@@ -1,9 +1,0 @@
-{
-  "name": "thunder-board",
-  "version": "1.0.0",
-  "private": true,
-  "description": "Sons of Thunder — Thunder Board PWA",
-  "dependencies": {
-    "web-push": "^3.6.7"
-  }
-}
