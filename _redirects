@@ -1,0 +1,4 @@
+# Existing files are served as-is. This rewrite only runs when no file matches.
+# Do NOT use ! (force) — that can shadow functions and assets.
+# Netlify Functions (/.netlify/functions/*) are handled before redirects.
+/*    /index.html   200
