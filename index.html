@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Thunder Board" />
+  <title>Thunder Board | Sons of Thunder</title>
+  
+  <!-- App Icons -->
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="assets/icon-512.png" />
+  
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="manifest.json" />
+  
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <!-- Opening splash (once per session) -->
+  <div id="splash" class="splash" aria-hidden="true">
+    <div class="splash-inner">
+      <img src="assets/icon-official.png" alt="" class="splash-mark" width="120" height="120" />
+      <p class="splash-line">THUNDER DOESN’T DULL</p>
+    </div>
+  </div>
+
+  <!-- First-load welcome (once per session, after splash) -->
+  <div id="welcome" class="welcome hidden" role="dialog" aria-modal="true" aria-labelledby="welcome-title" aria-hidden="true">
+    <div class="welcome-card" id="welcome-card">
+      <div class="welcome-bolt" aria-hidden="true">⚡</div>
+      <h2 id="welcome-title" class="welcome-title">WELCOME TO THUNDER BOARD</h2>
+      <p class="welcome-purpose">Private brotherhood tool — show up, know your brothers, stay sharp.</p>
+      <ul class="welcome-list">
+        <li>Next Gathering + big red <strong>I’M IN</strong></li>
+        <li>Brothers directory — know who’s in the room</li>
+        <li>Events &amp; Memories · Ask Thunder</li>
+      </ul>
+      <button type="button" class="welcome-gotit" id="welcome-gotit">GOT IT</button>
+    </div>
+  </div>
+
+  <div id="app">
+    <header id="main-header" class="header">
+      <img
+        src="assets/logo@2x.png"
+        srcset="assets/logo@2x.png 503w, assets/logo@3x.png 755w"
+        sizes="(max-width: 480px) 94vw, 420px"
+        alt="Sons of Thunder"
+        class="logo"
+        id="header-logo"
+        width="503"
+        height="220"
+        decoding="async"
+      />
+    </header>
+
+    <main id="views">
+      <!-- HOME -->
+      <section id="view-home" class="view active">
+        <div class="container">
+          <p class="identity-line">Thunder doesn’t dull</p>
+
+          <div class="next-meeting card">
+            <div class="card-label" id="meeting-phase-label">NEXT GATHERING</div>
+            <div id="meeting-countdown" class="meeting-countdown">—</div>
+            <div id="meeting-date" class="meeting-date">Calculating…</div>
+            <div class="meeting-time" id="meeting-time">6:30 PM</div>
+            <div class="meeting-loc" id="meeting-loc">Crooked Can Brewery Patio, Winter Garden</div>
+            <p id="rsvp-prompt" class="rsvp-prompt">Your seat is open. Lock it in.</p>
+            <button id="rsvp-btn" class="btn-rsvp">I'M IN</button>
+            <div id="rsvp-status" class="rsvp-status hidden">⚡ YOU'RE LOCKED IN</div>
+            <!-- Who's In removed: local-only roster read as group presence. Personal LOCKED IN stays. -->
+            <button id="reminder-btn" class="btn-reminder btn-reminder-compact">7-DAY REMINDER</button>
+            <div id="reminder-status" class="reminder-status hidden"></div>
+            <button type="button" id="text-leader-btn" class="btn-text-leader">TEXT A LEADER</button>
+          </div>
+
+          <!-- Last Fire: one photo + one line between gatherings -->
+          <div id="last-fire" class="last-fire card hidden" role="button" tabindex="0" aria-label="Last Fire">
+            <div class="card-label last-fire-label">🔥 LAST FIRE</div>
+            <div class="last-fire-media" id="last-fire-media"></div>
+            <div class="last-fire-cap" id="last-fire-cap"></div>
+          </div>
+
+          <!-- Mission weight on Home (same data as Events) -->
+          <div id="home-mission" class="home-mission card mission-mode tappable-card hidden" role="button" tabindex="0" aria-label="Open next mission">
+            <div class="mission-mode-top">
+              <span class="mission-bolt bolt-glow" aria-hidden="true">⚡</span>
+              <div class="card-label">MISSION</div>
+            </div>
+            <div class="mission-title" id="home-mission-title"></div>
+            <div class="mission-detail" id="home-mission-detail"></div>
+          </div>
+
+          <div class="section-title" id="announcements-title">Announcements</div>
+          <div id="announcements" class="feed"></div>
+
+          <div class="section-title">Sharpening Iron</div>
+          <div id="iron-feed" class="iron-feed">
+            <div class="empty-state iron-loading">Loading…</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- BROTHERS -->
+      <section id="view-brothers" class="view">
+        <div class="container">
+          <div class="section-header">
+            <h1 id="brothers-section-title">Brothers</h1>
+            <button id="edit-profile-btn" class="btn-secondary">Add / Edit My Profile</button>
+          </div>
+          <button type="button" id="text-leader-btn-brothers" class="btn-text-leader btn-text-leader-secondary">TEXT A LEADER</button>
+          <div id="brothers-grid" class="brothers-grid"></div>
+        </div>
+      </section>
+
+      <!-- EVENTS -->
+      <section id="view-events" class="view">
+        <div class="container">
+          <div class="section-header">
+            <h1>Events & Memories</h1>
+            <button id="upload-media-btn" class="btn-secondary">+ Add Memory</button>
+          </div>
+          <div class="activity-tags" id="activity-tags" role="tablist" aria-label="Activity feeds">
+            <button type="button" class="activity-tag" data-feed="range" role="tab" aria-selected="false">RANGE</button>
+            <button type="button" class="activity-tag" data-feed="lake" role="tab" aria-selected="false">LAKE</button>
+            <button type="button" class="activity-tag" data-feed="bible" role="tab" aria-selected="false">BIBLE</button>
+            <button type="button" class="activity-tag" data-feed="gym" role="tab" aria-selected="false">GYM</button>
+          </div>
+          <div id="activity-feed" class="activity-feed hidden" aria-live="polite"></div>
+          <div class="section-title" id="events-section-title">Upcoming</div>
+          <div id="events-note" class="events-note hidden" role="button" tabindex="0" aria-label="Open note"></div>
+          <div id="upcoming-events" class="events-list"></div>
+          <div class="next-mission card tappable-card mission-mode" id="next-mission-card" role="button" tabindex="0" aria-label="Open next mission">
+            <div class="mission-mode-top">
+              <span class="mission-bolt bolt-glow" aria-hidden="true">⚡</span>
+              <div class="card-label">THE NEXT MISSION</div>
+            </div>
+            <div class="mission-title" id="mission-title">Service Project — Local Family</div>
+            <div class="mission-detail" id="mission-detail">Details dropping at the September gathering. Be ready.</div>
+            <div class="mission-cta">OPEN</div>
+          </div>
+          <div class="section-title" id="memories-section-title">Past Gatherings</div>
+          <div id="auth-session-bar" class="auth-session-bar hidden">
+            <span class="auth-who" id="auth-who"></span>
+            <button type="button" id="auth-signout-btn">Sign out</button>
+          </div>
+          <div id="media-feed" class="media-feed">
+            <div class="empty-state">No memories yet.<br>Be the first to drop a photo.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MORE -->
+      <section id="view-about" class="view">
+        <div class="container about-container">
+          <img
+            src="assets/logo-about.png"
+            srcset="assets/logo-about.png 384w, assets/logo@2x.png 503w"
+            sizes="200px"
+            alt="Sons of Thunder"
+            class="about-logo"
+            width="384"
+            height="168"
+            decoding="async"
+          />
+          <h1 class="about-title">WHO WE ARE</h1>
+          <p class="about-text">
+            Jesus named James and John <em>Boanerges</em> — Sons of Thunder (Mark 3:17) — wild men who wanted to call down fire. That’s us: men who want to lead, know we can be hotheads, and need brothers who keep us sharp.
+          </p>
+          <p class="about-text about-text-2">
+            We gather for mentorship, stories, a drink, the occasional cigar — and for the range, the lake, the Word, and the gym. Ages 21–75. One aim: be better men where it counts — marriage, family, work, friends, neighbors. Looking more like Jesus, the ultimate gentleman.
+          </p>
+          <h1 class="about-title code-title code-title-glow">THE CODE</h1>
+          <div class="code-list" id="code-list"></div>
+
+          <div class="about-bolt-break" aria-hidden="true">
+            <img
+              src="assets/icon-official.png"
+              alt=""
+              class="about-bolt-glow"
+              width="56"
+              height="56"
+              decoding="async"
+            />
+          </div>
+
+          <!-- More utilities: centered column -->
+          <div class="more-tools">
+            <div class="alerts-card" id="gathering-alerts-card">
+              <div class="alerts-card-top">
+                <div>
+                  <div class="alerts-card-title">GATHERING ALERTS</div>
+                  <div class="alerts-card-sub">New announcements only. Off anytime.</div>
+                </div>
+                <label class="alerts-switch" title="Gathering alerts">
+                  <input type="checkbox" id="gathering-alerts-toggle" />
+                  <span class="alerts-slider"></span>
+                </label>
+              </div>
+              <p class="alerts-hint" id="gathering-alerts-hint"></p>
+            </div>
+
+            <div class="install-card install-card-more" id="install-help-card">
+              <div class="install-card-row">
+                <div class="install-card-body">
+                  <div class="install-card-title" id="install-card-title">PUT THUNDER BOARD ON YOUR HOME SCREEN</div>
+                  <div class="install-card-sub" id="install-card-sub">Safari or Chrome · Add to Home Screen</div>
+                </div>
+              </div>
+              <div class="install-card-actions">
+                <button type="button" id="install-share-btn" class="install-card-btn">INSTALL</button>
+                <button type="button" id="install-help-btn" class="install-card-btn install-card-btn-secondary">HOW</button>
+              </div>
+              <p class="install-card-tip" id="install-share-tip">Safari / Chrome · Add to Home Screen</p>
+            </div>
+            <div id="install-toast" class="install-toast hidden" role="status"></div>
+
+            <div class="refresh-card refresh-card-compact" id="refresh-app-card">
+              <button type="button" id="refresh-app-btn" class="refresh-app-btn">REFRESH APP</button>
+            </div>
+
+            <div class="admin-zone admin-zone-bottom">
+              <button id="leader-unlock-btn" class="btn-secondary btn-leadership" style="width:100%;margin-top:0;">Leadership</button>
+              <div id="leader-tools" class="leader-tools hidden">
+                <button id="admin-announcements-btn" class="btn-secondary" style="width:100%;margin-top:10px;">Edit Announcements</button>
+                <button id="admin-lastfire-btn" class="btn-secondary" style="width:100%;margin-top:10px;">Edit Last Fire</button>
+                <button id="admin-events-btn" class="btn-secondary" style="width:100%;margin-top:10px;">Edit Events / Mission</button>
+                <button id="admin-code-btn" class="btn-secondary" style="width:100%;margin-top:10px;">Edit The Code</button>
+                <button id="leader-lock-btn" class="btn-secondary" style="width:100%;margin-top:10px;opacity:0.7;">Lock</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-view="home">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        <span>Home</span>
+      </button>
+      <button class="nav-item" data-view="brothers">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+        <span>Brothers</span>
+      </button>
+      <button class="nav-item" data-view="events">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/></svg>
+        <span>Events</span>
+      </button>
+      <button class="nav-item" data-view="about">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+        <span>More</span>
+      </button>
+    </nav>
+
+    <button id="thunder-fab" class="thunder-fab" aria-label="Ask Thunder">
+      <span class="bolt bolt-glow">⚡</span>
+    </button>
+  </div>
+
+
+  <!-- iOS INSTALL OVERLAY (Safari path) -->
+  <div id="ios-install-overlay" class="ios-install-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="ios-install-title" aria-hidden="true">
+    <div class="ios-install-panel">
+      <button type="button" class="ios-install-close" id="ios-install-close" aria-label="Close">×</button>
+      <div class="ios-install-bolt" aria-hidden="true">⚡</div>
+      <h2 id="ios-install-title" class="ios-install-title">TAKE THUNDER WITH YOU</h2>
+      <p class="ios-install-sub">Put Thunder Board on your Home Screen.<br>3 quick taps.</p>
+      <ol class="ios-install-steps">
+        <li><span class="ios-step-num">1</span> Tap <strong>Share</strong> <span class="ios-step-hint">(box with ↑)</span></li>
+        <li><span class="ios-step-num">2</span> Tap <strong>Add to Home Screen</strong></li>
+        <li><span class="ios-step-num">3</span> Tap <strong>Add</strong></li>
+      </ol>
+      <p class="ios-install-end">YOU’RE IN. ⚡</p>
+      <button type="button" class="ios-install-share" id="ios-install-share-btn">OPEN SHARE SHEET</button>
+      <button type="button" class="ios-install-gotit" id="ios-install-gotit">GOT IT</button>
+    </div>
+  </div>
+
+  <!-- IN-APP BROWSER GATE (Instagram / Messenger / FB) -->
+  <div id="inapp-install-overlay" class="ios-install-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="inapp-install-title" aria-hidden="true">
+    <div class="ios-install-panel">
+      <button type="button" class="ios-install-close" id="inapp-install-close" aria-label="Close">×</button>
+      <div class="ios-install-bolt" aria-hidden="true">⚡</div>
+      <h2 id="inapp-install-title" class="ios-install-title">OPEN IN SAFARI</h2>
+      <p class="ios-install-sub">Home Screen install only works in Safari.<br>Leave this in-app browser first.</p>
+      <ol class="ios-install-steps">
+        <li><span class="ios-step-num">1</span> Tap the <strong>⋯</strong> or share menu</li>
+        <li><span class="ios-step-num">2</span> Choose <strong>Open in Safari</strong> (or Chrome)</li>
+        <li><span class="ios-step-num">3</span> Then: Share → Add to Home Screen</li>
+      </ol>
+      <button type="button" class="ios-install-share" id="inapp-copy-link">COPY LINK</button>
+      <button type="button" class="ios-install-gotit" id="inapp-install-gotit">GOT IT</button>
+    </div>
+  </div>
+
+  <!-- INSTALL EXPLAINER -->
+  <div id="install-modal" class="modal hidden">
+    <div class="modal-content install-modal-content">
+      <div class="modal-header">
+        <h2>Home Screen</h2>
+        <button class="modal-close" data-close="install-modal">×</button>
+      </div>
+      <div class="modal-body install-modal-body">
+        <img id="install-gif" class="install-video install-gif" src="assets/install-explainer.gif" alt="How to add Thunder Board to your home screen" width="540" height="960" />
+        <p class="install-tap-hint">Steps loop automatically</p>
+        <a id="install-live-link" class="install-live-link" href="https://sonsofthunder.netlify.app/" target="_blank" rel="noopener noreferrer">
+          sonsofthunder.netlify.app
+        </a>
+        <p class="install-link-hint">Open in Safari or Chrome → Share → Add to Home Screen</p>
+        <div class="install-steps-static">
+          <p><strong>iPhone</strong> — Safari → Share → Add to Home Screen</p>
+          <p><strong>Android</strong> — Chrome → Menu → Add to Home screen</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- BROTHER DETAIL (full profile) -->
+  <div id="brother-detail" class="brother-detail hidden" aria-hidden="true">
+    <div class="brother-detail-panel">
+      <button type="button" class="brother-detail-close" id="brother-detail-close" aria-label="Close">×</button>
+      <div class="brother-detail-photo" id="brother-detail-photo"></div>
+      <div class="brother-detail-name" id="brother-detail-name"></div>
+      <div class="brother-detail-bio" id="brother-detail-bio"></div>
+      <div class="brother-contact-actions hidden" id="brother-contact-actions">
+        <a class="btn-contact btn-call hidden" id="brother-call" href="#">CALL</a>
+        <a class="btn-contact btn-text hidden" id="brother-text" href="#">TEXT</a>
+        <button type="button" class="btn-contact btn-share" id="brother-share-contact">SHARE CONTACT</button>
+        <button type="button" class="btn-contact btn-qr" id="brother-show-qr">SHOW QR</button>
+      </div>
+      <div class="brother-qr-wrap hidden" id="brother-qr-wrap">
+        <img id="brother-qr-img" alt="Contact QR" width="220" height="220" />
+        <div class="brother-qr-hint">Scan to save this brother to your phone</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INFO DETAIL (announcements / events / mission) -->
+  <div id="info-detail" class="info-detail hidden" aria-hidden="true">
+    <div class="info-detail-panel">
+      <button type="button" class="info-detail-close" id="info-detail-close" aria-label="Close">×</button>
+      <div class="info-detail-label" id="info-detail-label"></div>
+      <div class="info-detail-title" id="info-detail-title"></div>
+      <div class="info-detail-meta" id="info-detail-meta"></div>
+      <div class="info-detail-body" id="info-detail-body"></div>
+    </div>
+  </div>
+
+  <!-- PROFILE MODAL -->
+  <div id="profile-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>My Profile</h2>
+        <button class="modal-close" data-close="profile-modal">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="photo-preview" id="photo-preview"></div>
+        <label class="file-label"><input type="file" id="profile-photo" accept="image/*" />Choose Photo</label>
+        <input type="text" id="profile-name" placeholder="First name" maxlength="30" />
+        <textarea id="profile-bio" placeholder="One-line identity (occupation, family, what you bring)" maxlength="120" rows="3"></textarea>
+        <label class="field-label" for="profile-phone">Phone <span class="field-hint">(optional — only shared if you add it)</span></label>
+        <input type="tel" id="profile-phone" placeholder="Mobile number" maxlength="20" inputmode="tel" autocomplete="tel" />
+        <button id="save-profile" class="btn-primary">Save Profile</button>
+        <button type="button" id="profile-my-qr" class="btn-secondary profile-my-qr hidden">MY QR</button>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- CONTACT QR (Cash App style — bolt center) -->
+  <div id="contact-qr-modal" class="modal hidden">
+    <div class="modal-content contact-qr-modal-content">
+      <div class="modal-header">
+        <h2 id="contact-qr-title">CONTACT QR</h2>
+        <button class="modal-close" data-close="contact-qr-modal">×</button>
+      </div>
+      <div class="modal-body contact-qr-body">
+        <div class="qr-stage" id="qr-stage">
+          <div id="qr-code-target" class="qr-code-target" aria-hidden="true"></div>
+          <div class="qr-bolt-pad" aria-hidden="true">
+            <img src="assets/bolt-for-qr.png" alt="" class="qr-bolt-img" width="72" height="72" />
+          </div>
+        </div>
+        <p class="brother-qr-hint">Hold up to their camera → Add Contact.<br>iPhone &amp; Android.</p>
+        <div class="qr-label">SONS OF THUNDER</div>
+        <button type="button" class="btn-primary" id="contact-qr-share-btn">SHARE CONTACT FILE</button>
+      </div>
+    </div>
+  </div>
+  <!-- MEMORY VIEWER (full-screen) -->
+  <div id="memory-viewer" class="memory-viewer hidden" aria-hidden="true">
+    <div class="memory-viewer-top">
+      <span class="memory-viewer-count" id="memory-viewer-count"></span>
+      <button type="button" class="memory-viewer-close" id="memory-viewer-close" aria-label="Close">×</button>
+    </div>
+    <div class="memory-viewer-stage" id="memory-viewer-stage"></div>
+    <div class="memory-viewer-caption" id="memory-viewer-caption"></div>
+  </div>
+
+  <!-- AUTH MODAL (email / password — minimal) -->
+  <div id="auth-gate" class="auth-gate hidden" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+    <div class="auth-card">
+      <h2 id="auth-title">THUNDER BOARD</h2>
+      <p class="auth-sub" id="auth-sub">Sign in to view and add shared memories.</p>
+      <input type="email" id="auth-email" placeholder="Email" autocomplete="email" />
+      <input type="password" id="auth-password" placeholder="Password" autocomplete="current-password" />
+      <p class="auth-error" id="auth-error" aria-live="polite"></p>
+      <div class="auth-actions">
+        <button type="button" id="auth-signin-btn" class="btn-primary">Sign In</button>
+        <button type="button" id="auth-signup-btn" class="btn-secondary">Create Account</button>
+      </div>
+      <div class="auth-link-row">
+        <button type="button" id="auth-forgot-btn">Forgot password</button>
+        ·
+        <button type="button" id="auth-cancel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEDIA MODAL -->
+  <div id="media-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Add Memory</h2>
+        <button class="modal-close" data-close="media-modal">×</button>
+      </div>
+      <div class="modal-body">
+        <label class="file-label"><input type="file" id="media-file" accept="image/*,video/*" />Choose Photo or Video</label>
+        <input type="text" id="media-caption" placeholder="Short caption (optional)" maxlength="100" />
+        <button id="save-media" class="btn-primary">Add to Memories</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- THUNDER CHAT -->
+  <div id="thunder-modal" class="modal thunder-modal hidden">
+    <div class="modal-content thunder-content">
+      <div class="modal-header thunder-header">
+        <div class="thunder-title"><span class="bolt bolt-glow">⚡</span> Ask Thunder</div>
+        <button class="modal-close" data-close="thunder-modal">×</button>
+      </div>
+      <div class="thunder-messages" id="thunder-messages">
+        <div class="thunder-msg system">
+          I’m Thunder — institutional memory of Sons of Thunder.<br>
+          Ask about the Code, brothers, meetings, Scripture, or who can help.
+        </div>
+      </div>
+      <div class="thunder-input-row">
+        <input type="text" id="thunder-input" placeholder="Ask Thunder…" autocomplete="off" />
+        <button id="thunder-send">Send</button>
+      </div>
+    </div>
+  </div>
+
+    <!-- Admin Announcements Modal -->
+  <div id="admin-ann-modal" class="modal hidden">
+    <div class="modal-content" style="max-height:90vh;overflow-y:auto;">
+      <div class="modal-header">
+        <h2>Announcements</h2>
+        <button class="modal-close" data-close="admin-ann-modal" type="button">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="admin-ann-list" class="admin-ann-list"></div>
+        <div class="admin-ann-form">
+          <input type="text" id="admin-ann-title" placeholder="Title" autocomplete="off" />
+          <textarea id="admin-ann-body" placeholder="Message" rows="3"></textarea>
+          <button id="admin-ann-add" class="btn-rsvp" type="button" style="width:100%;margin-top:12px;">ADD ANNOUNCEMENT</button>
+          <button data-close="admin-ann-modal" type="button" class="btn-secondary" style="width:100%;margin-top:10px;">DONE</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <!-- Admin Events Modal -->
+  <div id="admin-events-modal" class="modal hidden">
+    <div class="modal-content" style="max-height:90vh;overflow-y:auto;">
+      <div class="modal-header">
+        <h2>Events / Mission</h2>
+        <button class="modal-close" data-close="admin-events-modal" type="button">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="color:#888;font-size:13px;margin-bottom:12px;">Monthly Gathering detail (opens when a brother taps the gathering card)</p>
+        <textarea id="admin-gathering-body" placeholder="First Monday of the month (or second Monday if Labor Day / Memorial Day). Show up. Bring a brother who needs it." rows="3"></textarea>
+        <p style="color:#888;font-size:13px;margin:16px 0 8px;">Next Mission</p>
+        <input type="text" id="admin-mission-title" placeholder="Mission title" />
+        <textarea id="admin-mission-detail" placeholder="Mission details" rows="3"></textarea>
+        <p style="color:#888;font-size:13px;margin:16px 0 8px;">Custom upcoming note (optional)</p>
+        <textarea id="admin-events-note" placeholder="e.g. September is at Crooked Can — bring a brother" rows="2"></textarea>
+        <button id="admin-events-save" class="btn-rsvp" type="button" style="width:100%;margin-top:12px;">SAVE</button>
+        <button data-close="admin-events-modal" type="button" class="btn-secondary" style="width:100%;margin-top:10px;">DONE</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Code Modal -->
+  <div id="admin-code-modal" class="modal hidden">
+    <div class="modal-content" style="max-height:90vh;overflow-y:auto;">
+      <div class="modal-header">
+        <h2>The Code</h2>
+        <button class="modal-close" data-close="admin-code-modal" type="button">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="admin-code-list"></div>
+        <p style="color:#888;font-size:12px;margin:12px 0;">One line per item: LINE | subtitle</p>
+        <textarea id="admin-code-raw" rows="10" placeholder="SHOW UP. | Your presence matters."></textarea>
+        <button id="admin-code-save" class="btn-rsvp" type="button" style="width:100%;margin-top:12px;">SAVE CODE</button>
+        <button data-close="admin-code-modal" type="button" class="btn-secondary" style="width:100%;margin-top:10px;">DONE</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/qrcode.min.js"></script>
+  <script src="js/app.js"></script>
+</div>
+
+</body>
+</html>
