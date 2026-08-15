@@ -2330,9 +2330,25 @@
       const v = $('#install-gif');
       if (v && v.tagName === 'VIDEO') {
         try {
-          v.currentTime = 0;
-          const p = v.play();
-          if (p && p.catch) p.catch(() => {});
+          v.muted = true;
+          v.playsInline = true;
+          v.setAttribute('playsinline', '');
+          v.setAttribute('webkit-playsinline', '');
+          const tryPlay = () => {
+            try {
+              v.currentTime = 0;
+              const p = v.play();
+              if (p && p.catch) {
+                p.catch(() => { v.classList.add('needs-tap'); });
+              }
+            } catch (e) {}
+          };
+          if (v.readyState >= 2) tryPlay();
+          else {
+            v.addEventListener('loadeddata', tryPlay, { once: true });
+            v.load();
+            setTimeout(tryPlay, 250);
+          }
         } catch (e) {}
       }
     }
