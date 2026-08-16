@@ -1,89 +1,116 @@
-// Thunder Board — Thunder AI (Grok via xAI). Secret: XAI_API_KEY in Netlify env.
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS'
-};
+/**
+ * Thunder AI proxy — Grok brain for Sons of Thunder
+ * Env: XAI_API_KEY (required). Never expose this to the client.
+ */
+const XAI_URL = 'https://api.x.ai/v1/chat/completions';
+const MODEL = 'grok-4.5';
+
+function systemPrompt(ctx) {
+  const next = (ctx && ctx.nextMeeting) || 'See Thunder Board Home for next gathering.';
+  const code = (ctx && ctx.theCode) || 'STAY SHARP. SHOW UP. OWN THE HOTHEAD. LEAD WHERE YOU STAND. CARRY YOUR BROTHER. AIM AT THE GENTLEMAN.';
+  const identity = (ctx && ctx.identity) || 'Sons of Thunder — Mark 3:17. Thunder doesn’t dull.';
+  return `You are Thunder AI for the Sons of Thunder men's fraternity (Winter Garden / Orlando).
+
+VOICE: Masculine, short, direct. No soft church words. No fluff. No therapy cosplay.
+
+FACTS YOU KNOW:
+- Next gathering: ${next}
+- The Code: ${code}
+- Identity: ${identity}
+- Tagline: Thunder doesn’t dull.
+- Venue pattern: Crooked Can Brewery Patio, Winter Garden, first Monday 6:30 PM (second Monday if first is Labor Day or Memorial Day).
+
+SCRIPTURE: When you quote the Bible, use NASB wording or clearly label the reference. Prefer brief quotes.
+
+HARD RULES:
+- You are NOT a brother and NOT a counselor. If a man is in crisis, struggling, or alone, tell him to reach a real brother or Text a Leader from the app. Do not run a long counseling session.
+- Prefer pointing men toward presence, the Code, and each other over abstract advice.
+- Keep answers tight (a few sentences unless they ask for depth).
+- Do not invent meeting dates — use the "Next gathering" fact above.
+
+Answer the brother's question in that voice.`;
+}
 
 exports.handler = async (event) => {
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Content-Type': 'application/json'
+  };
+
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 204, headers: CORS, body: '' };
+    return { statusCode: 204, headers, body: '' };
   }
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'POST only' }) };
+    return { statusCode: 405, headers, body: JSON.stringify({ error: 'POST only' }) };
   }
 
   const key = process.env.XAI_API_KEY;
   if (!key) {
     return {
       statusCode: 500,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ error: 'XAI_API_KEY not set on Netlify' })
+      headers,
+      body: JSON.stringify({ error: 'XAI_API_KEY not configured on server' })
     };
   }
 
-  let body;
+  let question = '';
+  let context = {};
   try {
-    body = JSON.parse(event.body || '{}');
+    const body = JSON.parse(event.body || '{}');
+    question = (body.question || '').toString().trim().slice(0, 500);
+    context = body.context || {};
   } catch (e) {
-    return { statusCode: 400, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'Invalid JSON' }) };
+    return { statusCode: 400, headers, body: JSON.stringify({ error: 'Invalid JSON' }) };
   }
-
-  const question = String(body.question || body.q || '').trim();
   if (!question) {
-    return { statusCode: 400, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'question required' }) };
+    return { statusCode: 400, headers, body: JSON.stringify({ error: 'question required' }) };
   }
-
-  const ctx = body.context || {};
-  const system = [
-    'You are Thunder AI for Sons of Thunder (Mark 3:17) — a private men\'s fraternity app.',
-    'Voice: masculine, direct, no soft church-management tone. Scripture NASB only when quoting.',
-    'Identity line: Thunder doesn\'t dull.',
-    ctx.nextMeeting ? ('Next gathering: ' + ctx.nextMeeting) : '',
-    ctx.theCode ? ('The Code: ' + ctx.theCode) : '',
-    ctx.identity ? ('Identity: ' + ctx.identity) : '',
-    'Keep answers tight and useful for brothers coordinating life, faith, and gatherings.'
-  ].filter(Boolean).join('\n');
 
   try {
-    const res = await fetch('https://api.x.ai/v1/chat/completions', {
+    const resp = await fetch(XAI_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + key
+        Authorization: `Bearer ${key}`
       },
       body: JSON.stringify({
-        model: 'grok-2-latest',
+        model: MODEL,
+        stream: false,
+        temperature: 0.6,
         messages: [
-          { role: 'system', content: system },
+          { role: 'system', content: systemPrompt(context) },
           { role: 'user', content: question }
-        ],
-        temperature: 0.7,
-        max_tokens: 800
+        ]
       })
     });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) {
+
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) {
+      console.error('xAI error', resp.status, data);
       return {
-        statusCode: res.status,
-        headers: { ...CORS, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ error: data.error || data || 'xAI error' })
+        statusCode: 502,
+        headers,
+        body: JSON.stringify({ error: 'Grok upstream error', detail: data.error || data })
       };
     }
+
     const answer =
       (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) ||
-      data.answer ||
       '';
+
     return {
       statusCode: 200,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ answer, text: answer })
+      headers,
+      body: JSON.stringify({ answer: answer.trim(), source: 'Grok' })
     };
   } catch (e) {
+    console.error('thunder-ai function failed', e);
     return {
       statusCode: 500,
-      headers: { ...CORS, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ error: (e && e.message) || 'Thunder AI failed' })
+      headers,
+      body: JSON.stringify({ error: 'Thunder AI failed' })
     };
   }
 };

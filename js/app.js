@@ -40,30 +40,6 @@
     setTimeout(() => el.classList.remove(cls), 400);
   }
 
-  /** Stagger child cards on open — Goldilocks #3 (skip if reduced motion) */
-  function tbStaggerChildren(parent, sel, max) {
-    if (!parent || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
-    const nodes = parent.querySelectorAll(sel);
-    const n = Math.min(nodes.length, max || 8);
-    for (let i = 0; i < n; i++) {
-      const el = nodes[i];
-      el.classList.remove('tb-stagger-in');
-      el.style.animationDelay = (i * 0.04) + 's';
-      void el.offsetWidth;
-      el.classList.add('tb-stagger-in');
-    }
-  }
-
-  function tbSuccess(el, msg) {
-    if (el && typeof tbGlowHit === 'function') tbGlowHit(el, 'yellow');
-    if (el) {
-      el.classList.add('tb-spark');
-      setTimeout(() => el.classList.remove('tb-spark'), 500);
-    }
-    if (typeof haptic === 'function') haptic(12);
-    if (msg && typeof tbToast === 'function') tbToast(msg, 2200);
-  }
-
   // ---------- DATA ----------
   const DEFAULT_BROTHERS = [];
 
@@ -325,7 +301,7 @@
             .catch((e) => console.warn('realtime events_board pull', e && e.message ? e.message : e))
         );
       }
-      if ((!kind || kind === 'memories' || kind === 'all')) {
+      if ((!kind || kind === 'memories' || kind === 'all') && typeof isSignedIn === 'function' && isSignedIn()) {
         tasks.push(
           pullMemories()
             .then(() => {
@@ -612,15 +588,9 @@
           if (typeof renderLastFire === 'function') renderLastFire();
         }).catch((e) => console.warn('memories after auth', e));
       } else {
-        // Keep trying public memories even when signed out
-        pullMemories().then(() => {
-          renderMedia();
-          if (typeof renderLastFire === 'function') renderLastFire();
-        }).catch(() => {
-          media = [];
-          renderMedia();
-          if (typeof renderLastFire === 'function') renderLastFire();
-        });
+        media = [];
+        renderMedia();
+        if (typeof renderLastFire === 'function') renderLastFire();
       }
     });
     authReady = true;
@@ -681,45 +651,29 @@
   async function signedUrlFor(path) {
     const sb = getSb();
     if (!sb || !path) return null;
-    // Prefer signed URL (works when auth present)
-    try {
-      const { data, error } = await sb.storage
-        .from(memoriesBucket())
-        .createSignedUrl(path, 3600);
-      if (!error && data && data.signedUrl) return data.signedUrl;
-      if (error) console.warn('signed URL failed', path, error.message || error);
-    } catch (e) {
-      console.warn('signed URL threw', e);
+    const { data, error } = await sb.storage
+      .from(memoriesBucket())
+      .createSignedUrl(path, 3600);
+    if (error) {
+      console.warn('signed URL failed', path, error);
+      return null;
     }
-    // Fallback: public URL (works if bucket/object is public — unlocks visitor browse)
-    try {
-      const { data } = sb.storage.from(memoriesBucket()).getPublicUrl(path);
-      if (data && data.publicUrl) return data.publicUrl;
-    } catch (e2) {
-      console.warn('public URL failed', e2);
-    }
-    return null;
+    return (data && data.signedUrl) || null;
   }
 
   async function pullMemories() {
     if (!supabaseEnabled()) return false;
-    // Allow anonymous read so anyone can browse Past Gatherings as promo.
-    // Write paths still require a signed-in session.
+    if (!isSignedIn()) {
+      media = [];
+      return false;
+    }
     const sb = getSb();
     const { data: rows, error } = await sb
       .from('memories')
       .select('id,user_id,storage_path,caption,uploader_name,created_at')
       .order('created_at', { ascending: false })
       .limit(60);
-    if (error) {
-      console.warn('memories pull', error.message || error);
-      // If RLS blocks anon, leave media as-is / empty rather than hard fail
-      if (!isSignedIn()) {
-        media = media || [];
-        return false;
-      }
-      throw new Error(error.message || 'Could not load memories.');
-    }
+    if (error) throw new Error(error.message || 'Could not load memories.');
     if (!Array.isArray(rows)) {
       media = [];
       return false;
@@ -938,7 +892,7 @@
     try {
       const { data, error } = await sb
         .from('brothers')
-        .select('id,name,bio,photo_url,phone,birthday,joined_at,show_up_streak,last_showed_up,carried_note,carried_at,skills,available,updated_at')
+        .select('id,name,bio,photo_url,phone,skills,available,updated_at')
         .order('updated_at', { ascending: false });
       if (error) {
         console.warn('brothers pull', error);
@@ -957,12 +911,6 @@
           name: row.name || (local && local.name) || '',
           bio: row.bio || (local && local.bio) || '',
           phone: row.phone || (local && local.phone) || '',
-          birthday: normalizeBirthday(row.birthday || (local && local.birthday) || ''),
-          joinedAt: row.joined_at || (local && local.joinedAt) || null,
-          showUpStreak: (typeof row.show_up_streak === 'number' ? row.show_up_streak : (local && local.showUpStreak)) || 0,
-          lastShowedUp: row.last_showed_up || (local && local.lastShowedUp) || null,
-          carriedNote: row.carried_note || (local && local.carriedNote) || '',
-          carriedAt: row.carried_at || (local && local.carriedAt) || null,
           photo,
           skills: row.skills || (local && local.skills) || '',
           available: row.available !== false,
@@ -1044,12 +992,6 @@
         name: entry.name || '',
         bio: entry.bio || '',
         phone: entry.phone || '',
-        birthday: normalizeBirthday(entry.birthday || ''),
-        joined_at: entry.joinedAt || null,
-        show_up_streak: entry.showUpStreak || 0,
-        last_showed_up: entry.lastShowedUp || null,
-        carried_note: entry.carriedNote || '',
-        carried_at: entry.carriedAt || null,
         photo_url: photoUrl,
         skills: entry.skills || '',
         available: entry.available !== false,
@@ -1156,7 +1098,6 @@
     const next = getNextMeetingMonday();
     const days = daysUntil(next);
     const dateEl = document.getElementById('meeting-date');
-    if (typeof updateMeetingPhaseEnergy === 'function') updateMeetingPhaseEnergy();
     const countEl = document.getElementById('meeting-countdown');
     const phaseEl = document.getElementById('meeting-phase-label');
     const card = document.querySelector('.next-meeting');
@@ -1639,7 +1580,6 @@
         <p>${esc(a.body)}</p>
       </button>`;
     }).join('');
-    tbStaggerChildren(el, '.announcement-card', 6);
     el.querySelectorAll('.announcement-card').forEach(card => {
       card.addEventListener('click', () => {
         const idx = parseInt(card.getAttribute('data-ann-index'), 10) || 0;
@@ -1711,12 +1651,145 @@
   }
 
   // ---------- INFO DETAIL (tap-to-expand cards) ----------
-  function haptic(ms) {
+  
+  /* LOCKED: ~3s reward on profile / memory save — reads TB_CONFIG.SAVE_REWARD */
+  function rewardSaveSuccess(kind) {
     try {
-      if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
-        navigator.vibrate(ms || 12);
+      const R = (window.TB_CONFIG && window.TB_CONFIG.SAVE_REWARD) || {};
+      if (R.enabled === false) return;
+      const hapticMs = typeof R.hapticMs === 'number' ? R.hapticMs : 18;
+      const holdMs = Math.max(1200, (typeof R.durationMs === 'number' ? R.durationMs : 3000) - 320);
+      const boltSrc = R.boltSrc || 'assets/bolt-only.png';
+      try { tbFeedback.confirm(); } catch (e) {}
+      let el = document.getElementById('tb-reward');
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'tb-reward';
+        el.className = 'tb-reward hidden';
+        el.setAttribute('data-tb-lock', 'save-reward');
+        el.setAttribute('aria-live', 'polite');
+        el.innerHTML = [
+          '<div class="tb-reward-card">',
+          '  <img class="tb-reward-bolt" src="' + boltSrc.replace(/"/g, '') + '" alt="" width="56" height="56" />',
+          '  <p class="tb-reward-title"></p>',
+          '  <p class="tb-reward-sub"></p>',
+          '</div>'
+        ].join('');
+        document.body.appendChild(el);
       }
+      const img = el.querySelector('.tb-reward-bolt');
+      if (img && boltSrc) img.setAttribute('src', boltSrc);
+      const title = el.querySelector('.tb-reward-title');
+      const sub = el.querySelector('.tb-reward-sub');
+      if (kind === 'memory') {
+        if (title) title.textContent = R.memoryTitle || 'MEMORY LOCKED IN';
+        if (sub) sub.textContent = R.memorySub || 'Part of the brotherhood record.';
+      } else {
+        if (title) title.textContent = R.profileTitle || 'PROFILE LOCKED IN';
+        if (sub) sub.textContent = R.profileSub || 'Your seat in the roster.';
+      }
+      el.classList.remove('hidden', 'tb-reward-out');
+      void el.offsetWidth;
+      el.classList.add('tb-reward-on');
+      if (el._tbRewardTimer) clearTimeout(el._tbRewardTimer);
+      el._tbRewardTimer = setTimeout(() => {
+        el.classList.add('tb-reward-out');
+        el.classList.remove('tb-reward-on');
+        setTimeout(() => {
+          el.classList.add('hidden');
+          el.classList.remove('tb-reward-out');
+        }, 320);
+      }, holdMs);
     } catch (e) {}
+  }
+
+  /* LOCKED: Sensory life blood — visual first; vibrate is optional Android only */
+  const tbFeedback = (function () {
+    const last = Object.create(null);
+    function sensoryCfg() {
+      try { return (window.TB_CONFIG && window.TB_CONFIG.SENSORY) || {}; } catch (e) { return {}; }
+    }
+    function canVibrate() {
+      const S = sensoryCfg();
+      if (S.vibrateEnabled === false) return false;
+      try {
+        return !!(typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function');
+      } catch (e) { return false; }
+    }
+    function debounced(key) {
+      const S = sensoryCfg();
+      const ms = typeof S.debounceMs === 'number' ? S.debounceMs : 100;
+      const now = Date.now();
+      if (last[key] && now - last[key] < ms) return true;
+      last[key] = now;
+      return false;
+    }
+    function pulse(pattern) {
+      if (!canVibrate()) return;
+      try {
+        navigator.vibrate(0); // cancel prior
+        navigator.vibrate(pattern);
+      } catch (e) {}
+    }
+    function reduced() {
+      try {
+        return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+      } catch (e) { return false; }
+    }
+    return {
+      /** Splash-only. Strongest. Visual already owned by CSS; optional 40ms buzz. */
+      thunderImpact: function () {
+        if (debounced('thunderImpact')) return;
+        if (reduced()) return; // no jolt/buzz under reduced motion
+        const S = sensoryCfg();
+        const ms = typeof S.thunderImpactMs === 'number' ? S.thunderImpactMs : 40;
+        pulse(ms);
+      },
+      /** Primary CTAs: I'm In, Save, Add Memory, Share, Text a Leader */
+      press: function (el) {
+        if (debounced('press')) return;
+        if (el && el.classList && !reduced()) {
+          el.classList.add('tb-press');
+          setTimeout(() => { try { el.classList.remove('tb-press'); } catch (e) {} }, 140);
+        }
+        const S = sensoryCfg();
+        pulse(typeof S.pressMs === 'number' ? S.pressMs : 10);
+      },
+      /** After real success only */
+      confirm: function () {
+        if (debounced('confirm')) return;
+        const S = sensoryCfg();
+        pulse(typeof S.confirmMs === 'number' ? S.confirmMs : 25);
+      },
+      /** Failed save / missing field / upload error */
+      warningOrError: function (el) {
+        if (debounced('warning')) return;
+        if (el && el.classList && !reduced()) {
+          el.classList.remove('tb-warn-shake');
+          void el.offsetWidth;
+          el.classList.add('tb-warn-shake');
+          setTimeout(() => { try { el.classList.remove('tb-warn-shake'); } catch (e) {} }, 420);
+        }
+        const S = sensoryCfg();
+        const pat = Array.isArray(S.warningPattern) ? S.warningPattern : [25, 60, 35];
+        pulse(pat);
+      },
+      /** Discrete selects: chips, toggles, swipe commit */
+      selection: function () {
+        if (debounced('selection')) return;
+        const S = sensoryCfg();
+        pulse(typeof S.selectionMs === 'number' ? S.selectionMs : 8);
+      },
+      /** Back-compat shim — prefer semantic methods */
+      raw: function (ms) {
+        pulse(typeof ms === 'number' ? ms : 12);
+      }
+    };
+  })();
+
+  function haptic(ms) {
+    /* deprecated scatter path — routes to soft press-scale pulse */
+    try { tbFeedback.raw(ms); } catch (e) {}
   }
 
   // ---------- ELASTIC SWIPE (bump + snap-back, shared) ----------
@@ -1887,7 +1960,7 @@
       }
 
       if (dx < 0 && canNext() && typeof opts.onNext === 'function') {
-        if (typeof haptic === 'function') haptic(8);
+        try { tbFeedback.selection(); } catch (e) {}
         // brief finish bump then clear + action
         if (el && !prefersReducedMotion()) {
           el.style.transition = 'transform 0.14s ease-out';
@@ -1900,7 +1973,7 @@
         return;
       }
       if (dx > 0 && canPrev() && typeof opts.onPrev === 'function') {
-        if (typeof haptic === 'function') haptic(8);
+        try { tbFeedback.selection(); } catch (e) {}
         if (el && !prefersReducedMotion()) {
           el.style.transition = 'transform 0.14s ease-out';
           el.style.transform = 'translate3d(28px,0,0)';
@@ -1922,26 +1995,6 @@
   }
 
 
-
-  const DEFAULT_THUNDER_INTRO = "I'm Thunder — institutional memory of Sons of Thunder.\nAsk about the Code, brothers, meetings, Scripture, or who can help.";
-  const DEFAULT_THUNDER_HINT = 'Voice mode — speak your question';
-
-  function getThunderCopy() {
-    const intro = (load('thunderIntro') || DEFAULT_THUNDER_INTRO).toString();
-    const hint = (load('thunderVoiceHint') || DEFAULT_THUNDER_HINT).toString();
-    return { intro, hint };
-  }
-
-  function applyThunderCopy() {
-    const { intro, hint } = getThunderCopy();
-    const msg = document.getElementById('thunder-intro-msg');
-    if (msg) {
-      msg.innerHTML = esc(intro).replace(/\n/g, '<br>');
-    }
-    const hintEl = document.getElementById('thunder-voice-hint');
-    if (hintEl && !hintEl.dataset.live) hintEl.textContent = hint;
-  }
-
   function openInfoDetail(payload) {
     const detail = $('#info-detail');
     if (!detail) return;
@@ -1956,7 +2009,7 @@
     detail.classList.remove('hidden');
     detail.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
-    haptic(12);
+    try { tbFeedback.press(); } catch (e) {}
     bindInfoDetail();
   }
 
@@ -1967,7 +2020,7 @@
     detail.classList.add('hidden');
     detail.setAttribute('aria-hidden', 'true');
     unlockBodyIfClear();
-    haptic(8);
+    try { tbFeedback.selection(); } catch (e) {}
   }
 
   function bindInfoDetail() {
@@ -2088,9 +2141,6 @@
     leaderUnlocked = true;
     const tools = $('#leader-tools');
     if (tools) tools.classList.remove('hidden');
-    updateLeaderBirthdayPanel(true);
-    refreshHonorBrotherSelect();
-    bindHonorBoard();
     // One-shot honesty: shared vs this-phone edits
     if (!requireLeader._told) {
       requireLeader._told = true;
@@ -2121,33 +2171,6 @@
   // ---------- CONTACT SHARE (vCard + Share sheet + QR) ----------
   function digitsOnly(phone) {
     return String(phone || '').replace(/\D/g, '');
-  }
-
-  /** Normalize birthday to MM-DD or empty */
-  function normalizeBirthday(raw) {
-    const s = String(raw || '').trim();
-    if (!s) return '';
-    // Accept MM-DD, M-D, MM/DD
-    const m = s.match(/^(\d{1,2})[\/-](\d{1,2})$/);
-    if (!m) return '';
-    const mo = parseInt(m[1], 10);
-    const dy = parseInt(m[2], 10);
-    if (mo < 1 || mo > 12 || dy < 1 || dy > 31) return '';
-    return String(mo).padStart(2, '0') + '-' + String(dy).padStart(2, '0');
-  }
-
-  function todayMMDD() {
-    const d = new Date();
-    return String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-  }
-
-  function isBirthdayToday(b) {
-    const bd = normalizeBirthday(b && b.birthday);
-    return bd && bd === todayMMDD();
-  }
-
-  function brothersWithBirthdayToday() {
-    return (brothers || []).filter(isBirthdayToday);
   }
 
   function formatPhoneDisplay(phone) {
@@ -2411,32 +2434,6 @@
     }
     const nameEl = $('#brother-detail-name');
     if (nameEl) nameEl.textContent = b.name || '';
-    const bdayLine = $('#brother-detail-bday');
-    if (bdayLine) {
-      if (isBirthdayToday(b)) {
-        bdayLine.classList.remove('hidden');
-        bdayLine.textContent = 'HAPPY BIRTHDAY';
-      } else {
-        bdayLine.classList.add('hidden');
-        bdayLine.textContent = '';
-      }
-    }
-    const sinceEl = $('#brother-detail-since');
-    if (sinceEl) sinceEl.textContent = formatSince(b.joinedAt) || '';
-    const honorEl = $('#brother-detail-honor');
-    if (honorEl) {
-      const bits = [];
-      if ((b.showUpStreak || 0) >= 1) bits.push('Show-up streak: ' + b.showUpStreak);
-      if (isCarriedActive(b)) bits.push('Carrying: ' + b.carriedNote);
-      if (isAnniversaryMonth(b)) bits.push('Anniversary month');
-      if (bits.length) {
-        honorEl.classList.remove('hidden');
-        honorEl.innerHTML = bits.map(t => '<div class="honor-line">' + esc(t) + '</div>').join('');
-      } else {
-        honorEl.classList.add('hidden');
-        honorEl.innerHTML = '';
-      }
-    }
     const bioEl = $('#brother-detail-bio');
     if (bioEl) bioEl.textContent = b.bio || '';
 
@@ -2509,154 +2506,15 @@
     });
   }
 
-
-  function updateLeaderBirthdayPanel(announce) {
-    const el = $('#leader-birthdays');
-    if (!el) return;
-    const list = brothersWithBirthdayToday();
-    if (!list.length) {
-      el.classList.add('hidden');
-      el.innerHTML = '';
-      return;
-    }
-    const names = list.map(b => b.name || 'Brother').join(', ');
-    el.classList.remove('hidden');
-    el.innerHTML = '<div class="leader-bday-title">BIRTHDAYS TODAY</div>' +
-      '<div class="leader-bday-names">' + names.split(', ').map(n => '<span class="leader-bday-chip">' + esc(n) + '</span>').join('') + '</div>' +
-      '<div class="leader-bday-hint">Recognize them. A text or a word at the gathering goes far.</div>';
-    // Once-per-day leader alert
-    if (announce) {
-      const key = 'tb_bday_alert_' + todayMMDD();
-      try {
-        if (!localStorage.getItem(key)) {
-          localStorage.setItem(key, '1');
-          setTimeout(() => {
-            alert('Birthday today: ' + names + '\n\nTake a second to recognize them.');
-          }, 400);
-        }
-      } catch (e) {}
-    }
-  }
-
-
-  function formatSince(joinedAt) {
-    if (!joinedAt) return '';
-    try {
-      const d = new Date(joinedAt);
-      if (isNaN(d.getTime())) return '';
-      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      return 'Since ' + months[d.getMonth()] + ' ' + d.getFullYear();
-    } catch (e) { return ''; }
-  }
-
-  function isAnniversaryMonth(b) {
-    if (!b || !b.joinedAt) return false;
-    try {
-      const d = new Date(b.joinedAt);
-      if (isNaN(d.getTime())) return false;
-      return d.getMonth() === new Date().getMonth();
-    } catch (e) { return false; }
-  }
-
-  function isCarriedActive(b) {
-    if (!b || !b.carriedNote || !b.carriedAt) return false;
-    try {
-      const t = new Date(b.carriedAt).getTime();
-      if (isNaN(t)) return false;
-      return (Date.now() - t) < (7 * 24 * 60 * 60 * 1000);
-    } catch (e) { return false; }
-  }
-
-  function meetingKeyNow() {
-    // First Monday rule is client-side display only; streak key = YYYY-MM of next/current gathering month
-    const d = new Date();
-    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
-  }
-
-
-  function refreshHonorBrotherSelect() {
-    const sel = $('#honor-brother-select');
-    if (!sel) return;
-    const cur = sel.value;
-    sel.innerHTML = '<option value="">Select brother…</option>' +
-      (brothers || []).map(b => '<option value="' + esc(b.id) + '">' + esc(b.name || 'Brother') + '</option>').join('');
-    if (cur) sel.value = cur;
-  }
-
-  async function honorMarkShowedUp() {
-    const sel = $('#honor-brother-select');
-    const id = sel && sel.value;
-    if (!id) return alert('Pick a brother first.');
-    const idx = brothers.findIndex(b => b.id === id);
-    if (idx < 0) return;
-    const b = { ...brothers[idx] };
-    const key = meetingKeyNow();
-    // Simple: increment streak if last show wasn't this month key
-    if (b.lastShowedUp !== key) {
-      b.showUpStreak = (b.showUpStreak || 0) + 1;
-      b.lastShowedUp = key;
-    }
-    b.updatedAt = Date.now();
-    if (supabaseEnabled()) {
-      const pushed = await pushBrother(b);
-      brothers[idx] = pushed;
-    } else {
-      brothers[idx] = b;
-    }
-    save('brothers', brothers);
-    renderBrothers();
-    refreshHonorBrotherSelect();
-    alert((b.name || 'Brother') + ' marked showed up. Streak: ' + (b.showUpStreak || 0));
-  }
-
-  async function honorSaveCarried() {
-    const sel = $('#honor-brother-select');
-    const id = sel && sel.value;
-    const note = ($('#honor-carried-note') && $('#honor-carried-note').value || '').trim();
-    if (!id) return alert('Pick a brother first.');
-    if (!note) return alert('Add a one-line carried note.');
-    const idx = brothers.findIndex(b => b.id === id);
-    if (idx < 0) return;
-    const b = { ...brothers[idx] };
-    b.carriedNote = note.slice(0, 80);
-    b.carriedAt = new Date().toISOString();
-    b.updatedAt = Date.now();
-    if (supabaseEnabled()) {
-      const pushed = await pushBrother(b);
-      brothers[idx] = pushed;
-    } else {
-      brothers[idx] = b;
-    }
-    save('brothers', brothers);
-    renderBrothers();
-    if ($('#honor-carried-note')) $('#honor-carried-note').value = '';
-    alert('Carried set for ' + (b.name || 'Brother') + ' (7 days).');
-  }
-
-  function bindHonorBoard() {
-    const mark = $('#honor-mark-showed');
-    const carried = $('#honor-save-carried');
-    if (mark && !mark._bound) {
-      mark._bound = true;
-      mark.addEventListener('click', () => honorMarkShowedUp());
-    }
-    if (carried && !carried._bound) {
-      carried._bound = true;
-      carried.addEventListener('click', () => honorSaveCarried());
-    }
-  }
-
   function openProfileEditor() {
     const me = brothers.find(b => b.id === myProfileId);
     const phoneEl = $('#profile-phone');
     if (me) {
       const nameEl = $('#profile-name');
       const bioEl = $('#profile-bio');
-      const bdayEl = $('#profile-birthday');
       if (nameEl) nameEl.value = me.name || '';
       if (bioEl) bioEl.value = me.bio || '';
       if (phoneEl) phoneEl.value = me.phone || '';
-      if (bdayEl) bdayEl.value = me.birthday || '';
       if (me.photo) {
         pendingPhotoData = me.photo;
         const preview = $('#photo-preview');
@@ -2675,8 +2533,6 @@
       if (nameEl) nameEl.value = '';
       if (bioEl) bioEl.value = '';
       if (phoneEl) phoneEl.value = '';
-      const bdayEl = $('#profile-birthday');
-      if (bdayEl) bdayEl.value = '';
       pendingPhotoData = null;
       const preview = $('#photo-preview');
       if (preview) { preview.innerHTML = ''; preview.classList.remove('visible'); }
@@ -2699,7 +2555,7 @@
       if (cta) {
         cta.addEventListener('click', () => {
           if (typeof tbGlowHit === 'function') tbGlowHit(cta, 'yellow');
-          if (typeof haptic === 'function') haptic(10);
+          try { tbFeedback.selection(); } catch (e) {}
           openProfileEditor();
         });
       }
@@ -2714,16 +2570,11 @@
         : `<div class="brother-photo">${esc(initials)}</div>`;
       const isNew = (typeof b.updatedAt === 'number' && b.updatedAt > (brothersSeenAt || 0));
       return `
-        <button type="button" class="brother-card${isNew ? ' card-new' : ''}${isBirthdayToday(b) ? ' brother-bday-today' : ''}" data-brother-index="${i}" aria-label="View ${esc(b.name || 'brother')} profile">
+        <button type="button" class="brother-card${isNew ? ' card-new' : ''}" data-brother-index="${i}" aria-label="View ${esc(b.name || 'brother')} profile">
           ${isNew ? '<span class="new-badge new-badge-overlay">NEW</span>' : ''}
-          ${isBirthdayToday(b) ? '<span class="bday-badge">TODAY</span>' : ''}
-          ${isAnniversaryMonth(b) ? '<span class="anniv-badge">ANNIV</span>' : ''}
-          ${(b.showUpStreak || 0) >= 3 ? '<span class="streak-badge">' + (b.showUpStreak) + 'x</span>' : ''}
-          ${isCarriedActive(b) ? '<span class="carried-badge">CARRIED</span>' : ''}
           ${photoHtml}
           <div class="brother-info">
-            <div class="brother-name${isBirthdayToday(b) ? ' brother-name-bday' : ''}">${esc(b.name)}</div>
-            <div class="brother-since">${esc(formatSince(b.joinedAt))}</div>
+            <div class="brother-name">${esc(b.name)}</div>
             <div class="brother-bio">${esc(b.bio || '')}</div>
           </div>
         </button>`;
@@ -2738,7 +2589,6 @@
         </div>
       </button>`;
     grid.innerHTML = cardsHtml + inviteHtml;
-    tbStaggerChildren(grid, '.brother-card', 10);
     grid.querySelectorAll('.brother-card[data-brother-index]').forEach(card => {
       card.addEventListener('click', () => {
         tbGlowHit(card, 'yellow');
@@ -2750,15 +2600,11 @@
     if (slot) {
       slot.addEventListener('click', () => {
         if (typeof tbGlowHit === 'function') tbGlowHit(slot, 'yellow');
-        if (typeof haptic === 'function') haptic(10);
+        try { tbFeedback.selection(); } catch (e) {}
         openProfileEditor();
       });
     }
     updateAllNewBadges();
-    if (typeof leaderUnlocked !== 'undefined' && leaderUnlocked) {
-      updateLeaderBirthdayPanel(false);
-      refreshHonorBrotherSelect();
-    }
   }
 
   function renderUpcoming() {
@@ -2971,20 +2817,38 @@
     const el = $('#media-feed');
     if (!el) return;
     updateAuthSessionBar();
-    // Public browse of memories is allowed (promo for the nights).
-    // Upload / add still requires sign-in (handled in upload flow).
-    if (!media.length) {
+    /* Auth lives on Brothers — no Sign In wall on Events / Past Gatherings */
+    if (supabaseEnabled() && !isSignedIn()) {
       el.innerHTML = `
         <button type="button" class="empty-state empty-memories empty-memories-cta" id="empty-memories-cta" aria-label="Add a memory">
           <div class="empty-memories-plus" aria-hidden="true">+</div>
           <div class="empty-memories-title">No memories yet.</div>
-          <div class="empty-memories-sub">Nights get remembered here.<br>Brothers who are signed in can drop the first photo.</div>
+          <div class="empty-memories-sub">Be the first to drop a photo.<br>Shared album: Sign In under Brothers.</div>
         </button>`;
       const cta = $('#empty-memories-cta');
       if (cta) {
         cta.addEventListener('click', () => {
           if (typeof tbGlowHit === 'function') tbGlowHit(cta, 'yellow');
-          if (typeof haptic === 'function') haptic(10);
+          try { tbFeedback.selection(); } catch (e) {}
+          const up = $('#upload-media-btn');
+          if (up) up.click();
+        });
+      }
+      updateAllNewBadges();
+      return;
+    }
+    if (!media.length) {
+      el.innerHTML = `
+        <button type="button" class="empty-state empty-memories empty-memories-cta" id="empty-memories-cta" aria-label="Add a memory">
+          <div class="empty-memories-plus" aria-hidden="true">+</div>
+          <div class="empty-memories-title">No memories yet.</div>
+          <div class="empty-memories-sub">Be the first to drop a photo.<br>Build the history.</div>
+        </button>`;
+      const cta = $('#empty-memories-cta');
+      if (cta) {
+        cta.addEventListener('click', () => {
+          if (typeof tbGlowHit === 'function') tbGlowHit(cta, 'yellow');
+          try { tbFeedback.selection(); } catch (e) {}
           const up = $('#upload-media-btn');
           if (up) up.click();
         });
@@ -3164,47 +3028,6 @@
   const TAB_ORDER = ['home', 'brothers', 'events', 'about'];
   let currentViewName = 'home';
 
-
-  function applyLivingInterface() {
-    try {
-      const app = document.getElementById('app');
-      if (app) app.classList.add('tb-ambient');
-      const idLine = document.querySelector('.identity-line');
-      if (idLine) idLine.classList.add('kinetic-in');
-      const splashLine = document.querySelector('.splash-line');
-      if (splashLine) splashLine.classList.add('kinetic-in');
-      const rsvp = document.getElementById('rsvp-btn');
-      if (rsvp && !rsvp._magnetic) {
-        rsvp._magnetic = true;
-        const near = () => rsvp.classList.add('magnetic-near');
-        const far = () => rsvp.classList.remove('magnetic-near');
-        rsvp.addEventListener('touchstart', near, { passive: true });
-        rsvp.addEventListener('touchend', far, { passive: true });
-        rsvp.addEventListener('touchcancel', far, { passive: true });
-        rsvp.addEventListener('mousedown', near);
-        rsvp.addEventListener('mouseup', far);
-        rsvp.addEventListener('mouseleave', far);
-      }
-    } catch (e) {}
-  }
-
-  function updateMeetingPhaseEnergy() {
-    const box = document.querySelector('.next-meeting');
-    if (!box || typeof getNextMeetingMonday !== 'function') return;
-    try {
-      const next = getNextMeetingMonday();
-      const now = new Date();
-      const ms = next.getTime() - now.getTime();
-      const hours = ms / 36e5;
-      box.classList.remove('phase-soon', 'phase-live');
-      // Same calendar day as gathering
-      if (next.toDateString() === now.toDateString()) {
-        if (hours <= 0.5 && hours > -3) box.classList.add('phase-live');
-        else if (hours <= 12) box.classList.add('phase-soon');
-      }
-    } catch (e) {}
-  }
-
   function showView(name, opts) {
     if (!TAB_ORDER.includes(name)) return;
     const fromSwipe = opts && opts.fromSwipe;
@@ -3216,9 +3039,8 @@
       view.classList.add('active');
       view.classList.remove('view-enter');
       if (fromSwipe) {
-        const dir = (opts && opts.dir) === 'left' ? 'view-swipe-left' : (opts && opts.dir) === 'right' ? 'view-swipe-right' : 'view-swipe-in';
-        view.classList.add(dir);
-        setTimeout(() => view.classList.remove(dir, 'view-swipe-in', 'view-swipe-left', 'view-swipe-right'), 200);
+        view.classList.add('view-swipe-in');
+        setTimeout(() => view.classList.remove('view-swipe-in'), 180);
       } else if (!(opts && opts.silent) && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
         // Level 4: one-shot arrive on tab tap — not on swipe, not on silent
         void view.offsetWidth;
@@ -3277,11 +3099,11 @@
       },
       onPrev: () => {
         const i = TAB_ORDER.indexOf(currentViewName);
-        if (i > 0) showView(TAB_ORDER[i - 1], { fromSwipe: true, dir: 'right' });
+        if (i > 0) showView(TAB_ORDER[i - 1], { fromSwipe: true });
       },
       onNext: () => {
         const i = TAB_ORDER.indexOf(currentViewName);
-        if (i >= 0 && i < TAB_ORDER.length - 1) showView(TAB_ORDER[i + 1], { fromSwipe: true, dir: 'left' });
+        if (i >= 0 && i < TAB_ORDER.length - 1) showView(TAB_ORDER[i + 1], { fromSwipe: true });
       },
       blocked: (t) => isOverlayBlockingSwipe() || swipeStartBlocked(t)
     });
@@ -3314,6 +3136,73 @@
     }
   }
 
+  /* LOCKED: CapCut VO explainer — H.264+AAC, loop, no chrome, sound on HOW open */
+  function bindInstallExplainerOnce(v) {
+    if (!v || v.dataset.tbExplainerBound === '1') return;
+    v.dataset.tbExplainerBound = '1';
+    v.playsInline = true;
+    v.loop = true;
+    v.setAttribute('playsinline', '');
+    v.setAttribute('webkit-playsinline', '');
+    v.setAttribute('loop', '');
+    v.removeAttribute('controls');
+    v.addEventListener('ended', () => {
+      try {
+        v.currentTime = 0;
+        const p = v.play();
+        if (p && p.catch) p.catch(() => {});
+      } catch (e) {}
+    });
+    v.addEventListener('stalled', () => {
+      try {
+        if (!v.paused) {
+          const p = v.play();
+          if (p && p.catch) p.catch(() => {});
+        }
+      } catch (e) {}
+    });
+  }
+  function playInstallExplainerWithAudio(v) {
+    if (!v) return;
+    bindInstallExplainerOnce(v);
+    const cfg = (window.TB_CONFIG && window.TB_CONFIG.INSTALL_EXPLAINER) || {};
+    const wantAudio = cfg.keepAudio !== false;
+    try {
+      v.playsInline = true;
+      v.loop = true;
+      if (wantAudio) {
+        v.muted = false;
+        v.defaultMuted = false;
+        try { v.volume = 1; } catch (e) {}
+        v.removeAttribute('muted');
+      }
+      v.currentTime = 0;
+      const p = v.play();
+      if (p && p.catch) {
+        p.catch(() => {
+          try {
+            v.muted = true;
+            v.play().then(() => {
+              v.classList.add('needs-tap');
+            }).catch(() => { v.classList.add('needs-tap'); });
+          } catch (e2) {
+            v.classList.add('needs-tap');
+          }
+        });
+      } else {
+        v.classList.remove('needs-tap');
+      }
+    } catch (e) {}
+  }
+  function stopInstallExplainer(v) {
+    if (!v) return;
+    try {
+      v.pause();
+      v.currentTime = 0;
+      v.classList.remove('needs-tap');
+    } catch (e) {}
+  }
+
   function openModal(id) {
     const el = $(`#${id}`);
     if (!el) return;
@@ -3322,27 +3211,12 @@
     if (id === 'install-modal') {
       const v = $('#install-gif');
       if (v && v.tagName === 'VIDEO') {
-        try {
-          v.muted = true;
-          v.playsInline = true;
-          v.setAttribute('playsinline', '');
-          v.setAttribute('webkit-playsinline', '');
-          const tryPlay = () => {
-            try {
-              v.currentTime = 0;
-              const p = v.play();
-              if (p && p.catch) {
-                p.catch(() => { v.classList.add('needs-tap'); });
-              }
-            } catch (e) {}
-          };
-          if (v.readyState >= 2) tryPlay();
-          else {
-            v.addEventListener('loadeddata', tryPlay, { once: true });
-            v.load();
-            setTimeout(tryPlay, 250);
-          }
-        } catch (e) {}
+        if (v.readyState >= 2) playInstallExplainerWithAudio(v);
+        else {
+          v.addEventListener('loadeddata', () => playInstallExplainerWithAudio(v), { once: true });
+          try { v.load(); } catch (e) {}
+          setTimeout(() => playInstallExplainerWithAudio(v), 250);
+        }
       }
     }
   }
@@ -3351,19 +3225,9 @@
     if (!el) return;
     releaseFocusAndZoom();
     el.classList.add('hidden');
-    el.setAttribute('aria-hidden', 'true');
     unlockBodyIfClear();
     if (id === 'install-modal') {
-      const v = $('#install-gif');
-      if (v && v.tagName === 'VIDEO') {
-        try { v.pause(); } catch (e) {}
-      }
-    }
-    if (id === 'thunder-modal') {
-      try {
-        if (typeof stopThunderVoice === 'function') stopThunderVoice();
-      } catch (e) {}
-      if (typeof thunderVoiceMode !== 'undefined') thunderVoiceMode = false;
+      stopInstallExplainer($('#install-gif'));
     }
   }
 
@@ -3602,7 +3466,7 @@
         if (typeof tbGlowHit === 'function') tbGlowHit(btn, 'yellow');
         const meetCard = document.querySelector('.next-meeting');
         if (meetCard && typeof tbGlowHit === 'function') tbGlowHit(meetCard, 'yellow');
-        if (typeof haptic === 'function') haptic(14);
+        try { tbFeedback.confirm(); } catch (e) {}
       }
       if (rsvp && typeof requestNotifyPermission === 'function') {
         requestNotifyPermission().then((perm) => {
@@ -3675,15 +3539,12 @@ $('#edit-profile-btn').addEventListener('click', () => {
     });
 
     $('#save-profile').addEventListener('click', async () => {
+      try { tbFeedback.press($('#save-profile')); } catch (e) {}
       const name = $('#profile-name').value.trim();
       const bio = $('#profile-bio').value.trim();
       const phoneRaw = ($('#profile-phone') && $('#profile-phone').value) || '';
       const phone = digitsOnly(phoneRaw) ? phoneRaw.trim() : '';
-      const birthday = normalizeBirthday(($('#profile-birthday') && $('#profile-birthday').value) || '');
-      if (!name) return alert('Name required');
-      if (($('#profile-birthday') && $('#profile-birthday').value || '').trim() && !birthday) {
-        return alert('Birthday must be MM-DD (example: 04-24)');
-      }
+      if (!name) { try { tbFeedback.warningOrError($('#profile-name') || $('#save-profile')); } catch (e) {} return alert('Name required'); }
       const id = ensureBrotherId();
       const existing = brothers.findIndex(b => b.id === id);
       let entry = {
@@ -3691,16 +3552,10 @@ $('#edit-profile-btn').addEventListener('click', () => {
         name,
         bio,
         phone,
-        birthday,
         photo: pendingPhotoData || (existing >= 0 ? brothers[existing].photo : null),
         skills: '',
         available: true,
-        updatedAt: Date.now(),
-        joinedAt: (existing >= 0 && brothers[existing].joinedAt) ? brothers[existing].joinedAt : new Date().toISOString(),
-        showUpStreak: (existing >= 0 && brothers[existing].showUpStreak) ? brothers[existing].showUpStreak : 0,
-        lastShowedUp: (existing >= 0 && brothers[existing].lastShowedUp) ? brothers[existing].lastShowedUp : null,
-        carriedNote: (existing >= 0 && brothers[existing].carriedNote) ? brothers[existing].carriedNote : '',
-        carriedAt: (existing >= 0 && brothers[existing].carriedAt) ? brothers[existing].carriedAt : null
+        updatedAt: Date.now()
       };
       const btn = $('#save-profile');
       if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
@@ -3735,13 +3590,41 @@ $('#edit-profile-btn').addEventListener('click', () => {
         renderBrothers();
         closeModal('profile-modal');
         pendingPhotoData = null;
-        tbSuccess($('#edit-profile-btn') || $('#save-profile'), 'Profile saved');
+        rewardSaveSuccess('profile');
         if (!supabaseEnabled()) {
-          alert('Profile saved on this phone. Other brothers will not see it until shared roster is on.');
+          /* soft toast already rewards; keep local-only note brief */
+          setTimeout(() => {
+            try {
+              const t = document.getElementById('install-toast');
+              if (t) {
+                t.textContent = 'On this phone only until shared roster is on.';
+                t.classList.remove('hidden');
+                setTimeout(() => t.classList.add('hidden'), 3200);
+              }
+            } catch (e) {}
+          }, 300);
         } else if (entry._sharedPush === 'sign_in_required') {
-          alert('Profile saved on this phone. Sign in to share it with the brotherhood roster.');
+          setTimeout(() => {
+            try {
+              const t = document.getElementById('install-toast');
+              if (t) {
+                t.textContent = 'Sign in to share your profile with the roster.';
+                t.classList.remove('hidden');
+                setTimeout(() => t.classList.add('hidden'), 3200);
+              }
+            } catch (e) {}
+          }, 300);
         } else if (entry._sharedPush && entry._sharedPush !== 'ok') {
-          alert('Profile saved on this phone. Shared roster update failed (' + entry._sharedPush + ').');
+          setTimeout(() => {
+            try {
+              const t = document.getElementById('install-toast');
+              if (t) {
+                t.textContent = 'Saved here. Shared roster update failed.';
+                t.classList.remove('hidden');
+                setTimeout(() => t.classList.add('hidden'), 3200);
+              }
+            } catch (e) {}
+          }, 300);
         }
       } catch (err) {
         console.error(err);
@@ -3763,6 +3646,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
 
     // Media — shared Supabase when configured; requires signed-in session
     $('#save-media').addEventListener('click', () => {
+      try { tbFeedback.press($('#save-media')); } catch (e) {}
       const file = $('#media-file').files[0];
       if (!file) return alert('Choose a file');
 
@@ -3818,6 +3702,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
             closeModal('media-modal');
             $('#media-file').value = '';
             $('#media-caption').value = '';
+            rewardSaveSuccess('memory');
           } catch (err) {
             console.error(err);
             alert('Could not save memory. ' + (err.message || 'Try again.'));
@@ -4025,7 +3910,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
           if (!transcript) return;
           const input = $('#thunder-input');
           if (input) input.value = transcript;
-          if (typeof haptic === 'function') haptic(12);
+          try { tbFeedback.press(); } catch (e) {}
           handleThunderSend();
         };
         thunderRecognition.start();
@@ -4047,16 +3932,14 @@ $('#edit-profile-btn').addEventListener('click', () => {
     }
 
     // Thunder FAB — open in voice mode
-    applyThunderCopy();
     $('#thunder-fab').addEventListener('click', () => {
-      applyThunderCopy();
       const fab = $('#thunder-fab');
       if (fab) {
         fab.classList.remove('fab-hit');
         void fab.offsetWidth;
         fab.classList.add('fab-hit');
         setTimeout(() => fab.classList.remove('fab-hit'), 480);
-        if (typeof haptic === 'function') haptic(10);
+        try { tbFeedback.selection(); } catch (e) {}
       }
       openThunderVoiceMode();
     });
@@ -4072,41 +3955,9 @@ $('#edit-profile-btn').addEventListener('click', () => {
     const thunderModal = $('#thunder-modal');
     if (thunderModal) {
       const obs = new MutationObserver(() => {
-        if (thunderModal.classList.contains('hidden')) {
-          try { stopThunderVoice(); } catch (e) {}
-        }
+        if (thunderModal.classList.contains('hidden')) stopThunderVoice();
       });
       obs.observe(thunderModal, { attributes: true, attributeFilter: ['class'] });
-
-      // Explicit close paths — X, backdrop, Escape (do not rely only on generic data-close)
-      const thunderClose = $('#thunder-close-btn') || thunderModal.querySelector('[data-close="thunder-modal"]');
-      if (thunderClose && !thunderClose.dataset.tbCloseBound) {
-        thunderClose.dataset.tbCloseBound = '1';
-        thunderClose.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          closeModal('thunder-modal');
-        });
-      }
-      if (!thunderModal.dataset.tbBackdropBound) {
-        thunderModal.dataset.tbBackdropBound = '1';
-        thunderModal.addEventListener('click', (e) => {
-          if (e.target === thunderModal) closeModal('thunder-modal');
-        });
-      }
-      const thunderContent = thunderModal.querySelector('.thunder-content, .modal-content');
-      if (thunderContent && !thunderContent.dataset.tbStopBound) {
-        thunderContent.dataset.tbStopBound = '1';
-        thunderContent.addEventListener('click', (e) => e.stopPropagation());
-      }
-    }
-    if (!window.__tbThunderEscBound) {
-      window.__tbThunderEscBound = true;
-      document.addEventListener('keydown', (e) => {
-        if (e.key !== 'Escape') return;
-        const tm = $('#thunder-modal');
-        if (tm && !tm.classList.contains('hidden')) closeModal('thunder-modal');
-      });
     }
     const installShareBtn = $('#install-share-btn');
     const installBtn = $('#install-help-btn');
@@ -4124,21 +3975,37 @@ $('#edit-profile-btn').addEventListener('click', () => {
 
     function refreshInstallCta() {
       if (!installCard) return;
-      // Always show — share-first for brothers inviting others
+      // Always show — brothers need the HOW path even after they install
       installCard.classList.remove('hidden');
       const title = $('#install-card-title');
       const sub = $('#install-card-sub');
       const tip = $('#install-share-tip');
-      // Permanent share-first copy — never flip back to install-only language
-      if (title) title.textContent = 'SHARE THUNDER WITH A BROTHER';
-      if (sub) sub.textContent = 'Send the link · get him on the home screen';
-      if (installShareBtn) installShareBtn.textContent = 'SHARE';
-      if (isInAppBrowser()) {
-        if (tip) tip.textContent = 'Open in Safari/Chrome first, then Share → Add to Home Screen';
+      if (isStandalonePwa()) {
+        // Already on home screen — reframe as share tool for other brothers
+        if (installShareBtn) installShareBtn.textContent = 'SHARE';
+        if (title) title.textContent = 'GET A BROTHER ON HOME SCREEN';
+        if (sub) sub.textContent = 'Share the link · HOW shows the steps';
+        if (tip) tip.textContent = 'iPhone: Safari → Share → Add to Home Screen · Android: Chrome → Install';
+      } else if (isInAppBrowser()) {
+        if (installShareBtn) installShareBtn.textContent = 'OPEN IN SAFARI';
+        if (title) title.textContent = 'PUT THUNDER BOARD ON YOUR HOME SCREEN';
+        if (sub) sub.textContent = 'Leave this in-app browser first';
+        if (tip) tip.textContent = 'Then Safari → Share → Add to Home Screen';
+      } else if (deferredInstallPrompt) {
+        if (installShareBtn) installShareBtn.textContent = 'INSTALL';
+        if (title) title.textContent = 'PUT THUNDER BOARD ON YOUR HOME SCREEN';
+        if (sub) sub.textContent = 'Android · one confirm';
+        if (tip) tip.textContent = 'Safari: Share → Add to Home Screen · Chrome: Install app';
       } else if (isIos()) {
-        if (tip) tip.textContent = 'iPhone: Safari → Share → Add to Home Screen';
+        if (installShareBtn) installShareBtn.textContent = 'ADD TO HOME';
+        if (title) title.textContent = 'PUT THUNDER BOARD ON YOUR HOME SCREEN';
+        if (sub) sub.textContent = 'Safari · Share → Add to Home Screen';
+        if (tip) tip.textContent = 'iPhone: Safari → Share → Add · Android: Chrome → Install';
       } else {
-        if (tip) tip.textContent = 'Share the link · or Chrome → Install app';
+        if (installShareBtn) installShareBtn.textContent = 'INSTALL';
+        if (title) title.textContent = 'PUT THUNDER BOARD ON YOUR HOME SCREEN';
+        if (sub) sub.textContent = 'Safari or Chrome · Add to Home Screen';
+        if (tip) tip.textContent = 'iPhone: Safari → Share → Add · Android: Chrome → Menu → Install';
       }
     }
 
@@ -4154,34 +4021,12 @@ $('#edit-profile-btn').addEventListener('click', () => {
     });
 
     async function runSmartInstall() {
-      // SHARE-first: always try to send the app link to a brother
-      const url = window.location.origin + '/';
-      const payload = {
-        title: 'Thunder Board',
-        text: 'Sons of Thunder — private brotherhood app. Thunder doesn’t dull.\n' + url,
-        url
-      };
-      if (navigator.share) {
-        try {
-          await navigator.share(payload);
-          showInstallToast('Shared with a brother');
-          return;
-        } catch (err) {
-          if (err && err.name === 'AbortError') return;
-          console.warn('Share failed', err);
-        }
-      }
-      // Fallback: copy link
-      try {
-        await navigator.clipboard.writeText(url);
-        showInstallToast('Link copied — text it to a brother');
-        return;
-      } catch (e) {}
-      // Last resorts for install path
+      // Trapped in Instagram / Messenger / etc.
       if (isInAppBrowser()) {
         openInAppInstallOverlay();
         return;
       }
+      // Android Chrome native install when available
       if (deferredInstallPrompt) {
         try {
           deferredInstallPrompt.prompt();
@@ -4200,9 +4045,27 @@ $('#edit-profile-btn').addEventListener('click', () => {
         }
         return;
       }
+      // iPhone Safari: clear 3-step overlay (Share still available inside)
       if (isIos()) {
         openIosInstallOverlay();
         return;
+      }
+      // Desktop / other: Share or copy
+      const url = window.location.origin + '/';
+      const payload = {
+        title: 'Thunder Board',
+        text: 'Sons of Thunder — Thunder doesn’t dull.',
+        url
+      };
+      if (navigator.share) {
+        try {
+          await navigator.share(payload);
+          showInstallToast('Shared. Or use browser menu → Install app');
+          return;
+        } catch (err) {
+          if (err && err.name === 'AbortError') return;
+          console.warn('Share failed', err);
+        }
       }
       try {
         await navigator.clipboard.writeText(url);
@@ -4246,6 +4109,35 @@ $('#edit-profile-btn').addEventListener('click', () => {
         openModal('install-modal');
       });
     }
+
+    // Invite a brother — native Share sheet; copy-link fallback (not install tutorial)
+    const inviteShareBtn = $('#invite-share-btn');
+    if (inviteShareBtn && !inviteShareBtn.dataset.tbInviteBound) {
+      inviteShareBtn.dataset.tbInviteBound = '1';
+      inviteShareBtn.addEventListener('click', async () => {
+        const url = 'https://sonsofthunder.netlify.app/';
+        const payload = {
+          title: 'Thunder Board',
+          text: 'Sons of Thunder — Thunder doesn’t dull. Put this on your Home Screen.',
+          url
+        };
+        if (navigator.share) {
+          try {
+            await navigator.share(payload);
+            showInstallToast('Shared with a brother.');
+            return;
+          } catch (err) {
+            if (err && err.name === 'AbortError') return;
+          }
+        }
+        try {
+          await navigator.clipboard.writeText(url);
+          showInstallToast('Link copied. Send it to a brother.');
+        } catch (e) {
+          showInstallToast(url);
+        }
+      });
+    }
     const liveLink = $('#install-live-link');
     if (liveLink) {
       liveLink.addEventListener('click', () => {
@@ -4265,12 +4157,9 @@ $('#edit-profile-btn').addEventListener('click', () => {
       const installVid = $('#install-gif');
       if (installVid && installVid.tagName === 'VIDEO' && !installVid.dataset.tbReplayBound) {
         installVid.dataset.tbReplayBound = '1';
+        /* LOCKED: tap = unmute + replay from start (VO preserved) */
         installVid.addEventListener('click', () => {
-          try {
-            installVid.currentTime = 0;
-            const p = installVid.play();
-            if (p && p.catch) p.catch(() => {});
-          } catch (e) {}
+          playInstallExplainerWithAudio(installVid);
         });
       }
     }
@@ -4440,34 +4329,6 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       });
     }
 
-
-
-    const adminThunderBtn = $('#admin-thunder-btn');
-    if (adminThunderBtn) {
-      adminThunderBtn.addEventListener('click', () => {
-        if (!requireLeader()) return;
-        const { intro, hint } = getThunderCopy();
-        const introEl = $('#admin-thunder-intro');
-        const hintEl = $('#admin-thunder-hint');
-        if (introEl) introEl.value = intro;
-        if (hintEl) hintEl.value = hint;
-        openModal('admin-thunder-modal');
-      });
-    }
-    const adminThunderSave = $('#admin-thunder-save');
-    if (adminThunderSave) {
-      adminThunderSave.addEventListener('click', () => {
-        if (!requireLeader()) return;
-        const intro = (($('#admin-thunder-intro') && $('#admin-thunder-intro').value) || '').trim() || DEFAULT_THUNDER_INTRO;
-        const hint = (($('#admin-thunder-hint') && $('#admin-thunder-hint').value) || '').trim() || DEFAULT_THUNDER_HINT;
-        save('thunderIntro', intro);
-        save('thunderVoiceHint', hint);
-        applyThunderCopy();
-        closeModal('admin-thunder-modal');
-        if (typeof tbSuccess === 'function') tbSuccess(adminThunderBtn, 'Thunder copy saved');
-        else if (typeof tbToast === 'function') tbToast('Thunder copy saved');
-      });
-    }
 
     // Admin announcements
     const adminBtn = $('#admin-announcements-btn');
@@ -4781,7 +4642,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       closeBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (typeof haptic === 'function') haptic(8);
+        try { tbFeedback.selection(); } catch (e) {}
         collapseActivityFeed();
       });
     }
@@ -5022,6 +4883,19 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
   // ---------- OPENING SPLASH (once per session) ----------
   // Door into the room: settle bolt → soft dissolve + light scale → cross-fade welcome
+  
+  /* LOCKED visual guard — welcome bolt must stay official asset */
+  function assertWelcomeBoltLock() {
+    try {
+      const img = document.querySelector('.welcome-bolt-img');
+      if (!img) return;
+      const src = (img.getAttribute('src') || '');
+      if (!src.includes('bolt-only')) {
+        console.warn('[TB] VISUAL LOCK: welcome bolt must use assets/bolt-only.png, not emoji');
+      }
+    } catch (e) {}
+  }
+
   function runSplash() {
     const el = document.getElementById('splash');
     if (!el) {
@@ -5056,6 +4930,8 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       setTimeout(hide, 1400); // cover full dramatic zoom duration
     };
 
+    // Sensory: one thunder impact near bolt flash (Android optional buzz only)
+    setTimeout(() => { try { tbFeedback.thunderImpact(); } catch (e) {} }, 300);
     // Hold for bolt settle, then dramatic zoom → welcome
     setTimeout(finish, 2200);
 
@@ -5444,13 +5320,10 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       } catch (eB) {
         console.warn('brothers init', eB);
       }
-      // Always attempt memories (public browse). Auth still required to upload.
-      try {
+      if (isSignedIn()) {
         await pullMemories();
         renderMedia();
         renderLastFire();
-      } catch (eM) {
-        console.warn('memories init', eM);
       }
       // Live updates: when another brother saves a profile (or leadership edits board), this device refreshes
       try {
@@ -5464,5 +5337,4 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   }
 
   init();
-  try { applyLivingInterface(); updateMeetingPhaseEnergy(); setInterval(updateMeetingPhaseEnergy, 60000); } catch (e) {}
 })();

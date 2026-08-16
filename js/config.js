@@ -1,9 +1,73 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260815-master-final-audited',
+  APP_BUILD: '20260816-sensory1',
+
+  /* ── VISUAL LOCKS (do not regress) ─────────────────────────────
+     Welcome bolt = assets/bolt-only.png (official mark), NOT emoji ⚡
+     Must pulse via boltLive / --tb-breathe with every other bolt
+     Logo: bolt-only effects; NEVER full-box gradient/slab on wordmark
+     Install explainer: CapCut VO, H.264+AAC, keepAudio true
+     ───────────────────────────────────────────────────────────── */
+  VISUAL_LOCKS: {
+    welcomeBoltSrc: 'assets/bolt-only.png',
+    welcomeBoltSize: 72,
+    welcomeBoltPulse: true, // boltLive shared rhythm
+    noEmojiWelcomeBolt: true,
+    noFullBoxLogoGlow: true,
+    installExplainerKeepAudio: true,
+    saveRewardOnProfileAndMemory: true
+  },
+
 
   VENUE: 'Crooked Can Brewery Patio, Winter Garden',
   MEETING_TIME: '6:30 PM',
+
+  /* ── INSTALL EXPLAINER (LOCKED) ─────────────────────────────────
+     Source: CapCut VO cut. Asset: assets/install-explainer.mp4
+     Encode: H.264 ~30fps ~540w + AAC voiceover + faststart.
+     NEVER: mute permanently, strip audio, ship 120fps/HEVC, show native controls.
+     Playback: HOW opens modal (user gesture) → try play WITH sound →
+       if blocked, muted fallback + tap video to unmute/replay from 0 → loop.
+     Close: pause + currentTime = 0.
+     ─────────────────────────────────────────────────────────────── */
+
+  /* ── SAVE REWARD (LOCKED) ─────────────────────────────────────
+     ~3s Thunder pulse after successful profile save or new memory.
+     Official bolt-only.png, masculine, no confetti / points / social.
+     Only on real success — never on failed upload.
+     ───────────────────────────────────────────────────────────── */
+
+  /* ── SENSORY LIFE BLOOD (LOCKED) ───────────────────────────────
+     Visual feedback is required on every platform.
+     Vibration is optional Android progressive enhancement only.
+     iPhone PWA has no navigator.vibrate — never force it.
+     Semantic API only: thunderImpact / press / confirm / warningOrError / selection
+     ───────────────────────────────────────────────────────────── */
+  SENSORY: {
+    vibrateEnabled: true,
+    thunderImpactMs: 40,
+    pressMs: 10,
+    confirmMs: 25,
+    warningPattern: [25, 60, 35],
+    selectionMs: 8,
+    debounceMs: 100
+  },
+  SAVE_REWARD: {
+    durationMs: 3000,
+    boltSrc: 'assets/bolt-only.png',
+    profileTitle: 'PROFILE LOCKED IN',
+    profileSub: 'Your seat in the roster.',
+    memoryTitle: 'MEMORY LOCKED IN',
+    memorySub: 'Part of the brotherhood record.',
+    hapticMs: 18,
+    enabled: true
+  },
+  INSTALL_EXPLAINER: {
+    src: 'assets/install-explainer.mp4',
+    keepAudio: true,
+    loop: true,
+    noNativeControls: true
+  },
 
   // Mild client-side UI gate only — NOT server security (View Source can reveal this).
   // Push broadcast and DB leadership writes use Supabase session + app_members role.
