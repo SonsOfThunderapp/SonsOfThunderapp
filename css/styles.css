@@ -86,8 +86,8 @@ html, body {
 #header-logo {
   /* Intrinsic aspect 503x291 — size by WIDTH so full mark (incl. OF THUNDER) shows */
   height: auto !important;
-  width: min(200px, 70vw) !important;
-  max-width: 70vw !important;
+  width: auto !important;
+  max-width: 78vw !important;
   max-height: none !important;
   object-fit: contain !important;
   object-position: center center !important;
@@ -5005,7 +5005,7 @@ h1.code-title-glow,
 #header-logo,
 .logo-wrap .logo {
   height: auto !important;
-  width: min(200px, 70vw) !important;
+  width: auto !important;
   max-height: none !important;
   object-fit: contain !important;
   object-position: center center !important;
@@ -5231,4 +5231,67 @@ body.tb-tour-open { overflow: hidden; }
   .tb-tour-stage { animation: none !important; }
   .tb-tour-slide-img.tb-tour-slide-in { animation: none !important; }
   .tb-tour-follow { animation: none !important; }
+}
+
+/* === LOGO PIN 20260818: exact current size, die-cut, top layer every page === */
+#main-header.header,
+.header#main-header,
+#main-header {
+  display: block !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 500 !important;
+  background: #000 !important;
+  padding: calc(8px + env(safe-area-inset-top, 20px)) 12px 8px !important;
+  overflow: visible !important;
+  box-shadow: none !important;
+  border-bottom: none !important;
+}
+.logo-wrap {
+  position: relative !important;
+  z-index: 501 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  overflow: visible !important;
+  background: transparent !important;
+  line-height: 0 !important;
+}
+/* Exact size — match live app, NOT enlarged. Die-cut = transparent, no box. */
+.header .logo,
+.header img.logo,
+#header-logo,
+.logo-wrap .logo {
+  height: 72px !important;
+  width: auto !important;
+  max-width: 78vw !important;
+  max-height: 72px !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  display: block !important;
+  margin: 0 auto !important;
+  position: relative !important;
+  z-index: 502 !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  /* no rectangular pad — PNG die-cut only */
+  filter: none !important;
+  padding: 0 !important;
+}
+#views,
+.view,
+.view.active,
+.next-meeting.card,
+.announcement-card,
+.brother-card,
+.card {
+  position: relative;
+  z-index: 1;
+}
+.about-container {
+  padding-top: 8px !important;
 }

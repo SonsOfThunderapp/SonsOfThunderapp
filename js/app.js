@@ -3706,7 +3706,7 @@
     }
     currentViewName = name;
     const header = $('#main-header');
-    if (header) header.style.display = name === 'about' ? 'none' : 'block';
+    if (header) header.style.display = 'block'; /* logo star on all 4 tabs */
     // NEW no longer auto-clears on Home visit — only when items are opened
     if (name === 'brothers') {
       // Roster NEW clears when the brothers tab is opened
@@ -6612,7 +6612,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
 
   // ---------- PRODUCT TOUR — 7-slide (restored 20260818) ----------
-  const TB_TOUR_VERSION = 12;
+  const TB_TOUR_VERSION = 13;
   function tourStorageKey() { return 'thunderTourV' + TB_TOUR_VERSION; }
   function isTourComplete() {
     try {
@@ -6633,51 +6633,51 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   const TB_TOUR_STEPS = [
     {
       id: 'welcome',
-      slide: 'assets/tour-01.png',
-      headline: 'FOLLOW ME',
-      body: 'I\u2019m Thunder \u2014 your guide. The brotherhood between gatherings. Stick with me.',
+      slide: 'assets/tour-01.jpg',
+      headline: 'WELCOME TO SONS OF THUNDER',
+      body: 'I\u2019m Thunder\u2014your guide. This is your brotherhood hub. Let\u2019s walk through the essentials.',
       nextLabel: 'LET\u2019S GO'
     },
     {
-      id: 'home',
-      slide: 'assets/tour-02.png',
-      headline: 'HOME BASE',
-      body: 'Next Gathering lives here \u2014 date, time, Crooked Can. Always current.',
-      nextLabel: 'NEXT'
-    },
-    {
-      id: 'imin',
-      slide: 'assets/tour-03.png',
-      headline: 'LOCK YOUR SEAT',
-      body: 'Tap I\u2019M IN when you\u2019re coming. One commitment. Your phone remembers.',
+      id: 'locked-in',
+      slide: 'assets/tour-02.jpg',
+      headline: 'LOCKED IN',
+      body: 'Never miss what matters. Tap I\u2019M IN for the next gathering and get reminded so you don\u2019t miss it.',
       nextLabel: 'NEXT'
     },
     {
       id: 'brothers',
-      slide: 'assets/tour-04.png',
-      headline: 'THE BROTHERS',
-      body: 'Names, faces, who you are. Claim your spot when you\u2019re ready.',
+      slide: 'assets/tour-03.jpg',
+      headline: 'BROTHERS',
+      body: 'Real connections. See who\u2019s in, update your profile, and strengthen the bond.',
       nextLabel: 'NEXT'
     },
     {
-      id: 'events',
-      slide: 'assets/tour-05.png',
-      headline: 'MISSIONS & MEMORIES',
-      body: 'Range. Lake. Bible. Gym. Photos that prove you showed up.',
+      id: 'memories',
+      slide: 'assets/tour-04.jpg',
+      headline: 'MEMORIES',
+      body: 'Capture. Share. Remember. Add photos from gatherings and missions. The memories we make keep our story alive.',
       nextLabel: 'NEXT'
     },
     {
       id: 'code',
-      slide: 'assets/tour-06.png',
+      slide: 'assets/tour-05.jpg',
       headline: 'THE CODE',
-      body: 'Who we are. How we roll. Intense, loyal, built for more.',
+      body: 'Live it. Every day. The Code is our standard\u2014who we are and how we show up for ourselves and each other.',
       nextLabel: 'NEXT'
     },
     {
-      id: 'ask',
-      slide: 'assets/tour-07.png',
-      headline: 'OR JUST ASK',
-      body: 'Don\u2019t hunt menus. Ask Thunder \u2014 next gathering, The Code, Scripture.',
+      id: 'text-leader',
+      slide: 'assets/tour-06.jpg',
+      headline: 'TEXT A LEADER',
+      body: 'When you need it most. Rough day? Hard season? Text a leader. Confidential. Always.',
+      nextLabel: 'NEXT'
+    },
+    {
+      id: 'whats-next',
+      slide: 'assets/tour-07.jpg',
+      headline: 'WHAT\u2019S NEXT',
+      body: 'Stay ahead. Stay ready. See what\u2019s coming up so you can plan, invite, and be there. You\u2019re all set, brother.',
       nextLabel: 'DONE'
     }
   ];
