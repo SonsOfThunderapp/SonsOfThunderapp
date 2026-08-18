@@ -53,9 +53,3 @@ RULES (permanent):
 - Real app must remain recognizable under tour dimming (no near-black stack)
 - No future ZIP may mark Concierge pass on CSS/DOM presence alone — DEVICE BLOCKING is required acceptance
 - Target, host, tip, safe-area, bottom-nav: no prohibited intersections
-
-## 20260818-p0-recon1
-- Removed HEY THUNDER chip + note from Ask Thunder panel (continuous wake stays retired no-op).
-- Header logo assets replaced from CANONICAL logo-official-7697-header.png into logo@2x/@3x slots.
-- Auth copy: invite-first; button label Use Invite Login.
-- Thunder intro copy shortened.

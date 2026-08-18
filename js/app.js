@@ -2586,55 +2586,17 @@
     detail.addEventListener('click', (e) => {
       if (e.target === detail) closeInfoDetail();
     });
-    // Permanent: every window supports swipe-down dismiss (same elastic path as brother/memory)
-    bindElasticSwipe(detail, {
-      onDown: () => closeInfoDetail(),
-      blocked: (t) => !!(t && t.closest && t.closest('.info-detail-close, button, a, input, textarea'))
-    });
+    let startY = 0;
+    detail.addEventListener('touchstart', (e) => {
+      if (e.touches && e.touches[0]) startY = e.touches[0].clientY;
+    }, { passive: true });
+    detail.addEventListener('touchend', (e) => {
+      const t = e.changedTouches && e.changedTouches[0];
+      if (!t) return;
+      if (t.clientY - startY > 80) closeInfoDetail();
+    }, { passive: true });
     document.addEventListener('keydown', (e) => {
       if (!detail.classList.contains('hidden') && e.key === 'Escape') closeInfoDetail();
-    });
-  }
-
-  /**
-   * Permanent UX law: every overlay "window" can be swipe-closed (down).
-   * X + backdrop + Escape still work. Inputs/buttons block gesture start.
-   * Tour tip is NOT a dismissible window — excluded.
-   */
-  function bindSwipeCloseAllWindows() {
-    const specs = [
-      { id: 'install-modal', close: () => closeModal('install-modal') },
-      { id: 'profile-modal', close: () => closeModal('profile-modal') },
-      { id: 'qr-explainer-modal', close: () => closeModal('qr-explainer-modal') },
-      { id: 'contact-qr-modal', close: () => closeModal('contact-qr-modal') },
-      { id: 'media-modal', close: () => closeModal('media-modal') },
-      { id: 'thunder-modal', close: () => closeModal('thunder-modal') },
-      { id: 'admin-ann-modal', close: () => closeModal('admin-ann-modal') },
-      { id: 'admin-events-modal', close: () => closeModal('admin-events-modal') },
-      { id: 'admin-code-modal', close: () => closeModal('admin-code-modal') },
-      { id: 'admin-push-modal', close: () => closeModal('admin-push-modal') },
-      { id: 'admin-lastfire-modal', close: () => closeModal('admin-lastfire-modal') },
-      { id: 'auth-gate', close: () => { try { closeAuthGate(); } catch (e) {} } },
-      { id: 'ios-install-overlay', close: () => {
-        const el = document.getElementById('ios-install-overlay');
-        if (el) { el.classList.add('hidden'); el.setAttribute('aria-hidden', 'true'); unlockBodyIfClear(); }
-      }},
-      { id: 'inapp-install-overlay', close: () => {
-        const el = document.getElementById('inapp-install-overlay');
-        if (el) { el.classList.add('hidden'); el.setAttribute('aria-hidden', 'true'); unlockBodyIfClear(); }
-      }},
-      { id: 'cal-confirm-sheet', close: () => { try { closeCalConfirmSheet(); } catch (e) {} } }
-    ];
-    specs.forEach(({ id, close }) => {
-      const el = document.getElementById(id);
-      if (!el || el.dataset.swipeClose === '1') return;
-      el.dataset.swipeClose = '1';
-      bindElasticSwipe(el, {
-        onDown: close,
-        blocked: (t) => !!(t && t.closest && t.closest(
-          'input, textarea, select, button, a, video, .modal-close, [data-close]'
-        ))
-      });
     });
   }
 
@@ -4344,8 +4306,6 @@ $('#edit-profile-btn').addEventListener('click', () => {
 
     bindBrotherDetail();
     bindMemoryViewer();
-    bindInfoDetail();
-    bindSwipeCloseAllWindows();
 
     // Profile photo
     $('#profile-photo').addEventListener('change', (e) => {
@@ -4806,7 +4766,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
           chip.classList.toggle('is-on', !!wakeEnabled);
           chip.classList.remove('is-listening');
           const lab = chip.querySelector('.thunder-wake-lab');
-          if (lab) lab.textContent = '';
+          if (lab) lab.textContent = wakeEnabled ? 'HEY THUNDER ON' : 'HEY THUNDER';
         }
       }
 
@@ -4833,7 +4793,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
           if (chip) {
             chip.classList.add('is-on', 'is-listening');
             const lab = chip.querySelector('.thunder-wake-lab');
-            if (lab) lab.textContent = '';
+            if (lab) lab.textContent = 'LISTENING FOR HEY THUNDER';
           }
           wakeRec.onresult = (event) => {
             try {
