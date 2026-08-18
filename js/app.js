@@ -231,7 +231,9 @@
       .replace(/\r/g, '');
   }
 
-  /** Canonical next gathering → RFC5545 ICS (America/New_York local wall time as floating local) */
+  /** Canonical next gathering ICS — same meeting engine as Home / Thunder AI.
+   * VALARMs: 7 days, 1 day, 2 hours before (OS calendar must Save for alarms to exist).
+   * PWA cannot prove calendar was saved — never claim CALENDAR SAVED. */
   function buildGatheringIcs(meetingDate) {
     const start = new Date(meetingDate);
     const mt = parseMeetingHours();
@@ -243,9 +245,13 @@
         pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds());
     }
     const uid = 'thunder-gathering-' + start.getFullYear() + pad(start.getMonth() + 1) + pad(start.getDate()) + '@sonsofthunder.netlify.app';
-    const title = 'Sons of Thunder Gathering';
+    const title = 'Sons of Thunder — Next Gathering';
     const loc = venueName();
-    const desc = 'Sons of Thunder monthly gathering. Show up. Lock arms. Sharpen iron.\\nhttps://sonsofthunder.netlify.app/';
+    const desc = [
+      'Sons of Thunder monthly gathering. Show up.',
+      'Check Thunder Board for the latest gathering details.',
+      'https://sonsofthunder.netlify.app/'
+    ].join('\\n');
     const lines = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
@@ -258,9 +264,27 @@
       'DTSTART:' + localStamp(start),
       'DTEND:' + localStamp(end),
       'SUMMARY:' + icsEscape(title),
-      'DESCRIPTION:' + icsEscape(desc.replace(/\\n/g, '\n')),
+      'DESCRIPTION:' + icsEscape(desc),
       'LOCATION:' + icsEscape(loc),
       'URL:https://sonsofthunder.netlify.app/',
+      // 7 days before
+      'BEGIN:VALARM',
+      'TRIGGER:-P7D',
+      'ACTION:DISPLAY',
+      'DESCRIPTION:One week out. Sons of Thunder gathers next Monday.',
+      'END:VALARM',
+      // 1 day before
+      'BEGIN:VALARM',
+      'TRIGGER:-P1D',
+      'ACTION:DISPLAY',
+      'DESCRIPTION:Tomorrow — Sons of Thunder. Your seat is waiting.',
+      'END:VALARM',
+      // 2 hours before
+      'BEGIN:VALARM',
+      'TRIGGER:-PT2H',
+      'ACTION:DISPLAY',
+      'DESCRIPTION:Two hours. See you at the gathering.',
+      'END:VALARM',
       'END:VEVENT',
       'END:VCALENDAR'
     ];
@@ -268,25 +292,73 @@
   }
 
   let __calBlobUrl = null;
+  /**
+   * Open native calendar with next gathering prefilled.
+   * PWA cannot silently write to Calendar — OS requires user Save/Add.
+   * Strategy: data: ICS (iOS often hands to Calendar) → blob download → Google Calendar template.
+   */
   function launchGatheringCalendar() {
     try {
       const next = getNextMeetingMonday();
       const ics = buildGatheringIcs(next);
-      if (__calBlobUrl) {
-        try { URL.revokeObjectURL(__calBlobUrl); } catch (e) {}
+      const mt = parseMeetingHours();
+      const start = new Date(next);
+      start.setHours(mt.h, mt.m, 0, 0);
+      const end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
+      function pad(n) { return String(n).padStart(2, '0'); }
+      function gStamp(d) {
+        return d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate()) + 'T' +
+          pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + pad(d.getUTCSeconds()) + 'Z';
       }
-      const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-      __calBlobUrl = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = __calBlobUrl;
-      a.download = 'sons-of-thunder-gathering.ics';
-      a.rel = 'noopener';
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => {
-        try { a.remove(); } catch (e) {}
-        try { URL.revokeObjectURL(__calBlobUrl); __calBlobUrl = null; } catch (e) {}
-      }, 2500);
+      const gTitle = encodeURIComponent('Sons of Thunder — Next Gathering');
+      const gDetails = encodeURIComponent('Sons of Thunder monthly gathering. Show up.\nCheck Thunder Board for the latest gathering details.\nhttps://sonsofthunder.netlify.app/');
+      const gLoc = encodeURIComponent(venueName());
+      const googleUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+        + '&text=' + gTitle
+        + '&dates=' + gStamp(start) + '/' + gStamp(end)
+        + '&details=' + gDetails
+        + '&location=' + gLoc;
+
+      // 1) data: URI — best chance for iPhone Safari/PWA to open Calendar with Save
+      try {
+        const dataUrl = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
+        const a1 = document.createElement('a');
+        a1.href = dataUrl;
+        a1.setAttribute('download', 'sons-of-thunder-gathering.ics');
+        a1.rel = 'noopener';
+        document.body.appendChild(a1);
+        a1.click();
+        setTimeout(function () { try { a1.remove(); } catch (e) {} }, 800);
+      } catch (e1) {}
+
+      // 2) Blob download — Android / desktop Chrome
+      try {
+        if (__calBlobUrl) {
+          try { URL.revokeObjectURL(__calBlobUrl); } catch (e) {}
+        }
+        const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+        __calBlobUrl = URL.createObjectURL(blob);
+        const a2 = document.createElement('a');
+        a2.href = __calBlobUrl;
+        a2.download = 'sons-of-thunder-gathering.ics';
+        a2.rel = 'noopener';
+        document.body.appendChild(a2);
+        a2.click();
+        setTimeout(function () {
+          try { a2.remove(); } catch (e) {}
+          try { URL.revokeObjectURL(__calBlobUrl); __calBlobUrl = null; } catch (e) {}
+        }, 2500);
+      } catch (e2) {}
+
+      // 3) Google Calendar template in new tab — always works as hard fallback
+      try {
+        setTimeout(function () {
+          try { window.open(googleUrl, '_blank', 'noopener'); } catch (e3) {
+            try { window.location.href = googleUrl; } catch (e4) {}
+          }
+        }, 350);
+      } catch (e3) {}
+
       return true;
     } catch (e) {
       console.warn('Calendar launch failed', e);
@@ -1466,53 +1538,32 @@
   }
 
   function setupReminderButton() {
+    /* CONSOLIDATED: same gathering ICS + VALARMs as I'm In (no second reminder engine) */
     const btn = document.getElementById('reminder-btn');
     const status = document.getElementById('reminder-status');
     if (!btn) return;
 
-    // Restore previous choice
     if (load('reminderSet')) {
       btn.classList.add('set');
-      btn.textContent = "REMINDER SET";
+      btn.textContent = 'ON CALENDAR';
       if (status) {
-        status.textContent = "Calendar reminder locked in.";
+        status.textContent = 'Opened calendar — hit Save in your calendar app.';
         status.classList.remove('hidden');
       }
     }
 
     btn.addEventListener('click', () => {
-      const next = getNextMeetingMonday();
-      const { googleUrl, ics } = buildCalendarLinks(next);
-
-      // Prefer native calendar download + Google as fallback
-      const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = "sons-of-thunder-reminder.ics";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      // Also open Google Calendar in a new tab for easy add
-      setTimeout(() => window.open(googleUrl, '_blank'), 400);
-
+      try { launchGatheringCalendar(); } catch (e) {}
       btn.classList.add('set');
-      btn.textContent = "REMINDER SET";
+      btn.textContent = 'ON CALENDAR';
       save('reminderSet', true);
-      tbGlowHit(btn, 'yellow');
-
+      try { tbGlowHit(btn, 'yellow'); } catch (e) {}
       if (status) {
-        status.textContent = "7 days out. Be ready.";
+        status.textContent = 'Opened calendar — hit Save so 7-day / 1-day / 2-hour alerts can fire.';
         status.classList.remove('hidden');
       }
-
-      // Request browser notification permission so local alerts can fire
       requestNotifyPermission().then((perm) => {
-        if (perm === 'granted') {
-          checkAndFireMeetingNotifications();
-        }
+        if (perm === 'granted') checkAndFireMeetingNotifications();
       });
     });
   }
@@ -4168,18 +4219,12 @@
         }, 900);
       }
 
-      // Calendar from same gesture — .ics download/open (OS confirms Add)
-      let launched = false;
-      try { launched = !!launchGatheringCalendar(); } catch (e) { launched = false; }
-      // Always offer explicit ADD path — never claim the OS already saved the event
-      if (!launched) openCalConfirmSheet();
-      else {
-        try {
-          if (!sessionStorage.getItem('tb_cal_sheet_once')) {
-            sessionStorage.setItem('tb_cal_sheet_once', '1');
-            openCalConfirmSheet();
-          }
-        } catch (e) { openCalConfirmSheet(); }
+      // Calendar handoff on same gesture — native/OS Save required (no silent insert)
+      // Strip intermediate confirm sheet: go straight to calendar so brother hits Save.
+      try {
+        launchGatheringCalendar();
+      } catch (e) {
+        try { openCalConfirmSheet(); } catch (e2) {}
       }
 
       if (typeof requestNotifyPermission === 'function') {
@@ -4726,6 +4771,8 @@ $('#edit-profile-btn').addEventListener('click', () => {
       }
 
       function startWakeLoop() {
+        /* RETIRED: Hey Thunder continuous listen — no-op */
+        return;
         if (!wakeEnabled || !isSupported()) return;
         if (document.hidden) return;
         if (thunderListening) return; // question capture owns mic
@@ -4785,21 +4832,19 @@ $('#edit-profile-btn').addEventListener('click', () => {
       }
 
       function setWakeEnabled(on) {
-        wakeEnabled = !!on;
-        try { localStorage.setItem('tb_hey_thunder', wakeEnabled ? '1' : '0'); } catch (e) {}
+        /* RETIRED 2026-08-17: continuous Hey Thunder wake — permanent off */
+        wakeEnabled = false;
+        try { localStorage.setItem('tb_hey_thunder', '0'); } catch (e) {}
+        try { localStorage.removeItem('tb_hey_thunder'); } catch (e) {}
         const chip = document.getElementById('thunder-wake-chip');
         if (chip) {
-          chip.classList.toggle('is-on', wakeEnabled);
-          const lab = chip.querySelector('.thunder-wake-lab');
-          if (lab) lab.textContent = wakeEnabled ? 'HEY THUNDER ON' : 'HEY THUNDER';
+          chip.classList.add('hidden');
+          chip.setAttribute('hidden', 'hidden');
+          chip.setAttribute('aria-hidden', 'true');
+          chip.classList.remove('is-on', 'is-listening');
         }
-        if (wakeEnabled) {
-          setState('READY');
-          startWakeLoop();
-        } else {
-          stopWake();
-          setState('OFF');
-        }
+        try { stopWake(); } catch (e) {}
+        setState('OFF');
       }
 
       function openAsk(opts) {
@@ -4850,35 +4895,24 @@ $('#edit-profile-btn').addEventListener('click', () => {
       }
 
       function init() {
-        try {
-          wakeEnabled = localStorage.getItem('tb_hey_thunder') === '1';
-        } catch (e) { wakeEnabled = false; }
+        /* Hey Thunder retired — force off, hide chip, clear stored preference */
+        wakeEnabled = false;
+        try { localStorage.setItem('tb_hey_thunder', '0'); localStorage.removeItem('tb_hey_thunder'); } catch (e) {}
         const chip = document.getElementById('thunder-wake-chip');
         if (chip) {
-          chip.classList.toggle('is-on', wakeEnabled);
-          chip.addEventListener('click', () => {
-            if (!isSupported()) {
-              try { showInstallToast('Voice isn\'t available on this browser.'); } catch (e) {}
-              return;
-            }
-            setWakeEnabled(!wakeEnabled);
-          });
-          const lab = chip.querySelector('.thunder-wake-lab');
-          if (lab) lab.textContent = wakeEnabled ? 'HEY THUNDER ON' : 'HEY THUNDER';
+          chip.classList.add('hidden');
+          chip.setAttribute('hidden', 'hidden');
+          chip.setAttribute('aria-hidden', 'true');
+          chip.classList.remove('is-on', 'is-listening');
+          /* no click handler — wake path dead */
         }
         document.addEventListener('visibilitychange', () => {
           if (document.hidden) {
-            stopWake();
+            try { stopWake(); } catch (e) {}
             try { stopThunderVoice(); } catch (e) {}
-          } else if (wakeEnabled) {
-            setTimeout(() => startWakeLoop(), 400);
           }
         });
-        // Restore wake if previously on
-        if (wakeEnabled && isSupported()) {
-          setTimeout(() => startWakeLoop(), 1200);
-        }
-        setState(wakeEnabled ? 'READY' : 'OFF');
+        setState('OFF');
       }
 
       return {
@@ -6112,7 +6146,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
 
   // ---------- PRODUCT TOUR — Living Bolt Concierge (versioned) ----------
-  const TB_TOUR_VERSION = 4; /* Living host bolt + typed speech + focus stage */
+  const TB_TOUR_VERSION = 10; /* Character host (Thunder sunglasses) — old bolt-only host retired */
 
   function tourStorageKey() {
     return 'thunderTourV' + TB_TOUR_VERSION;
@@ -6235,6 +6269,16 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   function setTourHostState(state) {
     const host = document.getElementById('tb-tour-host');
     if (!host) return;
+    /* HARD LOCK: tour host = official Thunder character — never bolt-only / never legacy generic bolt */
+    const himg = host.querySelector('.tb-tour-host-img');
+    if (himg) {
+      const src = himg.getAttribute('src') || '';
+      if (!src.includes('thunder-cool') && !src.includes('thunder-tour-host')) {
+        himg.setAttribute('src', 'assets/thunder-cool.png');
+        himg.setAttribute('width', '96');
+        himg.setAttribute('height', '96');
+      }
+    }
     host.classList.remove('is-arrival', 'is-travel', 'is-explain', 'is-celebrate', 'is-attention');
     if (state) host.classList.add('is-' + state);
     __tourHostState = state || 'rest';
@@ -6250,10 +6294,10 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     if (target) {
       const r = target.getBoundingClientRect();
       // Prefer upper-left of target so bolt "points" toward feature
-      x = Math.min(window.innerWidth - 40, Math.max(40, r.left + 20));
-      y = Math.max(56, r.top - 28);
-      if (y < 56) y = Math.min(window.innerHeight - navH - 40, r.bottom + 36);
-      if (x < 36) x = Math.min(window.innerWidth - 40, r.right - 12);
+      x = Math.min(window.innerWidth - 56, Math.max(48, r.left + 24));
+      y = Math.max(72, r.top - 40);
+      if (y < 72) y = Math.min(window.innerHeight - navH - 56, r.bottom + 48);
+      if (x < 48) x = Math.min(window.innerWidth - 56, r.right - 16);
     }
     host.style.left = x + 'px';
     host.style.top = y + 'px';
@@ -6688,9 +6732,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
   // ---------- FIRST-LOAD WELCOME (once per session; overlaps splash exit) ----------
   function runWelcome() {
-    /* MASTERPIECE: retire generic WELCOME TO THE BOARD as onboarding authority.
-       Hide the popup permanently for this session and hand off to Thunder Concierge
-       (Follow the Bolt) when tour not complete. One system owns the moment. */
+    /* OLD welcome popup removed from DOM. Handoff only to Follow the Bolt tour. */
     const el = document.getElementById('welcome');
     if (el) {
       el.classList.add('hidden');

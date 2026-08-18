@@ -58,3 +58,10 @@ Also mirrored under `/home/workdir/artifacts/sot-logo-official/` for non-deploy 
 
 ## Provenance rule
 If a file is on disk but not listed here as CANONICAL / APPROVED / BRIDGE: treat as **UNVERIFIED**. Do not ship it to production UI without explicit approval.
+
+## LOGO PURGE (2026-08-17) — PERMANENT
+
+- **DELETED:** all `assets/logo*.old-backup` files (pre-7697 wordmarks).
+- **PRODUCTION SLOTS** (`logo@2x.png`, `logo@3x.png`, `logo.png`, `logo-about.png`, `logo-clean-master.png`, `logo@2x-hd.png`, `logo@3x-hd.png`) are **only** derivatives of `assets/CANONICAL/logo-official-7697-header.png` (IMG_7697).
+- **BANNED:** restoring any pre-7697 white-outline / flat legacy wordmark into those slots.
+- **Gate:** before any future zip, confirm no `*.old-backup` logo files exist in `assets/`.

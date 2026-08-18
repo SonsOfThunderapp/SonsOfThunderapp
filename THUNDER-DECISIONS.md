@@ -328,3 +328,17 @@ Thunder is the single official mascot and concierge character. The concierge lig
 - Tour host and Ask hero must use official 7692-family character art once production PNGs are approved and wired — not Bond, not AI approximate.
 - Until production cool/character PNGs are present in the deploy package, tour may use bolt-only as BRIDGE mark only — report IMPLEMENTATION PENDING, do not invent art.
 
+
+## 2026-08-17 — I'm In → Calendar lock
+- Single gathering ICS from meeting engine (`getNextMeetingMonday` + MEETING_TIME + venue).
+- Title: Sons of Thunder — Next Gathering.
+- VALARMs: -P7D, -P1D, -PT2H (require OS Save).
+- Never claim calendar saved; copy = opened / hit Save.
+- Home reminder control consolidated to same `launchGatheringCalendar()` — no second ICS engine.
+- Gathering Alerts Web Push remains announcement channel (no duplicate meeting cron in this pass).
+
+
+## 2026-08-17 — P1 repair (post bad-build gate)
+- Hey Thunder continuous wake: RETIRED. setWakeEnabled forced off; startWakeLoop no-op; chip hidden DOM+CSS; tb_hey_thunder cleared.
+- Tour host image: assets/thunder-cool.png (official cool bolt), not alternate/Bond.
+- thunder-bond-hero.png moved to assets/.rejected/ — do not resurrect as runtime fallback.

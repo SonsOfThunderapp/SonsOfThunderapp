@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260816-MASTERPIECE1b-bolt1docs',
+  APP_BUILD: '20260817-p1-repair',
 
   /* ── PRODUCT LOCK (2026-08-16 FINAL) ───────────────────────────
      This build freezes every signed-off system through cohere1/tap/voice/hero.
@@ -26,6 +26,20 @@ window.TB_CONFIG = {
      Logo: bolt-only effects; NEVER full-box gradient/slab on wordmark
      Install explainer: CapCut VO, H.264+AAC, keepAudio true
      ───────────────────────────────────────────────────────────── */
+  /* LOGO CANON — OLD WORDMARK BANNED FOREVER
+     Production header/splash/about MUST use assets/logo@2x.png + logo@3x.png
+     derived ONLY from assets/CANONICAL/logo-official-7697-header.png (IMG_7697).
+     Never restore pre-7697 white-outline / flat legacy wordmarks.
+     Never keep *.old-backup logo files in the package.
+  */
+  LOGO_CANON: {
+    master: 'assets/CANONICAL/logo-official-7697-header.png',
+    header2x: 'assets/logo@2x.png',
+    header3x: 'assets/logo@3x.png',
+    about: 'assets/logo-about.png',
+    banned: ['pre-7697-wordmark', 'white-outline-legacy', 'logo*.old-backup']
+  },
+
   VISUAL_LOCKS: {
     welcomeBoltSrc: 'assets/bolt-only.png',
     welcomeBoltSize: 72,

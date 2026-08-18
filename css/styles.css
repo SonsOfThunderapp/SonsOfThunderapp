@@ -2230,10 +2230,10 @@ h1.code-title-glow {
   color: var(--yellow);
   margin-bottom: 10px;
   padding-right: 40px;
-  /* LOCKED: same heartbeat as brother names / bolts */
-  animation: brotherNamePulse var(--tb-breathe) !important;
-  animation-delay: 0s !important;
-  will-change: opacity, text-shadow;
+  /* STRIPPED: no ambient pulse/glow on announcement / meeting / mission modal titles */
+  animation: none !important;
+  text-shadow: none !important;
+  will-change: auto;
 }
 .info-detail-title {
   font-family: var(--font-display, inherit);
@@ -4507,18 +4507,14 @@ h1.code-title-glow,
   padding-top: 10px !important;
 }
 
-/* Yellow month labels + info modal labels on shared breathe */
+/* STRIPPED: event-month + info modal label pulse (announcements / meetings / invites) */
 .event-month {
-  animation: boltLive var(--tb-breathe);
+  animation: none !important;
+  text-shadow: none !important;
 }
 .info-detail-label {
-  animation: boltLive var(--tb-breathe);
-}
-@media (prefers-reduced-motion: reduce) {
-  .event-month,
-  .info-detail-label {
-    animation: none !important;
-  }
+  animation: none !important;
+  text-shadow: none !important;
 }
 /* ===END SHIP invite1=== */
 
@@ -4661,7 +4657,6 @@ h1.code-title-glow,
 .thunder-fab .bolt,
 .about-bolt-glow,
 .brother-name,
-.info-detail-label,
 .rsvp-status:not(.hidden),
 .btn-share,
 .code-title-glow,
@@ -4702,8 +4697,7 @@ h1.code-title-glow,
 @media (prefers-reduced-motion: reduce) {
   .bolt-glow, .mission-bolt, .welcome-bolt, .welcome-bolt-img,
   .ios-install-bolt, .thunder-title .bolt, .thunder-fab .bolt,
-  .about-bolt-glow, .brother-name, .info-detail-label,
-  .rsvp-status, .btn-share, .code-title-glow, .new-badge,
+  .about-bolt-glow, .brother-name,   .rsvp-status, .btn-share, .code-title-glow, .new-badge,
   .install-card, .install-card-more {
     animation: none !important;
   }
@@ -4899,8 +4893,8 @@ h1.code-title-glow,
 /* Living host bolt — official bolt-only asset */
 .tb-tour-host {
   position: fixed;
-  width: 56px;
-  height: 56px;
+  width: 96px;
+  height: 96px;
   z-index: 12003;
   pointer-events: none;
   transform: translate(-50%, -50%);
@@ -4908,19 +4902,19 @@ h1.code-title-glow,
   will-change: top, left, transform;
 }
 .tb-tour-host-img {
-  width: 56px;
-  height: 56px;
+  width: 96px;
+  height: 96px;
   object-fit: contain;
   display: block;
   position: relative;
   z-index: 1;
-  filter: drop-shadow(0 0 10px rgba(254, 241, 5, 0.65));
+  filter: drop-shadow(0 0 14px rgba(254, 241, 5, 0.55));
 }
 .tb-tour-host-glow {
   position: absolute;
-  inset: -8px;
+  inset: -12px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(254, 241, 5, 0.35) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(254, 241, 5, 0.28) 0%, transparent 70%);
   z-index: 0;
   animation: tbHostPulse 2.4s ease-in-out infinite;
   pointer-events: none;
@@ -5130,8 +5124,7 @@ body.tb-tour-open .header-bolt-live,
 body.tb-tour-open .brother-name,
 body.tb-tour-open .code-title,
 body.tb-tour-open .btn-share,
-body.tb-tour-open .info-detail-label,
-body.tb-tour-open .welcome-bolt-img,
+body.tb-tour-open body.tb-tour-open .welcome-bolt-img,
 body.tb-tour-open .logo-bolt-glimmer,
 body.tb-tour-open [class*="boltLive"],
 body.tb-tour-open .rsvp-status {
@@ -5676,7 +5669,6 @@ img.about-logo {
   }
 }
 
-.info-detail-label,
 .card-label,
 .last-fire-label,
 .announcement-card-label,
@@ -5699,8 +5691,7 @@ img.about-logo {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .info-detail-label,
-  .card-label,
+    .card-label,
   .last-fire-label,
   .announcement-card-label,
   #meeting-phase-label {
@@ -5737,7 +5728,6 @@ img.about-logo {
   }
 }
 
-.info-detail-label,
 .card-label,
 .last-fire-label,
 .announcement-card-label,
@@ -5762,8 +5752,7 @@ img.about-logo {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .info-detail-label,
-  .card-label,
+    .card-label,
   .last-fire-label,
   .announcement-card-label,
   #meeting-phase-label,
@@ -5886,7 +5875,6 @@ img.about-logo {
 }
 
 /* Title lifeblood — readable always, never opacity 0 */
-.info-detail-label,
 .card-label,
 .announcement-card-label,
 .last-fire-label,
@@ -6003,4 +5991,31 @@ img.about-logo {
 }
 @media (prefers-reduced-motion: reduce) {
   .tb-tour-demo:active, .tb-tour-demo.tb-demo-press { animation: none; transform: none; }
+}
+
+
+/* === STRIP: modal category titles (ANNOUNCEMENT / MISSION / GATHERING / calendar) — no pulse === */
+.info-detail-label,
+#info-detail-label {
+  animation: none !important;
+  animation-name: none !important;
+  text-shadow: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+  color: var(--yellow, #FEF105) !important;
+}
+.event-month {
+  animation: none !important;
+  text-shadow: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+}
+
+
+/* HEY THUNDER RETIRED 2026-08-17 — continuous wake chip never shows */
+#thunder-wake-chip,
+.thunder-wake-chip {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }

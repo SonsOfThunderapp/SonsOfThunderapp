@@ -42,23 +42,7 @@
     </div>
   </div>
 
-  <!-- First-load welcome (once per session, after splash) -->
-  <div id="welcome" class="welcome hidden" role="dialog" aria-modal="true" aria-labelledby="welcome-title" aria-hidden="true">
-    <div class="welcome-card" id="welcome-card">
-      <!-- LOCKED: official bolt-only.png + boltLive pulse — never emoji ⚡ -->
-      <div class="welcome-bolt bolt-glow" data-tb-visual-lock="welcome-official-bolt" aria-hidden="true">
-        <img src="assets/bolt-only.png" alt="" class="welcome-bolt-img" width="72" height="72" decoding="async" />
-      </div>
-      <h2 id="welcome-title" class="welcome-title">WELCOME TO THUNDER BOARD</h2>
-      <p class="welcome-purpose">Private brotherhood tool — show up, know your brothers, stay sharp.</p>
-      <ul class="welcome-list">
-        <li>Next Gathering + big red <strong>I’M IN</strong></li>
-        <li>Brothers directory — know who’s in the room</li>
-        <li>Events &amp; Memories · Ask Thunder</li>
-      </ul>
-      <button type="button" class="welcome-gotit" id="welcome-gotit">GOT IT</button>
-    </div>
-  </div>
+  <!-- OLD welcome popup REMOVED — Follow the Bolt tour is the only first-run system -->
 
   <div id="app">
     <header id="main-header" class="header">
@@ -97,7 +81,7 @@
             <button id="rsvp-btn" class="btn-rsvp">I'M IN</button>
             <div id="rsvp-status" class="rsvp-status hidden">⚡ YOU'RE LOCKED IN</div>
             <!-- Who's In removed: local-only roster read as group presence. Personal LOCKED IN stays. -->
-            <button id="reminder-btn" class="btn-reminder btn-reminder-compact">7-DAY REMINDER</button>
+            <button id="reminder-btn" class="btn-reminder btn-reminder-compact">ADD TO CALENDAR</button>
             <div id="reminder-status" class="reminder-status hidden"></div>
             <button type="button" id="text-leader-btn" class="btn-text-leader">HAVE A QUESTION? TEXT A LEADER</button>
           </div>
@@ -369,9 +353,9 @@
   <div id="tb-tour" class="tb-tour hidden" aria-hidden="true">
     <div class="tb-tour-dim" id="tb-tour-dim"></div>
     <div class="tb-tour-spotlight" id="tb-tour-spotlight" aria-hidden="true"></div>
-    <!-- Living host: official bolt-only mark — motion host, not a new logo -->
+    <!-- Tour host: official Thunder character (sunglasses) — NOT bolt-only, NOT legacy generic bolt -->
     <div id="tb-tour-host" class="tb-tour-host" aria-hidden="true">
-      <img src="assets/bolt-only.png" alt="" class="tb-tour-host-img" width="56" height="56" decoding="async" />
+      <img src="assets/thunder-cool.png" alt="" class="tb-tour-host-img" width="96" height="96" decoding="async" />
       <span class="tb-tour-host-glow" aria-hidden="true"></span>
     </div>
     <div class="tb-tour-tip" id="tb-tour-tip" role="dialog" aria-modal="true" aria-labelledby="tb-tour-headline" aria-describedby="tb-tour-body-full">
@@ -586,7 +570,7 @@
           <span id="thunder-voice-label">TAP TO SPEAK</span>
         </button>
         <p class="thunder-voice-hint" id="thunder-voice-hint">Voice mode — speak your question</p>
-        <button type="button" id="thunder-wake-chip" class="thunder-wake-chip" aria-pressed="false" title="While Thunder Board is open only — not system-wide">
+        <button type="button" id="thunder-wake-chip" class="thunder-wake-chip hidden" hidden aria-hidden="true" aria-pressed="false" title="While Thunder Board is open only — not system-wide">
           <span class="thunder-wake-bolt" aria-hidden="true">⚡</span>
           <span class="thunder-wake-lab">HEY THUNDER</span>
         </button>
