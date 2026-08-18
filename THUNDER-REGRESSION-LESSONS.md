@@ -32,6 +32,15 @@
 26. Ask Thunder Bond hero sized too small relative to its role as page identity — scale up when coding TC03.
 
 
+## PRODUCT CONSTITUTION + ASSET PROVENANCE (2026-08-17)
+
+47. **Approved asset only:** Never show or ship AI-redrawn / approximate / legacy Thunder or logo. Trace `assets/CANONICAL/logo-official-IMG_7697.jpg` and `assets/CANONICAL/thunder-character-official-IMG_7692.jpg`.
+48. **File existence ≠ approval.** `thunder-bond-hero.png` may exist (even as 0-byte) — Bond path is DO NOT USE.
+49. **Deploy package gap:** Docs reference `thunder-cool` family; production `index.html` tour host currently uses `bolt-only.png` (BRIDGE). Full character in production UI = IMPLEMENTATION PENDING until official 7692-derived PNGs are approved and wired — do not invent substitutes.
+50. **Visual proof law:** Mockup → approval → code/ZIP. No unsolicited ZIP. Concept images must be labeled CONCEPT, not PRODUCTION PROOF.
+51. **Freeze-frame motion test:** Every keyframe of AI animation must stand as an approved still (START/25/50/75/END).
+52. **One heartbeat:** Do not introduce a second ambient pulse clock that drifts from `--tb-breathe`.
+
 ## CONCIERGE HOST SIZE + PLACEMENT = ONE SYSTEM (2026-08-17 device fail)
 
 HARD FAIL evidence: screenshots showed Thunder clipped by status bar, overlapping YOU'RE IN CTA, logo, speech disconnected.

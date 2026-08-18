@@ -169,7 +169,6 @@
   }
 
   // Compress image data URL for localStorage (M2)
-  window.tbCompressImage = compressImageDataUrl;
   function compressImageDataUrl(dataUrl, maxW, quality) {
     return new Promise((resolve) => {
       try {
@@ -221,19 +220,6 @@
     if (!ap && h <= 12 && h < 7) h += 12; // bare "6:30" -> evening guess
     return { h, m: min };
   }
-
-  function safeHttpUrl(u) {
-    try {
-      const s = String(u || '').trim();
-      if (!s) return '';
-      const low = s.toLowerCase();
-      if (low.startsWith('javascript:') || low.startsWith('data:') || low.startsWith('vbscript:')) return '';
-      if (low.startsWith('https:') || low.startsWith('http:')) return s;
-      if (s.startsWith('/') && !s.startsWith('//')) return s;
-      return '';
-    } catch (e) { return ''; }
-  }
-
   function venueName() { return (cfg().VENUE || 'Crooked Can Brewery Patio, Winter Garden'); }
 
   function icsEscape(text) {
@@ -1484,17 +1470,21 @@
     const status = document.getElementById('reminder-status');
     if (!btn) return;
 
-    // Option C: once set, hide the button — status lives on RSVP meta line
+    // Restore previous choice
     if (load('reminderSet')) {
       btn.classList.add('set');
-      btn.classList.add('hidden');
-      if (status) status.classList.add('hidden');
+      btn.textContent = "REMINDER SET";
+      if (status) {
+        status.textContent = "Calendar reminder locked in.";
+        status.classList.remove('hidden');
+      }
     }
 
     btn.addEventListener('click', () => {
       const next = getNextMeetingMonday();
       const { googleUrl, ics } = buildCalendarLinks(next);
 
+      // Prefer native calendar download + Google as fallback
       const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -1505,15 +1495,20 @@
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
+      // Also open Google Calendar in a new tab for easy add
       setTimeout(() => window.open(googleUrl, '_blank'), 400);
 
-      save('reminderSet', true);
       btn.classList.add('set');
-      btn.classList.add('hidden');
-      if (status) status.classList.add('hidden');
-      try { renderRsvp(); } catch (e) {}
+      btn.textContent = "REMINDER SET";
+      save('reminderSet', true);
       tbGlowHit(btn, 'yellow');
 
+      if (status) {
+        status.textContent = "7 days out. Be ready.";
+        status.classList.remove('hidden');
+      }
+
+      // Request browser notification permission so local alerts can fire
       requestNotifyPermission().then((perm) => {
         if (perm === 'granted') {
           checkAndFireMeetingNotifications();
@@ -1608,7 +1603,6 @@
       save('brothersSeenAt', brothersSeenAt);
     }
     renderBrothers();
-    try { renderHomeBirthdayHonor(); } catch (eHB) {}
     updateAllNewBadges();
   }
 
@@ -2091,10 +2085,10 @@
       }
       try { if (window.tbFeedback) tbFeedback.thunderImpact(); } catch (e) {}
       try {
-        if (window.tbFeedback && tbFeedback.raw) {
-          setTimeout(() => { try { tbFeedback.raw(12); } catch (e) {} }, 180);
-          setTimeout(() => { try { tbFeedback.raw(12); } catch (e) {} }, 320);
-          setTimeout(() => { try { tbFeedback.raw(28); } catch (e) {} }, 520);
+        if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+          setTimeout(() => { try { navigator.vibrate(12); } catch (e) {} }, 180);
+          setTimeout(() => { try { navigator.vibrate(12); } catch (e) {} }, 320);
+          setTimeout(() => { try { navigator.vibrate(28); } catch (e) {} }, 520);
         }
       } catch (e) {}
     } catch (e) {}
@@ -2933,40 +2927,9 @@
         : esc(initials);
     }
     const nameEl = $('#brother-detail-name');
-    if (nameEl) {
-      nameEl.textContent = b.name || '';
-      nameEl.classList.toggle('brother-name-bday', isBirthdayToday(b));
-    }
+    if (nameEl) nameEl.textContent = b.name || '';
     const bioEl = $('#brother-detail-bio');
     if (bioEl) bioEl.textContent = b.bio || '';
-
-    // Birthday honor — member is the hero; restrained, one day only
-    const honor = $('#brother-birthday-honor');
-    const honorTitle = $('#brother-birthday-honor-title');
-    const textHim = $('#brother-birthday-text');
-    if (honor) {
-      if (isBirthdayToday(b)) {
-        honor.classList.remove('hidden');
-        if (honorTitle) honorTitle.textContent = 'HAPPY BIRTHDAY, ' + firstNameOf(b.name).toUpperCase();
-        const ph = digitsOnly(b.phone);
-        if (textHim) {
-          if (ph) {
-            textHim.classList.remove('hidden');
-            textHim.onclick = function () {
-              try { tbFeedback.press(textHim); } catch (e) {}
-              var msg = encodeURIComponent('Happy birthday, ' + firstNameOf(b.name) + ' — from your brothers.');
-              window.location.href = 'sms:' + ph + (/iPhone|iPad|iPod/i.test(navigator.userAgent) ? '&' : '?') + 'body=' + msg;
-            };
-          } else {
-            textHim.classList.add('hidden');
-            textHim.onclick = null;
-          }
-        }
-      } else {
-        honor.classList.add('hidden');
-        if (textHim) { textHim.classList.add('hidden'); textHim.onclick = null; }
-      }
-    }
 
     // Contact actions — phone is opt-in only (SHARE CONTACT + inline QR; no CALL/TEXT chips)
     const actions = $('#brother-contact-actions');
@@ -3047,11 +3010,9 @@
     if (me) {
       const nameEl = $('#profile-name');
       const bioEl = $('#profile-bio');
-      const bdayEl = $('#profile-birthday');
       if (nameEl) nameEl.value = me.name || '';
       if (bioEl) bioEl.value = me.bio || '';
       if (phoneEl) phoneEl.value = me.phone || '';
-      if (bdayEl) bdayEl.value = normalizeBirthday(me.birthday) || '';
       if (me.photo) {
         pendingPhotoData = me.photo;
         const preview = $('#photo-preview');
@@ -3067,11 +3028,9 @@
     } else {
       const nameEl = $('#profile-name');
       const bioEl = $('#profile-bio');
-      const bdayEl = $('#profile-birthday');
       if (nameEl) nameEl.value = '';
       if (bioEl) bioEl.value = '';
       if (phoneEl) phoneEl.value = '';
-      if (bdayEl) bdayEl.value = '';
       pendingPhotoData = null;
       const preview = $('#photo-preview');
       if (preview) { preview.innerHTML = ''; preview.classList.remove('visible'); }
@@ -3080,75 +3039,7 @@
     openModal('profile-modal');
   }
 
-
-  /* ── BIRTHDAY / HONOR ENGINE (one source of truth) ───────────────
-     Store: MM-DD only (privacy). Entering a birthday = opt-in to recognition.
-     Surfaces: Brothers card badge, detail honor, Home strip.
-     No confetti. No year. Member is the hero.
-  ──────────────────────────────────────────────────────────────── */
-  function normalizeBirthday(raw) {
-    if (!raw) return '';
-    var s = String(raw).trim();
-    var m = s.match(/^(\d{1,2})[\/\-](\d{1,2})(?:[\/\-]\d{2,4})?$/);
-    if (!m) return '';
-    var mo = parseInt(m[1], 10);
-    var d = parseInt(m[2], 10);
-    if (mo < 1 || mo > 12 || d < 1 || d > 31) return '';
-    return String(mo).padStart(2, '0') + '-' + String(d).padStart(2, '0');
-  }
-  function todayMMDD(dateObj) {
-    var d = dateObj || new Date();
-    return String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-  }
-  function isBirthdayToday(b, dateObj) {
-    var bd = normalizeBirthday(b && b.birthday);
-    if (!bd) return false;
-    return bd === todayMMDD(dateObj);
-  }
-  function formatBirthdayLabel(mmdd) {
-    var n = normalizeBirthday(mmdd);
-    if (!n) return '';
-    var parts = n.split('-');
-    var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-    var mo = parseInt(parts[0], 10) - 1;
-    var day = parseInt(parts[1], 10);
-    if (mo < 0 || mo > 11) return n;
-    return months[mo] + ' ' + day;
-  }
-  function firstNameOf(name) {
-    return String(name || 'Brother').trim().split(/\s+/)[0] || 'Brother';
-  }
-  function brothersWithBirthdayToday() {
-    return (brothers || []).filter(function (b) { return isBirthdayToday(b); });
-  }
-  function renderHomeBirthdayHonor() {
-    var el = document.getElementById('home-birthday-honor');
-    if (!el) return;
-    var list = brothersWithBirthdayToday();
-    if (!list.length) {
-      el.classList.add('hidden');
-      el.onclick = null;
-      return;
-    }
-    var names = list.map(function (b) { return firstNameOf(b.name); });
-    var title = names.length === 1
-      ? (names[0] + "'s birthday")
-      : (names.slice(0, -1).join(', ') + ' & ' + names[names.length - 1] + " — birthdays");
-    var titleEl = document.getElementById('home-birthday-title');
-    if (titleEl) titleEl.textContent = title.toUpperCase();
-    el.classList.remove('hidden');
-    el.onclick = function () {
-      try { tbFeedback.selection(); } catch (e) {}
-      var idx = (brothers || []).findIndex(function (b) { return b && b.id === list[0].id; });
-      if (idx >= 0) {
-        if (typeof showView === 'function') showView('brothers');
-        setTimeout(function () { openBrotherDetail(idx); }, 80);
-      }
-    };
-  }
-
   function renderBrothers() {
-
     const grid = $('#brothers-grid');
     if (!grid) return;
     if (!brothers.length) {
@@ -3176,22 +3067,13 @@
         ? `<img class="brother-photo" src="${esc(b.photo)}" alt="${esc(b.name)}" />`
         : `<div class="brother-photo">${esc(initials)}</div>`;
       const isNew = (typeof b.updatedAt === 'number' && b.updatedAt > (brothersSeenAt || 0));
-      const isBday = isBirthdayToday(b);
-      const since = b.joinedAt ? (function () {
-        try {
-          var d = new Date(b.joinedAt);
-          if (isNaN(d.getTime())) return '';
-          return 'Since ' + d.toLocaleString('en-US', { month: 'short', year: 'numeric' });
-        } catch (e) { return ''; }
-      })() : '';
       return `
-        <button type="button" class="brother-card${isNew ? ' card-new' : ''}${isBday ? ' brother-card-bday' : ''}" data-brother-index="${i}" aria-label="View ${esc(b.name || 'brother')} profile">
-          ${isBday ? '<span class="bday-badge" aria-label="Birthday today">TODAY</span>' : (isNew ? '<span class="new-badge new-badge-overlay">NEW</span>' : '')}
+        <button type="button" class="brother-card${isNew ? ' card-new' : ''}" data-brother-index="${i}" aria-label="View ${esc(b.name || 'brother')} profile">
+          ${isNew ? '<span class="new-badge new-badge-overlay">NEW</span>' : ''}
           ${photoHtml}
           <div class="brother-info">
-            <div class="brother-name${isBday ? ' brother-name-bday' : ''}">${esc(b.name)}</div>
+            <div class="brother-name">${esc(b.name)}</div>
             <div class="brother-bio">${esc(b.bio || '')}</div>
-            ${since ? '<div class="brother-since">' + esc(since) + '</div>' : ''}
           </div>
         </button>`;
     }).join('');
@@ -3578,29 +3460,19 @@
     const btn = $('#rsvp-btn');
     const status = $('#rsvp-status');
     const prompt = $('#rsvp-prompt');
-    const reminderBtn = document.getElementById('reminder-btn');
-    const reminderStatus = document.getElementById('reminder-status');
     if (!btn) return;
     if (rsvp) {
       try { syncSelfToRoster(true); } catch (e) {}
       btn.classList.add('confirmed');
-      /* Option C: one solid locked-in hero */
-      btn.textContent = "⚡ YOU'RE LOCKED IN";
-      const reminderOn = !!load('reminderSet');
+      btn.textContent = "YOU'RE IN ⚡";
       if (status) {
-        status.textContent = reminderOn ? 'Reminder on · On this phone' : 'On this phone';
+        status.textContent = "⚡ YOU'RE IN · this phone";
         status.classList.remove('hidden');
       }
-      if (reminderBtn) {
-        if (reminderOn) reminderBtn.classList.add('hidden');
-        else reminderBtn.classList.remove('hidden');
-      }
-      if (reminderStatus) reminderStatus.classList.add('hidden');
       const meetCard = document.querySelector('.next-meeting');
       if (meetCard) meetCard.classList.add('commit-energized');
       let calBtn = document.getElementById('rsvp-add-cal');
-      const calDone = !!load('calendarAdded');
-      if (!calDone && !calBtn && meetCard) {
+      if (!calBtn && meetCard) {
         calBtn = document.createElement('button');
         calBtn.type = 'button';
         calBtn.id = 'rsvp-add-cal';
@@ -3609,23 +3481,15 @@
         const statusEl = document.getElementById('rsvp-status');
         if (statusEl && statusEl.parentNode) statusEl.parentNode.insertBefore(calBtn, statusEl.nextSibling);
         else meetCard.appendChild(calBtn);
-        calBtn.addEventListener('click', () => {
-          try { launchGatheringCalendar(); } catch (e) {}
-          try { save('calendarAdded', true); } catch (e) {}
-          try { calBtn.classList.add('hidden'); } catch (e) {}
-        });
+        calBtn.addEventListener('click', () => { try { launchGatheringCalendar(); } catch (e) {} });
       }
-      if (calBtn) {
-        if (calDone) calBtn.classList.add('hidden');
-        else calBtn.classList.remove('hidden');
-      }
+      if (calBtn) calBtn.classList.remove('hidden');
       if (prompt) prompt.classList.add('hidden');
     } else {
       try { syncSelfToRoster(false); } catch (e) {}
       btn.classList.remove('confirmed');
       btn.textContent = "I'M IN";
       if (status) status.classList.add('hidden');
-      if (reminderBtn) reminderBtn.classList.remove('hidden');
       const meetCardOff = document.querySelector('.next-meeting');
       if (meetCardOff) meetCardOff.classList.remove('commit-energized');
       const calBtnOff = document.getElementById('rsvp-add-cal');
@@ -3639,20 +3503,9 @@
     }
   }
 
-
-  function syncHomeDualStory() {
-    try {
-      const lf = document.getElementById('last-fire');
-      const hm = document.getElementById('home-mission');
-      const lfOn = lf && !lf.classList.contains('hidden');
-      const hmOn = hm && !hm.classList.contains('hidden');
-      document.body.classList.toggle('tb-home-dual-story', !!(lfOn && hmOn));
-    } catch (e) {}
-  }
-
   function renderLastFire() {
     const el = $('#last-fire');
-    if (!el) { syncHomeDualStory(); return; }
+    if (!el) return;
     const media = $('#last-fire-media');
     const cap = $('#last-fire-cap');
     const hasCap = lastFire && String(lastFire.caption || '').trim();
@@ -3662,7 +3515,6 @@
       if (media) media.innerHTML = '';
       if (cap) cap.textContent = '';
       updateAllNewBadges();
-      syncHomeDualStory();
       return;
     }
     if (media) {
@@ -3671,25 +3523,22 @@
     if (cap) cap.textContent = hasCap ? String(lastFire.caption).trim() : '';
     el.classList.remove('hidden');
     updateAllNewBadges();
-    syncHomeDualStory();
   }
 
   function renderHomeMission() {
     const card = $('#home-mission');
     const t = $('#home-mission-title');
     const d = $('#home-mission-detail');
-    if (!card) { syncHomeDualStory(); return; }
+    if (!card) return;
     const title = (mission && mission.title) ? String(mission.title).trim() : '';
     const detail = (mission && mission.detail) ? String(mission.detail).trim() : '';
     if (!title && !detail) {
       card.classList.add('hidden');
-      syncHomeDualStory();
       return;
     }
     if (t) t.textContent = title;
     if (d) d.textContent = detail;
     card.classList.remove('hidden');
-    syncHomeDualStory();
   }
 
 
@@ -3722,9 +3571,6 @@
       if (typeof tbGlowHit === 'function') tbGlowHit(nav, 'yellow');
     }
     currentViewName = name;
-    try {
-      if (window.ThunderWisdom && ThunderWisdom.onView) ThunderWisdom.onView(name);
-    } catch (eW) {}
     const header = $('#main-header');
     if (header) header.style.display = name === 'about' ? 'none' : 'block';
     // NEW no longer auto-clears on Home visit — only when items are opened
@@ -3803,10 +3649,6 @@
     if ($('#info-detail') && !$('#info-detail').classList.contains('hidden')) return true;
     if ($('#memory-viewer') && !$('#memory-viewer').classList.contains('hidden')) return true;
     if ($('#auth-gate') && !$('#auth-gate').classList.contains('hidden')) return true;
-    if ($('#ios-install-overlay') && !$('#ios-install-overlay').classList.contains('hidden')) return true;
-    if ($('#inapp-install-overlay') && !$('#inapp-install-overlay').classList.contains('hidden')) return true;
-    if ($('#cal-confirm-sheet') && !$('#cal-confirm-sheet').classList.contains('hidden')) return true;
-    if ($('#tb-tour') && !$('#tb-tour').classList.contains('hidden')) return true;
     return false;
   }
   function unlockBodyIfClear() {
@@ -3890,15 +3732,6 @@
     if (id === 'install-modal') {
       const v = $('#install-gif');
       if (v && v.tagName === 'VIDEO') {
-        // Ensure src always points at packaged explainer (never missing after deploys)
-        const want = 'assets/install-explainer.mp4';
-        try {
-          const cur = v.getAttribute('src') || '';
-          if (!cur || cur.indexOf('install-explainer') < 0) {
-            v.setAttribute('src', want);
-            v.setAttribute('poster', 'assets/install-poster.jpg');
-          }
-        } catch (eSrc) {}
         if (v.readyState >= 2) playInstallExplainerWithAudio(v);
         else {
           v.addEventListener('loadeddata', () => playInstallExplainerWithAudio(v), { once: true });
@@ -4012,38 +3845,14 @@
       }
       return;
     }
-    if (id === 'memories') {
-      try { closeModal('thunder-panel'); closeModal('thunder-modal'); } catch (e) {}
-      try { showView('events'); } catch (e) {}
-      setTimeout(function () {
-        const el = document.getElementById('media-feed') || document.querySelector('#view-events .memories, #view-events');
-        if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 120);
-      return;
-    }
-    if (id === 'profile') {
-      try { closeModal('thunder-panel'); closeModal('thunder-modal'); } catch (e) {}
-      try { showView('brothers'); } catch (e) {}
-      setTimeout(function () {
-        const b = document.getElementById('edit-profile-btn') || document.querySelector('[data-edit-profile], #empty-brothers-cta');
-        if (b && b.click) b.click();
-      }, 150);
-      return;
-    }
   }
 
   /** Action chips for local AND Grok paths — allowlisted client execution only. */
   function thunderActionsForQuery(query, localResult) {
     const q = (query || '').toLowerCase();
     const actions = [];
-    if (q.includes('next meeting') || q.includes('when is') || q.includes('next gathering') || q.includes('what time') || q.includes('where') || q.includes('crooked can') || q.includes('venue') || q.includes('calendar') || q.includes('put it on')) {
+    if (q.includes('next meeting') || q.includes('when is') || q.includes('next gathering') || q.includes('what time') || q.includes('where') || q.includes('crooked can') || q.includes('venue')) {
       actions.push({ id: 'calendar', label: 'ADD TO CALENDAR' });
-    }
-    if (q.includes('memor') || q.includes('photo') || q.includes('last fire') || q.includes('past gathering')) {
-      actions.push({ id: 'memories', label: 'OPEN MEMORIES' });
-    }
-    if (q.includes('my profile') || q.includes('add my profile') || q.includes('edit my profile')) {
-      actions.push({ id: 'profile', label: 'MY PROFILE' });
     }
     if (q.includes("who's in") || q.includes('rsvp') || q.includes("i'm in") || q.includes('im in') || q.includes('lock in')) {
       if (!rsvp) actions.push({ id: 'im_in', label: "I'M IN" });
@@ -4075,16 +3884,6 @@
   // Local instant answers (markdown only — formatThunderHtml escapes + **bold** / newlines)
   // null = fall through to Grok
   function thunderRespondLocal(q) {
-    var ql = (q || '').toLowerCase();
-    if (/birthday|birthdays/.test(ql) && /(today|whose|who|upcoming|this week|any)/.test(ql)) {
-      var todayList = brothersWithBirthdayToday();
-      if (todayList.length) {
-        var names = todayList.map(function (b) { return b.name || 'a brother'; }).join(', ');
-        return { text: '**Today:** ' + names + '.\n\nOpen Brothers → their profile. Show up for them.', source: 'local' };
-      }
-      return { text: 'No birthdays on the roster **today**. Brothers can add month/day on their profile (optional).', source: 'local' };
-    }
-
     const query = q.toLowerCase().trim();
 
     if (query.includes('next meeting') || query.includes('when is') || query.includes('next gathering') || query.includes('where') || query.includes('what time')) {
@@ -4231,24 +4030,6 @@
     };
   }
 
-
-  /* Thunder AI constitution: example chips → real pipeline (not fake demo) */
-  function bindThunderExampleChips() {
-    const root = document.getElementById('thunder-example-chips');
-    if (!root || root.dataset.bound) return;
-    root.dataset.bound = '1';
-    root.addEventListener('click', function (ev) {
-      const btn = ev.target && ev.target.closest ? ev.target.closest('.thunder-example-chip') : null;
-      if (!btn) return;
-      const q = btn.getAttribute('data-thunder-q') || btn.textContent || '';
-      const input = document.getElementById('thunder-input');
-      if (input) input.value = q.trim();
-      try { if (window.tbFeedback) tbFeedback.selection(); } catch (e) {}
-      try { handleThunderSend(); } catch (e) {}
-    });
-  }
-  try { bindThunderExampleChips(); } catch (e) {}
-
   async function handleThunderSend() {
     const input = $('#thunder-input');
     const sendBtn = $('#thunder-send');
@@ -4378,8 +4159,6 @@
       } catch (e) {
         try { tbFeedback.confirm(); } catch (e2) {}
       }
-      try { if (window.ThunderCharacter) ThunderCharacter.flashSmile(); } catch (e3) {}
-      try { if (window.ThunderWisdom && ThunderWisdom.onRsvp) ThunderWisdom.onRsvp(); } catch (eW) {}
       if (btn) {
         setTimeout(() => {
           try {
@@ -4506,15 +4285,11 @@ $('#edit-profile-btn').addEventListener('click', () => {
       if (!name) { try { tbFeedback.warningOrError($('#profile-name') || $('#save-profile')); } catch (e) {} return alert('Name required'); }
       const id = ensureBrotherId();
       const existing = brothers.findIndex(b => b.id === id);
-      const birthday = normalizeBirthday(($('#profile-birthday') && $('#profile-birthday').value) || '');
-      const prev = existing >= 0 ? brothers[existing] : null;
       let entry = {
         id,
         name,
         bio,
         phone,
-        birthday: birthday || '',
-        joinedAt: (prev && prev.joinedAt) ? prev.joinedAt : Date.now(),
         photo: pendingPhotoData || (existing >= 0 ? brothers[existing].photo : null),
         skills: '',
         available: true,
@@ -4551,7 +4326,6 @@ $('#edit-profile-btn').addEventListener('click', () => {
         }
         updateMyQrButtonVisibility();
         renderBrothers();
-        try { renderHomeBirthdayHonor(); } catch (eH) {}
         closeModal('profile-modal');
         pendingPhotoData = null;
         rewardSaveSuccess('profile');
@@ -4778,21 +4552,6 @@ $('#edit-profile-btn').addEventListener('click', () => {
       authCancelBtn.dataset.bound = '1';
       authCancelBtn.addEventListener('click', () => closeAuthGate());
     }
-    const authCloseBtn = $('#auth-close-btn');
-    if (authCloseBtn && authCloseBtn.dataset.bound !== '1') {
-      authCloseBtn.dataset.bound = '1';
-      authCloseBtn.addEventListener('click', (e) => {
-        if (e) { e.preventDefault(); e.stopPropagation(); }
-        closeAuthGate();
-      });
-    }
-    const authGate = $('#auth-gate');
-    if (authGate && authGate.dataset.backdropBound !== '1') {
-      authGate.dataset.backdropBound = '1';
-      authGate.addEventListener('click', (e) => {
-        if (e.target === authGate) closeAuthGate();
-      });
-    }
     // Enter in password field = Sign In (fewer taps)
     const authPw = $('#auth-password');
     if (authPw && authPw.dataset.bound !== '1') {
@@ -4911,7 +4670,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
 
     function openThunderVoiceMode() {
       thunderVoiceMode = true;
-      openModal('thunder-modal'); try { bindThunderExampleChips(); } catch (e) {};
+      openModal('thunder-modal');
       // Small delay so modal is visible before mic prompt
       setTimeout(() => {
         if (thunderSpeechSupported()) startThunderVoice();
@@ -5048,23 +4807,20 @@ $('#edit-profile-btn').addEventListener('click', () => {
         const modal = $('#thunder-modal');
         const alreadyOpen = modal && !modal.classList.contains('hidden');
         openModal('thunder-modal');
-        // Text is the primary path. Voice only when explicitly requested.
-        thunderVoiceMode = opts.voice === true;
+        thunderVoiceMode = true;
+        // Do not stack a second recognition session if already listening
         if (alreadyOpen && thunderListening) return;
-        if (opts.voice === true && isSupported()) {
+        if (opts.voice !== false && isSupported()) {
           setTimeout(() => {
             if (thunderListening) return;
             startThunderVoice();
           }, opts.delay != null ? opts.delay : 280);
         } else {
-          try { stopThunderVoice(); } catch (e) {}
           setThunderVoiceUI(isSupported() ? 'ready' : 'unsupported');
           setTimeout(() => {
             const input = $('#thunder-input');
-            if (input) try { input.focus({ preventScroll: true }); } catch (e) {
-              try { input.focus(); } catch (e2) {}
-            }
-          }, opts.delay != null ? opts.delay : 120);
+            if (input) try { input.focus(); } catch (e) {}
+          }, 200);
         }
       }
 
@@ -5138,7 +4894,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
     try { window.ThunderVoice = ThunderVoice; } catch (e) {}
 
 
-    // Thunder FAB — wake + open ASK (text first; mic optional via voice button)
+    // Thunder FAB — THUNDER WAKE then open (full once/session, soft after)
     $('#thunder-fab').addEventListener('click', () => {
       const fab = $('#thunder-fab');
       const first = !window.__tbThunderWokeSession;
@@ -5155,19 +4911,11 @@ $('#edit-profile-btn').addEventListener('click', () => {
           }
         }
       } catch (e) {}
-      // Always open the chat panel. Do NOT force mic — many devices block voice and it feels broken.
       try {
-        if (window.ThunderVoice && ThunderVoice.openAsk) {
-          ThunderVoice.openAsk({ voice: false, delay: 120 });
-        } else {
-          openModal('thunder-modal');
-          setTimeout(function () {
-            const input = document.getElementById('thunder-input');
-            if (input) try { input.focus(); } catch (e2) {}
-          }, 200);
-        }
+        if (window.ThunderVoice) ThunderVoice.openAsk({ voice: true });
+        else openThunderVoiceMode();
       } catch (e) {
-        try { openModal('thunder-modal'); } catch (e3) {}
+        openThunderVoiceMode();
       }
     });
     $('#thunder-send').addEventListener('click', handleThunderSend);
@@ -5334,25 +5082,18 @@ $('#edit-profile-btn').addEventListener('click', () => {
 
       if (state === 'INSTALLED') {
         markInstalledSuccessOnce();
-        // Installed: invite brothers — KEEP explainer (poster + HOW) so video is never missing
+        // Installed: only "get a brother" — no install tutorial nag
         installCard.classList.remove('hidden');
         if (installShareBtn) installShareBtn.textContent = 'SHARE';
         if (title) title.textContent = 'GET A BROTHER ON THUNDER';
-        if (sub) sub.textContent = 'Send the link · or rewatch how to install';
+        if (sub) sub.textContent = 'Send the link · one tap';
         if (tip) tip.textContent = 'They open it → put Thunder on their phone.';
-        if (howBtn) {
-          howBtn.classList.remove('hidden');
-          howBtn.textContent = 'HOW';
-        }
-        const poster = document.getElementById('install-poster-btn');
-        if (poster) poster.classList.remove('hidden');
+        if (howBtn) howBtn.classList.add('hidden');
         return;
       }
 
       installCard.classList.remove('hidden');
       if (howBtn) howBtn.classList.remove('hidden');
-      const posterShow = document.getElementById('install-poster-btn');
-      if (posterShow) posterShow.classList.remove('hidden');
 
       if (state === 'IN_APP_BROWSER') {
         if (installShareBtn) installShareBtn.textContent = isAndroid() ? 'OPEN IN CHROME' : 'OPEN IN SAFARI';
@@ -5504,15 +5245,6 @@ $('#edit-profile-btn').addEventListener('click', () => {
         openModal('install-modal');
       });
     }
-    // Visible poster on More → same explainer modal (never bury the video)
-    const installPosterBtn = $('#install-poster-btn');
-    if (installPosterBtn && !installPosterBtn.dataset.tbPosterBound) {
-      installPosterBtn.dataset.tbPosterBound = '1';
-      installPosterBtn.addEventListener('click', () => {
-        try { if (window.tbFeedback) tbFeedback.selection(); } catch (e) {}
-        openModal('install-modal');
-      });
-    }
 
     // Invite a brother — native Share sheet; copy-link fallback (not install tutorial)
     const inviteShareBtn = $('#invite-share-btn');
@@ -5649,22 +5381,6 @@ $('#edit-profile-btn').addEventListener('click', () => {
         if (typeof closeInfoDetail === 'function') closeInfoDetail();
         return;
       }
-      if ($('#auth-gate') && !$('#auth-gate').classList.contains('hidden')) {
-        closeAuthGate();
-        return;
-      }
-      if ($('#ios-install-overlay') && !$('#ios-install-overlay').classList.contains('hidden')) {
-        if (typeof closeIosInstallOverlay === 'function') closeIosInstallOverlay();
-        return;
-      }
-      if ($('#inapp-install-overlay') && !$('#inapp-install-overlay').classList.contains('hidden')) {
-        if (typeof closeInAppInstallOverlay === 'function') closeInAppInstallOverlay();
-        return;
-      }
-      if ($('#cal-confirm-sheet') && !$('#cal-confirm-sheet').classList.contains('hidden')) {
-        if (typeof closeCalConfirmSheet === 'function') closeCalConfirmSheet();
-        return;
-      }
       const open = document.querySelector('.modal:not(.hidden)');
       if (open && open.id) closeModal(open.id);
     });
@@ -5674,30 +5390,26 @@ $('#edit-profile-btn').addEventListener('click', () => {
       if (document.visibilityState === 'visible') unlockBodyIfClear();
     });
 
-    // REFRESH APP — clean technical debris, PRESERVE brother data (profile/RSVP/prefs)
+    // REFRESH APP — force fresh HTML/JS/CSS (More page, under Gathering Alerts)
     const refreshBtn = $('#refresh-app-btn');
     if (refreshBtn) {
       refreshBtn.addEventListener('click', async () => {
         showInstallToast('Updating… hang tight');
         try {
-          if (window.ThunderPreflight) {
-            await ThunderPreflight({ force: true });
-          } else {
-            await tbPruneObsoleteThunderCaches();
-          }
-        } catch (e) {
-          console.warn('preflight refresh', e);
-        }
-        // Prefer update over unregister so push subscription can survive
-        try {
           if ('serviceWorker' in navigator) {
-            const reg = await navigator.serviceWorker.getRegistration();
-            if (reg) {
-              try { await reg.update(); } catch (e2) {}
-            }
+            const regs = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(regs.map((r) => r.unregister()));
           }
         } catch (e) {
-          console.warn('SW update', e);
+          console.warn('SW unregister', e);
+        }
+        try {
+          if (window.caches && caches.keys) {
+            const keys = await caches.keys();
+            await Promise.all(keys.map((k) => caches.delete(k)));
+          }
+        } catch (e) {
+          console.warn('cache clear', e);
         }
         setTimeout(() => {
           try {
@@ -6400,7 +6112,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
 
   // ---------- PRODUCT TOUR — Living Bolt Concierge (versioned) ----------
-  const TB_TOUR_VERSION = 8; /* Spotlight feature star + host stays guide, not jumpy */
+  const TB_TOUR_VERSION = 4; /* Living host bolt + typed speech + focus stage */
 
   function tourStorageKey() {
     return 'thunderTourV' + TB_TOUR_VERSION;
@@ -6437,15 +6149,15 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       view: 'home',
       target: '#view-home .logo-wrap, #view-home .header-logo, .home-header, #main-header',
       headline: 'FOLLOW ME',
-      body: 'This is the room between gatherings. Stick with me — I’ll show you around.',
+      body: 'I’m your guide on Thunder Board. The brotherhood between gatherings — stick with me.',
       nextLabel: 'LET’S GO'
     },
     {
       id: 'gathering',
       view: 'home',
       target: '#view-home .next-meeting, #meeting-card, #meeting-date',
-      headline: 'HOME BASE',
-      body: 'Next gathering. When. Where. What matters.\nDon’t overthink it — show up.',
+      headline: 'YOUR NEXT GATHERING',
+      body: 'Date, time, and Crooked Can live right here. Always current. First Monday — second if Labor Day or Memorial Day hits.',
       nextLabel: 'NEXT'
     },
     {
@@ -6453,42 +6165,40 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       view: 'home',
       target: '#rsvp-btn, #rsvp-status',
       headline: 'LOCK YOUR SEAT',
-      body: 'Tap I’M IN when you’re coming.\nYour phone remembers. That’s presence.',
+      body: 'Tap I’M IN when you’re coming. Presence is the point. Your phone remembers.',
       nextLabel: 'NEXT',
       allowTargetTap: true
     },
     {
       id: 'brothers',
       view: 'brothers',
-      target: '#view-brothers #brothers-list, #view-brothers .brothers-grid, #view-brothers .empty-brothers, #view-brothers .container, #empty-brothers-cta, #view-brothers',
-      navHint: '.nav-item[data-view="brothers"]',
-      headline: 'THE BROTHERS',
-      body: 'Faces. Names. Who you are in one line.\nClaim your spot when you’re ready.',
+      target: '.nav-item[data-view="brothers"]',
+      headline: 'MEET THE BROTHERS',
+      body: 'Names, faces, a line of who you are. Claim your spot when you’re ready.',
       nextLabel: 'NEXT'
     },
     {
       id: 'events',
       view: 'events',
-      target: '#view-events .activity-tags, #next-mission-card, #view-events #media-feed, #view-events .container, #view-events',
-      navHint: '.nav-item[data-view="events"]',
+      target: '.nav-item[data-view="events"]',
       headline: 'MISSIONS & MEMORIES',
-      body: 'Range. Lake. Word. Gym.\nPhotos that prove you showed up. This is the history.',
+      body: 'Range, lake, Word, gym — and the photos that prove you showed up. Build the history.',
       nextLabel: 'NEXT'
     },
     {
       id: 'code',
       view: 'about',
-      target: '.code-title, #the-code, #view-about .code-block, #view-about',
+      target: '.code-title, #the-code, #view-about .code-block',
       headline: 'THE CODE',
-      body: 'Why we exist.\nCarry it.',
+      body: 'Why we exist. Hotheads learning to lead like gentlemen. Read it. Carry it.',
       nextLabel: 'NEXT'
     },
     {
       id: 'thunder',
       view: 'home',
       target: '#thunder-fab',
-      headline: 'OR JUST ASK',
-      body: 'You could remember all of that…\nOr just ask Thunder.',
+      headline: 'ASK THUNDER',
+      body: 'Questions about the board, the gathering, Scripture, or the Code — Ask Thunder. I’m the guide; he’s the brain.',
       nextLabel: 'SKIP DEMO',
       demoPrompt: "When's the next gathering?",
       demoLabel: "WHEN'S THE NEXT GATHERING?"
@@ -6498,7 +6208,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       view: 'home',
       target: null,
       headline: 'YOU KNOW THE BOARD',
-      body: 'NOW SHOW UP. ⚡\nReplay anytime from More. Thunder doesn’t dull.',
+      body: 'Replay anytime from More. Show up. Thunder doesn’t dull.',
       nextLabel: 'FINISH'
     }
   ];
@@ -6528,209 +6238,26 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     host.classList.remove('is-arrival', 'is-travel', 'is-explain', 'is-celebrate', 'is-attention');
     if (state) host.classList.add('is-' + state);
     __tourHostState = state || 'rest';
-    /* TC01: character leads tour — Cool default, Smile on celebrate */
-    const himg = document.getElementById('tb-tour-host-img') || host.querySelector('.tb-tour-host-img');
-    if (himg) {
-      const cool = 'assets/thunder-cool.png';
-      const smile = 'assets/thunder-smile.png';
-      if (state === 'celebrate') {
-        himg.setAttribute('src', smile);
-      } else {
-        const cur = himg.getAttribute('src') || '';
-        if (cur.indexOf('smile') >= 0 || cur.indexOf('bolt-only') >= 0 || !cur) {
-          himg.setAttribute('src', cool);
-        }
-      }
-    }
   }
 
   function placeTourHost(target) {
-    /* DIRECTOR LOCK (tour v7): Thunder is guide beside the feature — never the feature.
-       Host uses position:fixed + translate(-50%,-50%) so left/top are CENTER.
-       Size is capped in CSS (≤72px). Measure real bounds after layout. */
     const host = document.getElementById('tb-tour-host');
-    if (!host) return { x: window.innerWidth / 2, y: 140, w: 0, h: 0 };
-
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    let safeTop = 54;
-    let safeBot = 12;
-    try {
-      const cs = getComputedStyle(document.documentElement);
-      const st = parseFloat(cs.getPropertyValue('--safe-top')) || 0;
-      const sb = parseFloat(cs.getPropertyValue('--safe-bottom')) || 0;
-      if (!isNaN(st) && st > 0) safeTop = Math.max(54, st + 10);
-      if (!isNaN(sb) && sb > 0) safeBot = Math.max(12, sb);
-    } catch (e) {}
-    const navH = 76 + safeBot;
-    const gap = 16; /* visual glow + clearance from target */
-
-    host.classList.remove('tb-tour-host--compact');
-    host.style.visibility = 'hidden';
-    host.style.left = '0px';
-    host.style.top = '0px';
-    void host.offsetWidth;
-    let hw = host.offsetWidth || 72;
-    let hh = host.offsetHeight || 72;
-    try {
-      const img = host.querySelector('.tb-tour-host-img');
-      if (img) {
-        const ir = img.getBoundingClientRect();
-        if (ir.width > 8) hw = Math.max(hw, ir.width);
-        if (ir.height > 8) hh = Math.max(hh, ir.height);
-      }
-    } catch (e) {}
-    /* Cap runaway measure (glow must not inflate placement math forever) */
-    hw = Math.min(hw, 80);
-    hh = Math.min(hh, 80);
-    host.style.visibility = '';
-
-    let halfW = hw / 2;
-    let halfH = hh / 2;
-    let minX = halfW + 10;
-    let maxX = vw - halfW - 10;
-    let minY = safeTop + halfH + 4;
-    let maxY = vh - navH - halfH;
-
-    function clamp(x, y) {
-      return {
-        x: Math.max(minX, Math.min(maxX, x)),
-        y: Math.max(minY, Math.min(maxY, y))
-      };
+    if (!host) return { x: window.innerWidth / 2, y: 120 };
+    const pad = 12;
+    const navH = 64;
+    let x = window.innerWidth / 2;
+    let y = Math.max(72, window.innerHeight * 0.18);
+    if (target) {
+      const r = target.getBoundingClientRect();
+      // Prefer upper-left of target so bolt "points" toward feature
+      x = Math.min(window.innerWidth - 40, Math.max(40, r.left + 20));
+      y = Math.max(56, r.top - 28);
+      if (y < 56) y = Math.min(window.innerHeight - navH - 40, r.bottom + 36);
+      if (x < 36) x = Math.min(window.innerWidth - 40, r.right - 12);
     }
-
-    function rectOfCenter(cx, cy, w, h, pad) {
-      const p = pad == null ? gap : pad;
-      return {
-        left: cx - w / 2 - p,
-        right: cx + w / 2 + p,
-        top: cy - h / 2 - p,
-        bottom: cy + h / 2 + p
-      };
-    }
-
-    function intersects(a, b) {
-      if (!a || !b) return false;
-      return !(a.right < b.left || a.left > b.right || a.bottom < b.top || a.top > b.bottom);
-    }
-
-    function forbiddenZones(tr) {
-      const zones = [];
-      if (tr && tr.width > 0) {
-        zones.push({
-          left: tr.left - gap,
-          right: tr.right + gap,
-          top: tr.top - gap,
-          bottom: tr.bottom + gap
-        });
-      }
-      /* Logo / status band — never park host on the wordmark */
-      zones.push({ left: 0, right: vw, top: 0, bottom: Math.min(vh * 0.16, safeTop + 72) });
-      /* Bottom nav */
-      zones.push({ left: 0, right: vw, top: vh - navH - 4, bottom: vh });
-      /* Tip card if already laid out */
-      try {
-        const tip = document.getElementById('tb-tour-tip');
-        if (tip && !tip.classList.contains('hidden')) {
-          const tipR = tip.getBoundingClientRect();
-          if (tipR.width > 20 && tipR.height > 20) {
-            zones.push({
-              left: tipR.left - 8,
-              right: tipR.right + 8,
-              top: tipR.top - 8,
-              bottom: tipR.bottom + 8
-            });
-          }
-        }
-      } catch (e) {}
-      return zones;
-    }
-
-    function clearOfZones(cx, cy, zones) {
-      const box = rectOfCenter(cx, cy, hw, hh, gap);
-      for (let i = 0; i < zones.length; i++) {
-        if (intersects(box, zones[i])) return false;
-      }
-      return true;
-    }
-
-    const tr = target ? target.getBoundingClientRect() : null;
-    const zones = forbiddenZones(tr);
-
-    let candidates = [];
-    if (tr && tr.width > 0) {
-      candidates = [
-        { x: tr.right + halfW + gap + 6, y: tr.top + tr.height * 0.4 },
-        { x: tr.left - halfW - gap - 6, y: tr.top + tr.height * 0.4 },
-        { x: tr.left + tr.width * 0.5, y: tr.bottom + halfH + gap + 10 },
-        { x: tr.left + tr.width * 0.5, y: tr.top - halfH - gap - 10 },
-        { x: vw * 0.18, y: tr.bottom + halfH + gap + 12 },
-        { x: vw * 0.82, y: tr.bottom + halfH + gap + 12 },
-        { x: vw * 0.18, y: Math.min(maxY, tr.top + halfH) },
-        { x: vw * 0.82, y: Math.min(maxY, tr.top + halfH) },
-        { x: vw * 0.5, y: Math.min(maxY, tr.bottom + halfH + gap + 20) },
-        { x: vw * 0.2, y: vh * 0.42 },
-        { x: vw * 0.8, y: vh * 0.42 }
-      ];
-    } else {
-      /* Finish / no target — park mid-left, clear of center tip */
-      candidates = [
-        { x: vw * 0.2, y: vh * 0.38 },
-        { x: vw * 0.8, y: vh * 0.38 },
-        { x: vw * 0.5, y: vh * 0.28 }
-      ];
-    }
-
-    let x = vw * 0.2;
-    let y = Math.max(minY, vh * 0.38);
-    let placed = false;
-    for (let i = 0; i < candidates.length; i++) {
-      const c = clamp(candidates[i].x, candidates[i].y);
-      if (clearOfZones(c.x, c.y, zones)) {
-        x = c.x;
-        y = c.y;
-        placed = true;
-        break;
-      }
-    }
-
-    if (!placed) {
-      /* Compact host and retry sides only */
-      host.classList.add('tb-tour-host--compact');
-      void host.offsetWidth;
-      hw = Math.min(host.offsetWidth || 56, 56);
-      hh = Math.min(host.offsetHeight || 56, 56);
-      halfW = hw / 2;
-      halfH = hh / 2;
-      minX = halfW + 10;
-      maxX = vw - halfW - 10;
-      minY = safeTop + halfH + 4;
-      maxY = vh - navH - halfH;
-      const retry = [
-        { x: vw * 0.14, y: vh * 0.45 },
-        { x: vw * 0.86, y: vh * 0.45 },
-        { x: vw * 0.14, y: vh * 0.32 },
-        { x: vw * 0.86, y: vh * 0.32 }
-      ];
-      for (let i = 0; i < retry.length; i++) {
-        const c = clamp(retry[i].x, retry[i].y);
-        if (clearOfZones(c.x, c.y, zones)) {
-          x = c.x;
-          y = c.y;
-          placed = true;
-          break;
-        }
-      }
-      if (!placed) {
-        const c = clamp(vw * 0.14, vh * 0.45);
-        x = c.x;
-        y = c.y;
-      }
-    }
-
     host.style.left = x + 'px';
     host.style.top = y + 'px';
-    return { x: x, y: y, w: hw, h: hh };
+    return { x: x, y: y };
   }
 
   function placeTourTip(target, hostPos) {
@@ -6740,12 +6267,8 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
     const tipH = tip.offsetHeight || 200;
     const tipW = Math.min(340, window.innerWidth - 32);
-    const navClear = 80;
-    let safeTop = 54;
-    try {
-      const st = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--safe-top'));
-      if (!isNaN(st) && st > 0) safeTop = Math.max(54, st + 8);
-    } catch (e) {}
+    const navClear = 72;
+    const safeTop = 12;
     let tipTop = safeTop + 48;
     let tipLeft = 16;
 
@@ -6754,23 +6277,10 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       const pad = 10;
       if (spot) {
         spot.classList.remove('is-empty');
-        /* Clamp oversized targets (whole views) so the cutout stays a focused stage */
-        const maxW = Math.min(window.innerWidth - 16, Math.max(r.width + pad * 2, 120));
-        const maxH = Math.min(window.innerHeight * 0.42, Math.max(r.height + pad * 2, 56));
-        let sw = Math.min(window.innerWidth - 12, r.width + pad * 2);
-        let sh = r.height + pad * 2;
-        let st = Math.max(0, r.top - pad);
-        let sl = Math.max(6, Math.min(r.left - pad, window.innerWidth - sw - 6));
-        if (sh > maxH) {
-          /* Prefer the top of a tall target (where the action usually is) */
-          sh = maxH;
-          st = Math.max(0, Math.min(r.top - pad, r.bottom - sh));
-        }
-        if (sw > window.innerWidth - 12) sw = window.innerWidth - 12;
-        spot.style.top = st + 'px';
-        spot.style.left = sl + 'px';
-        spot.style.width = sw + 'px';
-        spot.style.height = sh + 'px';
+        spot.style.top = Math.max(0, r.top - pad) + 'px';
+        spot.style.left = Math.max(0, r.left - pad) + 'px';
+        spot.style.width = Math.min(window.innerWidth, r.width + pad * 2) + 'px';
+        spot.style.height = (r.height + pad * 2) + 'px';
       }
       // Place bubble below target when space, else above
       const below = r.bottom + 16;
@@ -6795,19 +6305,9 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       tipLeft = Math.max(16, (window.innerWidth - tipW) / 2);
     }
 
-    // Keep clear of host — use real host half-height when available
-    if (hostPos) {
-      const hh = (hostPos.h || 120) / 2 + 16;
-      const hostTop = hostPos.y - hh;
-      const hostBot = hostPos.y + hh;
-      if (tipTop < hostBot + 8 && tipTop + tipH > hostTop - 8) {
-        /* Prefer below host; else above */
-        const below = hostBot + 12;
-        const above = hostTop - tipH - 12;
-        if (below + tipH < window.innerHeight - navClear) tipTop = below;
-        else if (above > safeTop) tipTop = above;
-        else tipTop = Math.min(window.innerHeight - tipH - navClear, below);
-      }
+    // Keep clear of host bolt
+    if (hostPos && Math.abs(tipTop - hostPos.y) < 50) {
+      tipTop = Math.min(window.innerHeight - tipH - navClear, hostPos.y + 40);
     }
 
     const maxTop = window.innerHeight - tipH - navClear;
@@ -6951,10 +6451,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
             if (step.allowTargetTap) el.classList.add('tb-tour-target-live');
           } catch (e) {}
         }
-        let hostPos = placeTourHost(el);
-        placeTourTip(el, hostPos);
-        /* Second pass: tip is measured — keep host clear of speech card */
-        hostPos = placeTourHost(el);
+        const hostPos = placeTourHost(el);
         placeTourTip(el, hostPos);
         setTimeout(() => {
           if (!__tourActive) return;
@@ -6964,26 +6461,6 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       });
     });
     setTourState({ step: step.id, complete: false });
-  }
-
-  function tbTourReposition() {
-    if (!__tourActive) return;
-    try {
-      const step = TB_TOUR_STEPS[__tourIdx];
-      const el = step && step.target ? resolveTourTarget(step.target) : __tourTargetEl;
-      const hp = placeTourHost(el);
-      placeTourTip(el, hp);
-    } catch (e) {}
-  }
-
-  if (!window.__tbTourResizeBound) {
-    window.__tbTourResizeBound = true;
-    window.addEventListener('resize', function () {
-      try { tbTourReposition(); } catch (e) {}
-    }, { passive: true });
-    window.addEventListener('orientationchange', function () {
-      setTimeout(function () { try { tbTourReposition(); } catch (e) {} }, 180);
-    });
   }
 
   function openTourUI() {
@@ -7024,15 +6501,8 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       __tourActive = false;
       setTourState({ complete: true, step: 'done', completedAt: Date.now() });
       closeTourUI();
-      try { if (window.ThunderCharacter && ThunderCharacter.endGuiding) ThunderCharacter.endGuiding(); } catch (eG) {}
       try { if (typeof showView === 'function') showView('home'); } catch (e) {}
-      /* One ending only — finish step already said the line; toast is the single beat if needed */
-      try {
-        const st = getTourState();
-        if (!st.demoDone && typeof showInstallToast === 'function') {
-          showInstallToast("YOU KNOW THE BOARD. NOW SHOW UP. ⚡");
-        }
-      } catch (e) {}
+      try { if (typeof showInstallToast === 'function') showInstallToast("YOU'RE READY. Thunder doesn’t dull."); } catch (e) {}
     }, tourReducedMotion() ? 0 : 520);
   }
 
@@ -7040,7 +6510,6 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     __tourActive = false;
     setTourState({ complete: true, skipped: true, step: 'skipped' });
     closeTourUI();
-    try { if (window.ThunderCharacter && ThunderCharacter.endGuiding) ThunderCharacter.endGuiding(); } catch (eG) {}
   }
 
   function startTour(opts) {
@@ -7053,7 +6522,6 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       if (inapp && !inapp.classList.contains('hidden')) return;
     } catch (e) {}
     __tourActive = true;
-    try { if (window.ThunderCharacter && ThunderCharacter.beginGuiding) ThunderCharacter.beginGuiding(); } catch (eG) {}
     const st = getTourState();
     if (opts.replay) {
       __tourIdx = 0;
@@ -7081,9 +6549,9 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       }
     } catch (e) {}
     try {
-      // Close tour chrome so Thunder modal is the stage — demo attempted, not full complete yet
+      // Close tour chrome so Thunder modal is the stage — mark complete
       __tourActive = false;
-      setTourState({ complete: false, step: 'thunder', demoAttempted: true, demoDone: false });
+      setTourState({ complete: true, step: 'done', demoDone: true, completedAt: Date.now() });
       closeTourUI();
     } catch (e) {}
     const fab = document.getElementById('thunder-fab');
@@ -7108,13 +6576,17 @@ $('#thunder-input').addEventListener('keydown', (e) => {
         }
       } catch (e) {}
       setTimeout(function () {
-        window.__tbTourDemoRunning = false;
-        try {
-          setTourState({ complete: true, step: 'done', demoDone: true, completedAt: Date.now() });
-        } catch (e) {}
         try {
           if (typeof showInstallToast === 'function') {
-            showInstallToast("YOU KNOW THE BOARD. NOW SHOW UP. ⚡");
+            showInstallToast("THAT'S THUNDER. Ask him what you need.");
+          }
+        } catch (e) {}
+        window.__tbTourDemoRunning = false;
+        try {
+          if (typeof showInstallToast === 'function') {
+            setTimeout(function () {
+              showInstallToast("YOU KNOW THE BOARD. Show up. Thunder doesn't dull.");
+            }, 2800);
           }
         } catch (e) {}
       }, 1600);
@@ -7571,140 +7043,29 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
 
   // Housekeeping: bounded, event-driven only — no polling, no auto-delete of user data
-  /* ── THUNDER PREFLIGHT (clean upgrade, not factory reset) ─────
-     On new APP_BUILD: prune obsolete Thunder-owned CacheStorage only.
-     NEVER delete profile / birthday / RSVP / tour / push prefs / auth.
-     NEVER unregister SW on every launch (breaks push).
-     Manual REFRESH APP: same preserve rules + controlled reload once.
-  ─────────────────────────────────────────────────────────────── */
-  var TB_PROTECTED_STORAGE_KEYS = {
-    tb_brothers: 1,
-    tb_myProfileId: 1,
-    tb_rsvp: 1,
-    tb_rsvpRoster: 1,
-    tb_reminderSet: 1,
-    tb_gatheringAlertsOn: 1,
-    tb_seenAnnouncements: 1,
-    tb_announcements: 1,
-    tb_code_v2: 1,
-    tb_mission: 1,
-    tb_eventsNote: 1,
-    tb_gatheringBody: 1,
-    tb_lastFire: 1,
-    tb_displayName: 1,
-    tb_brothersSeenAt: 1,
-    tb_eventsSeenAt: 1,
-    tb_mediaSeenAt: 1,
-    tb_lastFireSeenAt: 1,
-    tb_eventsUpdatedAt: 1,
-    tb_seenBootstrapped: 1,
-    tb_hey_thunder: 1,
-    tb_app_build_persisted: 1,
-    tb_state_version: 1
-  };
-
-  function tbIsThunderCacheName(name) {
-    if (!name) return false;
-    var n = String(name).toLowerCase();
-    return n.indexOf('thunder') === 0 || n.indexOf('tb-') === 0 || n.indexOf('thunder-board') === 0 || n.indexOf('sot-') === 0;
-  }
-
-  async function tbPruneObsoleteThunderCaches() {
-    if (!window.caches || !caches.keys) return { deleted: [] };
-    var deleted = [];
-    try {
-      var keys = await caches.keys();
-      for (var i = 0; i < keys.length; i++) {
-        var k = keys[i];
-        if (tbIsThunderCacheName(k)) {
-          try {
-            await caches.delete(k);
-            deleted.push(k);
-          } catch (e) {}
-        }
-      }
-    } catch (e) {}
-    return { deleted: deleted };
-  }
-
-  async function ThunderPreflight(opts) {
-    opts = opts || {};
-    var build = (cfg().APP_BUILD || '').toString();
-    var force = !!opts.force; // manual REFRESH APP
-    var result = { build: build, upgraded: false, cachesCleared: [], reloaded: false };
-
-    try {
-      var prev = null;
-      try { prev = localStorage.getItem('tb_app_build_persisted'); } catch (e) {}
-      try { sessionStorage.setItem('tb_app_build', build || ''); } catch (e) {}
-
-      if (!force && build && prev && prev === build) {
-        return result; // common path: almost nothing
-      }
-
-      if (build && prev && prev !== build) {
-        result.upgraded = true;
-        console.info('Thunder Board Preflight: build', prev, '→', build);
-      }
-
-      // Only prune Thunder-owned technical caches — never whole origin wipe
-      var pruned = await tbPruneObsoleteThunderCaches();
-      result.cachesCleared = pruned.deleted || [];
-
-      // Persist current build after safe hygiene
-      try {
-        if (build) localStorage.setItem('tb_app_build_persisted', build);
-      } catch (e) {}
-
-      // Manual refresh may request one controlled reload (loop-guarded)
-      if (force) {
-        var guardKey = 'tb_preflight_reload_' + (build || 'x');
-        var already = false;
-        try { already = sessionStorage.getItem(guardKey) === '1'; } catch (e) {}
-        if (!already) {
-          try { sessionStorage.setItem(guardKey, '1'); } catch (e) {}
-          result.reloaded = true;
-          // Update SW if waiting — do NOT unregister (preserves push)
-          try {
-            if ('serviceWorker' in navigator) {
-              var reg = await navigator.serviceWorker.getRegistration();
-              if (reg) {
-                try { await reg.update(); } catch (e2) {}
-                if (reg.waiting) {
-                  try { reg.waiting.postMessage({ type: 'SKIP_WAITING' }); } catch (e3) {}
-                }
-              }
-            }
-          } catch (e) {}
-        }
-      }
-    } catch (e) {
-      console.warn('ThunderPreflight fail-open', e);
-    }
-    return result;
-  }
-
   function setupHousekeeping() {
     if (window.__tbHousekeepingBound) return;
     window.__tbHousekeepingBound = true;
-    // Event-driven preflight on launch (cheap when build unchanged)
+    const build = (cfg().APP_BUILD || '').toString();
     try {
-      ThunderPreflight({ force: false }).catch(function () {});
+      const prev = sessionStorage.getItem('tb_app_build');
+      if (build && prev && prev !== build) {
+        // New deploy detected in this browser tab session — nudge, never force mid-task
+        console.info('Thunder Board: new build', build, '(was', prev + ')');
+      }
+      if (build) sessionStorage.setItem('tb_app_build', build);
     } catch (e) {}
-    document.addEventListener('visibilitychange', function () {
+    document.addEventListener('visibilitychange', () => {
       if (document.visibilityState !== 'visible') return;
+      // Reconcile alerts toggle with real PushManager (never trust localStorage alone)
       try { refreshAlertsToggleUI(); } catch (e) {}
+      // Soft session touch: if Supabase client exists, refresh session quietly
       try {
-        var sb = getSb && getSb();
+        const sb = getSb && getSb();
         if (sb && sb.auth && sb.auth.getSession) sb.auth.getSession().catch(function () {});
       } catch (e) {}
-      // Resume: re-check build quietly (no reload)
-      try { ThunderPreflight({ force: false }).catch(function () {}); } catch (e) {}
     });
   }
-
-  window.ThunderPreflight = ThunderPreflight;
-
 
   function setupGatheringAlerts() {
     ensureServiceWorker();
@@ -7737,570 +7098,12 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       // Product tour is manual-only (More → replay). No auto-start after welcome.
       try { maybeStartProductTour(); } catch (e) {}
     } catch (e) {}
-
-  /* ── THUNDER CHARACTER (Scope A lock) ─────────────────────────
-     Cool variants soft-rotate on open | Big Smile on I'm In |
-     Bond only on his page (static asset in modal) | no yellow circle FAB
-     ──────────────────────────────────────────────────────────── */
-
-  /* ── THUNDER WISDOM (character-led moments) ───────────────────
-     Unsolicited: max 1 per visit, ~24h cap, after 8–12s stable.
-     Never during modals/tour/forms/keyboard. Local rotation state.
-     ──────────────────────────────────────────────────────────── */
-  window.ThunderWisdom = (function () {
-    /* Thunder Encouragement Bubbles — exact 10 lines, 15s cycle (8 visible + 7 quiet)
-       Additive. Non-blocking. Does not replace FAB / Ask Thunder / idle. */
-    const PREF_KEY = 'tbWisdomAmbientOff';
-    const VISIBLE_MS = 8000;
-    const QUIET_MS = 7000;
-    const CYCLE_MS = VISIBLE_MS + QUIET_MS; /* 15s start-to-start */
-    const FIRST_DELAY_MS = 15000;
-
-    const MESSAGES = [
-      'Hey, brother—you’re doing better than you think.',
-      'Whatever today handed you, you’re strong enough to carry it.',
-      'Keep going. I’ve seen your kind—you don’t quit.',
-      'You’ve got this, brother. And your brothers have you.',
-      'Bad day? Maybe. Bad life? Not even close.',
-      'Just a reminder: you matter more than you realize.',
-      'Take a breath, reset, and bring the thunder.',
-      'Look at you—still showing up. That counts for something.',
-      'You don’t have to have it all figured out today.',
-      'Head up, brother. You were built for more than this moment.'
-    ];
-
-    let order = [];
-    let idx = 0;
-    let open = false;
-    let bound = false;
-    let showTimer = null;
-    let hideTimer = null;
-    let cycleTimer = null;
-    let paused = false;
-    let started = false;
-    let firstArmed = false;
-
-    function ambientOff() {
-      /* Gate 1 restore: approved encouragement KEEP — off only via user pref */
-      try { return localStorage.getItem(PREF_KEY) === '1'; } catch (e) { return false; }
-    }
-    function setAmbientOff(off) {
-      try { localStorage.setItem(PREF_KEY, off ? '1' : '0'); } catch (e) {}
-    }
-    function reducedMotion() {
-      try {
-        return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      } catch (e) { return false; }
-    }
-    function shuffle(arr) {
-      const a = arr.slice();
-      for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        const t = a[i]; a[i] = a[j]; a[j] = t;
-      }
-      return a;
-    }
-    function ensureOrder() {
-      if (!order.length) order = shuffle(MESSAGES);
-    }
-    function nextText() {
-      ensureOrder();
-      if (idx >= order.length) {
-        order = shuffle(MESSAGES);
-        idx = 0;
-      }
-      return order[idx++];
-    }
-
-    function anyBlocking() {
-      if (document.hidden) return true;
-      if (document.body.classList.contains('tb-tour-open')) return true;
-      if (typeof __tourActive !== 'undefined' && __tourActive) return true;
-      const sel = [
-        '#splash:not(.hidden)',
-        '#welcome:not(.hidden)',
-        '#thunder-modal:not(.hidden)',
-        '#tb-tour:not(.hidden)',
-        '#ios-install-overlay:not(.hidden)',
-        '#inapp-install-overlay:not(.hidden)',
-        '#info-detail:not(.hidden)',
-        '#brother-detail:not(.hidden)',
-        '#memory-viewer:not(.hidden)',
-        '.modal:not(.hidden)'
-      ].join(',');
-      try {
-        if (document.querySelector(sel)) return true;
-      } catch (e) {}
-      const ae = document.activeElement;
-      if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.tagName === 'SELECT' || ae.isContentEditable)) {
-        return true;
-      }
-      return false;
-    }
-
-    function thunderVisible() {
-      const fab = document.getElementById('thunder-fab');
-      if (!fab) return false;
-      if (fab.classList.contains('hidden')) return false;
-      try {
-        const r = fab.getBoundingClientRect();
-        if (r.width < 8 || r.height < 8) return false;
-        if (r.bottom < 0 || r.top > (window.innerHeight || 0)) return false;
-      } catch (e) {}
-      return true;
-    }
-
-    function clearTimers() {
-      if (showTimer) { clearTimeout(showTimer); showTimer = null; }
-      if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
-      if (cycleTimer) { clearTimeout(cycleTimer); cycleTimer = null; }
-    }
-
-    function el() { return document.getElementById('tb-wisdom'); }
-
-    function dismiss(immediate) {
-      if (!open && !el()) return;
-      open = false;
-      if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
-      const root = el();
-      if (!root) return;
-      root.classList.remove('is-open', 'tb-wisdom-ignite');
-      const finish = function () {
-        root.classList.add('hidden');
-        root.setAttribute('aria-hidden', 'true');
-        document.body.classList.remove('tb-wisdom-open');
-        document.documentElement.classList.remove('tb-wisdom-open');
-        try {
-          if (window.ThunderCharacter && ThunderCharacter.endSpeaking) {
-            ThunderCharacter.endSpeaking();
-          }
-        } catch (e) {}
-      };
-      if (immediate || reducedMotion()) finish();
-      else setTimeout(finish, 280);
-    }
-
-    function showOne() {
-      if (ambientOff()) return;
-      if (open) return;
-      if (anyBlocking()) {
-        scheduleAfterQuiet(QUIET_MS);
-        return;
-      }
-      if (!thunderVisible()) {
-        scheduleAfterQuiet(QUIET_MS);
-        return;
-      }
-      const text = nextText();
-      const root = el();
-      if (!root) return;
-      const textEl = document.getElementById('tb-wisdom-text');
-      if (textEl) textEl.textContent = text;
-
-      open = true;
-      root.classList.remove('hidden');
-      root.setAttribute('aria-hidden', 'false');
-      document.body.classList.add('tb-wisdom-open');
-      /* non-blocking: do NOT lock body scroll */
-
-      requestAnimationFrame(function () {
-        root.classList.add('is-open');
-      });
-
-      try {
-        if (window.ThunderCharacter && ThunderCharacter.beginSpeaking) {
-          ThunderCharacter.beginSpeaking();
-        }
-        if (window.ThunderCharacter && ThunderCharacter.flashSmile && !reducedMotion()) {
-          ThunderCharacter.flashSmile(600);
-        }
-      } catch (e) {}
-
-      hideTimer = setTimeout(function () {
-        dismiss(false);
-        scheduleAfterQuiet(QUIET_MS);
-      }, VISIBLE_MS);
-    }
-
-    function scheduleAfterQuiet(ms) {
-      if (cycleTimer) clearTimeout(cycleTimer);
-      if (ambientOff()) return;
-      cycleTimer = setTimeout(function () {
-        cycleTimer = null;
-        if (paused || ambientOff()) return;
-        if (anyBlocking() || !thunderVisible()) {
-          scheduleAfterQuiet(QUIET_MS);
-          return;
-        }
-        showOne();
-      }, typeof ms === 'number' ? ms : QUIET_MS);
-    }
-
-    function armFirst() {
-      if (firstArmed || ambientOff()) return;
-      firstArmed = true;
-      started = true;
-      ensureOrder();
-      showTimer = setTimeout(function () {
-        showTimer = null;
-        if (paused || ambientOff()) return;
-        if (anyBlocking() || !thunderVisible()) {
-          scheduleAfterQuiet(QUIET_MS);
-          return;
-        }
-        showOne();
-      }, FIRST_DELAY_MS);
-    }
-
-    function pauseAll() {
-      paused = true;
-      clearTimers();
-      if (open) dismiss(true);
-    }
-
-    function resumeAll() {
-      paused = false;
-      if (ambientOff()) return;
-      if (!started) {
-        armFirst();
-        return;
-      }
-      /* resume with a quiet gap then continue cycle — never stack */
-      if (!open) scheduleAfterQuiet(QUIET_MS);
-    }
-
-    function onView() {
-      /* navigation: do not stack; if open, leave it; timers stay single */
-    }
-    function onRsvp() {
-      /* encouragement system is ambient-only; RSVP does not inject extra bubbles */
-    }
-
-    function requestAgain() {
-      if (open) dismiss(true);
-      clearTimers();
-      if (anyBlocking()) return;
-      showOne();
-    }
-
-    function bind() {
-      if (bound) return;
-      bound = true;
-      const closeBtn = document.getElementById('tb-wisdom-close');
-      const bubble = document.getElementById('tb-wisdom-bubble');
-      const scrim = document.getElementById('tb-wisdom-scrim');
-      if (closeBtn) closeBtn.addEventListener('click', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        dismiss(false);
-        scheduleAfterQuiet(QUIET_MS);
-      });
-      if (bubble) bubble.addEventListener('click', function (e) {
-        if (e.target && e.target.closest && e.target.closest('.tb-wisdom-close')) return;
-        dismiss(false);
-        scheduleAfterQuiet(QUIET_MS);
-      });
-      /* Scrim is soft visual only — click through for navigation; optional early dismiss */
-      if (scrim) {
-        scrim.addEventListener('click', function () {
-          if (open) {
-            dismiss(false);
-            scheduleAfterQuiet(QUIET_MS);
-          }
-        });
-      }
-      document.addEventListener('visibilitychange', function () {
-        if (document.hidden) pauseAll();
-        else resumeAll();
-      });
-      document.addEventListener('keydown', function (e) {
-        if (open && e.key === 'Escape') {
-          dismiss(false);
-          scheduleAfterQuiet(QUIET_MS);
-        }
-      });
-
-      const again = document.getElementById('tb-wisdom-again');
-      if (again && !again.dataset.bound) {
-        again.dataset.bound = '1';
-        again.addEventListener('click', requestAgain);
-      }
-      const pref = document.getElementById('tb-wisdom-pref');
-      if (pref && !pref.dataset.bound) {
-        pref.dataset.bound = '1';
-        pref.checked = !ambientOff();
-        pref.addEventListener('change', function () {
-          setAmbientOff(!pref.checked);
-          if (!pref.checked) {
-            pauseAll();
-            firstArmed = false;
-            started = false;
-          } else {
-            armFirst();
-          }
-        });
-      }
-    }
-
-    function init() {
-      bind();
-      if (ambientOff()) return;
-      /* Wait until splash likely settled, then arm 15s first delay from visibility */
-      setTimeout(function () {
-        if (!document.hidden) armFirst();
-        else {
-          document.addEventListener('visibilitychange', function once() {
-            if (!document.hidden) {
-              document.removeEventListener('visibilitychange', once);
-              armFirst();
-            }
-          });
-        }
-      }, 1200);
-    }
-
-    return {
-      init: init,
-      dismiss: dismiss,
-      onView: onView,
-      onRsvp: onRsvp,
-      requestAgain: requestAgain,
-      isOpen: function () { return open; },
-      setAmbientOff: setAmbientOff,
-      ambientOff: ambientOff,
-      pauseAll: pauseAll,
-      resumeAll: resumeAll
-    };
-  })();
-
-
-  window.ThunderCharacter = (function () {
-    /* Unified Thunder — single mascot + concierge.
-       States: hidden | entering | idle | speaking | guiding | reacting | exiting
-       Living-idle when visible and not active. Authoritative assets only. */
-    const COOL = [
-      'assets/thunder-cool-fab.png',
-      'assets/thunder-cool-2-fab.png'
-    ];
-    const SMILE = 'assets/thunder-smile-fab.png';
-    const KEY = 'tbThunderCoolIdx';
-    const STATES = ['hidden', 'entering', 'idle', 'speaking', 'guiding', 'reacting', 'exiting'];
-
-    let state = 'idle';
-    let smileTimer = null;
-    let visBound = false;
-    let stateToken = 0;
-
-    function img() { return document.getElementById('thunder-fab-img'); }
-    function fabEl() { return document.getElementById('thunder-fab'); }
-
-    function reducedMotion() {
-      try {
-        return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      } catch (e) { return false; }
-    }
-
-    function setSrc(src) {
-      const el = img();
-      if (!el || !src) return;
-      if (el.getAttribute('src') === src) return;
-      el.setAttribute('src', src);
-    }
-
-    function pickCoolIndex() {
-      let idx = 0;
-      try {
-        const prev = parseInt(sessionStorage.getItem(KEY) || '-1', 10);
-        idx = (isNaN(prev) ? -1 : prev) + 1;
-        if (idx >= COOL.length) idx = 0;
-        sessionStorage.setItem(KEY, String(idx));
-      } catch (e) {
-        idx = Math.floor(Math.random() * COOL.length);
-      }
-      return idx;
-    }
-
-    function applyCool() {
-      const idx = pickCoolIndex();
-      setSrc(COOL[idx] || COOL[0]);
-    }
-
-    function isActiveState(s) {
-      return s === 'speaking' || s === 'guiding' || s === 'reacting' || s === 'entering' || s === 'exiting';
-    }
-
-    function setIdlePaused(paused) {
-      const fab = fabEl();
-      if (!fab) return;
-      fab.classList.toggle('tb-char-idle-paused', !!paused);
-      try {
-        document.body.classList.toggle('tb-page-hidden', !!document.hidden);
-      } catch (e) {}
-    }
-
-    function setState(next, opts) {
-      opts = opts || {};
-      if (STATES.indexOf(next) < 0) next = 'idle';
-      const prev = state;
-      state = next;
-      stateToken++;
-      const fab = fabEl();
-      if (fab) {
-        fab.setAttribute('data-thunder-state', next);
-        STATES.forEach(function (s) {
-          fab.classList.toggle('tb-state-' + s, s === next);
-        });
-      }
-
-      if (next === 'hidden' || document.hidden) {
-        setIdlePaused(true);
-      } else if (isActiveState(next)) {
-        setIdlePaused(true);
-        /* Pause encouragement rotation while guiding/speaking */
-        try {
-          if (window.ThunderWisdom && ThunderWisdom.pauseAll && next === 'guiding') {
-            ThunderWisdom.pauseAll();
-          }
-        } catch (e) {}
-      } else if (next === 'idle') {
-        setIdlePaused(false);
-        if (fab) {
-          fab.classList.add('tb-char-idle');
-          fab.classList.remove('tb-char-idle-paused');
-        }
-        if (prev === 'guiding' || prev === 'speaking' || prev === 'reacting') {
-          try {
-            if (window.ThunderWisdom && ThunderWisdom.resumeAll) {
-              ThunderWisdom.resumeAll();
-            }
-          } catch (e) {}
-        }
-      }
-
-      if (opts.smile && !reducedMotion()) {
-        flashSmile(opts.smileMs || 700);
-      }
-      return state;
-    }
-
-    function getState() { return state; }
-
-    function bindVisibility() {
-      if (visBound) return;
-      visBound = true;
-      document.addEventListener('visibilitychange', function () {
-        if (document.hidden) {
-          setIdlePaused(true);
-        } else if (state === 'idle') {
-          setIdlePaused(false);
-        } else if (isActiveState(state)) {
-          setIdlePaused(true);
-        }
-      });
-      setIdlePaused(!!document.hidden);
-    }
-
-    function flashSmile(ms) {
-      const duration = typeof ms === 'number' ? ms : 2500;
-      const el = img();
-      if (!el) return;
-      if (reducedMotion()) return;
-      if (smileTimer) {
-        clearTimeout(smileTimer);
-        smileTimer = null;
-      }
-      const prev = el.getAttribute('src') || COOL[0];
-      setSrc(SMILE);
-      const fab = fabEl();
-      if (fab) {
-        fab.classList.add('fab-hit');
-        if (state === 'idle') setIdlePaused(true);
-        setTimeout(function () {
-          try { fab.classList.remove('fab-hit'); } catch (e) {}
-        }, 480);
-      }
-      const token = stateToken;
-      smileTimer = setTimeout(function () {
-        if (token !== stateToken && isActiveState(state)) {
-          /* state moved on — still restore cool face under guiding */
-        }
-        setSrc(prev.indexOf('smile') >= 0 ? COOL[0] : prev);
-        smileTimer = null;
-        if (state === 'idle' && !document.hidden) setIdlePaused(false);
-      }, duration);
-    }
-
-    function beginGuiding() {
-      setState('guiding');
-      setIdlePaused(true);
-      try {
-        if (window.ThunderWisdom && ThunderWisdom.pauseAll) ThunderWisdom.pauseAll();
-      } catch (e) {}
-    }
-
-    function endGuiding() {
-      setState('idle');
-      applyCool();
-      setIdlePaused(!!document.hidden);
-      try {
-        if (window.ThunderWisdom && ThunderWisdom.resumeAll) ThunderWisdom.resumeAll();
-      } catch (e) {}
-    }
-
-    function beginSpeaking() {
-      setState('speaking');
-      setIdlePaused(true);
-    }
-
-    function endSpeaking() {
-      if (state === 'guiding') return; /* tour still owns */
-      setState('idle');
-      setIdlePaused(!!document.hidden);
-    }
-
-    function init() {
-      applyCool();
-      const fab = fabEl();
-      if (fab) {
-        fab.classList.add('tb-char-idle');
-        fab.classList.add('thunder-fab--character');
-      }
-      setState('idle');
-      bindVisibility();
-    }
-
-    return {
-      init: init,
-      applyCool: applyCool,
-      flashSmile: flashSmile,
-      setIdlePaused: setIdlePaused,
-      setState: setState,
-      getState: getState,
-      beginGuiding: beginGuiding,
-      endGuiding: endGuiding,
-      beginSpeaking: beginSpeaking,
-      endSpeaking: endSpeaking
-    };
-  })();
-
-  try { if (window.ThunderCharacter) ThunderCharacter.init(); } catch (e) {}
-    try { if (window.ThunderWisdom) ThunderWisdom.init(); } catch (eW) {}
     bootstrapSeenState();
     updateMeetingCard();
     setupReminderButton();
     setupNotificationSystem();
     setupGatheringAlerts();
     setupHousekeeping();
-    try {
-      if (window.TBGuardians) {
-        TBGuardians.init();
-        TBGuardians.setHandlers({});
-        // Leadership diagnostic only (console) — no UI noise for brothers
-        if (typeof console !== 'undefined' && console.debug) {
-          console.debug('[TB Guardians]', TBGuardians.health());
-        }
-      }
-    } catch (eG) { console.warn('guardians init', eG); }
     renderAnnouncements();
     renderBrothers();
     renderUpcoming();

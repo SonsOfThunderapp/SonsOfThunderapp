@@ -62,6 +62,3 @@ Client is **untrusted**. AI is **untrusted for authorization**. NFC/QR/deep link
 8. Shared writes need clear authority (`is_sot_leader` / session).  
 9. External input validated/sanitized.  
 10. Obscurity is not a boundary.
-
-## Leadership PIN & membership (2026-08-17)
-Client `LEADER_PIN` = mild UI gate only, not real security. Facebook membership ≠ approved brother. Privileged writes and push require Supabase Auth + RLS + server checks. Verify invite-only / policies before wide Facebook blast.

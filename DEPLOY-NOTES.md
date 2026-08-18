@@ -29,10 +29,3 @@ If box remains: REFRESH APP again or delete Home Screen icon and reopen.
 
 ## After publish
 Canary 5–10 brothers before the 900-member Facebook post.
-
-## Pre-blast ops checklist (Gate 1)
-- [ ] Live `APP_BUILD` matches deployed zip
-- [ ] Supabase invite-only / RLS for shared writes
-- [ ] Netlify env: XAI_API_KEY, VAPID_*, SUPABASE_*
-- [ ] PIN is UI-only
-- [ ] Smoke: encouragement can appear; pauses during Concierge

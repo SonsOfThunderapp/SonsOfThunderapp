@@ -1,18 +1,21 @@
-# Documentation authority (2026-08-17)
+# Documentation authority (2026-08-17, constitution lock)
 
 **Current order (top wins):**
-1. Actual production source (index.html, js/, css/, sw.js, functions)
-2. **SONS-OF-THUNDER-MASTER-CONSTITUTION.md** (reigns overall)
-3. THUNDER-CONSTITUTION.md
-3. PROTECTED_BASELINE.md + SOURCE-OF-TRUTH.md
-4. Date-stamped continuity / director audits (latest date)
-5. THUNDER-REGRESSION-LESSONS.md
+1. Actual production source (index.html, js/, css/, sw.js, functions, assets)
+2. **SONS-OF-THUNDER-PRODUCT-CONSTITUTION.md** (master product law)
+3. APPROVED-ASSET-MANIFEST.md + DO-NOT-RESURRECT-REGISTRY.md
+4. THUNDER-CONSTITUTION.md
+5. PROTECTED_BASELINE.md + SOURCE-OF-TRUTH.md
+6. THUNDER-VISUAL-DNA.md + PULSE-DNA-LOCK.md
+7. Date-stamped continuity / director audits (latest date)
+8. THUNDER-REGRESSION-LESSONS.md
+
+If an older doc conflicts with SONS-OF-THUNDER-PRODUCT-CONSTITUTION.md: **do not silently pick.** Flag the conflict and treat the Product Constitution as superseding for asset/character/visual-proof/security philosophy unless production source already implements a newer **explicit** product-owner order.
 
 **Historical / superseded (keep, do not treat as current gate):**
 - DEPLOYMENT_GATES.md older "NOT SAFE" lines — superseded by CONTINUITY-AUDIT + this director pass when APP_BUILD matches
 - Tour v4 references — current TB_TOUR_VERSION is in js/app.js only
+- Bond / human-face / full-body Thunder directions — DO NOT USE (see DO-NOT-RESURRECT-REGISTRY.md)
 
 **Current build:** see js/config.js APP_BUILD  
-**Current tour:** TB_TOUR_VERSION in js/app.js (v6 after director pass)
-
-**Motion law:** `THUNDER-EFFECTS-CONSTITUTION.md` (under Master Constitution). Inventory before adding effects; no final zip for new effect families without director approval gate.
+**Current tour:** TB_TOUR_VERSION in js/app.js

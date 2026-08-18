@@ -1,16 +1,3 @@
-# GROK — START HERE
-
-**Read first every session:**
-
-1. `SONS-OF-THUNDER-MASTER-CONSTITUTION.md` — **reigns overall** (how to work + non-negotiables)
-2. Current `js/config.js` → `APP_BUILD`
-3. `SOURCE-OF-TRUTH.md` + `PROTECTED_BASELINE.md`
-4. Then domain docs only as needed
-
-Chat memory is evidence. **Source + Master Constitution are authority.**
-
----
-
 # GROK-START-HERE — Thunder Board
 
 **Before modifying Thunder Board, read this file, then the permanent constitution, then the current production source.**
@@ -18,9 +5,10 @@ Chat memory is evidence. **Source + Master Constitution are authority.**
 ## Authority order (highest first)
 
 1. **Current production source** (HTML/CSS/JS/assets/functions in the deployed package)
-2. **Repository constitution set** (files listed below)
-3. **User’s explicit new order** in the active conversation
-4. **Conversational memory** (lowest — never reconstruct behavior from chat when source can be verified)
+2. **`SONS-OF-THUNDER-PRODUCT-CONSTITUTION.md`** (master product law — 2026-08-17)
+3. **Repository constitution set** (`APPROVED-ASSET-MANIFEST.md`, `DO-NOT-RESURRECT-REGISTRY.md`, THUNDER-CONSTITUTION, VISUAL-DNA, etc.)
+4. **User’s explicit new order** in the active conversation
+5. **Conversational memory** (lowest — never reconstruct behavior from chat when source can be verified)
 
 Conversational memory is **input**, not the archive.  
 The repository remembers Thunder Board.
@@ -28,15 +16,24 @@ The repository remembers Thunder Board.
 ## Mandatory read order before code changes
 
 1. `GROK-START-HERE.md` (this file)
-2. `THUNDER-CONSTITUTION.md
-- **THUNDER-AI-CONSTITUTION.md** (Thunder = orchestrator, not chatbot; truth hierarchy; action chips)`
-3. `THUNDER-VISUAL-DNA.md`
-4. `THUNDER-UX-STATE-MACHINE.md`
-5. `SECURITY.md` + `THUNDER-SECURITY-GATE.md` (if present)
-6. `THUNDER-REGRESSION-LESSONS.md`
-7. `THUNDER-ACCEPTANCE-TESTS.md`
-8. `SONS_OF_THUNDER_FEATURE_MANIFEST.md` / `PROMPT-LEDGER-48H.md`
-9. **Then** open the actual files you will touch
+2. `SONS-OF-THUNDER-PRODUCT-CONSTITUTION.md`
+3. `APPROVED-ASSET-MANIFEST.md` + `DO-NOT-RESURRECT-REGISTRY.md`
+4. `THUNDER-CONSTITUTION.md`
+5. `THUNDER-VISUAL-DNA.md`
+6. `THUNDER-UX-STATE-MACHINE.md`
+7. `SECURITY.md` + `THUNDER-SECURITY-GATE.md` (if present)
+8. `THUNDER-REGRESSION-LESSONS.md`
+9. `THUNDER-ACCEPTANCE-TESTS.md`
+10. `SONS_OF_THUNDER_FEATURE_MANIFEST.md` / `PROMPT-LEDGER-48H.md`
+11. **Then** open the actual files you will touch
+
+## Absolute asset rule (product law)
+
+If you cannot identify the **exact approved** logo or Thunder source asset → **STOP.** Report `APPROVED ASSET NOT VERIFIED.` Do not AI-redraw, guess, or use “similar” files.
+
+- Official logo canon: `assets/CANONICAL/logo-official-IMG_7697.jpg`
+- Official Thunder canon: `assets/CANONICAL/thunder-character-official-IMG_7692.jpg`
+- File existence ≠ approval. Mockup ≠ production.
 
 ## Working method (non-negotiable)
 

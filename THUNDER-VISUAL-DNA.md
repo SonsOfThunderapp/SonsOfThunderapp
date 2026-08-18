@@ -39,7 +39,7 @@
 ## Thunder character (Scope A)
 - Cool (sunglasses) = default FAB; soft-rotate variants on open
 - Big Smile = short flash on successful I’m In only
-- Bond tux (no sunglasses) = Ask Thunder page only
+- Bond tux (no sunglasses) = **SUPERSEDED / DO NOT USE** (2026-08-17 constitution)
 - FAB: character-only + glow — **no yellow circle**
 - Hard no: random Bond, always-on mic, Thunder as feed brother
 
@@ -53,43 +53,14 @@ Navigation is L0–L1 only.
 - Invite brother is secondary text action, not a second competing red share card
 
 
-## Tour host character (locked 2026-08-16 — pending code)
-- Product tour **host** must be the Thunder **character** (Cool / Scope A family), **not** plain `bolt-only.png`.
-- Plain bolt-only remains for: welcome bolt, header bolt pulse, QR center, brand marks.
-- Ask Thunder page: Bond hero must be **much larger** / dominant when Thunder is open (no yellow circle).
-- Status until coded: **FAIL in source** — see PROMPT-LEDGER TC01 / TC03.
-
+## Tour host character (constitution-reconciled 2026-08-17)
+- Product tour **host** must be the official Thunder **character** derived from `assets/CANONICAL/thunder-character-official-IMG_7692.jpg` — **not** a generic/plain reinterpretation and **not** Bond/human face.
+- Plain `bolt-only.png` remains **BRIDGE** for: welcome bolt, header bolt-shaped pulse, QR center, brand marks (not a second mascot identity).
+- Ask Thunder page hero: official 7692-family character, larger/dominant when open (no yellow circle). **Bond hero path = DO NOT USE** (see DO-NOT-RESURRECT-REGISTRY).
+- Status: production `index.html` still references `bolt-only.png` for tour host → **BRIDGE / IMPLEMENTATION PENDING** for full character host. Do not invent substitute art.
 
 ## Living idle — Cool FAB character (20260816-char-idle1)
-- Additive CSS on existing `thunder-cool-fab` assets only
+- Additive CSS on approved cool/FAB assets only when those assets are present and APPROVED
 - Stage: breathe (translate); img: glow pulse + 16s rare personality; sparks on ring layers
 - Seamless 0%/100% keyframes; pause when tab hidden / fab-hit / reduced-motion
-- Does not change Bond hero size or tour host (still pending TC01/TC03)
-
-## Thunder character canon (Gate 1 corrected — 2026-08-17)
-
-### Identity (current approved)
-- Premium **faceted dimensional golden** bolt
-- Black sunglasses where the look calls for them
-- Restrained, confident, masculine, private-room energy
-- One unified character: FAB, Concierge host, Ask Thunder, encouragement companion
-
-### Seven emotional / reaction states — CURRENT APPROVED CANON
-Implementation: **APPROVED + PENDING** visual/motion proof. Do **not** treat as optional. Do **not** silently drop to three looks.
-
-1. LOCKED IN
-2. GOOD CALL
-3. LET'S GO
-4. THINKING
-5. BROTHERHOOD
-6. APPRECIATE THAT
-7. I'M ALL EARS
-
-### Legacy / bridge production assets (still in code until migration)
-- Cool / Cool-2 FAB — live FAB + tour host
-- Smile FAB — I'm In flash
-- Bond / Bond hero — Ask Thunder
-- bolt-only / masks — logo overlay, QR
-
-Bridge assets **do not supersede** the seven-state + faceted-gold canon.
-
+- Does not invent Bond hero; tour host = 7692 character when assets present (BRIDGE: bolt-only until then)

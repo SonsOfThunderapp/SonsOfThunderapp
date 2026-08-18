@@ -322,21 +322,9 @@ Thunder is the single official mascot and concierge character. The concierge lig
 - Keep pulsing/glowing overlay on the bolt only (`.header-bolt-live` / bolt-only pulse). Never restore rectangular `.logo-bolt-glimmer` full-box effect.
 - Do not swap back to outlined-bolt wordmark without explicit user order.
 
-## Gate 1 continuity decisions (2026-08-17) — locked
+## SUPERSESSION — 2026-08-17 Product Constitution
+- **Bond / human-face / tuxedo Thunder = DO NOT USE** (canonical Thunder = IMG_7692 geometric bolt head + wayfarers + restrained smirk only).
+- Older decision lines that “Accepted Bond hero” are **SUPERSEDED** by `SONS-OF-THUNDER-PRODUCT-CONSTITUTION.md` + `DO-NOT-RESURRECT-REGISTRY.md`.
+- Tour host and Ask hero must use official 7692-family character art once production PNGs are approved and wired — not Bond, not AI approximate.
+- Until production cool/character PNGs are present in the deploy package, tour may use bolt-only as BRIDGE mark only — report IMPLEMENTATION PENDING, do not invent art.
 
-### Who's In (Home social-pressure / avatar row)
-**DO NOT RESURRECT.** Superseded. Intentionally removed from product DNA.
-
-### Thunder encouragement bubbles
-**KEEP.** Exact 10 approved lines. ~15s first delay, ~8s visible, ~15s start-to-start. Pause while Concierge / Thunder AI / modals / install / hero moments own the stage. Ambient path restored (was hard-disabled).
-
-### Seven Thunder reaction states
-CURRENT APPROVED CANON (LOCKED IN, GOOD CALL, LET'S GO, THINKING, BROTHERHOOD, APPRECIATE THAT, I'M ALL EARS). Implementation pending visual/motion proof.
-
-### Auth
-Public viewing OK. Facebook membership ≠ approved brother. Privileged writes need Auth + RLS + server checks. Client LEADER_PIN = mild UI gate only.
-
-
-
-## 20260817-guardians1
-Quiet Guardians module (`js/guardians.js`) wired at init. Event-driven only. No freshness seven-file system. No visual DNA change.

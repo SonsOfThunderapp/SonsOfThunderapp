@@ -1,9 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260817-guardians1',
-  /* HEADER LOGO LOCK: clean high-def wordmark (white SONS, yellow bolt NO white outline, red OF THUNDER).
-     Pulse = header-bolt-live / bolt-only overlay only — never full-box glimmer on wordmark. */
-  HEADER_LOGO_CLEAN: true,
+  APP_BUILD: '20260816-MASTERPIECE1b-bolt1docs',
 
   /* ── PRODUCT LOCK (2026-08-16 FINAL) ───────────────────────────
      This build freezes every signed-off system through cohere1/tap/voice/hero.
@@ -19,7 +16,7 @@ window.TB_CONFIG = {
       'the-code','ask-thunder-hybrid','thunder-fx','profile-fireworks',
       'laser-ignition','thunder-voice','hey-thunder-optin','thunder-tap',
       'manifest-shortcuts','pwa-install','splash-welcome','housekeeping-governor',
-      'push-gathering-alerts','supabase-shared','leadership-pin-mild','thunder-character'
+      'push-gathering-alerts','supabase-shared','leadership-pin-mild'
     ]
   },
 
@@ -29,30 +26,6 @@ window.TB_CONFIG = {
      Logo: bolt-only effects; NEVER full-box gradient/slab on wordmark
      Install explainer: CapCut VO, H.264+AAC, keepAudio true
      ───────────────────────────────────────────────────────────── */
-
-  /* Thunder character Scope A (2026-08-16) — permanent */
-  /* Permanent pulse inventory — fail pre-ship if any missing in CSS */
-  PULSE_DNA: {
-    clock: '--tb-breathe 4s',
-    mustPulse: [
-      'brother-name', 'brother-photo', 'brother-slot-plus', 'empty-brothers-plus',
-      'modal-header h2', 'thunder-title', 'tb-pulse-title', 'info-detail-label',
-      'code-title-glow', 'btn-share', 'rsvp-status', 'boltLive marks',
-      'install-poster-play', 'thunder-fab-img', 'brother-detail-name'
-    ]
-  },
-  THUNDER_CHARACTER: {
-    fabStyle: 'character-only-glow', // no yellow circle
-    looks: {
-      cool: ['assets/thunder-cool-fab.png', 'assets/thunder-cool-2-fab.png'],
-      smile: 'assets/thunder-smile-fab.png',
-      bond: 'assets/thunder-bond-hero.png'
-    },
-    softRotateCoolOnOpen: true,
-    bigSmileOnImInMs: 2500,
-    bondOnAskPage: true,
-    bondSunglasses: false
-  },
   VISUAL_LOCKS: {
     welcomeBoltSrc: 'assets/bolt-only.png',
     welcomeBoltSize: 72,

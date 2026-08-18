@@ -1,5 +1,3 @@
-> **Parent:** See `SONS-OF-THUNDER-MASTER-CONSTITUTION.md` for the unified operating + product reign document.
-
 # Thunder Board Constitution (permanent product rules)
 
 **Repo is memory.** Current production source + this constitution outrank conversational memory.

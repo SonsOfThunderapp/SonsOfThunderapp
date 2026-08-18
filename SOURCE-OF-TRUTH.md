@@ -2,6 +2,11 @@
 
 > **Authority:** Current production source + repository constitution files outrank conversational memory.
 > Start every change session at `GROK-START-HERE.md`.
+>
+> **Master product law (2026-08-17):** `SONS-OF-THUNDER-PRODUCT-CONSTITUTION.md`  
+> **Assets:** `APPROVED-ASSET-MANIFEST.md` · **Banned returns:** `DO-NOT-RESURRECT-REGISTRY.md`  
+> **Canonical logo:** `assets/CANONICAL/logo-official-IMG_7697.jpg`  
+> **Canonical Thunder:** `assets/CANONICAL/thunder-character-official-IMG_7692.jpg`
 
 
 **APP_BUILD:** `20260816-LOCKED`  
@@ -112,9 +117,3 @@ Thunder is the single official mascot and concierge character. The concierge lig
 - Keep pulsing/glowing overlay on the bolt only (`.header-bolt-live` / bolt-only pulse). Never restore rectangular `.logo-bolt-glimmer` full-box effect.
 - Do not swap back to outlined-bolt wordmark without explicit user order.
 
-## Gate 1 continuity (2026-08-17)
-- Seven reaction states: approved canon, implementation pending.
-- Legacy Cool/Smile/Bond: bridge only.
-- Who's In: DO NOT RESURRECT.
-- Encouragement: KEEP; ambient on unless user pref off.
-- Auth: view public; privileged paths need live RLS/invite-only before wide launch.

@@ -19,7 +19,7 @@
   <!-- Web App Manifest -->
   <link rel="manifest" href="manifest.json" />
   
-  <link rel="stylesheet" href="css/styles.css?v=20260817-block1" />
+  <link rel="stylesheet" href="css/styles.css?v=20260816-MASTER-LABELBOLT" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -49,7 +49,7 @@
       <div class="welcome-bolt bolt-glow" data-tb-visual-lock="welcome-official-bolt" aria-hidden="true">
         <img src="assets/bolt-only.png" alt="" class="welcome-bolt-img" width="72" height="72" decoding="async" />
       </div>
-      <h2 id="welcome-title" class="tb-pulse-title welcome-title">WELCOME TO THUNDER BOARD</h2>
+      <h2 id="welcome-title" class="welcome-title">WELCOME TO THUNDER BOARD</h2>
       <p class="welcome-purpose">Private brotherhood tool — show up, know your brothers, stay sharp.</p>
       <ul class="welcome-list">
         <li>Next Gathering + big red <strong>I’M IN</strong></li>
@@ -87,12 +87,6 @@
           <p class="identity-line">Thunder doesn’t dull</p>
           <p id="home-personal" class="home-personal hidden" aria-live="polite"></p>
 
-          <div id="home-birthday-honor" class="home-birthday-honor card hidden" role="button" tabindex="0" aria-label="Brother birthday">
-            <div class="home-birthday-kicker">BIRTHDAY</div>
-            <div class="home-birthday-title" id="home-birthday-title"></div>
-            <div class="home-birthday-sub">The brotherhood remembers. Tap to open his profile.</div>
-          </div>
-
           <div class="next-meeting card">
             <div class="card-label" id="meeting-phase-label">NEXT GATHERING</div>
             <div id="meeting-countdown" class="meeting-countdown">—</div>
@@ -101,7 +95,7 @@
             <div class="meeting-loc" id="meeting-loc">Crooked Can Brewery Patio, Winter Garden</div>
             <p id="rsvp-prompt" class="rsvp-prompt">Your seat is open. Lock it in.</p>
             <button id="rsvp-btn" class="btn-rsvp">I'M IN</button>
-            <div id="rsvp-status" class="rsvp-status hidden">⚡ YOU'RE IN</div>
+            <div id="rsvp-status" class="rsvp-status hidden">⚡ YOU'RE LOCKED IN</div>
             <!-- Who's In removed: local-only roster read as group presence. Personal LOCKED IN stays. -->
             <button id="reminder-btn" class="btn-reminder btn-reminder-compact">7-DAY REMINDER</button>
             <div id="reminder-status" class="reminder-status hidden"></div>
@@ -242,29 +236,36 @@
               <p class="alerts-hint" id="gathering-alerts-hint"></p>
             </div>
 
-            <!-- Install + explainer (poster visible — video not buried) -->
+            <!-- Invite a brother — mirrors install card, sits just above it -->
+            <div class="install-card install-card-more invite-card" id="invite-brother-card">
+              <div class="install-card-row">
+                <div class="install-card-body">
+                  <div class="install-card-title">INVITE A BROTHER</div>
+                  <div class="install-card-sub">Hand him Thunder Board in one tap.</div>
+                </div>
+              </div>
+              <div class="install-card-actions">
+                <button type="button" id="invite-share-btn" class="install-card-btn invite-share-btn">SHARE THUNDER BOARD</button>
+              </div>
+            </div>
+
             <div class="install-card install-card-more" id="install-help-card">
               <div class="install-card-row">
                 <div class="install-card-body">
-                  <div class="install-card-title tb-pulse-title" id="install-card-title">PUT IT ON YOUR HOME SCREEN</div>
-                  <div class="install-card-sub" id="install-card-sub">Watch the walkthrough · then Install</div>
+                  <div class="install-card-title" id="install-card-title">PUT THUNDER BOARD ON YOUR HOME SCREEN</div>
+                  <div class="install-card-sub" id="install-card-sub">Safari or Chrome · Add to Home Screen</div>
                 </div>
               </div>
-              <button type="button" class="install-poster-btn" id="install-poster-btn" aria-label="Watch how to add Thunder Board to your Home Screen">
-                <img class="install-poster-img" src="assets/install-poster.jpg" alt="" width="540" height="304" decoding="async" />
-                <span class="install-poster-play" aria-hidden="true">▶</span>
-              </button>
               <div class="install-card-actions">
                 <button type="button" id="install-share-btn" class="install-card-btn">INSTALL</button>
                 <button type="button" id="install-help-btn" class="install-card-btn install-card-btn-secondary">HOW</button>
               </div>
-              <p class="install-card-tip" id="install-share-tip">iPhone: Safari → Share → Add to Home Screen · Android: Chrome → Install</p>
-              <button type="button" id="invite-share-btn" class="invite-link-btn">Share link with a brother</button>
+              <p class="install-card-tip" id="install-share-tip">Safari / Chrome · Add to Home Screen</p>
             </div>
             <div id="install-toast" class="install-toast hidden" role="status"></div>
 
             <div class="refresh-card refresh-card-compact" id="replay-tour-card">
-              <button type="button" id="replay-tour-btn" class="refresh-app-btn">TAKE THE TOUR</button>
+              <button type="button" id="replay-tour-btn" class="refresh-app-btn">REPLAY APP TOUR</button>
             </div>
             <div class="refresh-card refresh-card-compact" id="refresh-app-card">
               <button type="button" id="refresh-app-btn" class="refresh-app-btn">REFRESH APP</button>
@@ -306,13 +307,8 @@
       </button>
     </nav>
 
-    <button id="thunder-fab" class="thunder-fab thunder-fab--character tb-char-idle" aria-label="Ask Thunder" type="button">
-      <span class="tb-char-stage" aria-hidden="true">
-        <span class="tb-char-glow-ring"></span>
-        <img id="thunder-fab-img" class="thunder-fab-img" src="assets/thunder-cool-fab.png" alt="" width="44" height="44" decoding="async" />
-        <span class="tb-char-spark"></span>
-        <span class="tb-char-spark tb-char-spark--b"></span>
-      </span>
+    <button id="thunder-fab" class="thunder-fab" aria-label="Ask Thunder">
+      <span class="bolt bolt-glow">⚡</span>
     </button>
   </div>
 
@@ -322,7 +318,7 @@
     <div class="ios-install-panel">
       <button type="button" class="ios-install-close" id="ios-install-close" aria-label="Close">×</button>
       <div class="ios-install-bolt" aria-hidden="true">⚡</div>
-      <h2 id="ios-install-title" class="tb-pulse-title ios-install-title">PUT THUNDER ON YOUR PHONE</h2>
+      <h2 id="ios-install-title" class="ios-install-title">PUT THUNDER ON YOUR PHONE</h2>
       <p id="ios-install-sub" class="ios-install-sub">Three quick taps.</p>
       <div id="ios-coach-step" class="ios-coach-step" aria-live="polite">
         <div class="ios-coach-progress" id="ios-coach-dots" aria-hidden="true"><span class="on"></span><span></span><span></span></div>
@@ -344,7 +340,7 @@
     <div class="ios-install-panel">
       <button type="button" class="ios-install-close" id="inapp-install-close" aria-label="Close">×</button>
       <div class="ios-install-bolt" aria-hidden="true">⚡</div>
-      <h2 id="inapp-install-title" class="tb-pulse-title ios-install-title">OPEN IN SAFARI</h2>
+      <h2 id="inapp-install-title" class="ios-install-title">OPEN IN SAFARI</h2>
       <p class="ios-install-sub">Home Screen install only works in Safari.<br>Leave this in-app browser first.</p>
       <ol class="ios-install-steps">
         <li><span class="ios-step-num">1</span> Tap the <strong>⋯</strong> or share menu</li>
@@ -361,7 +357,7 @@
   <!-- RSVP calendar handoff (not a success claim until OS adds) -->
   <div id="cal-confirm-sheet" class="cal-confirm-sheet hidden" role="dialog" aria-modal="true" aria-labelledby="cal-confirm-title" aria-hidden="true">
     <div class="cal-confirm-panel">
-      <h2 id="cal-confirm-title" class="tb-pulse-title cal-confirm-title">YOU’RE IN ⚡</h2>
+      <h2 id="cal-confirm-title" class="cal-confirm-title">YOU’RE IN ⚡</h2>
       <p class="cal-confirm-body">Your seat is locked on this phone.<br>Put it on your calendar — everything’s filled in.</p>
       <button type="button" class="cal-confirm-primary" id="cal-confirm-add">ADD TO CALENDAR</button>
       <button type="button" class="cal-confirm-secondary" id="cal-confirm-later">NOT NOW</button>
@@ -374,8 +370,8 @@
     <div class="tb-tour-dim" id="tb-tour-dim"></div>
     <div class="tb-tour-spotlight" id="tb-tour-spotlight" aria-hidden="true"></div>
     <!-- Living host: official bolt-only mark — motion host, not a new logo -->
-    <div id="tb-tour-host" class="tb-tour-host tb-tour-host--character" aria-hidden="true">
-      <img id="tb-tour-host-img" src="assets/thunder-cool.png" alt="" class="tb-tour-host-img" width="72" height="72" decoding="async" />
+    <div id="tb-tour-host" class="tb-tour-host" aria-hidden="true">
+      <img src="assets/bolt-only.png" alt="" class="tb-tour-host-img" width="56" height="56" decoding="async" />
       <span class="tb-tour-host-glow" aria-hidden="true"></span>
     </div>
     <div class="tb-tour-tip" id="tb-tour-tip" role="dialog" aria-modal="true" aria-labelledby="tb-tour-headline" aria-describedby="tb-tour-body-full">
@@ -384,7 +380,7 @@
         <span class="tb-tour-follow">FOLLOW THE BOLT</span>
         <span class="tb-tour-progress" id="tb-tour-progress">1 of 8</span>
       </div>
-      <h2 id="tb-tour-headline" class="tb-pulse-title tb-tour-headline"></h2>
+      <h2 id="tb-tour-headline" class="tb-tour-headline"></h2>
       <p id="tb-tour-body" class="tb-tour-body" aria-hidden="true"></p>
       <p id="tb-tour-body-full" class="tb-tour-body-full sr-only"></p>
       <button type="button" id="tb-tour-demo" class="tb-tour-demo hidden" aria-label="Try asking Thunder">WHEN'S THE NEXT GATHERING?</button>
@@ -400,7 +396,7 @@
   <div id="install-modal" class="modal hidden">
     <div class="modal-content install-modal-content">
       <div class="modal-header">
-        <h2 class="tb-pulse-title">Home Screen</h2>
+        <h2>Home Screen</h2>
         <button class="modal-close" data-close="install-modal">×</button>
       </div>
       <div class="modal-body install-modal-body">
@@ -425,12 +421,6 @@
       <button type="button" class="brother-detail-close" id="brother-detail-close" aria-label="Close">×</button>
       <div class="brother-detail-photo" id="brother-detail-photo"></div>
       <div class="brother-detail-name" id="brother-detail-name"></div>
-      <div id="brother-birthday-honor" class="brother-birthday-honor hidden" aria-live="polite">
-        <div class="brother-birthday-honor-kicker">TODAY</div>
-        <div class="brother-birthday-honor-title" id="brother-birthday-honor-title">HAPPY BIRTHDAY</div>
-        <p class="brother-birthday-honor-sub">The brotherhood remembers.</p>
-        <button type="button" class="btn-primary brother-birthday-text hidden" id="brother-birthday-text">TEXT HIM</button>
-      </div>
       <div class="brother-detail-bio" id="brother-detail-bio"></div>
       <div class="brother-contact-actions hidden" id="brother-contact-actions">
         <button type="button" class="btn-contact btn-share" id="brother-share-contact">SHARE CONTACT</button>
@@ -463,7 +453,7 @@
   <div id="profile-modal" class="modal hidden">
     <div class="modal-content">
       <div class="modal-header">
-        <h2 class="tb-pulse-title">My Profile</h2>
+        <h2>My Profile</h2>
         <button class="modal-close" data-close="profile-modal">×</button>
       </div>
       <div class="modal-body">
@@ -473,9 +463,6 @@
         <textarea id="profile-bio" placeholder="One-line identity (occupation, family, what you bring)" maxlength="120" rows="3"></textarea>
         <label class="field-label" for="profile-phone">Phone <span class="field-hint">(optional — only shared if you add it)</span></label>
         <input type="tel" id="profile-phone" placeholder="Mobile number" maxlength="20" inputmode="tel" autocomplete="tel" />
-        <label class="field-label" for="profile-birthday">Birthday <span class="field-hint">(optional — month &amp; day only)</span></label>
-        <input type="text" id="profile-birthday" placeholder="MM-DD" maxlength="5" inputmode="numeric" autocomplete="bday" aria-describedby="profile-birthday-help" />
-        <p class="profile-phone-help" id="profile-birthday-help">Brothers see it on your day. No year. No age.</p>
         <p class="profile-phone-help" id="profile-phone-help">
           Add a number so brothers can save you with one scan — like Cash App, but for the brotherhood.
         </p>
@@ -491,7 +478,7 @@
   <div id="qr-explainer-modal" class="modal hidden">
     <div class="modal-content qr-explainer-content">
       <div class="modal-header">
-        <h2 class="tb-pulse-title">YOUR CONTACT QR</h2>
+        <h2>YOUR CONTACT QR</h2>
         <button class="modal-close" data-close="qr-explainer-modal">×</button>
       </div>
       <div class="modal-body qr-explainer-body">
@@ -518,7 +505,7 @@
   <div id="contact-qr-modal" class="modal hidden">
     <div class="modal-content contact-qr-modal-content">
       <div class="modal-header">
-        <h2 class="tb-pulse-title" id="contact-qr-title">CONTACT QR</h2>
+        <h2 id="contact-qr-title">CONTACT QR</h2>
         <button class="modal-close" data-close="contact-qr-modal">×</button>
       </div>
       <div class="modal-body contact-qr-body">
@@ -547,8 +534,7 @@
   <!-- AUTH MODAL (email / password — minimal) -->
   <div id="auth-gate" class="auth-gate hidden" role="dialog" aria-modal="true" aria-labelledby="auth-title">
     <div class="auth-card">
-      <button type="button" class="auth-close" id="auth-close-btn" aria-label="Close">×</button>
-      <h2 class="tb-pulse-title" id="auth-title">THUNDER BOARD</h2>
+      <h2 id="auth-title">THUNDER BOARD</h2>
       <p class="auth-sub" id="auth-sub">Shared roster &amp; memories only. Browse the app without an account. Leadership invites brothers — this is not a public club.</p>
       <input type="email" id="auth-email" placeholder="Email" autocomplete="email" />
       <input type="password" id="auth-password" placeholder="Password" autocomplete="current-password" />
@@ -570,7 +556,7 @@
   <div id="media-modal" class="modal hidden">
     <div class="modal-content">
       <div class="modal-header">
-        <h2 class="tb-pulse-title">Add Memory</h2>
+        <h2>Add Memory</h2>
         <button class="modal-close" data-close="media-modal">×</button>
       </div>
       <div class="modal-body">
@@ -585,22 +571,13 @@
   <div id="thunder-modal" class="modal thunder-modal hidden">
     <div class="modal-content thunder-content">
       <div class="modal-header thunder-header">
-        <div class="thunder-title tb-pulse-title">ASK THUNDER</div>
+        <div class="thunder-title"><span class="bolt bolt-glow">⚡</span> Ask Thunder</div>
         <button class="modal-close" data-close="thunder-modal">×</button>
       </div>
-      <div class="thunder-hero" id="thunder-hero" aria-hidden="true">
-        <img class="thunder-hero-img" src="assets/thunder-bond-hero.png" alt="" width="200" height="300" decoding="async" />
-      </div>
       <div class="thunder-messages" id="thunder-messages">
-        <div class="thunder-msg system" id="thunder-system-intro">
-          <div class="thunder-power-line">JUST ASK THUNDER. ⚡</div>
-          <p class="thunder-power-sub">Don’t hunt through the Board. Tell Thunder what you need.</p>
-          <div class="thunder-example-chips" id="thunder-example-chips" role="group" aria-label="Example questions">
-            <button type="button" class="thunder-example-chip" data-thunder-q="When's the next gathering?">When’s the next gathering?</button>
-            <button type="button" class="thunder-example-chip" data-thunder-q="Show me the brothers.">Show me the brothers.</button>
-            <button type="button" class="thunder-example-chip" data-thunder-q="Add the gathering to my calendar.">Put it on my calendar.</button>
-            <button type="button" class="thunder-example-chip" data-thunder-q="Text a leader.">Text a leader.</button>
-          </div>
+        <div class="thunder-msg system">
+          I’m Thunder — institutional memory of Sons of Thunder.<br>
+          Ask about the Code, brothers, meetings, Scripture, or who can help.
         </div>
       </div>
       <div class="thunder-voice-bar" id="thunder-voice-bar">
@@ -616,7 +593,7 @@
         <p class="thunder-wake-note">Optional: while this app is open, say “Hey Thunder.” Stops when you leave.</p>
       </div>
       <div class="thunder-input-row">
-        <input type="text" id="thunder-input" placeholder="Tell Thunder what you need…" autocomplete="off" />
+        <input type="text" id="thunder-input" placeholder="Or type…" autocomplete="off" />
         <button id="thunder-send">Send</button>
       </div>
     </div>
@@ -626,7 +603,7 @@
   <div id="admin-ann-modal" class="modal hidden">
     <div class="modal-content" style="max-height:90vh;overflow-y:auto;">
       <div class="modal-header">
-        <h2 class="tb-pulse-title">Announcements</h2>
+        <h2>Announcements</h2>
         <button class="modal-close" data-close="admin-ann-modal" type="button">✕</button>
       </div>
       <div class="modal-body">
@@ -646,7 +623,7 @@
   <div id="admin-events-modal" class="modal hidden">
     <div class="modal-content" style="max-height:90vh;overflow-y:auto;">
       <div class="modal-header">
-        <h2 class="tb-pulse-title">Events / Mission</h2>
+        <h2>Events / Mission</h2>
         <button class="modal-close" data-close="admin-events-modal" type="button">✕</button>
       </div>
       <div class="modal-body">
@@ -667,7 +644,7 @@
   <div id="admin-code-modal" class="modal hidden">
     <div class="modal-content" style="max-height:90vh;overflow-y:auto;">
       <div class="modal-header">
-        <h2 class="tb-pulse-title">The Code</h2>
+        <h2>The Code</h2>
         <button class="modal-close" data-close="admin-code-modal" type="button">✕</button>
       </div>
       <div class="modal-body">
@@ -682,9 +659,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/config.js"></script>
-  <script src="js/guardians.js?v=20260817-guardians1"></script>
   <script src="js/qrcode.min.js?v=20260816LOCKED6"></script>
-  <script src="js/app.js?v=20260817-block1"></script>
+  <script src="js/app.js?v=20260816-MASTER-LABELBOLT"></script>
 </div>
 
 
@@ -692,7 +668,7 @@
   <div id="admin-push-modal" class="modal hidden">
     <div class="modal-content">
       <div class="modal-header">
-        <h2 class="tb-pulse-title">Send Alert</h2>
+        <h2>Send Alert</h2>
         <button class="modal-close" data-close="admin-push-modal" type="button">✕</button>
       </div>
       <div class="modal-body">
@@ -702,20 +678,6 @@
         <button id="admin-push-send" class="btn-rsvp" type="button" style="width:100%;margin-top:12px;">SEND TO EVERYONE</button>
         <p class="admin-push-status" id="admin-push-status" aria-live="polite"></p>
         <button data-close="admin-push-modal" type="button" class="btn-secondary" style="width:100%;margin-top:10px;">CANCEL</button>
-      </div>
-    </div>
-  </div>
-
-
-  <!-- THUNDER WISDOM — premium character dialogue (wisdom2) -->
-  <div id="tb-wisdom" class="tb-wisdom hidden" aria-hidden="true">
-    <div class="tb-wisdom-scrim" id="tb-wisdom-scrim" tabindex="-1"></div>
-    <div class="tb-wisdom-stage" id="tb-wisdom-stage" role="status" aria-live="polite" aria-labelledby="tb-wisdom-label" aria-describedby="tb-wisdom-text">
-      <div class="tb-wisdom-bubble" id="tb-wisdom-bubble">
-        <button type="button" class="tb-wisdom-close" id="tb-wisdom-close" aria-label="Dismiss">×</button>
-        <p class="tb-wisdom-label" id="tb-wisdom-label">THUNDER</p>
-        <p class="tb-wisdom-text" id="tb-wisdom-text"></p>
-        <span class="tb-wisdom-tail" aria-hidden="true"></span>
       </div>
     </div>
   </div>

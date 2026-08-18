@@ -1,9 +1,3 @@
-
-## 20260817-director-visual1
-- Gate 1: encouragement ambient re-enabled (pref-gated only)
-- Gate 1: seven-state canon + Who's In DNR + auth notes in docs
-- Director visual: event month 12px, nav labels 11px, modal dvh scroll, FAB safe-area bottom, wisdom/info max-width phone fit, install pulse softened
-- No new features. Who's In stays out. Seven-state art still pending proof.
 # Changelog
 
 ## 20260816-char-idle1
