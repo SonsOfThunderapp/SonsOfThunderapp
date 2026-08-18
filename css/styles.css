@@ -56,35 +56,43 @@ html, body {
   padding-bottom: calc(96px + var(--safe-bottom));
 }
 
-/* HEADER — logo on top, centered, no overlay, no clip under notch.
-   Bolt lives in the PNG only. No absolute bolt layer. */
+/* HEADER — full wordmark (SONS + bolt + OF THUNDER) on top, centered, no clip.
+   Never fixed-height crop. Bolt lives in the PNG only. */
 .header {
-  padding: calc(12px + env(safe-area-inset-top, 24px)) 12px 10px;
+  padding: calc(10px + env(safe-area-inset-top, 24px)) 12px 8px;
   text-align: center;
   background: var(--black);
   position: sticky;
   top: 0;
   z-index: 50;
   overflow: visible;
+  min-height: 0;
 }
 .logo-wrap {
   position: relative;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
-  max-width: 92vw;
+  max-width: 100%;
   margin: 0 auto;
   line-height: 0;
   overflow: visible;
   z-index: 2;
 }
-.logo {
-  height: 64px;
-  width: auto;
-  max-width: 92vw;
-  object-fit: contain;
-  object-position: center center;
-  display: block;
-  margin: 0 auto;
+.logo,
+.header .logo,
+.header img.logo,
+#header-logo {
+  /* Intrinsic aspect 503x291 — size by WIDTH so full mark (incl. OF THUNDER) shows */
+  height: auto !important;
+  width: min(200px, 70vw) !important;
+  max-width: 70vw !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  display: block !important;
+  margin: 0 auto !important;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   position: relative;
@@ -4989,4 +4997,238 @@ h1.code-title-glow,
 .header .logo {
   position: relative;
   z-index: 2;
+}
+
+/* === LOGO CLIP FIX 20260818: full wordmark, no height crop === */
+.header .logo,
+.header img.logo,
+#header-logo,
+.logo-wrap .logo {
+  height: auto !important;
+  width: min(200px, 70vw) !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+}
+.header {
+  overflow: visible !important;
+}
+.logo-wrap {
+  overflow: visible !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+/* === OVERRIDE 20260818: tuxedo Thunder on Ask Thunder page ONLY ===
+   Explicit product-owner override of body/tuxedo lock for this surface.
+   FAB, Home, tour, and all other surfaces stay bolt-head only. */
+.thunder-ask-hero {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px 4px;
+  background: #000;
+}
+.thunder-ask-hero-img {
+  width: min(220px, 58vw);
+  height: auto;
+  max-height: 42vh;
+  object-fit: contain;
+  object-position: center top;
+  display: block;
+  filter: drop-shadow(0 0 18px rgba(254, 241, 5, 0.25));
+}
+.thunder-modal .thunder-messages {
+  flex: 1;
+  min-height: 0;
+}
+
+/* ===== 7-SLIDE PRODUCT TOUR — restored 20260818, glow + motion ===== */
+.tb-tour.tb-tour-slides {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  background: rgba(0, 0, 0, 0.94);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
+}
+.tb-tour.tb-tour-slides.hidden { display: none !important; }
+body.tb-tour-open { overflow: hidden; }
+
+.tb-tour-stage {
+  width: min(420px, 100%);
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #0a0a0a;
+  border-radius: 16px;
+  border: 1px solid #222;
+  box-shadow:
+    0 0 0 1px rgba(254, 241, 5, 0.08),
+    0 0 40px rgba(254, 241, 5, 0.12),
+    0 20px 60px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  position: relative;
+  animation: tbTourStageIn 0.35s ease-out;
+}
+@keyframes tbTourStageIn {
+  from { opacity: 0; transform: scale(0.96) translateY(12px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.tb-tour-slide-frame {
+  flex: 0 0 auto;
+  background: #000;
+  line-height: 0;
+  max-height: 52vh;
+  overflow: hidden;
+  position: relative;
+}
+.tb-tour-slide-frame::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 40px rgba(254, 241, 5, 0.06);
+}
+.tb-tour-slide-img {
+  width: 100%;
+  height: auto;
+  max-height: 52vh;
+  object-fit: contain;
+  object-position: center top;
+  display: block;
+  background: #000;
+}
+.tb-tour-slide-img.tb-tour-slide-in {
+  animation: tbTourSlideIn 0.4s ease-out;
+}
+@keyframes tbTourSlideIn {
+  from { opacity: 0.2; transform: scale(1.03); filter: brightness(0.7); }
+  to { opacity: 1; transform: scale(1); filter: brightness(1); }
+}
+
+.tb-tour-caption { padding: 12px 16px 4px; flex: 0 0 auto; }
+.tb-tour-bolt-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.tb-tour-follow {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: #FEF105;
+  font-weight: 700;
+  text-shadow:
+    0 0 8px rgba(254, 241, 5, 0.8),
+    0 0 18px rgba(254, 241, 5, 0.4);
+  animation: brotherNamePulse var(--tb-breathe);
+}
+.tb-tour-progress {
+  font-size: 11px;
+  color: #666;
+  letter-spacing: 0.06em;
+}
+.tb-tour-headline {
+  color: #FEF105;
+  font-size: 1.3rem;
+  margin: 4px 0 6px;
+  letter-spacing: 0.04em;
+  text-shadow:
+    0 0 10px rgba(254, 241, 5, 0.7),
+    0 0 24px rgba(254, 241, 5, 0.35);
+}
+.tb-tour-body {
+  color: #ccc;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  margin: 0 0 8px;
+}
+.tb-tour-dots {
+  display: flex;
+  gap: 7px;
+  justify-content: center;
+  padding: 6px 0 10px;
+}
+.tb-tour-dots span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #333;
+  transition: background 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+.tb-tour-dots span.on {
+  background: #FEF105;
+  box-shadow: 0 0 10px rgba(254, 241, 5, 0.8), 0 0 4px rgba(254, 241, 5, 0.9);
+  transform: scale(1.15);
+}
+.tb-tour-actions {
+  display: flex;
+  gap: 8px;
+  padding: 8px 16px 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.tb-tour-back {
+  background: transparent;
+  border: 1px solid #333;
+  color: #aaa;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.tb-tour-back:disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+.tb-tour-next {
+  flex: 1;
+  min-width: 120px;
+  background: #E30600;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  font-size: 14px;
+  box-shadow: 0 0 16px rgba(227, 6, 0, 0.35);
+}
+.tb-tour-next:active { transform: scale(0.97); }
+.tb-tour-skip {
+  width: 100%;
+  text-align: center;
+  margin-top: 2px;
+  background: transparent;
+  border: none;
+  color: #666;
+  font-size: 12px;
+  padding: 8px;
+}
+.tb-tour-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  z-index: 5;
+  background: rgba(0,0,0,0.5);
+  border: none;
+  color: #888;
+  font-size: 28px;
+  line-height: 1;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 8px;
+}
+.tb-tour-close:active { color: #fff; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tb-tour-stage { animation: none !important; }
+  .tb-tour-slide-img.tb-tour-slide-in { animation: none !important; }
+  .tb-tour-follow { animation: none !important; }
 }
