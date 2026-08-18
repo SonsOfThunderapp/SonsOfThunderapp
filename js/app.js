@@ -3717,7 +3717,6 @@
   function isOverlayBlockingSwipe() {
     if ($('#memory-viewer') && !$('#memory-viewer').classList.contains('hidden')) return true;
     if ($('#auth-gate') && !$('#auth-gate').classList.contains('hidden')) return true;
-    if ($('#tb-tour') && !$('#tb-tour').classList.contains('hidden')) return true;
     if ($('#ios-install-overlay') && !$('#ios-install-overlay').classList.contains('hidden')) return true;
     if ($('#inapp-install-overlay') && !$('#inapp-install-overlay').classList.contains('hidden')) return true;
     const openModal = document.querySelector('.modal:not(.hidden)');
@@ -5233,7 +5232,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
       } else if (state === 'IPHONE_SAFARI') {
         if (installShareBtn) installShareBtn.textContent = 'ADD TO HOME SCREEN';
         if (title) title.textContent = 'PUT THUNDER ON YOUR PHONE';
-        if (sub) sub.textContent = 'Safari will ask next — follow the bolt.';
+        if (sub) sub.textContent = 'Safari will ask next — add to Home Screen.';
         if (tip) tip.textContent = 'Share → Add to Home Screen → Add';
       } else {
         if (installShareBtn) installShareBtn.textContent = 'ADD TO HOME SCREEN';
@@ -6201,252 +6200,9 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   }
 
 
-  // ---------- PRODUCT TOUR — SLIDE-BASED (canonical 2026-08-18) ----------
-  // OLD floating/bouncing Concierge tour RETIRED by Erica — DO NOT RESURRECT.
-  // Authority: assets/tour-01.png … tour-07.png + captions below.
-  const TB_TOUR_VERSION = 11; /* slide tour — invalidates V10 floating tour state */
-
-  function tourStorageKey() {
-    return 'thunderTourV' + TB_TOUR_VERSION;
-  }
-
-  function isTourComplete() {
-    try {
-      const s = load(tourStorageKey());
-      return !!(s && s.complete);
-    } catch (e) { return false; }
-  }
-
-  function setTourState(patch) {
-    try {
-      const cur = load(tourStorageKey()) || {};
-      save(tourStorageKey(), Object.assign({}, cur, patch, { v: TB_TOUR_VERSION }));
-    } catch (e) {}
-  }
-
-  function getTourState() {
-    try { return load(tourStorageKey()) || {}; } catch (e) { return {}; }
-  }
-
-  function tourReducedMotion() {
-    try {
-      return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-    } catch (e) { return false; }
-  }
-
-  /* Slide inventory — matches assets/tour-0N.png (Grok official slide set) */
-  const TB_TOUR_STEPS = [
-    {
-      id: 'welcome',
-      slide: 'assets/tour-01.png',
-      headline: 'FOLLOW ME',
-      body: 'I’m Thunder — your guide. The brotherhood between gatherings. Stick with me.',
-      nextLabel: 'LET’S GO'
-    },
-    {
-      id: 'home',
-      slide: 'assets/tour-02.png',
-      headline: 'HOME BASE',
-      body: 'Next Gathering lives here — date, time, Crooked Can. Always current.',
-      nextLabel: 'NEXT'
-    },
-    {
-      id: 'imin',
-      slide: 'assets/tour-03.png',
-      headline: 'LOCK YOUR SEAT',
-      body: 'Tap I’M IN when you’re coming. One commitment. Your phone remembers.',
-      nextLabel: 'NEXT'
-    },
-    {
-      id: 'brothers',
-      slide: 'assets/tour-04.png',
-      headline: 'THE BROTHERS',
-      body: 'Names, faces, who you are. Claim your spot when you’re ready.',
-      nextLabel: 'NEXT'
-    },
-    {
-      id: 'events',
-      slide: 'assets/tour-05.png',
-      headline: 'MISSIONS & MEMORIES',
-      body: 'Range. Lake. Bible. Gym. Photos that prove you showed up.',
-      nextLabel: 'NEXT'
-    },
-    {
-      id: 'code',
-      slide: 'assets/tour-06.png',
-      headline: 'THE CODE',
-      body: 'Who we are. How we roll. Intense, loyal, built for more.',
-      nextLabel: 'NEXT'
-    },
-    {
-      id: 'ask',
-      slide: 'assets/tour-07.png',
-      headline: 'OR JUST ASK',
-      body: 'Don’t hunt menus. Ask Thunder — next gathering, The Code, Scripture.',
-      nextLabel: 'DONE'
-    }
-  ];
-
-  let __tourIdx = 0;
-  let __tourActive = false;
-
-  function renderTourSlide() {
-    const step = TB_TOUR_STEPS[__tourIdx];
-    if (!step) return;
-    const img = document.getElementById('tb-tour-slide-img');
-    const headline = document.getElementById('tb-tour-headline');
-    const body = document.getElementById('tb-tour-body');
-    const bodyFull = document.getElementById('tb-tour-body-full');
-    const progress = document.getElementById('tb-tour-progress');
-    const next = document.getElementById('tb-tour-next');
-    const back = document.getElementById('tb-tour-back');
-    const dots = document.getElementById('tb-tour-dots');
-
-    if (img) {
-      img.src = step.slide;
-      img.alt = step.headline || '';
-      img.classList.remove('tb-tour-slide-in');
-      void img.offsetWidth;
-      if (!tourReducedMotion()) img.classList.add('tb-tour-slide-in');
-    }
-    if (headline) headline.textContent = step.headline || '';
-    if (body) body.textContent = step.body || '';
-    if (bodyFull) bodyFull.textContent = (step.headline || '') + '. ' + (step.body || '');
-    if (progress) progress.textContent = (__tourIdx + 1) + ' of ' + TB_TOUR_STEPS.length;
-    if (next) next.textContent = step.nextLabel || (__tourIdx >= TB_TOUR_STEPS.length - 1 ? 'DONE' : 'NEXT');
-    if (back) back.disabled = __tourIdx <= 0;
-    if (dots) {
-      dots.innerHTML = TB_TOUR_STEPS.map((_, i) =>
-        '<span class="' + (i === __tourIdx ? 'on' : '') + '"></span>'
-      ).join('');
-    }
-    setTourState({ step: step.id, complete: false });
-  }
-
-  function openTourUI() {
-    const root = document.getElementById('tb-tour');
-    if (!root) return;
-    root.classList.remove('hidden');
-    root.setAttribute('aria-hidden', 'false');
-    document.body.classList.add('tb-tour-open');
-    try { document.body.style.overflow = 'hidden'; } catch (e) {}
-  }
-
-  function closeTourUI() {
-    const root = document.getElementById('tb-tour');
-    if (root) {
-      root.classList.add('hidden');
-      root.setAttribute('aria-hidden', 'true');
-    }
-    document.body.classList.remove('tb-tour-open');
-    try { document.body.style.overflow = ''; } catch (e) {}
-  }
-
-  function completeTour() {
-    __tourActive = false;
-    setTourState({ complete: true, step: 'done', completedAt: Date.now() });
-    closeTourUI();
-    try {
-      if (window.tbFeedback) tbFeedback.confirm();
-      if (window.ThunderFX && ThunderFX.tourComplete) ThunderFX.tourComplete();
-    } catch (e) {}
-  }
-
-  function skipTour() {
-    /* First-run mandatory tours historically no-op'd skip — Erica: user stays in control on slide tour */
-    __tourActive = false;
-    setTourState({ complete: true, skipped: true, step: 'skipped', completedAt: Date.now() });
-    closeTourUI();
-  }
-
-  function startTour(opts) {
-    opts = opts || {};
-    if (__tourActive) return;
-    const force = !!opts.force;
-    if (!force && isTourComplete() && !opts.replay) return;
-    __tourActive = true;
-    __tourIdx = 0;
-    if (opts.replay) {
-      /* restart from beginning */
-      __tourIdx = 0;
-    }
-    openTourUI();
-    renderTourSlide();
-    try { if (window.tbFeedback) tbFeedback.thunderImpact(); } catch (e) {}
-  }
-
-  function tourNext() {
-    if (!__tourActive) return;
-    if (__tourIdx >= TB_TOUR_STEPS.length - 1) {
-      completeTour();
-      return;
-    }
-    __tourIdx += 1;
-    renderTourSlide();
-    try { if (window.tbFeedback) tbFeedback.selection(); } catch (e) {}
-  }
-
-  function tourBack() {
-    if (!__tourActive || __tourIdx <= 0) return;
-    __tourIdx -= 1;
-    renderTourSlide();
-    try { if (window.tbFeedback) tbFeedback.selection(); } catch (e) {}
-  }
-
-
-  function maybeStartProductTour() {
-    /* First-run: after splash, open slide tour once if not complete.
-       Replay remains More → REPLAY APP TOUR. */
-    try {
-      if (isTourComplete()) return;
-      const start = function () {
-        try {
-          if (!isTourComplete() && !__tourActive) startTour({ force: false });
-        } catch (e) {}
-      };
-      // After splash window (~2s) so slides are not under splash
-      setTimeout(start, 2200);
-    } catch (e) {}
-  }
-
-  function bindTourControls() {
-    const next = document.getElementById('tb-tour-next');
-    const back = document.getElementById('tb-tour-back');
-    const skip = document.getElementById('tb-tour-skip');
-    const closeBtn = document.getElementById('tb-tour-close');
-    if (next && !next.dataset.tbBound) {
-      next.dataset.tbBound = '1';
-      next.addEventListener('click', () => {
-        try { if (window.tbFeedback) tbFeedback.press(next); } catch (e) {}
-        tourNext();
-      });
-    }
-    if (back && !back.dataset.tbBound) {
-      back.dataset.tbBound = '1';
-      back.addEventListener('click', () => tourBack());
-    }
-    if (skip && !skip.dataset.tbBound) {
-      skip.dataset.tbBound = '1';
-      skip.addEventListener('click', () => skipTour());
-    }
-    if (closeBtn && !closeBtn.dataset.tbBound) {
-      closeBtn.dataset.tbBound = '1';
-      closeBtn.addEventListener('click', () => skipTour());
-    }
-    /* More → Take the Tour */
-    const replay = document.getElementById('take-tour-btn') || document.getElementById('replay-tour-btn') || document.querySelector('[data-action="take-tour"]');
-    if (replay && !replay.dataset.tbBound) {
-      replay.dataset.tbBound = '1';
-      replay.addEventListener('click', () => startTour({ force: true, replay: true }));
-    }
-  }
-
-  /* OLD floating tour API removed — do not resurrect placeTourHost/spotlight */
-
-
   // ---------- FIRST-LOAD WELCOME (once per session; overlaps splash exit) ----------
   function runWelcome() {
-    /* OLD welcome popup removed from DOM. Handoff only to Follow the Bolt tour. */
+    /* OLD welcome popup and retired product tour removed. No first-run tour auto-start. */
     const el = document.getElementById('welcome');
     if (el) {
       el.classList.add('hidden');
@@ -6454,12 +6210,6 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       el.setAttribute('aria-hidden', 'true');
     }
     try { sessionStorage.setItem('tb_welcome_done', '1'); } catch (e) {}
-    try {
-      // Delay slightly so Home paints under the tour spotlight
-      setTimeout(function () {
-        try { maybeStartProductTour(); } catch (e2) {}
-      }, 420);
-    } catch (e) {}
   }
 
   // ---------- WEB PUSH (Gathering alerts) ----------
@@ -6863,12 +6613,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   // ---------- INIT ----------
   async function init() {
     runSplash();
-    try { bindTourControls(); } catch (e) {}
-    try {
-      // Welcome already finished earlier this session → tour can start after splash
-      // Product tour is manual-only (More → replay). No auto-start after welcome.
-      try { maybeStartProductTour(); } catch (e) {}
-    } catch (e) {}
+    /* retired product-tour controls and auto-start physically removed */
     bootstrapSeenState();
     updateMeetingCard();
     setupReminderButton();

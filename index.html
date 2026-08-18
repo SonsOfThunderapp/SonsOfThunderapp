@@ -42,7 +42,7 @@
     </div>
   </div>
 
-  <!-- OLD welcome popup REMOVED — Follow the Bolt tour is the only first-run system -->
+  <!-- OLD welcome popup and retired product tour physically deleted -->
 
   <div id="app">
     <header id="main-header" class="header">
@@ -248,9 +248,6 @@
             </div>
             <div id="install-toast" class="install-toast hidden" role="status"></div>
 
-            <div class="refresh-card refresh-card-compact" id="replay-tour-card">
-              <button type="button" id="replay-tour-btn" class="refresh-app-btn">REPLAY APP TOUR</button>
-            </div>
             <div class="refresh-card refresh-card-compact" id="refresh-app-card">
               <button type="button" id="refresh-app-btn" class="refresh-app-btn">REFRESH APP</button>
             </div>
@@ -347,31 +344,6 @@
       <button type="button" class="cal-confirm-primary" id="cal-confirm-add">ADD TO CALENDAR</button>
       <button type="button" class="cal-confirm-secondary" id="cal-confirm-later">NOT NOW</button>
       <p class="cal-confirm-hint">One more tap. Your phone confirms the event.</p>
-    </div>
-  </div>
-
-  <!-- PRODUCT TOUR — SLIDE-BASED (canonical 2026-08-18). OLD floating/bouncing tour RETIRED. -->
-  <div id="tb-tour" class="tb-tour tb-tour-slides hidden" aria-hidden="true">
-    <div class="tb-tour-stage" role="dialog" aria-modal="true" aria-labelledby="tb-tour-headline">
-      <button type="button" class="tb-tour-close" id="tb-tour-close" aria-label="Close tour">×</button>
-      <div class="tb-tour-slide-frame">
-        <img id="tb-tour-slide-img" class="tb-tour-slide-img" src="assets/tour-01.png" alt="" decoding="async" />
-      </div>
-      <div class="tb-tour-caption">
-        <div class="tb-tour-bolt-row" aria-hidden="true">
-          <span class="tb-tour-follow">FOLLOW THE BOLT</span>
-          <span class="tb-tour-progress" id="tb-tour-progress">1 of 7</span>
-        </div>
-        <h2 id="tb-tour-headline" class="tb-tour-headline"></h2>
-        <p id="tb-tour-body" class="tb-tour-body"></p>
-        <p id="tb-tour-body-full" class="tb-tour-body-full sr-only"></p>
-      </div>
-      <div class="tb-tour-dots" id="tb-tour-dots" aria-hidden="true"></div>
-      <div class="tb-tour-actions">
-        <button type="button" class="tb-tour-back" id="tb-tour-back">BACK</button>
-        <button type="button" class="tb-tour-next" id="tb-tour-next">NEXT</button>
-        <button type="button" class="tb-tour-skip" id="tb-tour-skip">SKIP TOUR</button>
-      </div>
     </div>
   </div>
 
