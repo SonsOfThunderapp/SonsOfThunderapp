@@ -161,3 +161,7 @@ Thunder is the single official mascot and concierge character. The concierge lig
 - Encouragement bubbles (10 exact lines, 15s cycle) pause during guiding; living-idle pauses during speaking/guiding.
 - Future ZIPs may not silently restore a generic bolt, freeze idle, or allow overlapping bubbles/states.
 
+
+
+## Cinematic tour motion (2026-08-18)
+Permanent: THUNDER-CINEMATIC-MOTION-LANGUAGE.md. One dominant motion at a time. Thunder stays put after entrance. No Ken Burns. Scene 7 single final heartbeat only.

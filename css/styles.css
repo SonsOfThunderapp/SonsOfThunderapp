@@ -52,29 +52,41 @@ html, body {
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  padding-bottom: calc(70px + var(--safe-bottom));
+  /* Nav ~62px + FAB clearance — keep last cards above fixed chrome */
+  padding-bottom: calc(96px + var(--safe-bottom));
 }
 
-/* HEADER */
+/* HEADER — compact APP header (not hero).
+   Safe-area grows padding; logo scale stays fixed and small. */
 .header {
-  /* Lower wordmark — clear status bar / notch, less top dead crush */
-  padding: max(48px, calc(22px + env(safe-area-inset-top, 0px))) 16px 10px;
+  padding: calc(8px + env(safe-area-inset-top, 20px)) 16px 8px;
   text-align: center;
   background: var(--black);
   position: sticky;
   top: 0;
   z-index: 50;
+  overflow: visible;
 }
 .logo {
-  height: 124px;
+  height: 72px;
   width: auto;
-  max-width: 96vw;
+  max-width: 78vw;
   object-fit: contain;
   display: block;
   margin: 0 auto;
-  /* High-res PNG srcset handles retina; let browser smooth */
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
+}
+/* Pulse bolt asset — absolute over the O-bolt only; never inflate header height */
+.header-bolt-live {
+  position: absolute;
+  left: 29.4%;
+  top: 2%;
+  width: 17.3%;
+  height: 86%;
+  object-fit: contain;
+  pointer-events: none;
+  z-index: 2;
 }
 
 /* Logo bolt pulse — clipped to the real bolt through the O (pixel-measured @2x).
@@ -83,7 +95,7 @@ html, body {
 .logo-glimmer-wrap {
   position: relative;
   display: inline-block;
-  max-width: 96vw;
+  max-width: 78vw;
   margin: 0 auto;
   line-height: 0;
   overflow: visible;
@@ -137,8 +149,8 @@ html, body {
 
 .container {
   padding: var(--space-3) var(--space-4) var(--space-5);
-  /* Extra bottom clearance so last cards clear the fixed Thunder FAB */
-  padding-bottom: calc(var(--space-5) + 28px);
+  /* Clear fixed bottom nav + FAB so last actionable cards stay reachable */
+  padding-bottom: calc(var(--space-5) + 72px + env(safe-area-inset-bottom, 0px));
   max-width: 640px;
   margin: 0 auto;
 }
@@ -396,7 +408,17 @@ html, body {
   width: 48px; height: 48px; background: #111; border-radius: 10px;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
-.event-month { font-size: 10px; font-weight: 700; color: var(--yellow); letter-spacing: 0.5px; }
+.event-month {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--yellow);
+  letter-spacing: 0.5px;
+  animation: brotherNamePulse var(--tb-breathe);
+  will-change: opacity, text-shadow;
+}
+@media (prefers-reduced-motion: reduce) {
+  .event-month { animation: none !important; text-shadow: none !important; }
+}
 .event-day { font-size: 18px; font-weight: 800; }
 .event-details h3 { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
 .event-details p { font-size: 13px; color: var(--gray); }
@@ -685,32 +707,51 @@ h1.code-title-glow {
 .nav-item svg { width: 22px; height: 22px; opacity: 0.85; }
 .nav-item.active { color: var(--yellow); }
 
-/* FLOATING THUNDER BUTTON — slightly smaller for balance */
+/* FLOATING THUNDER — character only, no yellow circle */
 .thunder-fab {
-  position: fixed; right: 18px; bottom: calc(108px + var(--safe-bottom));
-  width: 48px; height: 48px; border-radius: 50%;
-  background: var(--yellow); color: #000;
-  border: none; font-size: 22px; font-weight: 800;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 20px rgba(254, 241, 5, 0.45);
-  z-index: 150; cursor: pointer;
+  position: fixed;
+  right: 12px;
+  bottom: calc(88px + var(--safe-bottom));
+  width: 60px;
+  height: 60px;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: none;
+  z-index: 150;
+  cursor: pointer;
   transition: transform 0.15s;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  padding: 0;
 }
 .thunder-fab:active { transform: scale(0.92); }
-.thunder-fab .bolt {
-  line-height: 1;
-  color: #000;
-  -webkit-text-stroke: 1.5px #000;
-  text-stroke: 1.5px #000;
-  paint-order: stroke fill;
-  font-size: 24px;
+.thunder-fab-img {
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
   filter:
-    drop-shadow(0 0 4px rgba(254, 241, 5, 1))
-    drop-shadow(0 0 10px rgba(254, 241, 5, 0.75))
-    drop-shadow(0 0 18px rgba(255, 160, 0, 0.5));
+    drop-shadow(0 0 6px rgba(254, 241, 5, 0.55))
+    drop-shadow(0 0 14px rgba(254, 241, 5, 0.35));
   animation: boltLive var(--tb-breathe);
+}
+.thunder-fab-aura {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(254,241,5,0.18) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+  animation: boltLive var(--tb-breathe);
+}
+/* Legacy emoji bolt inside FAB — disabled when character asset is present */
+.thunder-fab .bolt {
+  display: none !important;
 }
 
 /* ===== UNIFIED BOLT GLOW =====
@@ -2230,10 +2271,15 @@ h1.code-title-glow {
   color: var(--yellow);
   margin-bottom: 10px;
   padding-right: 40px;
-  /* STRIPPED: no ambient pulse/glow on announcement / meeting / mission modal titles */
-  animation: none !important;
-  text-shadow: none !important;
-  will-change: auto;
+  /* RESTORED: shared --tb-breathe with brother names / event months */
+  animation: brotherNamePulse var(--tb-breathe) !important;
+  will-change: opacity, text-shadow;
+}
+@media (prefers-reduced-motion: reduce) {
+  .info-detail-label {
+    animation: none !important;
+    text-shadow: none !important;
+  }
 }
 .info-detail-title {
   font-family: var(--font-display, inherit);
@@ -2937,6 +2983,11 @@ h1.code-title-glow {
   font-size: 15px;
   letter-spacing: 0.14em;
   margin-bottom: 10px;
+  animation: brotherNamePulse var(--tb-breathe);
+  will-change: opacity, text-shadow;
+}
+@media (prefers-reduced-motion: reduce) {
+  .next-meeting .card-label { animation: none !important; text-shadow: none !important; }
 }
 
 .meeting-countdown {
@@ -3080,11 +3131,11 @@ h1.code-title-glow {
   text-shadow: 0 0 12px rgba(254, 241, 5, 0.35);
 }
 
-/* FAB — sit cleaner above nav */
+/* FAB — character-only; no yellow disk / box shadow */
 .thunder-fab {
-  box-shadow:
-    0 4px 18px rgba(254, 241, 5, 0.35),
-    0 0 0 1px rgba(0, 0, 0, 0.4);
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
 }
 
 /* More page — identity + tools as one system */
@@ -4507,15 +4558,7 @@ h1.code-title-glow,
   padding-top: 10px !important;
 }
 
-/* STRIPPED: event-month + info modal label pulse (announcements / meetings / invites) */
-.event-month {
-  animation: none !important;
-  text-shadow: none !important;
-}
-.info-detail-label {
-  animation: none !important;
-  text-shadow: none !important;
-}
+/* REPAIRED 20260818: event-month + info-detail-label pulse restored — strip kill removed */
 /* ===END SHIP invite1=== */
 
 /* Invite1: share contact + auth sub pulse on shared breathe */
@@ -4854,218 +4897,146 @@ h1.code-title-glow,
 
 
 /* ── Product Tour (isolated; must not leak after hidden) ── */
-/* ── Living Bolt Concierge Tour ───────────────────────────────── */
-.tb-tour {
+/* OLD Living Bolt floating Concierge CSS REMOVED 20260818 — see DO-NOT-RESURRECT */
+
+/* ===== SLIDE TOUR (canonical 2026-08-18) — old floating host RETIRED ===== */
+.tb-tour.tb-tour-slides {
   position: fixed;
   inset: 0;
   z-index: 12000;
-  pointer-events: none;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
 }
-.tb-tour.hidden { display: none !important; }
-.tb-tour-dim {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.28);
-  pointer-events: auto;
-  backdrop-filter: saturate(0.75) brightness(0.72);
-  -webkit-backdrop-filter: saturate(0.75) brightness(0.72);
-}
-.tb-tour-spotlight {
-  position: fixed;
-  border-radius: 14px;
-  border: 1.5px solid rgba(254, 241, 5, 0.8);
-  box-shadow:
-    0 0 0 9999px rgba(0, 0, 0, 0.78),
-    0 0 28px rgba(254, 241, 5, 0.5),
-    inset 0 0 0 1px rgba(254, 241, 5, 0.15);
-  pointer-events: none;
-  transition: top 0.32s cubic-bezier(0.22, 0.9, 0.28, 1), left 0.32s cubic-bezier(0.22, 0.9, 0.28, 1), width 0.32s cubic-bezier(0.22, 0.9, 0.28, 1), height 0.32s cubic-bezier(0.22, 0.9, 0.28, 1);
-  z-index: 12001;
-}
-.tb-tour-spotlight.is-empty {
-  opacity: 0;
-  width: 0;
-  height: 0;
-  border: none;
-  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.78);
-}
-
-/* Living host bolt — official bolt-only asset */
-.tb-tour-host {
-  position: fixed;
-  width: 96px;
-  height: 96px;
-  z-index: 12003;
-  pointer-events: none;
-  transform: translate(-50%, -50%);
-  transition: top 0.55s cubic-bezier(0.22, 0.85, 0.25, 1), left 0.55s cubic-bezier(0.22, 0.85, 0.25, 1);
-  will-change: top, left, transform;
-}
-.tb-tour-host-img {
-  width: 96px;
-  height: 96px;
-  object-fit: contain;
-  display: block;
+.tb-tour.tb-tour-slides.hidden { display: none !important; }
+.tb-tour-stage {
+  width: min(420px, 100%);
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #0a0a0a;
+  border-radius: 16px;
+  border: 1px solid #222;
+  overflow: hidden;
   position: relative;
-  z-index: 1;
-  filter: drop-shadow(0 0 14px rgba(254, 241, 5, 0.55));
 }
-.tb-tour-host-glow {
-  position: absolute;
-  inset: -12px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(254, 241, 5, 0.28) 0%, transparent 70%);
-  z-index: 0;
-  animation: tbHostPulse 2.4s ease-in-out infinite;
+.tb-tour-slide-frame {
+  flex: 0 0 auto;
+  background: #000;
+  line-height: 0;
+  max-height: 58vh;
+  overflow: hidden;
+}
+.tb-tour-slide-img {
+  width: 100%;
+  height: auto;
+  max-height: 58vh;
+  object-fit: contain;
+  object-position: center top;
+  display: block;
+  background: #000;
+}
+.tb-tour-slide-img.tb-tour-slide-in {
+  animation: tbTourFade 0.35s ease-out;
+}
+@keyframes tbTourFade {
+  from { opacity: 0.35; }
+  to { opacity: 1; }
+}
+.tb-tour-caption {
+  padding: 12px 16px 4px;
+  flex: 0 0 auto;
+}
+.tb-tour-slides .tb-tour-headline {
+  color: #FEF105;
+  font-size: 1.25rem;
+  margin: 6px 0 4px;
+  letter-spacing: 0.04em;
+}
+.tb-tour-slides .tb-tour-body {
+  color: #ccc;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  margin: 0 0 8px;
+}
+.tb-tour-slides .tb-tour-actions {
+  display: flex;
+  gap: 8px;
+  padding: 8px 16px 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.tb-tour-back {
+  background: transparent;
+  border: 1px solid #333;
+  color: #aaa;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.tb-tour-back:disabled {
+  opacity: 0.35;
   pointer-events: none;
 }
-.tb-tour-host.is-arrival .tb-tour-host-img {
-  animation: tbHostArrival 0.55s cubic-bezier(0.2, 0.9, 0.25, 1) both;
+.tb-tour-slides .tb-tour-next {
+  flex: 1;
+  min-width: 120px;
 }
-.tb-tour-host.is-travel .tb-tour-host-img {
-  animation: tbHostTravel 0.55s ease-in-out both;
+.tb-tour-slides .tb-tour-skip {
+  width: 100%;
+  text-align: center;
+  margin-top: 2px;
 }
-.tb-tour-host.is-explain .tb-tour-host-img {
-  animation: tbHostExplain 2.8s ease-in-out infinite;
+/* Kill old floating host/spotlight if any residual CSS */
+.tb-tour-slides .tb-tour-host,
+.tb-tour-slides .tb-tour-spotlight,
+.tb-tour-slides .tb-tour-dim {
+  display: none !important;
 }
-.tb-tour-host.is-celebrate .tb-tour-host-img {
-  animation: tbHostCelebrate 0.7s cubic-bezier(0.2, 0.9, 0.25, 1) both;
-}
-.tb-tour-host.is-attention {
-  transform: translate(-50%, -50%) scale(1.06);
-}
-@keyframes tbHostPulse {
-  0%, 100% { opacity: 0.55; transform: scale(0.92); }
-  50% { opacity: 1; transform: scale(1.05); }
-}
-@keyframes tbHostArrival {
-  0% { transform: scale(0.6); opacity: 0.2; filter: drop-shadow(0 0 4px rgba(254, 241, 5, 0.3)); }
-  60% { transform: scale(1.12); opacity: 1; }
-  100% { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 12px rgba(254, 241, 5, 0.75)); }
-}
-@keyframes tbHostTravel {
-  0% { transform: scale(1) rotate(0deg); }
-  40% { transform: scale(1.08) rotate(-6deg); }
-  100% { transform: scale(1) rotate(0deg); }
-}
-@keyframes tbHostExplain {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-3px); }
-}
-@keyframes tbHostCelebrate {
-  0% { transform: scale(1); }
-  35% { transform: scale(1.22); filter: drop-shadow(0 0 18px rgba(254, 241, 5, 0.95)); }
-  100% { transform: scale(1); }
+@media (prefers-reduced-motion: reduce) {
+  .tb-tour-slide-img.tb-tour-slide-in { animation: none !important; }
 }
 
-.tb-tour-tip {
-  position: fixed;
-  left: 16px;
-  right: 16px;
-  max-width: 340px;
-  margin: 0 auto;
-  padding: 14px 16px 12px;
-  background: #0a0a0a;
-  border: 1px solid rgba(254, 241, 5, 0.4);
-  border-radius: 14px;
-  z-index: 12004;
-  pointer-events: auto;
-  box-shadow: 0 14px 44px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(227, 6, 0, 0.12);
-  transition: top 0.35s cubic-bezier(0.22, 0.9, 0.28, 1), opacity 0.25s ease;
-}
-.tb-tour-tip::before {
-  content: '';
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  background: #0a0a0a;
-  border-left: 1px solid rgba(254, 241, 5, 0.4);
-  border-top: 1px solid rgba(254, 241, 5, 0.4);
-  transform: rotate(45deg);
-  top: -7px;
-  left: 28px;
-}
+/* Shared tour chrome (slide tour) — rebuilt after floating CSS purge */
 .tb-tour-close {
   position: absolute;
   top: 8px;
   right: 10px;
-  width: 32px;
-  height: 32px;
-  border: none;
+  z-index: 5;
   background: transparent;
+  border: none;
   color: #888;
-  font-size: 22px;
+  font-size: 28px;
   line-height: 1;
+  padding: 8px 12px;
   cursor: pointer;
-  z-index: 2;
 }
 .tb-tour-close:active { color: #fff; }
 .tb-tour-bolt-row {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   gap: 8px;
-  margin-bottom: 8px;
-  padding-right: 28px;
+  margin-bottom: 4px;
 }
 .tb-tour-follow {
   font-size: 11px;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   color: #FEF105;
-  font-weight: 600;
+  font-weight: 700;
 }
 .tb-tour-progress {
   font-size: 11px;
-  letter-spacing: 0.08em;
-  color: #777;
-  font-weight: 500;
-}
-.tb-tour-headline {
-  margin: 0 0 6px;
-  font-size: 17px;
-  letter-spacing: 0.05em;
-  color: #fff;
-  font-family: var(--font-display, inherit);
-  padding-right: 8px;
-}
-.tb-tour-body {
-  margin: 0 0 12px;
-  font-size: 14px;
-  line-height: 1.4;
-  color: #c8c8c8;
-  min-height: 2.8em;
-  white-space: pre-wrap;
-}
-.tb-tour-body.is-typing::after {
-  content: '';
-  display: inline-block;
-  width: 2px;
-  height: 0.95em;
-  margin-left: 2px;
-  background: #FEF105;
-  vertical-align: -2px;
-  animation: tbTypeCaret 0.9s steps(1) infinite;
-}
-@keyframes tbTypeCaret {
-  0%, 45% { opacity: 1; }
-  50%, 100% { opacity: 0; }
-}
-.tb-tour-body-full.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+  color: #666;
 }
 .tb-tour-dots {
   display: flex;
+  gap: 6px;
   justify-content: center;
-  gap: 7px;
-  margin-bottom: 12px;
+  padding: 4px 0 8px;
 }
 .tb-tour-dots span {
   width: 6px;
@@ -5075,947 +5046,89 @@ h1.code-title-glow,
 }
 .tb-tour-dots span.on {
   background: #FEF105;
-  box-shadow: 0 0 6px rgba(254, 241, 5, 0.5);
 }
-.tb-tour-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.tb-tour-next {
-  width: 100%;
-  padding: 12px 14px;
-  border: none;
-  border-radius: 10px;
+.tb-tour-slides .tb-tour-next {
   background: #E30600;
   color: #fff;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  font-size: 14px;
-  cursor: pointer;
-}
-.tb-tour-next:active { transform: scale(0.97); opacity: 0.92; }
-.tb-tour-next:disabled {
-  opacity: 0.55;
-  cursor: default;
-}
-.tb-tour-skip {
-  width: 100%;
-  padding: 10px;
   border: none;
-  background: transparent;
-  color: #777;
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-}
-.tb-tour-skip:active { color: #aaa; }
-.tb-tour-target-pulse {
-  outline: 2px solid rgba(254, 241, 5, 0.55);
-  outline-offset: 3px;
   border-radius: 12px;
-  position: relative;
-  z-index: 12002;
-}
-
-/* Pause ambient life while the host has the stage */
-body.tb-tour-open .bolt-glow,
-body.tb-tour-open .header-bolt-live,
-body.tb-tour-open .brother-name,
-body.tb-tour-open .code-title,
-body.tb-tour-open .btn-share,
-body.tb-tour-open body.tb-tour-open .welcome-bolt-img,
-body.tb-tour-open .logo-bolt-glimmer,
-body.tb-tour-open [class*="boltLive"],
-body.tb-tour-open .rsvp-status {
-  animation-play-state: paused !important;
-}
-body.tb-tour-open {
-  overflow: hidden;
-}
-body.tb-tour-open #app {
-  pointer-events: none;
-}
-body.tb-tour-open .tb-tour-target-live {
-  pointer-events: auto !important;
-  position: relative;
-  z-index: 12002;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tb-tour-spotlight { transition: none; }
-  .tb-tour-host { transition: none; }
-  .tb-tour-host-glow,
-  .tb-tour-host.is-arrival .tb-tour-host-img,
-  .tb-tour-host.is-travel .tb-tour-host-img,
-  .tb-tour-host.is-explain .tb-tour-host-img,
-  .tb-tour-host.is-celebrate .tb-tour-host-img { animation: none !important; }
-  .tb-tour-body.is-typing::after { display: none; }
-  .tb-tour-next:active { transform: none; }
-  .tb-tour-tip { transition: none; }
-}
-
-/* Thunder Commitment — I’m In signature */
-.btn-rsvp.is-locking {
-  pointer-events: none;
-  opacity: 0.95;
-}
-.btn-rsvp.commit-strike {
-  animation: tbCommitStrike 0.85s cubic-bezier(0.22, 1, 0.36, 1);
-}
-@keyframes tbCommitStrike {
-  0% { transform: scale(1); box-shadow: 0 0 0 transparent; }
-  18% { transform: scale(0.97); }
-  40% { transform: scale(1.02); box-shadow: 0 0 28px rgba(254, 241, 5, 0.55); }
-  70% { transform: scale(1); box-shadow: 0 0 18px rgba(227, 6, 0, 0.4); }
-  100% { transform: scale(1); box-shadow: 0 0 12px rgba(254, 241, 5, 0.25); }
-}
-.next-meeting.commit-energized {
-  border-color: rgba(254, 241, 5, 0.45);
-  box-shadow: 0 0 0 1px rgba(254, 241, 5, 0.2), 0 0 24px rgba(254, 241, 5, 0.12);
-}
-.next-meeting.commit-flash::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(105deg, transparent 30%, rgba(254, 241, 5, 0.22) 48%, transparent 62%);
-  pointer-events: none;
-  animation: tbCardStrike 0.7s ease-out;
-}
-@keyframes tbCardStrike {
-  0% { opacity: 0; transform: translateX(-30%); }
-  35% { opacity: 1; }
-  100% { opacity: 0; transform: translateX(30%); }
-}
-.next-meeting { position: relative; overflow: hidden; }
-.cal-confirm-sheet {
-  position: fixed;
-  inset: 0;
-  z-index: 11000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  background: rgba(0,0,0,0.78);
-}
-.cal-confirm-sheet.hidden { display: none !important; }
-.cal-confirm-panel {
-  width: 100%;
-  max-width: 340px;
-  background: #0a0a0a;
-  border: 1px solid rgba(254, 241, 5, 0.35);
-  border-radius: 14px;
-  padding: 22px 18px 16px;
-  text-align: center;
-}
-.cal-confirm-title {
-  margin: 0 0 8px;
-  color: #FEF105;
-  font-size: 22px;
-  letter-spacing: 0.06em;
-}
-.cal-confirm-body {
-  margin: 0 0 16px;
-  color: #ccc;
-  font-size: 14px;
-  line-height: 1.4;
-}
-.cal-confirm-primary {
-  width: 100%;
-  padding: 13px;
-  border: none;
-  border-radius: 10px;
-  background: #E30600;
-  color: #fff;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  margin-bottom: 8px;
-  cursor: pointer;
-}
-.cal-confirm-secondary {
-  width: 100%;
-  padding: 11px;
-  border: none;
-  background: transparent;
-  color: #888;
-  font-size: 13px;
-  letter-spacing: 0.06em;
-  cursor: pointer;
-}
-.cal-confirm-hint {
-  margin: 10px 0 0;
-  font-size: 11px;
-  color: #666;
-}
-.btn-add-cal-inline {
-  display: block;
-  width: 100%;
-  margin-top: 8px;
-  padding: 10px;
-  border: 1px solid rgba(254, 241, 5, 0.35);
-  border-radius: 8px;
-  background: transparent;
-  color: #FEF105;
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-}
-.btn-add-cal-inline.hidden { display: none; }
-@media (prefers-reduced-motion: reduce) {
-  .btn-rsvp.commit-strike { animation: none; }
-  .next-meeting.commit-flash::after { animation: none; display: none; }
-}
-
-
-/* ThunderFX — iPhone visual parity when vibrate API absent */
-.btn-rsvp.tfx-ios-boost {
-  box-shadow: 0 0 0 2px rgba(254, 241, 5, 0.55), 0 0 32px rgba(254, 241, 5, 0.35);
-}
-.tfx-success-flash {
-  animation: tfxSuccessFlash 0.48s cubic-bezier(0.22, 1, 0.36, 1);
-}
-@keyframes tfxSuccessFlash {
-  0% { filter: brightness(1); }
-  40% { filter: brightness(1.25); }
-  100% { filter: brightness(1); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .btn-rsvp.tfx-ios-boost { box-shadow: none; }
-  .tfx-success-flash { animation: none; }
-}
-
-/* CONFLICT FIX: never let tb-press transform:!important kill commit-strike */
-.btn-rsvp.commit-strike {
-  animation: tbCommitStrike 0.85s cubic-bezier(0.22, 1, 0.36, 1) !important;
-  transform: none; /* keyframes own transform */
-}
-.btn-rsvp.commit-strike.tb-press {
-  transform: none !important; /* strip press if it lingered */
-  filter: none !important;
-}
-/* lock-pulse is legacy one-shot — do not combine with commit-strike on same node */
-.btn-rsvp.lock-pulse.commit-strike {
-  animation: tbCommitStrike 0.85s cubic-bezier(0.22, 1, 0.36, 1) !important;
-}
-/* tb-glow-hit on RSVP would also overwrite animation — neutralize while striking */
-.btn-rsvp.commit-strike.tb-glow-hit,
-.btn-rsvp.commit-strike.tb-glow-hit-yellow {
-  animation: tbCommitStrike 0.85s cubic-bezier(0.22, 1, 0.36, 1) !important;
-}
-
-
-/* ── HERO: Thunder Fireworks + Laser Ignition (scarce) ─────────── */
-.tb-hero-layer {
-  position: fixed;
-  inset: 0;
-  z-index: 12000;
-  pointer-events: none;
-  overflow: hidden;
-}
-.tb-hero-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-.tb-fireworks-layer {
-  background: transparent;
-}
-.tb-hero-reduced {
-  background: radial-gradient(ellipse at 50% 60%, rgba(254, 241, 5, 0.18), transparent 55%);
-  animation: tbHeroReduced 0.65s ease-out 1;
-}
-@keyframes tbHeroReduced {
-  0% { opacity: 0; }
-  35% { opacity: 1; }
-  100% { opacity: 0; }
-}
-
-/* Laser streaks — pure black stage, electric yellow/gold */
-.tb-laser-layer {
-  background: #000;
-  opacity: 1;
-  transition: opacity 0.28s ease;
-}
-.tb-laser-layer.tb-laser-done {
-  opacity: 0;
-}
-.tb-laser-streak {
-  position: absolute;
-  height: 2px;
-  width: 140%;
-  left: -20%;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(254, 241, 5, 0.15) 20%,
-    #FEF105 48%,
-    #FFFFFF 50%,
-    #FEF105 52%,
-    rgba(254, 241, 5, 0.15) 80%,
-    transparent 100%
-  );
-  box-shadow: 0 0 8px rgba(254, 241, 5, 0.85), 0 0 20px rgba(254, 241, 5, 0.45);
-  opacity: 0;
-  transform-origin: center;
-  will-change: transform, opacity;
-}
-.tb-laser-a {
-  top: 28%;
-  animation: tbLaserA 0.42s cubic-bezier(0.2, 0.9, 0.3, 1) 0.12s 1 forwards;
-}
-.tb-laser-b {
-  top: 48%;
-  animation: tbLaserB 0.4s cubic-bezier(0.2, 0.9, 0.3, 1) 0.22s 1 forwards;
-}
-.tb-laser-c {
-  top: 62%;
-  animation: tbLaserC 0.38s cubic-bezier(0.2, 0.9, 0.3, 1) 0.34s 1 forwards;
-}
-.tb-laser-d {
-  top: 38%;
-  height: 3px;
-  animation: tbLaserD 0.36s cubic-bezier(0.2, 0.9, 0.3, 1) 0.42s 1 forwards;
-  box-shadow: 0 0 10px rgba(227, 6, 0, 0.5), 0 0 18px rgba(254, 241, 5, 0.7);
-}
-@keyframes tbLaserA {
-  0% { opacity: 0; transform: rotate(-18deg) scaleX(0.05) translateX(-30%); }
-  18% { opacity: 1; }
-  55% { opacity: 1; transform: rotate(-18deg) scaleX(1) translateX(0); }
-  100% { opacity: 0; transform: rotate(-18deg) scaleX(1.05) translateX(8%); }
-}
-@keyframes tbLaserB {
-  0% { opacity: 0; transform: rotate(14deg) scaleX(0.05) translateX(-30%); }
-  18% { opacity: 1; }
-  55% { opacity: 1; transform: rotate(14deg) scaleX(1) translateX(0); }
-  100% { opacity: 0; transform: rotate(14deg) scaleX(1.05) translateX(8%); }
-}
-@keyframes tbLaserC {
-  0% { opacity: 0; transform: rotate(-8deg) scaleX(0.05) translateX(-30%); }
-  18% { opacity: 1; }
-  55% { opacity: 1; transform: rotate(-8deg) scaleX(1) translateX(0); }
-  100% { opacity: 0; transform: rotate(-8deg) scaleX(1.05) translateX(8%); }
-}
-@keyframes tbLaserD {
-  0% { opacity: 0; transform: rotate(22deg) scaleX(0.05) translateX(-30%); }
-  18% { opacity: 1; }
-  55% { opacity: 1; transform: rotate(22deg) scaleX(1) translateX(0); }
-  100% { opacity: 0; transform: rotate(22deg) scaleX(1.05) translateX(8%); }
-}
-.tb-laser-core {
-  position: absolute;
-  left: 50%;
-  top: 46%;
-  width: 12px;
-  height: 12px;
-  margin: -6px 0 0 -6px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow:
-    0 0 20px 8px rgba(254, 241, 5, 0.9),
-    0 0 48px 16px rgba(254, 241, 5, 0.45),
-    0 0 80px 24px rgba(227, 6, 0, 0.2);
-  opacity: 0;
-  animation: tbLaserCore 0.55s cubic-bezier(0.2, 0.9, 0.25, 1) 0.48s 1 forwards;
-}
-@keyframes tbLaserCore {
-  0% { opacity: 0; transform: scale(0.3); }
-  40% { opacity: 1; transform: scale(1.35); }
-  100% { opacity: 0; transform: scale(0.6); }
-}
-.tb-laser-reduced {
-  background: #000;
-}
-@media (prefers-reduced-motion: reduce) {
-  .tb-laser-streak, .tb-laser-core { animation: none !important; opacity: 0; }
-  .tb-hero-reduced { animation: tbHeroReduced 0.4s ease-out 1; }
-}
-
-
-/* Hey Thunder opt-in (foreground only) */
-.thunder-wake-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 10px;
-  padding: 8px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(254, 241, 5, 0.35);
-  background: #0a0a0a;
-  color: #FEF105;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  cursor: pointer;
-}
-.thunder-wake-chip.is-on {
-  border-color: rgba(254, 241, 5, 0.7);
-  box-shadow: 0 0 12px rgba(254, 241, 5, 0.25);
-}
-.thunder-wake-chip.is-listening {
-  animation: thunderListenPulse var(--tb-breathe);
-}
-.thunder-wake-note {
-  margin: 6px 0 0;
-  font-size: 11px;
-  color: #777;
-  line-height: 1.35;
-}
-
-/* =========================================================
-   LOGO BOX KILL SWITCH — ABSOLUTE FINAL CASCADE (do not append after)
-   Full-size gradient overlays painted a rectangle on the wordmark.
-   Yellow bolt lives in the PNG. Housekeeping: keep this LAST.
-   ========================================================= */
-.logo-bolt-glimmer,
-.splash-logo-bolt-glimmer {
-  display: none !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-  background: none !important;
-  animation: none !important;
-  filter: none !important;
-  box-shadow: none !important;
-  mix-blend-mode: normal !important;
-  -webkit-mask-image: none !important;
-  mask-image: none !important;
-  width: 0 !important;
-  height: 0 !important;
-  overflow: hidden !important;
-}
-.header img.logo,
-.splash-mark,
-.splash-logo,
-.about-logo {
-  filter: none !important;
-  box-shadow: none !important;
-  background: transparent !important;
-}
-
-/* =========================================================
-   VISUAL DNA RESTORE 20260816-LOCKED3 — surgical pulse + safe-area
-   Header pulse uses bolt-only.png (never rectangular logo-bolt-glimmer).
-   ========================================================= */
-
-/* 1) Header bolt — bolt-shaped only, shared --tb-breathe */
-.logo-glimmer-wrap {
-  position: relative;
-  display: inline-block;
-  max-width: 100%;
-}
-.header-bolt-live {
-  /* Exact logo@2x yellow-bolt bbox (incl. 2px pad) — same zigzags as wordmark */
-  position: absolute;
-  left: 28.417%;
-  top: 3.629%;
-  width: 18.345%;
-  height: 89.516%;
-  max-width: none;
-  object-fit: fill; /* 1:1 with extracted logo bolt crop */
-  object-position: center center;
-  pointer-events: none;
-  z-index: 2;
-  mix-blend-mode: screen;
-  animation: boltLive var(--tb-breathe) !important;
-  animation-delay: 0s !important;
-  filter: drop-shadow(0 0 8px rgba(254, 241, 5, 0.65));
-}
-@media (prefers-reduced-motion: reduce) {
-  .header-bolt-live {
-    animation: none !important;
-    opacity: 0.9;
-    filter: drop-shadow(0 0 4px rgba(254, 241, 5, 0.35));
-  }
-}
-
-/* 2) Place / card titles — THE CODE + section titles that carry glow class */
-.code-title-glow,
-.about-container .code-title.code-title-glow,
-h1.code-title-glow {
-  animation: codeTitleGlow var(--tb-breathe) !important;
-  animation-delay: 0s !important;
-  color: #FEF105 !important;
-}
-
-/* 3) Brother name — stronger readable pulse, no layout shift */
-.brother-name {
-  animation: brotherNamePulse var(--tb-breathe) !important;
-  animation-delay: 0s !important;
-  will-change: opacity, text-shadow;
-}
-@keyframes brotherNamePulse {
-  0%, 100% {
-    opacity: 0.9;
-    text-shadow: 0 0 4px rgba(254, 241, 5, 0.15);
-    color: #fff;
-  }
-  50% {
-    opacity: 1;
-    text-shadow:
-      0 0 12px rgba(254, 241, 5, 0.55),
-      0 0 4px rgba(254, 241, 5, 0.35);
-    color: #fff;
-  }
-}
-
-/* 4) Event calendar dates — intense yellow bloom (DNA) */
-.event-month {
-  animation: eventDateGlow var(--tb-breathe) !important;
-  animation-delay: 0s !important;
-  color: #FEF105 !important;
-  font-weight: 700;
-}
-.event-day {
-  animation: eventDayGlow var(--tb-breathe) !important;
-  animation-delay: 0s !important;
-  color: #fff;
-}
-.event-date-box {
-  border: 1px solid rgba(254, 241, 5, 0.22);
-  box-shadow: inset 0 0 12px rgba(254, 241, 5, 0.06);
-}
-@keyframes eventDateGlow {
-  0%, 100% {
-    text-shadow: 0 0 4px rgba(254, 241, 5, 0.35);
-    opacity: 0.92;
-  }
-  50% {
-    text-shadow:
-      0 0 14px rgba(254, 241, 5, 0.85),
-      0 0 6px rgba(254, 241, 5, 0.55),
-      0 0 2px #FEF105;
-    opacity: 1;
-  }
-}
-@keyframes eventDayGlow {
-  0%, 100% {
-    text-shadow: 0 0 4px rgba(254, 241, 5, 0.2);
-  }
-  50% {
-    text-shadow:
-      0 0 12px rgba(254, 241, 5, 0.55),
-      0 0 4px rgba(255, 220, 80, 0.4);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .event-month, .event-day {
-    animation: none !important;
-    text-shadow: 0 0 6px rgba(254, 241, 5, 0.3);
-    opacity: 1;
-  }
-  .brother-name {
-    animation: none !important;
-    text-shadow: 0 0 4px rgba(254, 241, 5, 0.2);
-  }
-}
-
-/* 5) About / More page logo — safe-area, never clip under notch / Dynamic Island */
-#view-about.view,
-#view-about {
-  /* ensure view itself doesn't pull content under status bar */
-}
-#view-about .about-container,
-.about-container {
-  padding-top: max(64px, calc(36px + env(safe-area-inset-top, 0px))) !important;
-  padding-left: 16px;
-  padding-right: 16px;
-}
-#view-about .about-logo,
-.about-container .about-logo,
-img.about-logo {
-  margin-top: 8px !important;
-  margin-bottom: 22px !important;
-  display: block !important;
-  height: 96px;
-  max-width: 88vw;
-  margin-left: auto !important;
-  margin-right: auto !important;
-}
-
-/* Keep rectangular logo-bolt-glimmer dead even after this restore */
-.logo-bolt-glimmer,
-.splash-logo-bolt-glimmer {
-  display: none !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
-  width: 0 !important;
-  height: 0 !important;
-  pointer-events: none !important;
-}
-
-/* =========================================================
-   CATEGORY TITLE PULSE LOCK (20260816)
-   Labels like ANNOUNCEMENT / NEXT GATHERING / MISSION / LAST FIRE
-   share one yellow glow heartbeat with the rest of the app.
-   ========================================================= */
-@keyframes infoLabelPulse {
-  0%, 100% {
-    opacity: 0.72;
-    color: #FEF105;
-    text-shadow:
-      0 0 4px rgba(254, 241, 5, 0.2),
-      0 0 10px rgba(254, 241, 5, 0.08);
-  }
-  50% {
-    opacity: 1;
-    color: #FEF105;
-    text-shadow:
-      0 0 8px rgba(254, 241, 5, 0.85),
-      0 0 18px rgba(254, 241, 5, 0.55),
-      0 0 28px rgba(255, 180, 0, 0.35);
-  }
-}
-
-.card-label,
-.last-fire-label,
-.announcement-card-label,
-#meeting-phase-label {
-  font-family: var(--font-display, inherit) !important;
-  letter-spacing: 0.12em !important;
-  text-transform: uppercase !important;
-  color: #FEF105 !important;
-  animation: infoLabelPulse var(--tb-breathe, 4s) ease-in-out infinite !important;
-  animation-delay: 0s !important;
-  will-change: opacity, text-shadow;
-}
-
-.announcement-card-label {
-  display: block;
-  font-size: 11px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  text-align: left;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .card-label,
-  .last-fire-label,
-  .announcement-card-label,
-  #meeting-phase-label {
-    animation: none !important;
-    opacity: 1 !important;
-    text-shadow: 0 0 8px rgba(254, 241, 5, 0.35) !important;
-  }
-}
-
-
-/* =========================================================
-   CATEGORY TITLE GLOW + PULSE — HARD LOCK (20260816-LABELPULSE2)
-   ANNOUNCEMENT / NEXT GATHERING / MISSION / LAST FIRE / UPCOMING
-   and every .info-detail-label in the center popup.
-   Same --tb-breathe as bolts. Strong yellow bloom, not dim gray.
-   ========================================================= */
-@keyframes infoLabelPulse {
-  0%, 100% {
-    opacity: 0.82;
-    color: #FEF105 !important;
-    text-shadow:
-      0 0 6px rgba(254, 241, 5, 0.45),
-      0 0 14px rgba(254, 241, 5, 0.25),
-      0 0 22px rgba(255, 160, 0, 0.12);
-  }
-  50% {
-    opacity: 1;
-    color: #FEF105 !important;
-    text-shadow:
-      0 0 10px rgba(254, 241, 5, 1),
-      0 0 22px rgba(254, 241, 5, 0.75),
-      0 0 36px rgba(255, 180, 0, 0.45),
-      0 0 48px rgba(227, 6, 0, 0.15);
-  }
-}
-
-.card-label,
-.last-fire-label,
-.announcement-card-label,
-#meeting-phase-label,
-#info-detail-label {
-  font-family: var(--font-display, "Bebas Neue", sans-serif) !important;
-  letter-spacing: 0.14em !important;
-  text-transform: uppercase !important;
-  color: #FEF105 !important;
-  opacity: 1 !important;
-  animation: infoLabelPulse var(--tb-breathe, 4s) ease-in-out infinite !important;
-  animation-delay: 0s !important;
-  will-change: opacity, text-shadow;
-}
-
-.announcement-card-label {
-  display: block !important;
-  font-size: 11px !important;
-  font-weight: 700 !important;
-  margin-bottom: 8px !important;
-  text-align: left !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .card-label,
-  .last-fire-label,
-  .announcement-card-label,
-  #meeting-phase-label,
-  #info-detail-label {
-    animation: none !important;
-    opacity: 1 !important;
-    color: #FEF105 !important;
-    text-shadow: 0 0 10px rgba(254, 241, 5, 0.55) !important;
-  }
-}
-
-
-/* =========================================================
-   MASTER FINAL — MORE LOGO CLEARANCE + LABEL/BOLT CONFIRM
-   (20260816-MASTER-FINAL1)
-   ========================================================= */
-
-/* More page: push about logo fully below status bar / notch */
-#view-about .about-container {
-  padding-top: max(56px, calc(28px + env(safe-area-inset-top, 0px))) !important;
-}
-#view-about .about-logo {
-  margin-top: 12px !important;
-  margin-bottom: 22px !important;
-  height: 96px;
-  max-width: 88vw;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* Confirm header bolt overlay stays bolt-shaped + breathing */
-.header-bolt-live {
-  position: absolute !important;
-  left: 28.417% !important;
-  top: 3.629% !important;
-  width: 18.345% !important;
-  height: 89.516% !important;
-  pointer-events: none !important;
-  z-index: 2 !important;
-  mix-blend-mode: screen !important;
-  animation: boltLive var(--tb-breathe) !important;
-  filter: drop-shadow(0 0 8px rgba(254, 241, 5, 0.65));
-}
-
-/* Kill any rectangular glimmer residual */
-.logo-bolt-glimmer,
-.splash-logo-bolt-glimmer {
-  display: none !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  background: none !important;
-}
-
-
-/* =========================================================
-   MASTERPIECE LOCK — HEADER BOLT HEARTBEAT + TITLE DNA
-   (20260816-MASTERPIECE1)
-   POSITION owns placement. ANIMATION owns opacity/glow only.
-   ========================================================= */
-
-@keyframes headerBoltHeartbeat {
-  /* Cinematic: exist → dim → GONE → return → energize → settle */
-  0% {
-    opacity: 1;
-    filter: drop-shadow(0 0 10px rgba(254, 241, 5, 0.75)) drop-shadow(0 0 4px rgba(255, 180, 0, 0.4));
-  }
-  18% {
-    opacity: 0.35;
-    filter: drop-shadow(0 0 4px rgba(254, 241, 5, 0.3));
-  }
-  32% {
-    opacity: 0;
-    filter: none;
-  }
-  42% {
-    opacity: 0;
-    filter: none;
-  }
-  58% {
-    opacity: 0.55;
-    filter: drop-shadow(0 0 8px rgba(254, 241, 5, 0.5));
-  }
-  72% {
-    opacity: 1;
-    filter: drop-shadow(0 0 14px rgba(254, 241, 5, 0.9)) drop-shadow(0 0 6px rgba(255, 180, 0, 0.55));
-  }
-  88%, 100% {
-    opacity: 0.95;
-    filter: drop-shadow(0 0 8px rgba(254, 241, 5, 0.55));
-  }
-}
-
-.header-bolt-live {
-  /* POSITION locked — do not animate transform/left/top/width/height */
-  position: absolute !important;
-  left: 28.417% !important;
-  top: 3.629% !important;
-  width: 18.345% !important;
-  height: 89.516% !important;
-  max-width: none !important;
-  object-fit: fill !important;
-  object-position: center center !important;
-  pointer-events: none !important;
-  z-index: 2 !important;
-  mix-blend-mode: screen !important;
-  transform: none !important;
-  animation: headerBoltHeartbeat 7s ease-in-out infinite !important;
-  animation-delay: 0s !important;
-  will-change: opacity, filter;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .header-bolt-live {
-    animation: none !important;
-    opacity: 0.92 !important;
-    filter: drop-shadow(0 0 6px rgba(254, 241, 5, 0.4)) !important;
-    transform: none !important;
-  }
-}
-
-/* Title lifeblood — readable always, never opacity 0 */
-.card-label,
-.announcement-card-label,
-.last-fire-label,
-#meeting-phase-label,
-#info-detail-label,
-.brother-name,
-.event-month,
-.event-day,
-.code-title-glow {
-  animation-duration: var(--tb-breathe-dur, 4s) !important;
-}
-
-
-/* =========================================================
-   MASTERPIECE1b — ELEMENT PROOF LOCKS
-   ========================================================= */
-.brother-detail-name,
-#brother-detail-name {
-  font-family: var(--font-display, "Bebas Neue", sans-serif) !important;
-  color: #FEF105 !important;
-  animation: brotherNamePulse var(--tb-breathe) !important;
-  animation-delay: 0s !important;
-  will-change: opacity, text-shadow;
-}
-.brother-name {
-  animation: brotherNamePulse var(--tb-breathe) !important;
-}
-.event-month {
-  animation: eventDateGlow var(--tb-breathe) !important;
-}
-.event-day {
-  animation: eventDayGlow var(--tb-breathe) !important;
-}
-#view-about .about-container {
-  padding-top: max(64px, calc(36px + env(safe-area-inset-top, 0px))) !important;
-}
-@media (prefers-reduced-motion: reduce) {
-  .brother-detail-name,
-  #brother-detail-name {
-    animation: none !important;
-    text-shadow: 0 0 6px rgba(254, 241, 5, 0.35) !important;
-  }
-}
-
-
-/* ── THUNDER WAKE (signature activation — restrained) ───────── */
-.thunder-fab.tb-thunder-wake {
-  animation: tbThunderWakeFab 0.85s cubic-bezier(0.22, 1, 0.36, 1) 1;
-  box-shadow: 0 0 0 0 rgba(254, 241, 5, 0.55);
-}
-.thunder-fab.tb-thunder-wake-soft {
-  animation: tbThunderWakeFabSoft 0.4s cubic-bezier(0.22, 1, 0.36, 1) 1;
-}
-@keyframes tbThunderWakeFab {
-  0% { transform: scale(1); filter: brightness(1); }
-  12% { transform: scale(0.92); filter: brightness(1.15); }
-  28% { transform: scale(1.06); filter: brightness(1.35); box-shadow: 0 0 28px 4px rgba(254, 241, 5, 0.45); }
-  55% { transform: scale(1.02); filter: brightness(1.12); box-shadow: 0 0 18px 2px rgba(254, 241, 5, 0.28); }
-  100% { transform: scale(1); filter: brightness(1); box-shadow: 0 0 0 0 transparent; }
-}
-@keyframes tbThunderWakeFabSoft {
-  0% { transform: scale(1); }
-  40% { transform: scale(0.96); filter: brightness(1.12); }
-  100% { transform: scale(1); filter: brightness(1); }
-}
-#thunder-modal.tb-thunder-panel-wake,
-.thunder-panel.tb-thunder-panel-wake {
-  animation: tbThunderPanelWake 0.9s cubic-bezier(0.22, 1, 0.36, 1) 1;
-}
-@keyframes tbThunderPanelWake {
-  0% { box-shadow: 0 0 0 0 rgba(254, 241, 5, 0); }
-  30% { box-shadow: 0 0 40px 2px rgba(254, 241, 5, 0.22); }
-  100% { box-shadow: 0 0 0 0 transparent; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .thunder-fab.tb-thunder-wake,
-  .thunder-fab.tb-thunder-wake-soft,
-  #thunder-modal.tb-thunder-panel-wake,
-  .thunder-panel.tb-thunder-panel-wake {
-    animation: none !important;
-    filter: none !important;
-  }
-}
-
-
-/* Concierge Thunder hero sample question */
-.tb-tour-demo {
-  display: block;
-  width: 100%;
-  margin: 12px 0 4px;
-  padding: 14px 16px;
-  border: 1px solid rgba(254, 241, 5, 0.55);
-  border-radius: 12px;
-  background: #0a0a0a;
-  color: #FEF105;
-  font-family: inherit;
-  font-size: 0.95rem;
+  padding: 12px 18px;
   font-weight: 700;
   letter-spacing: 0.04em;
-  text-align: center;
-  box-shadow: 0 0 20px rgba(254, 241, 5, 0.12);
+  font-size: 14px;
+}
+.tb-tour-slides .tb-tour-skip {
+  background: transparent;
+  border: none;
+  color: #666;
+  font-size: 12px;
+  padding: 8px;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  border: 0;
+}
+
+
+/* === p0-recovery2: Home member CTA + utility pulse === */
+.home-member-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+  margin: 16px 0 8px;
+  padding: 14px 16px;
+  background: #0e0e0e;
+  border: 1px solid #1c1c1c;
+  border-radius: 12px;
+  color: #fff;
+  text-align: left;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
-.tb-tour-demo.hidden { display: none !important; }
-.tb-tour-demo:active { transform: scale(0.97); background: #111; }
-.tb-tour-demo.tb-demo-press {
-  animation: tbDemoPress 0.35s cubic-bezier(0.22, 1, 0.36, 1) 1;
+.home-member-cta:active { transform: scale(0.98); }
+.home-member-cta-title {
+  font-family: var(--font-display, inherit);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #fff;
 }
-@keyframes tbDemoPress {
-  0% { transform: scale(1); }
-  40% { transform: scale(0.94); box-shadow: 0 0 28px rgba(254, 241, 5, 0.35); }
-  100% { transform: scale(1); }
+.home-member-cta-sub {
+  font-size: 12px;
+  color: #9a9a9a;
+}
+.btn-reminder-emphasis {
+  border-color: var(--yellow, #fef105) !important;
+  box-shadow: 0 0 12px rgba(254, 241, 5, 0.25);
+}
+#refresh-app-btn,
+.refresh-app-btn {
+  animation: brotherNamePulse var(--tb-breathe);
+}
+.alerts-card .card-label,
+.alerts-switch,
+#gathering-alerts-label {
+  animation: brotherNamePulse var(--tb-breathe);
+}
+.rsvp-status {
+  animation: brotherNamePulse var(--tb-breathe);
+}
+.header-bolt-live {
+  animation: boltLive var(--tb-breathe);
 }
 @media (prefers-reduced-motion: reduce) {
-  .tb-tour-demo:active, .tb-tour-demo.tb-demo-press { animation: none; transform: none; }
-}
-
-
-/* === STRIP: modal category titles (ANNOUNCEMENT / MISSION / GATHERING / calendar) — no pulse === */
-.info-detail-label,
-#info-detail-label {
-  animation: none !important;
-  animation-name: none !important;
-  text-shadow: none !important;
-  filter: none !important;
-  opacity: 1 !important;
-  color: var(--yellow, #FEF105) !important;
-}
-.event-month {
-  animation: none !important;
-  text-shadow: none !important;
-  filter: none !important;
-  opacity: 1 !important;
-}
-
-
-/* HEY THUNDER RETIRED 2026-08-17 — continuous wake chip never shows */
-#thunder-wake-chip,
-.thunder-wake-chip {
-  display: none !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
+  #refresh-app-btn, .refresh-app-btn,
+  .alerts-card .card-label, .alerts-switch,
+  .rsvp-status, .header-bolt-live {
+    animation: none !important;
+  }
 }

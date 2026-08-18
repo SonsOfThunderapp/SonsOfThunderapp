@@ -22,6 +22,7 @@ Before restoring anything on this list: **STOP. Obtain explicit product-owner ap
 | AI-generated “replacement” logo or Thunder | FORBIDDEN | Trace approved source |
 | Open Supabase signup as “membership” | SECURITY | Authenticated ≠ approved brother |
 | Client LEADER_PIN as real server auth | SECURITY | Mild UI gate only |
+| OLD floating/bouncing Concierge tour (placeTourHost / spotlight chase) | RETIRED BY ERICA 2026-08-18 | Excessive movement; replaced by slide tour V11 |
 | Confetti / gamification / streaks / leaderboards | REJECTED | Off-brand |
 | Christian Facebook feed / likes / followers | REJECTED | Private room law |
 

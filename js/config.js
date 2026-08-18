@@ -1,9 +1,11 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260817-p1-repair',
-
+  APP_BUILD: '20260818-p0-recovery2',
+  /* AUTHORITATIVE LINEAGE — do not package from mixed branches */
+  SOURCE_PARENT: '20260818-p0-recovery1',
+  REJECTED_ARCHIVES: ['20260818-whatsnext1', '20260818-header-safe1'],
   /* ── PRODUCT LOCK (2026-08-16 FINAL) ───────────────────────────
-     This build freezes every signed-off system through cohere1/tap/voice/hero.
+     This build freezes every signed-off system through cohe1/tap/voice/hero.
      Do not strip systems listed in SOURCE-OF-TRUTH.md without explicit user order.
      Housekeeping may repair collisions; it may not delete product surface.
      ───────────────────────────────────────────────────────────── */
@@ -11,7 +13,7 @@ window.TB_CONFIG = {
     date: '2026-08-16',
     label: 'LOCKED',
     systems: [
-      'core-nav','meeting-engine','im-in','announcements','sharpening-iron',
+      'core-nav','meeting-engine','im-in','announcements','whats-next-retention',
       'brothers-profiles','qr-share-contact','events-memories','activity-rss',
       'the-code','ask-thunder-hybrid','thunder-fx','profile-fireworks',
       'laser-ignition','thunder-voice','hey-thunder-optin','thunder-tap',

@@ -342,3 +342,14 @@ Thunder is the single official mascot and concierge character. The concierge lig
 - Hey Thunder continuous wake: RETIRED. setWakeEnabled forced off; startWakeLoop no-op; chip hidden DOM+CSS; tb_hey_thunder cleared.
 - Tour host image: assets/thunder-cool.png (official cool bolt), not alternate/Bond.
 - thunder-bond-hero.png moved to assets/.rejected/ — do not resurrect as runtime fallback.
+
+
+## 2026-08-18 — Cinematic motion language (tour) LOCKED
+- File: THUNDER-CINEMATIC-MOTION-LANGUAGE.md (eternity)
+- Principle: Thunder speaks → one feature wakes → eye moves there → responds → settles → continue
+- One dominant motion at a time; Thunder stays put after short entrance (150–250ms)
+- Electric transitions 300–400ms; no Ken Burns / full-screen zoom / bounce travel
+- Scene 7 only: one synchronized final heartbeat on YOU ARE READY / LET US GO
+- Vocabulary: electric trace, focus falloff, living idle, type-out emphasis, feature ack, depth shift, electrified progress
+- Cross-refs: MOTION_HAPTICS_SPEC.md, CONCIERGE_TOUR_SPEC.md updated
+- Implementation only when explicitly ordered; this is the permanent allowed set

@@ -27,10 +27,21 @@ iPhone PWA: **no** `navigator.vibrate` — never fake it. Visual tactility only.
 
 ## Tour motion
 
-See `CONCIERGE_TOUR_SPEC.md`. Tour must pause ambient (`body.tb-tour-open`) and resume without a synchronized burst of every pulse.
+See `CONCIERGE_TOUR_SPEC.md` and **`THUNDER-CINEMATIC-MOTION-LANGUAGE.md`** (eternity lock 2026-08-18).
+
+Governing principle: Thunder speaks → one feature wakes → eye moves there → feature responds → settle → continue.
+
+- One dominant motion event at a time
+- Thunder entrance 150–250ms then **stays put** (no bounce/travel)
+- Electric scene transition 300–400ms (no Ken Burns / full-screen zoom)
+- Scene 7 only: one synchronized final heartbeat on “YOU'RE READY / LET'S GO”
+- Tour must pause ambient (`body.tb-tour-open`) and resume without a synchronized burst of every pulse
 
 ## Explicitly rejected motion
 
 - Confetti, points, social-like celebrations
 - Constant flashing, cartoon bounce, heavy camera shake
 - Liquid glass / Material theater packs (rejected in product editor pass)
+- Ken Burns / continuous whole-screen scaling on tour
+- Multiple simultaneous dominant motions during tour
+- Thunder bouncing around the screen after entrance

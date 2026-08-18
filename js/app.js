@@ -367,12 +367,14 @@
   }
 
   function openCalConfirmSheet() {
+    try { document.body.classList.add('cal-sheet-open'); } catch (e) {}
     const el = document.getElementById('cal-confirm-sheet');
     if (!el) return;
     el.classList.remove('hidden');
     el.setAttribute('aria-hidden', 'false');
   }
   function closeCalConfirmSheet() {
+    try { document.body.classList.remove('cal-sheet-open'); } catch (e) {}
     const el = document.getElementById('cal-confirm-sheet');
     if (!el) return;
     el.classList.add('hidden');
@@ -722,6 +724,17 @@
     }
   }
 
+  function bindHomeMemberCta() {
+    const cta = document.getElementById('home-member-cta');
+    if (!cta || cta.dataset.tbBound) return;
+    cta.dataset.tbBound = '1';
+    cta.addEventListener('click', function () {
+      try {
+        if (typeof openAuthGate === 'function') openAuthGate('Already a member? Sign in for shared roster and memories.');
+      } catch (e) {}
+    });
+  }
+
   async function initAuth() {
     if (!supabaseEnabled()) {
       authReady = true;
@@ -756,12 +769,42 @@
     updateAuthSessionBar();
   }
 
+  function softRefreshApp(reason) {
+    try {
+      if (typeof showInstallToast === 'function') showInstallToast(reason || 'Updating… hang tight');
+    } catch (e) {}
+    setTimeout(function () {
+      try {
+        if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+          navigator.serviceWorker.getRegistrations().then(function (regs) {
+            return Promise.all((regs || []).map(function (r) { return r.unregister(); }));
+          }).catch(function () {}).finally(function () {
+            try {
+              if (window.caches && caches.keys) {
+                caches.keys().then(function (keys) {
+                  return Promise.all((keys || []).map(function (k) { return caches.delete(k); }));
+                }).catch(function () {}).finally(function () {
+                  window.location.reload();
+                });
+              } else {
+                window.location.reload();
+              }
+            } catch (e2) { window.location.reload(); }
+          });
+        } else {
+          window.location.reload();
+        }
+      } catch (e) { window.location.reload(); }
+    }, 400);
+  }
+
   async function authSignIn(email, password) {
     const sb = getSb();
     if (!sb) throw new Error('Supabase is not configured.');
     const { data, error } = await sb.auth.signInWithPassword({ email, password });
     if (error) throw error;
     sbSession = data.session;
+    try { softRefreshApp('Signed in — refreshing Thunder Board…'); } catch (e) {}
     return data;
   }
 
@@ -1557,6 +1600,7 @@
       btn.classList.add('set');
       btn.textContent = 'ON CALENDAR';
       save('reminderSet', true);
+      try { renderRsvp(); } catch (e) {}
       try { tbGlowHit(btn, 'yellow'); } catch (e) {}
       if (status) {
         status.textContent = 'Opened calendar — hit Save so 7-day / 1-day / 2-hour alerts can fire.';
@@ -2586,17 +2630,55 @@
     detail.addEventListener('click', (e) => {
       if (e.target === detail) closeInfoDetail();
     });
-    let startY = 0;
-    detail.addEventListener('touchstart', (e) => {
-      if (e.touches && e.touches[0]) startY = e.touches[0].clientY;
-    }, { passive: true });
-    detail.addEventListener('touchend', (e) => {
-      const t = e.changedTouches && e.changedTouches[0];
-      if (!t) return;
-      if (t.clientY - startY > 80) closeInfoDetail();
-    }, { passive: true });
+    // Permanent: every window supports swipe-down dismiss (same elastic path as brother/memory)
+    bindElasticSwipe(detail, {
+      onDown: () => closeInfoDetail(),
+      blocked: (t) => !!(t && t.closest && t.closest('.info-detail-close, button, a, input, textarea'))
+    });
     document.addEventListener('keydown', (e) => {
       if (!detail.classList.contains('hidden') && e.key === 'Escape') closeInfoDetail();
+    });
+  }
+
+  /**
+   * Permanent UX law: every overlay "window" can be swipe-closed (down).
+   * X + backdrop + Escape still work. Inputs/buttons block gesture start.
+   * Tour tip is NOT a dismissible window — excluded.
+   */
+  function bindSwipeCloseAllWindows() {
+    const specs = [
+      { id: 'install-modal', close: () => closeModal('install-modal') },
+      { id: 'profile-modal', close: () => closeModal('profile-modal') },
+      { id: 'qr-explainer-modal', close: () => closeModal('qr-explainer-modal') },
+      { id: 'contact-qr-modal', close: () => closeModal('contact-qr-modal') },
+      { id: 'media-modal', close: () => closeModal('media-modal') },
+      { id: 'thunder-modal', close: () => closeModal('thunder-modal') },
+      { id: 'admin-ann-modal', close: () => closeModal('admin-ann-modal') },
+      { id: 'admin-events-modal', close: () => closeModal('admin-events-modal') },
+      { id: 'admin-code-modal', close: () => closeModal('admin-code-modal') },
+      { id: 'admin-push-modal', close: () => closeModal('admin-push-modal') },
+      { id: 'admin-lastfire-modal', close: () => closeModal('admin-lastfire-modal') },
+      { id: 'auth-gate', close: () => { try { closeAuthGate(); } catch (e) {} } },
+      { id: 'ios-install-overlay', close: () => {
+        const el = document.getElementById('ios-install-overlay');
+        if (el) { el.classList.add('hidden'); el.setAttribute('aria-hidden', 'true'); unlockBodyIfClear(); }
+      }},
+      { id: 'inapp-install-overlay', close: () => {
+        const el = document.getElementById('inapp-install-overlay');
+        if (el) { el.classList.add('hidden'); el.setAttribute('aria-hidden', 'true'); unlockBodyIfClear(); }
+      }},
+      { id: 'cal-confirm-sheet', close: () => { try { closeCalConfirmSheet(); } catch (e) {} } }
+    ];
+    specs.forEach(({ id, close }) => {
+      const el = document.getElementById(id);
+      if (!el || el.dataset.swipeClose === '1') return;
+      el.dataset.swipeClose = '1';
+      bindElasticSwipe(el, {
+        onDown: close,
+        blocked: (t) => !!(t && t.closest && t.closest(
+          'input, textarea, select, button, a, video, .modal-close, [data-close]'
+        ))
+      });
     });
   }
 
@@ -3512,30 +3594,35 @@
     const status = $('#rsvp-status');
     const prompt = $('#rsvp-prompt');
     if (!btn) return;
+    /* One calendar control only: #reminder-btn. Never inject a second ADD TO CALENDAR. */
+    const ghostCal = document.getElementById('rsvp-add-cal');
+    if (ghostCal) {
+      try { ghostCal.remove(); } catch (e) { ghostCal.classList.add('hidden'); }
+    }
     if (rsvp) {
       try { syncSelfToRoster(true); } catch (e) {}
+      const calLocked = !!load('reminderSet');
       btn.classList.add('confirmed');
-      btn.textContent = "YOU'RE IN ⚡";
+      /* YOU'RE LOCKED IN only after successful calendar handoff */
+      btn.textContent = calLocked ? "YOU'RE LOCKED IN" : "I'M IN ✓";
       if (status) {
-        status.textContent = "⚡ YOU'RE IN · this phone";
+        let meta = calLocked ? 'On this phone' : 'Add to calendar to finish lock-in';
+        try {
+          const next = getNextMeetingMonday();
+          if (calLocked) meta = formatMeetingDate(next) + ' · ' + meetingTime() + ' · ' + venueName();
+          else meta = 'Next: ' + formatMeetingDate(next) + ' · Add to calendar';
+        } catch (e) {}
+        status.textContent = meta;
         status.classList.remove('hidden');
       }
       const meetCard = document.querySelector('.next-meeting');
       if (meetCard) meetCard.classList.add('commit-energized');
-      let calBtn = document.getElementById('rsvp-add-cal');
-      if (!calBtn && meetCard) {
-        calBtn = document.createElement('button');
-        calBtn.type = 'button';
-        calBtn.id = 'rsvp-add-cal';
-        calBtn.className = 'btn-add-cal-inline';
-        calBtn.textContent = 'ADD TO CALENDAR';
-        const statusEl = document.getElementById('rsvp-status');
-        if (statusEl && statusEl.parentNode) statusEl.parentNode.insertBefore(calBtn, statusEl.nextSibling);
-        else meetCard.appendChild(calBtn);
-        calBtn.addEventListener('click', () => { try { launchGatheringCalendar(); } catch (e) {} });
-      }
-      if (calBtn) calBtn.classList.remove('hidden');
       if (prompt) prompt.classList.add('hidden');
+      const remBtn = document.getElementById('reminder-btn');
+      if (remBtn && !calLocked) {
+        remBtn.classList.remove('hidden');
+        remBtn.classList.add('btn-reminder-emphasis');
+      }
     } else {
       try { syncSelfToRoster(false); } catch (e) {}
       btn.classList.remove('confirmed');
@@ -3543,12 +3630,8 @@
       if (status) status.classList.add('hidden');
       const meetCardOff = document.querySelector('.next-meeting');
       if (meetCardOff) meetCardOff.classList.remove('commit-energized');
-      const calBtnOff = document.getElementById('rsvp-add-cal');
-      if (calBtnOff) calBtnOff.classList.add('hidden');
       if (prompt) {
-        if (!prompt.textContent || prompt.textContent.indexOf('seat') === -1) {
-          prompt.textContent = "Your seat is open. Lock it in.";
-        }
+        prompt.textContent = "Your seat is open. Lock it in.";
         prompt.classList.remove('hidden');
       }
     }
@@ -4243,6 +4326,10 @@
         add.dataset.tbBound = '1';
         add.addEventListener('click', () => {
           try { launchGatheringCalendar(); } catch (e) {}
+          try { save('reminderSet', true); } catch (e) {}
+          try { renderRsvp(); } catch (e) {}
+          const rb = document.getElementById('reminder-btn');
+          if (rb) { rb.classList.add('set'); rb.textContent = 'ON CALENDAR'; }
           closeCalConfirmSheet();
         });
       }
@@ -4306,6 +4393,8 @@ $('#edit-profile-btn').addEventListener('click', () => {
 
     bindBrotherDetail();
     bindMemoryViewer();
+    bindInfoDetail();
+    bindSwipeCloseAllWindows();
 
     // Profile photo
     $('#profile-photo').addEventListener('change', (e) => {
@@ -4766,7 +4855,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
           chip.classList.toggle('is-on', !!wakeEnabled);
           chip.classList.remove('is-listening');
           const lab = chip.querySelector('.thunder-wake-lab');
-          if (lab) lab.textContent = wakeEnabled ? 'HEY THUNDER ON' : 'HEY THUNDER';
+          if (lab) lab.textContent = '';
         }
       }
 
@@ -4793,7 +4882,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
           if (chip) {
             chip.classList.add('is-on', 'is-listening');
             const lab = chip.querySelector('.thunder-wake-lab');
-            if (lab) lab.textContent = 'LISTENING FOR HEY THUNDER';
+            if (lab) lab.textContent = '';
           }
           wakeRec.onresult = (event) => {
             try {
@@ -6032,42 +6121,9 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     });
   }
 
-  // ---------- SHARPENING IRON (Man in the Mirror RSS) ----------
-  async function loadIronFeed() {
-    const el = $('#iron-feed');
-    if (!el) return;
-    const feedUrl = 'https://maninthemirror.org/feed/';
-    const proxy = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(feedUrl);
-    try {
-      const res = await fetch(proxy);
-      if (!res.ok) throw new Error('feed ' + res.status);
-      const data = await res.json();
-      const items = (data.items || []).slice(0, 2);
-      if (!items.length) {
-        el.innerHTML = '<div class="empty-state">No posts right now.</div>';
-        return;
-      }
-      el.innerHTML = items.map(item => {
-        const title = esc(item.title || 'Untitled');
-        const link = esc(item.link || '#');
-        let date = '';
-        try {
-          date = new Date(item.pubDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        } catch (e) {}
-        let excerpt = (item.description || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-        if (excerpt.length > 140) excerpt = excerpt.slice(0, 137) + '…';
-        excerpt = esc(excerpt);
-        return `<a class="iron-card" href="${link}" target="_blank" rel="noopener noreferrer">
-          <div class="iron-date">${esc(date)}</div>
-          <div class="iron-title">${title}</div>
-          <div class="iron-excerpt">${excerpt}</div>
-        </a>`;
-      }).join('');
-    } catch (e) {
-      console.warn(e);
-      el.innerHTML = '<div class="empty-state">Couldn’t load feed. Check back later.</div>';
-    }
-  }
+  // ---------- SHARPENING IRON (CUT 2026-08-18) ----------
+  // Man in the Mirror RSS removed from product. Stub keeps any residual call sites safe.
+  async function loadIronFeed() { /* no-op — section removed from Home */ }
 
 
   // Leadership contact — assembled only on tap, never rendered as text
@@ -6145,8 +6201,10 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   }
 
 
-  // ---------- PRODUCT TOUR — Living Bolt Concierge (versioned) ----------
-  const TB_TOUR_VERSION = 10; /* Character host (Thunder sunglasses) — old bolt-only host retired */
+  // ---------- PRODUCT TOUR — SLIDE-BASED (canonical 2026-08-18) ----------
+  // OLD floating/bouncing Concierge tour RETIRED by Erica — DO NOT RESURRECT.
+  // Authority: assets/tour-01.png … tour-07.png + captions below.
+  const TB_TOUR_VERSION = 11; /* slide tour — invalidates V10 floating tour state */
 
   function tourStorageKey() {
     return 'thunderTourV' + TB_TOUR_VERSION;
@@ -6176,334 +6234,92 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     } catch (e) { return false; }
   }
 
-  /* Dialogue: bolt speaks as concierge — short, brotherhood, accurate to real features */
+  /* Slide inventory — matches assets/tour-0N.png (Grok official slide set) */
   const TB_TOUR_STEPS = [
     {
       id: 'welcome',
-      view: 'home',
-      target: '#view-home .logo-wrap, #view-home .header-logo, .home-header, #main-header',
+      slide: 'assets/tour-01.png',
       headline: 'FOLLOW ME',
-      body: 'I’m your guide on Thunder Board. The brotherhood between gatherings — stick with me.',
+      body: 'I’m Thunder — your guide. The brotherhood between gatherings. Stick with me.',
       nextLabel: 'LET’S GO'
     },
     {
-      id: 'gathering',
-      view: 'home',
-      target: '#view-home .next-meeting, #meeting-card, #meeting-date',
-      headline: 'YOUR NEXT GATHERING',
-      body: 'Date, time, and Crooked Can live right here. Always current. First Monday — second if Labor Day or Memorial Day hits.',
+      id: 'home',
+      slide: 'assets/tour-02.png',
+      headline: 'HOME BASE',
+      body: 'Next Gathering lives here — date, time, Crooked Can. Always current.',
       nextLabel: 'NEXT'
     },
     {
       id: 'imin',
-      view: 'home',
-      target: '#rsvp-btn, #rsvp-status',
+      slide: 'assets/tour-03.png',
       headline: 'LOCK YOUR SEAT',
-      body: 'Tap I’M IN when you’re coming. Presence is the point. Your phone remembers.',
-      nextLabel: 'NEXT',
-      allowTargetTap: true
+      body: 'Tap I’M IN when you’re coming. One commitment. Your phone remembers.',
+      nextLabel: 'NEXT'
     },
     {
       id: 'brothers',
-      view: 'brothers',
-      target: '.nav-item[data-view="brothers"]',
-      headline: 'MEET THE BROTHERS',
-      body: 'Names, faces, a line of who you are. Claim your spot when you’re ready.',
+      slide: 'assets/tour-04.png',
+      headline: 'THE BROTHERS',
+      body: 'Names, faces, who you are. Claim your spot when you’re ready.',
       nextLabel: 'NEXT'
     },
     {
       id: 'events',
-      view: 'events',
-      target: '.nav-item[data-view="events"]',
+      slide: 'assets/tour-05.png',
       headline: 'MISSIONS & MEMORIES',
-      body: 'Range, lake, Word, gym — and the photos that prove you showed up. Build the history.',
+      body: 'Range. Lake. Bible. Gym. Photos that prove you showed up.',
       nextLabel: 'NEXT'
     },
     {
       id: 'code',
-      view: 'about',
-      target: '.code-title, #the-code, #view-about .code-block',
+      slide: 'assets/tour-06.png',
       headline: 'THE CODE',
-      body: 'Why we exist. Hotheads learning to lead like gentlemen. Read it. Carry it.',
+      body: 'Who we are. How we roll. Intense, loyal, built for more.',
       nextLabel: 'NEXT'
     },
     {
-      id: 'thunder',
-      view: 'home',
-      target: '#thunder-fab',
-      headline: 'ASK THUNDER',
-      body: 'Questions about the board, the gathering, Scripture, or the Code — Ask Thunder. I’m the guide; he’s the brain.',
-      nextLabel: 'SKIP DEMO',
-      demoPrompt: "When's the next gathering?",
-      demoLabel: "WHEN'S THE NEXT GATHERING?"
-    },
-    {
-      id: 'finish',
-      view: 'home',
-      target: null,
-      headline: 'YOU KNOW THE BOARD',
-      body: 'Replay anytime from More. Show up. Thunder doesn’t dull.',
-      nextLabel: 'FINISH'
+      id: 'ask',
+      slide: 'assets/tour-07.png',
+      headline: 'OR JUST ASK',
+      body: 'Don’t hunt menus. Ask Thunder — next gathering, The Code, Scripture.',
+      nextLabel: 'DONE'
     }
   ];
 
   let __tourIdx = 0;
   let __tourActive = false;
-  let __tourTargetEl = null;
-  let __tourTypeGen = 0;
-  let __tourTyping = false;
-  let __tourFullText = '';
-  let __tourHostState = 'rest';
 
-  function resolveTourTarget(sel) {
-    if (!sel) return null;
-    const parts = sel.split(',').map(s => s.trim());
-    for (const p of parts) {
-      const el = document.querySelector(p);
-      if (!el) continue;
-      if (el.offsetParent !== null || el.getClientRects().length) return el;
-    }
-    return document.querySelector(parts[0]);
-  }
-
-  function setTourHostState(state) {
-    const host = document.getElementById('tb-tour-host');
-    if (!host) return;
-    /* HARD LOCK: tour host = official Thunder character — never bolt-only / never legacy generic bolt */
-    const himg = host.querySelector('.tb-tour-host-img');
-    if (himg) {
-      const src = himg.getAttribute('src') || '';
-      if (!src.includes('thunder-cool') && !src.includes('thunder-tour-host')) {
-        himg.setAttribute('src', 'assets/thunder-cool.png');
-        himg.setAttribute('width', '96');
-        himg.setAttribute('height', '96');
-      }
-    }
-    host.classList.remove('is-arrival', 'is-travel', 'is-explain', 'is-celebrate', 'is-attention');
-    if (state) host.classList.add('is-' + state);
-    __tourHostState = state || 'rest';
-  }
-
-  function placeTourHost(target) {
-    const host = document.getElementById('tb-tour-host');
-    if (!host) return { x: window.innerWidth / 2, y: 120 };
-    const pad = 12;
-    const navH = 64;
-    let x = window.innerWidth / 2;
-    let y = Math.max(72, window.innerHeight * 0.18);
-    if (target) {
-      const r = target.getBoundingClientRect();
-      // Prefer upper-left of target so bolt "points" toward feature
-      x = Math.min(window.innerWidth - 56, Math.max(48, r.left + 24));
-      y = Math.max(72, r.top - 40);
-      if (y < 72) y = Math.min(window.innerHeight - navH - 56, r.bottom + 48);
-      if (x < 48) x = Math.min(window.innerWidth - 56, r.right - 16);
-    }
-    host.style.left = x + 'px';
-    host.style.top = y + 'px';
-    return { x: x, y: y };
-  }
-
-  function placeTourTip(target, hostPos) {
-    const tip = document.getElementById('tb-tour-tip');
-    const spot = document.getElementById('tb-tour-spotlight');
-    if (!tip) return;
-
-    const tipH = tip.offsetHeight || 200;
-    const tipW = Math.min(340, window.innerWidth - 32);
-    const navClear = 72;
-    const safeTop = 12;
-    let tipTop = safeTop + 48;
-    let tipLeft = 16;
-
-    if (target) {
-      const r = target.getBoundingClientRect();
-      const pad = 10;
-      if (spot) {
-        spot.classList.remove('is-empty');
-        spot.style.top = Math.max(0, r.top - pad) + 'px';
-        spot.style.left = Math.max(0, r.left - pad) + 'px';
-        spot.style.width = Math.min(window.innerWidth, r.width + pad * 2) + 'px';
-        spot.style.height = (r.height + pad * 2) + 'px';
-      }
-      // Place bubble below target when space, else above
-      const below = r.bottom + 16;
-      const above = r.top - tipH - 16;
-      if (below + tipH < window.innerHeight - navClear) {
-        tipTop = below;
-      } else if (above > safeTop) {
-        tipTop = above;
-      } else {
-        tipTop = Math.max(safeTop, Math.min(below, window.innerHeight - tipH - navClear));
-      }
-      tipLeft = Math.max(16, Math.min(r.left, window.innerWidth - tipW - 16));
-    } else {
-      if (spot) {
-        spot.classList.add('is-empty');
-        spot.style.top = '0px';
-        spot.style.left = '0px';
-        spot.style.width = '0px';
-        spot.style.height = '0px';
-      }
-      tipTop = Math.max(safeTop + 40, window.innerHeight * 0.28);
-      tipLeft = Math.max(16, (window.innerWidth - tipW) / 2);
-    }
-
-    // Keep clear of host bolt
-    if (hostPos && Math.abs(tipTop - hostPos.y) < 50) {
-      tipTop = Math.min(window.innerHeight - tipH - navClear, hostPos.y + 40);
-    }
-
-    const maxTop = window.innerHeight - tipH - navClear;
-    tipTop = Math.max(safeTop, Math.min(tipTop, maxTop));
-    tip.style.top = tipTop + 'px';
-    tip.style.left = tipLeft + 'px';
-    tip.style.right = 'auto';
-    tip.style.width = tipW + 'px';
-    tip.style.bottom = 'auto';
-  }
-
-  function cancelTourTyping() {
-    __tourTypeGen += 1;
-    __tourTyping = false;
-    const body = document.getElementById('tb-tour-body');
-    if (body) body.classList.remove('is-typing');
-  }
-
-  function finishTourTyping() {
-    cancelTourTyping();
-    const body = document.getElementById('tb-tour-body');
-    if (body) {
-      body.textContent = __tourFullText;
-      body.classList.remove('is-typing');
-    }
-    const next = document.getElementById('tb-tour-next');
-    if (next) next.disabled = false;
-    setTourHostState('explain');
-  }
-
-  function typeTourText(text) {
-    cancelTourTyping();
-    __tourFullText = text || '';
-    const body = document.getElementById('tb-tour-body');
-    const full = document.getElementById('tb-tour-body-full');
-    const next = document.getElementById('tb-tour-next');
-    if (full) full.textContent = __tourFullText;
-    if (!body) return;
-    if (tourReducedMotion()) {
-      body.textContent = __tourFullText;
-      body.classList.remove('is-typing');
-      if (next) next.disabled = false;
-      return;
-    }
-    body.textContent = '';
-    body.classList.add('is-typing');
-    if (next) next.disabled = true;
-    __tourTyping = true;
-    const gen = __tourTypeGen;
-    let i = 0;
-    const chars = __tourFullText.split('');
-    function tick() {
-      if (gen !== __tourTypeGen) return;
-      if (i >= chars.length) {
-        finishTourTyping();
-        return;
-      }
-      body.textContent += chars[i];
-      const ch = chars[i];
-      i += 1;
-      let delay = 18;
-      if (ch === '.' || ch === '!' || ch === '?') delay = 140;
-      else if (ch === ',' || ch === '—' || ch === '-') delay = 70;
-      else if (ch === ' ') delay = 12;
-      setTimeout(tick, delay);
-    }
-    setTimeout(tick, 120);
-  }
-
-  function renderTourStep() {
-    if (!__tourActive) return;
+  function renderTourSlide() {
     const step = TB_TOUR_STEPS[__tourIdx];
-    if (!step) {
-      completeTour();
-      return;
-    }
-    cancelTourTyping();
-    if (step.view && typeof showView === 'function') {
-      try { showView(step.view, { silent: true }); } catch (e) {
-        try { showView(step.view); } catch (e2) {}
-      }
-    }
+    if (!step) return;
+    const img = document.getElementById('tb-tour-slide-img');
     const headline = document.getElementById('tb-tour-headline');
-    const next = document.getElementById('tb-tour-next');
-    const dots = document.getElementById('tb-tour-dots');
+    const body = document.getElementById('tb-tour-body');
+    const bodyFull = document.getElementById('tb-tour-body-full');
     const progress = document.getElementById('tb-tour-progress');
-    if (headline) headline.textContent = step.headline;
-    if (next) next.textContent = step.nextLabel || 'NEXT';
+    const next = document.getElementById('tb-tour-next');
+    const back = document.getElementById('tb-tour-back');
+    const dots = document.getElementById('tb-tour-dots');
+
+    if (img) {
+      img.src = step.slide;
+      img.alt = step.headline || '';
+      img.classList.remove('tb-tour-slide-in');
+      void img.offsetWidth;
+      if (!tourReducedMotion()) img.classList.add('tb-tour-slide-in');
+    }
+    if (headline) headline.textContent = step.headline || '';
+    if (body) body.textContent = step.body || '';
+    if (bodyFull) bodyFull.textContent = (step.headline || '') + '. ' + (step.body || '');
     if (progress) progress.textContent = (__tourIdx + 1) + ' of ' + TB_TOUR_STEPS.length;
-
-    const demoBtn = document.getElementById('tb-tour-demo');
-    if (demoBtn) {
-      if (step.demoPrompt) {
-        demoBtn.textContent = step.demoLabel || step.demoPrompt.toUpperCase();
-        demoBtn.classList.remove('hidden');
-        demoBtn.dataset.prompt = step.demoPrompt;
-      } else {
-        demoBtn.classList.add('hidden');
-        demoBtn.removeAttribute('data-prompt');
-      }
-    }
+    if (next) next.textContent = step.nextLabel || (__tourIdx >= TB_TOUR_STEPS.length - 1 ? 'DONE' : 'NEXT');
+    if (back) back.disabled = __tourIdx <= 0;
     if (dots) {
-      dots.innerHTML = '';
-      TB_TOUR_STEPS.forEach((_, i) => {
-        const s = document.createElement('span');
-        if (i <= __tourIdx) s.className = 'on';
-        dots.appendChild(s);
-      });
+      dots.innerHTML = TB_TOUR_STEPS.map((_, i) =>
+        '<span class="' + (i === __tourIdx ? 'on' : '') + '"></span>'
+      ).join('');
     }
-
-    // Clear prior live target
-    if (__tourTargetEl) {
-      try {
-        __tourTargetEl.classList.remove('tb-tour-target-pulse');
-        __tourTargetEl.classList.remove('tb-tour-target-live');
-      } catch (e) {}
-    }
-
-    setTourHostState(__tourIdx === 0 ? 'arrival' : 'travel');
-    try {
-      if (typeof tbFeedback !== 'undefined') {
-        if (__tourIdx === 0) tbFeedback.thunderImpact();
-        else tbFeedback.selection();
-      }
-    } catch (e) {}
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        if (!__tourActive) return;
-        const el = resolveTourTarget(step.target);
-        __tourTargetEl = el;
-        if (el) {
-          try {
-            el.scrollIntoView({
-              block: 'center',
-              behavior: tourReducedMotion() ? 'auto' : 'smooth'
-            });
-          } catch (e) {}
-          try {
-            el.classList.add('tb-tour-target-pulse');
-            if (step.allowTargetTap) el.classList.add('tb-tour-target-live');
-          } catch (e) {}
-        }
-        const hostPos = placeTourHost(el);
-        placeTourTip(el, hostPos);
-        setTimeout(() => {
-          if (!__tourActive) return;
-          setTourHostState('explain');
-          typeTourText(step.body);
-        }, tourReducedMotion() ? 0 : 320);
-      });
-    });
     setTourState({ step: step.id, complete: false });
   }
 
@@ -6513,184 +6329,101 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     root.classList.remove('hidden');
     root.setAttribute('aria-hidden', 'false');
     document.body.classList.add('tb-tour-open');
-    const host = document.getElementById('tb-tour-host');
-    if (host) {
-      host.style.left = (window.innerWidth / 2) + 'px';
-      host.style.top = '100px';
-    }
+    try { document.body.style.overflow = 'hidden'; } catch (e) {}
   }
 
   function closeTourUI() {
-    cancelTourTyping();
     const root = document.getElementById('tb-tour');
     if (root) {
       root.classList.add('hidden');
       root.setAttribute('aria-hidden', 'true');
     }
     document.body.classList.remove('tb-tour-open');
-    if (__tourTargetEl) {
-      try {
-        __tourTargetEl.classList.remove('tb-tour-target-pulse');
-        __tourTargetEl.classList.remove('tb-tour-target-live');
-      } catch (e) {}
-      __tourTargetEl = null;
-    }
-    setTourHostState('rest');
+    try { document.body.style.overflow = ''; } catch (e) {}
   }
 
   function completeTour() {
-    setTourHostState('celebrate');
-    try { if (typeof tbFeedback !== 'undefined') tbFeedback.confirm(); } catch (e) {}
-    setTimeout(() => {
-      __tourActive = false;
-      setTourState({ complete: true, step: 'done', completedAt: Date.now() });
-      closeTourUI();
-      try { if (typeof showView === 'function') showView('home'); } catch (e) {}
-      try { if (typeof showInstallToast === 'function') showInstallToast("YOU'RE READY. Thunder doesn’t dull."); } catch (e) {}
-    }, tourReducedMotion() ? 0 : 520);
+    __tourActive = false;
+    setTourState({ complete: true, step: 'done', completedAt: Date.now() });
+    closeTourUI();
+    try {
+      if (window.tbFeedback) tbFeedback.confirm();
+      if (window.ThunderFX && ThunderFX.tourComplete) ThunderFX.tourComplete();
+    } catch (e) {}
   }
 
   function skipTour() {
+    /* First-run mandatory tours historically no-op'd skip — Erica: user stays in control on slide tour */
     __tourActive = false;
-    setTourState({ complete: true, skipped: true, step: 'skipped' });
+    setTourState({ complete: true, skipped: true, step: 'skipped', completedAt: Date.now() });
     closeTourUI();
   }
 
   function startTour(opts) {
     opts = opts || {};
     if (__tourActive) return;
-    try {
-      const ios = document.getElementById('ios-install-overlay');
-      const inapp = document.getElementById('inapp-install-overlay');
-      if (ios && !ios.classList.contains('hidden')) return;
-      if (inapp && !inapp.classList.contains('hidden')) return;
-    } catch (e) {}
+    const force = !!opts.force;
+    if (!force && isTourComplete() && !opts.replay) return;
     __tourActive = true;
-    const st = getTourState();
+    __tourIdx = 0;
     if (opts.replay) {
-      __tourIdx = 0;
-    } else if (st.step && !st.complete) {
-      const idx = TB_TOUR_STEPS.findIndex(s => s.id === st.step);
-      __tourIdx = idx >= 0 ? idx : 0;
-    } else {
+      /* restart from beginning */
       __tourIdx = 0;
     }
     openTourUI();
-    renderTourStep();
-  }
-
-  function runThunderConciergeDemo(promptText) {
-    /* HERO AHA: real wake + real Thunder UI + real local pipeline. No fake answer. */
-    if (window.__tbTourDemoRunning) return;
-    window.__tbTourDemoRunning = true;
-    const prompt = (promptText || "When's the next gathering?").trim();
-    try {
-      const demoBtn = document.getElementById('tb-tour-demo');
-      if (demoBtn) {
-        demoBtn.classList.remove('tb-demo-press');
-        void demoBtn.offsetWidth;
-        demoBtn.classList.add('tb-demo-press');
-      }
-    } catch (e) {}
-    try {
-      // Close tour chrome so Thunder modal is the stage — mark complete
-      __tourActive = false;
-      setTourState({ complete: true, step: 'done', demoDone: true, completedAt: Date.now() });
-      closeTourUI();
-    } catch (e) {}
-    const fab = document.getElementById('thunder-fab');
-    try {
-      window.__tbThunderWokeSession = true;
-      if (window.ThunderFX && ThunderFX.thunderWake) ThunderFX.thunderWake(fab, 'full');
-      else if (window.tbFeedback) tbFeedback.thunderImpact();
-    } catch (e) {}
-    try {
-      if (window.ThunderVoice && ThunderVoice.openAsk) ThunderVoice.openAsk({ voice: false, delay: 120 });
-      else if (typeof openThunderVoiceMode === 'function') openThunderVoiceMode();
-      else openModal('thunder-modal');
-    } catch (e) {
-      try { openModal('thunder-modal'); } catch (e2) {}
-    }
-    setTimeout(function () {
-      try {
-        const input = document.getElementById('thunder-input');
-        if (input) {
-          input.value = prompt;
-          if (typeof handleThunderSend === 'function') handleThunderSend();
-        }
-      } catch (e) {}
-      setTimeout(function () {
-        try {
-          if (typeof showInstallToast === 'function') {
-            showInstallToast("THAT'S THUNDER. Ask him what you need.");
-          }
-        } catch (e) {}
-        window.__tbTourDemoRunning = false;
-        try {
-          if (typeof showInstallToast === 'function') {
-            setTimeout(function () {
-              showInstallToast("YOU KNOW THE BOARD. Show up. Thunder doesn't dull.");
-            }, 2800);
-          }
-        } catch (e) {}
-      }, 1600);
-    }, 520);
+    renderTourSlide();
+    try { if (window.tbFeedback) tbFeedback.thunderImpact(); } catch (e) {}
   }
 
   function tourNext() {
     if (!__tourActive) return;
-    if (__tourTyping) {
-      finishTourTyping();
-      return;
-    }
-    const step = TB_TOUR_STEPS[__tourIdx];
-    if (step && step.demoPrompt && step.id === 'thunder') {
-      if (__tourIdx >= TB_TOUR_STEPS.length - 1) {
-        completeTour();
-        return;
-      }
-      __tourIdx += 1;
-      renderTourStep();
-      return;
-    }
     if (__tourIdx >= TB_TOUR_STEPS.length - 1) {
       completeTour();
       return;
     }
     __tourIdx += 1;
-    renderTourStep();
+    renderTourSlide();
+    try { if (window.tbFeedback) tbFeedback.selection(); } catch (e) {}
   }
 
+  function tourBack() {
+    if (!__tourActive || __tourIdx <= 0) return;
+    __tourIdx -= 1;
+    renderTourSlide();
+    try { if (window.tbFeedback) tbFeedback.selection(); } catch (e) {}
+  }
+
+
   function maybeStartProductTour() {
-    /* Living Bolt Concierge is first-run authority. Install overlays still win. */
+    /* First-run: after splash, open slide tour once if not complete.
+       Replay remains More → REPLAY APP TOUR. */
     try {
       if (isTourComplete()) return;
-      const ios = document.getElementById('ios-install-overlay');
-      const inapp = document.getElementById('inapp-install-overlay');
-      if (ios && !ios.classList.contains('hidden')) return;
-      if (inapp && !inapp.classList.contains('hidden')) return;
-      startTour({ replay: false });
+      const start = function () {
+        try {
+          if (!isTourComplete() && !__tourActive) startTour({ force: false });
+        } catch (e) {}
+      };
+      // After splash window (~2s) so slides are not under splash
+      setTimeout(start, 2200);
     } catch (e) {}
   }
 
   function bindTourControls() {
     const next = document.getElementById('tb-tour-next');
+    const back = document.getElementById('tb-tour-back');
     const skip = document.getElementById('tb-tour-skip');
-    const dim = document.getElementById('tb-tour-dim');
-    const demo = document.getElementById('tb-tour-demo');
     const closeBtn = document.getElementById('tb-tour-close');
-    const bodyEl = document.getElementById('tb-tour-body');
-    if (demo && !demo.dataset.tbBound) {
-      demo.dataset.tbBound = '1';
-      demo.addEventListener('click', function () {
-        try { tbFeedback.press(demo); } catch (e) {}
-        const p = demo.dataset.prompt || "When's the next gathering?";
-        runThunderConciergeDemo(p);
-      });
-    }
     if (next && !next.dataset.tbBound) {
       next.dataset.tbBound = '1';
-      next.addEventListener('click', () => { try { tbFeedback.press(next); } catch (e) {} tourNext(); });
+      next.addEventListener('click', () => {
+        try { if (window.tbFeedback) tbFeedback.press(next); } catch (e) {}
+        tourNext();
+      });
+    }
+    if (back && !back.dataset.tbBound) {
+      back.dataset.tbBound = '1';
+      back.addEventListener('click', () => tourBack());
     }
     if (skip && !skip.dataset.tbBound) {
       skip.dataset.tbBound = '1';
@@ -6700,34 +6433,15 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       closeBtn.dataset.tbBound = '1';
       closeBtn.addEventListener('click', () => skipTour());
     }
-    if (bodyEl && !bodyEl.dataset.tbBound) {
-      bodyEl.dataset.tbBound = '1';
-      bodyEl.addEventListener('click', function () {
-        if (__tourTyping) finishTourTyping();
-      });
-    }
-    if (dim && !dim.dataset.tbBound) {
-      dim.dataset.tbBound = '1';
-      // dim does not skip — intentional
-    }
-    const replay = document.getElementById('replay-tour-btn');
+    /* More → Take the Tour */
+    const replay = document.getElementById('take-tour-btn') || document.getElementById('replay-tour-btn') || document.querySelector('[data-action="take-tour"]');
     if (replay && !replay.dataset.tbBound) {
       replay.dataset.tbBound = '1';
-      replay.addEventListener('click', () => {
-        try { tbFeedback.press(replay); } catch (e) {}
-        setTourState({ complete: false, step: null, skipped: false });
-        startTour({ replay: true });
-      });
+      replay.addEventListener('click', () => startTour({ force: true, replay: true }));
     }
-    window.addEventListener('resize', () => {
-      if (__tourActive) {
-        const step = TB_TOUR_STEPS[__tourIdx];
-        const el = step ? resolveTourTarget(step.target) : null;
-        const hp = placeTourHost(el);
-        placeTourTip(el, hp);
-      }
-    });
   }
+
+  /* OLD floating tour API removed — do not resurrect placeTourHost/spotlight */
 
 
   // ---------- FIRST-LOAD WELCOME (once per session; overlaps splash exit) ----------
@@ -7085,9 +6799,24 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
 
   // Housekeeping: bounded, event-driven only — no polling, no auto-delete of user data
+  function runLaunchHousekeeping() {
+    /* Once per open: light, event-driven — no polling */
+    try {
+      const build = (cfg().APP_BUILD || '').toString();
+      if (build) sessionStorage.setItem('tb_app_build', build);
+    } catch (e) {}
+    try {
+      /* Drop ghost dual calendar if any prior build injected it */
+      const ghost = document.getElementById('rsvp-add-cal');
+      if (ghost) ghost.remove();
+    } catch (e) {}
+    try { renderRsvp(); } catch (e) {}
+  }
+
   function setupHousekeeping() {
     if (window.__tbHousekeepingBound) return;
     window.__tbHousekeepingBound = true;
+    try { runLaunchHousekeeping(); } catch (e) {}
     const build = (cfg().APP_BUILD || '').toString();
     try {
       const prev = sessionStorage.getItem('tb_app_build');
@@ -7172,7 +6901,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     bindEvents();
     updateAllNewBadges();
     showView('home');
-    loadIronFeed();
+    /* loadIronFeed retired — RSS cut 2026-08-18 */
     bindActivityTags();
     try {
       await initAuth();

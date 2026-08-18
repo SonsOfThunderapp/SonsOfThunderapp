@@ -1,67 +1,31 @@
-# CONCIERGE TOUR SPEC — Follow the Bolt
+# Concierge / Product Tour — SPEC (authority)
 
-## Purpose
+**Updated:** 2026-08-18  
+**Canonical:** Slide-based tour V11 (`TB_TOUR_VERSION = 11`)
 
-First-run and replay guide. The official lightning bolt is the **host**, not a badge on a generic coach card.
+## Status
+OLD floating/bouncing Concierge (`placeTourHost`, spotlight, tip chase) is **RETIRED**.  
+See `DO-NOT-RESURRECT-REGISTRY.md`.
 
-## Audience constraint (locked 2026-08-16)
+## Runtime
+- DOM: `#tb-tour.tb-tour-slides`, `#tb-tour-slide-img`, caption + NEXT/BACK/SKIP
+- Assets: `assets/tour-01.png` … `tour-07.png`
+- Storage: `thunderTourV11`
+- Entry: first-run via `maybeStartProductTour()`; replay via `#replay-tour-btn`
 
-Many brothers are **older and not tech-friendly**.
+## Motion (CINEMATIC LANGUAGE — locked 2026-08-18)
 
-Required:
+Full vocabulary and hard rules: **`THUNDER-CINEMATIC-MOTION-LANGUAGE.md`**
 
-- Slow, patient pacing
-- One idea per step
-- Plain language (no FAB/PWA/modal jargon)
-- Large tappable controls
-- Always-visible **SKIP TOUR**
-- Tap speech to finish typing early
-- No punishment for going slow
-
-## Authoritative implementation
-
-- Version key: `TB_TOUR_VERSION` in `js/app.js` (v4 as of bolt1)
-- Storage: `thunderTourV{version}` localStorage
-- DOM: `#tb-tour`, `#tb-tour-host`, `#tb-tour-tip`, `#tb-tour-spotlight`, `#tb-tour-dim`
-- Entry: `maybeStartProductTour` after splash; install overlays win
-- Replay: `#replay-tour-btn` on More
-
-## Steps (v4 copy in source)
-
-1. welcome — Follow me  
-2. gathering — Next Gathering / Crooked Can / Monday rule  
-3. imin — I’m In (allowTargetTap)  
-4. brothers — nav  
-5. events — nav  
-6. code — The Code  
-7. thunder — Ask Thunder + optional real demo  
-8. finish — Replay from More / Thunder doesn’t dull  
-
-## Motion / focus (required intent)
-
-| Requirement | Spec | Source status |
-|-------------|------|---------------|
-| Host bolt separate from tip | `#tb-tour-host` + bolt-only.png | PRESENT |
-| Arrival / travel / explain / celebrate classes | CSS host states | PRESENT |
-| Live typing + tap to complete | `typeTourText` | PRESENT |
-| Pause ambient under `body.tb-tour-open` | CSS animation-play-state | PRESENT |
-| Dim + backdrop filter | `.tb-tour-dim` | PRESENT |
-| Tight spotlight only on one target | director rule | PARTIAL — large yellow frames still possible |
-| Extinguish previous before travel | director rule | PROMPTED BUT NOT FOUND as explicit phase machine |
-| Curved path / electrical trace | director rule | PROMPTED BUT NOT FOUND |
-| Suppress competing red CTA during non–I’m-In steps | director + older-user | PROMPTED BUT NOT FOUND |
-| One-second attention test | director gate | FAILED on bolt1 review screenshots |
-| Full cinematic sequence after approval | user hold for approve | NOT IMPLEMENTED pending explicit approve |
-
-## Haptics during tour
-
-- Arrival: `thunderImpact` (once)
-- Step change: `selection`
-- Complete: `confirm`
-- No per-character haptics
-
-## Non-regression
-
-Do not replace this system with a second tour framework. Improve in place.  
-Do not remove Skip/Close/Replay.  
-Do not auto-start over install overlays.
+Summary:
+- Principle: Thunder speaks → one feature wakes → eye follows → responds → settles → continue
+- One dominant motion at a time
+- Thunder entrance ~150–250ms then **stays put** (no bounce / no travel)
+- Living idle only while present and not transitioning
+- Type-out with rare phrase emphasis (LOCK IT IN, THE CODE, etc.)
+- Feature acknowledgement: compress → rebound → electric confirm → settle
+- Scene transition: electric wipe/dissolve ~300–400ms
+- Focus falloff + optional electric trace on real UI (focus device, not permanent deco)
+- Scene 7 only: one synchronized final heartbeat on “YOU'RE READY / LET'S GO”
+- **NO** Ken Burns, full-screen zoom, aggressive camera, bouncing cards, multi-motion chaos
+- `prefers-reduced-motion` → fades + utility only
