@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260817-p1-repair',
+  APP_BUILD: '20260818-p0-recon1',
 
   /* ── PRODUCT LOCK (2026-08-16 FINAL) ───────────────────────────
      This build freezes every signed-off system through cohere1/tap/voice/hero.
