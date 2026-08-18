@@ -56,10 +56,10 @@ html, body {
   padding-bottom: calc(96px + var(--safe-bottom));
 }
 
-/* HEADER — compact APP header (not hero).
-   Safe-area grows padding; logo scale stays fixed and small. */
+/* HEADER — logo on top, centered, no overlay, no clip under notch.
+   Bolt lives in the PNG only. No absolute bolt layer. */
 .header {
-  padding: calc(8px + env(safe-area-inset-top, 20px)) 16px 8px;
+  padding: calc(12px + env(safe-area-inset-top, 24px)) 12px 10px;
   text-align: center;
   background: var(--black);
   position: sticky;
@@ -67,70 +67,39 @@ html, body {
   z-index: 50;
   overflow: visible;
 }
+.logo-wrap {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 92vw;
+  margin: 0 auto;
+  line-height: 0;
+  overflow: visible;
+  z-index: 2;
+}
 .logo {
-  height: 72px;
+  height: 64px;
   width: auto;
-  max-width: 78vw;
+  max-width: 92vw;
   object-fit: contain;
+  object-position: center center;
   display: block;
   margin: 0 auto;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
-}
-/* Pulse bolt asset — absolute over the O-bolt only; never inflate header height */
-.header-bolt-live {
-  position: absolute;
-  left: 29.4%;
-  top: 2%;
-  width: 17.3%;
-  height: 86%;
-  object-fit: contain;
-  pointer-events: none;
+  position: relative;
   z-index: 2;
 }
-
-/* Logo bolt pulse — clipped to the real bolt through the O (pixel-measured @2x).
-   Asset unchanged. NO drop-shadow on the box (avoids rectangular bloom).
-   Glow only inside the zigzag clip-path. Same 4s --tb-breathe as every other bolt. */
-.logo-glimmer-wrap {
-  position: relative;
-  display: inline-block;
-  max-width: 78vw;
-  margin: 0 auto;
-  line-height: 0;
-  overflow: visible;
-}
-.logo-glimmer-wrap .logo {
-  margin: 0 auto;
-  position: relative;
-  z-index: 1;
-}
-.logo-bolt-glimmer {
-  /* DISABLED: full-rect gradient was painting a visible box over the wordmark
-     even with mask-image. Clean logo PNG already has the yellow bolt — no overlay. */
+/* Overlay bolt layers permanently removed — bolt is in the logo PNG */
+.header-bolt-live,
+.logo-bolt-glimmer,
+.logo-glimmer-wrap .header-bolt-live {
   display: none !important;
-  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
   opacity: 0 !important;
-  background: none !important;
-  animation: none !important;
-  box-shadow: none !important;
-  filter: none !important;
-}
-@keyframes logoBoltPulse {
-  0%, 100% {
-    opacity: 0.22;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.85;
-    transform: scale(1.015);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .logo-bolt-glimmer {
-    animation: none !important;
-    opacity: 0 !important;
-  }
+  pointer-events: none !important;
+  visibility: hidden !important;
 }
 
 /* VIEWS */
@@ -325,7 +294,13 @@ html, body {
   transform: scale(0.985);
   background: #161616;
 }
-.announcement-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.announcement-card h3 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  animation: brotherNamePulse var(--tb-breathe);
+  will-change: opacity, text-shadow;
+}
 .announcement-card p { font-size: 13px; color: #aaa; line-height: 1.4; }
 
 /* BROTHERS */
@@ -366,14 +341,17 @@ html, body {
 }
 @keyframes brotherNamePulse {
   0%, 100% {
-    opacity: 0.88;
+    opacity: 0.92;
     text-shadow: 0 0 0 transparent;
     color: #fff;
   }
   50% {
     opacity: 1;
-    text-shadow: 0 0 10px rgba(254, 241, 5, 0.45), 0 0 2px rgba(254, 241, 5, 0.3);
-    color: #fff;
+    text-shadow:
+      0 0 6px rgba(254, 241, 5, 0.95),
+      0 0 14px rgba(254, 241, 5, 0.75),
+      0 0 28px rgba(254, 241, 5, 0.45);
+    color: #FEF105;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -411,15 +389,26 @@ html, body {
 .event-month {
   font-size: 10px;
   font-weight: 700;
-  color: var(--yellow);
+  color: #FEF105;
   letter-spacing: 0.5px;
   animation: brotherNamePulse var(--tb-breathe);
   will-change: opacity, text-shadow;
 }
-@media (prefers-reduced-motion: reduce) {
-  .event-month { animation: none !important; text-shadow: none !important; }
+.event-day {
+  font-size: 18px;
+  font-weight: 800;
+  color: #FEF105;
+  animation: brotherNamePulse var(--tb-breathe);
+  will-change: opacity, text-shadow;
 }
-.event-day { font-size: 18px; font-weight: 800; }
+@media (prefers-reduced-motion: reduce) {
+  .event-month,
+  .event-day {
+    animation: none !important;
+    text-shadow: 0 0 8px rgba(254, 241, 5, 0.5) !important;
+    color: #FEF105 !important;
+  }
+}
 .event-details h3 { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
 .event-details p { font-size: 13px; color: var(--gray); }
 
@@ -3083,6 +3072,16 @@ h1.code-title-glow {
   font-size: 15px;
   font-weight: 700;
   letter-spacing: -0.01em;
+  animation: brotherNamePulse var(--tb-breathe);
+  will-change: opacity, text-shadow;
+}
+@media (prefers-reduced-motion: reduce) {
+  .announcement-card h3,
+  .iron-title {
+    animation: none !important;
+    text-shadow: none !important;
+    color: #fff !important;
+  }
 }
 
 .announcement-card p,
@@ -4964,4 +4963,30 @@ h1.code-title-glow,
   .rsvp-status, .header-bolt-live {
     animation: none !important;
   }
+}
+
+/* === PUNCH 20260818: header logo on top, no bolt overlay, centered, no overlap === */
+.header-bolt-live,
+.logo-bolt-glimmer,
+.splash-logo-bolt-glimmer {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  max-width: 0 !important;
+  max-height: 0 !important;
+  background: none !important;
+  animation: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+}
+.logo-wrap {
+  position: relative;
+  z-index: 2;
+}
+.header .logo {
+  position: relative;
+  z-index: 2;
 }
