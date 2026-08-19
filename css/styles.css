@@ -6210,3 +6210,38 @@ img.about-logo,
 #main-header {
   display: block !important;
 }
+
+/* Ask Thunder: modal above sticky header; tux fully visible; logo shrinks */
+.thunder-modal {
+  z-index: 800 !important;
+  align-items: stretch !important;
+}
+.thunder-modal .thunder-content {
+  height: 100% !important;
+  max-height: 100% !important;
+  border-radius: 0 !important;
+  max-width: 100% !important;
+}
+body.tb-ask-open #main-header.header,
+body.tb-ask-open #main-header {
+  display: block !important;
+  padding: calc(4px + env(safe-area-inset-top, 12px)) 12px 2px !important;
+}
+body.tb-ask-open #header-logo,
+body.tb-ask-open .header .logo {
+  width: min(28vw, 110px) !important;
+  max-width: min(28vw, 110px) !important;
+  max-height: none !important;
+  height: auto !important;
+}
+.thunder-ask-hero {
+  padding: 4px 12px 0 !important;
+  flex: 0 0 auto;
+}
+.thunder-ask-hero-img {
+  width: min(300px, 78vw) !important;
+  max-height: 52vh !important;
+  height: auto !important;
+  object-fit: contain !important;
+  object-position: center top !important;
+}

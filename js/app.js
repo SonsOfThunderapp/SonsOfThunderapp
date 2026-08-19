@@ -3941,6 +3941,9 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     if (!el) return;
     releaseFocusAndZoom();
     el.classList.add('hidden');
+    if (id === 'thunder-modal') {
+      try { document.body.classList.remove('tb-ask-open'); } catch (e) {}
+    }
     unlockBodyIfClear();
     if (id === 'install-modal') {
       stopInstallExplainer($('#install-gif'));
@@ -4798,12 +4801,12 @@ $('#edit-profile-btn').addEventListener('click', () => {
         if (hint) hint.textContent = 'Voice not available on this browser — type your question';
       } else if (state === 'ready') {
         thunderListening = false;
-        if (label) label.textContent = 'TAP TO SPEAK';
-        if (hint) hint.textContent = 'Voice mode — speak your question';
+        if (label) label.textContent = 'ASK THUNDER';
+        if (hint) hint.textContent = 'Tap when you’re ready to speak';
       } else {
         thunderListening = false;
-        if (label) label.textContent = 'TAP TO SPEAK';
-        if (hint) hint.textContent = 'Voice mode — speak your question';
+        if (label) label.textContent = 'ASK THUNDER';
+        if (hint) hint.textContent = 'Tap when you’re ready to speak';
       }
     }
 
@@ -4874,11 +4877,8 @@ $('#edit-profile-btn').addEventListener('click', () => {
     function openThunderVoiceMode() {
       thunderVoiceMode = true;
       openModal('thunder-modal');
-      // Small delay so modal is visible before mic prompt
-      setTimeout(() => {
-        if (thunderSpeechSupported()) startThunderVoice();
-        else setThunderVoiceUI('unsupported');
-      }, 280);
+      try { document.body.classList.add('tb-ask-open'); } catch (e) {}
+      setThunderVoiceUI(thunderSpeechSupported() ? 'ready' : 'unsupported');
     }
 
 
@@ -5010,6 +5010,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
         const modal = $('#thunder-modal');
         const alreadyOpen = modal && !modal.classList.contains('hidden');
         openModal('thunder-modal');
+        try { document.body.classList.add('tb-ask-open'); } catch (e) {}
         thunderVoiceMode = true;
         try {
           const hero = document.querySelector('.thunder-ask-hero-img');
@@ -5019,19 +5020,15 @@ $('#edit-profile-btn').addEventListener('click', () => {
             hero.classList.add('tb-tux-in');
           }
         } catch (e) {}
-        // Do not stack a second recognition session if already listening
         if (alreadyOpen && thunderListening) return;
-        if (opts.voice !== false && isSupported()) {
+        // Never auto-listen. Brother taps ASK THUNDER to speak.
+        if (opts.voice === true && isSupported()) {
           setTimeout(() => {
             if (thunderListening) return;
             startThunderVoice();
           }, opts.delay != null ? opts.delay : 280);
         } else {
           setThunderVoiceUI(isSupported() ? 'ready' : 'unsupported');
-          setTimeout(() => {
-            const input = $('#thunder-input');
-            if (input) try { input.focus(); } catch (e) {}
-          }, 200);
         }
       }
 
@@ -5112,7 +5109,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
         }
       } catch (e) {}
       try {
-        if (window.ThunderVoice) ThunderVoice.openAsk({ voice: true });
+        if (window.ThunderVoice) ThunderVoice.openAsk({ voice: false });
         else openThunderVoiceMode();
       } catch (e) {
         openThunderVoiceMode();
@@ -5130,7 +5127,10 @@ $('#edit-profile-btn').addEventListener('click', () => {
     const thunderModal = $('#thunder-modal');
     if (thunderModal) {
       const obs = new MutationObserver(() => {
-        if (thunderModal.classList.contains('hidden')) stopThunderVoice();
+        if (thunderModal.classList.contains('hidden')) {
+          stopThunderVoice();
+          try { document.body.classList.remove('tb-ask-open'); } catch (e) {}
+        }
       });
       obs.observe(thunderModal, { attributes: true, attributeFilter: ['class'] });
     }
@@ -5215,7 +5215,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
           const useVoice = info.voice || spec.voice;
           setTimeout(() => {
             try {
-              if (window.ThunderVoice) ThunderVoice.openAsk({ voice: !!useVoice, delay: 350 });
+              if (window.ThunderVoice) ThunderVoice.openAsk({ voice: false, delay: 350 });
               else if (typeof openThunderVoiceMode === 'function') openThunderVoiceMode();
             } catch (e) {}
           }, 450);
