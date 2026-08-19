@@ -310,10 +310,11 @@ html, body {
 }
 .announcement-card h3 {
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 800;
   margin-bottom: 4px;
-  animation: brotherNamePulse var(--tb-breathe);
-  will-change: opacity, text-shadow;
+  color: #FEF105;
+  animation: none;
+  text-shadow: none;
 }
 .announcement-card p { font-size: 13px; color: #aaa; line-height: 1.4; }
 
@@ -5819,22 +5820,28 @@ img.about-logo,
 .tb-live-card { margin-bottom: 0; }
 .tb-live-bros { margin-bottom: 0; }
 
-/* ===== MODAL TITLE AUTHORITY =====
-   Category chips (ANNOUNCEMENT / UPCOMING / GATHERING / MISSION) are chrome.
-   The real title of the modal is what glows. */
+/* ===== LABEL PULSE / TITLE SOLID =====
+   Chip (ANNOUNCEMENT) breathes. Title stands still. */
 .info-detail-label,
-.announcement-card-label,
+.announcement-card-label {
+  animation: brotherNamePulse var(--tb-breathe) !important;
+  color: #FEF105 !important;
+  text-shadow:
+    0 0 8px rgba(254, 241, 5, 0.55),
+    0 0 16px rgba(254, 241, 5, 0.25) !important;
+  opacity: 1 !important;
+}
 .qr-label,
 .info-detail .card-label {
   animation: none !important;
   text-shadow: none !important;
   color: #8a8a8a !important;
-  opacity: 1 !important;
 }
 .info-detail-title {
   color: #FEF105 !important;
-  animation: brotherNamePulse var(--tb-breathe) !important;
-  will-change: opacity, text-shadow;
+  animation: none !important;
+  text-shadow: none !important;
+  font-weight: 800;
 }
 .brother-detail-name {
   animation: brotherNamePulse var(--tb-breathe) !important;
