@@ -6147,3 +6147,57 @@ img.about-logo,
   .tb-tour-boards .tb-live-slide.is-on,
   .tb-tour-boards .tb-guide-thunder { animation: none !important; }
 }
+
+
+/* === LOCK 20260819-logofull1: stacked 7697 mark, FULL red OF THUNDER, every surface ===
+   Splash is the source of truth. Header was losing to leftover height:72px and a bolt overlay.
+   Size by WIDTH only. Never crop height. Overlay bolt is dead. */
+.header-bolt-pulse,
+.header-bolt-live,
+.logo-bolt-glimmer,
+.logo-stack {
+  display: none !important;
+}
+#main-header.header,
+.header {
+  overflow: visible !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  padding: calc(8px + env(safe-area-inset-top, 20px)) 12px 8px !important;
+}
+.logo-wrap {
+  display: flex !important;
+  justify-content: center !important;
+  overflow: visible !important;
+  height: auto !important;
+  max-height: none !important;
+  aspect-ratio: auto !important;
+}
+.header .logo,
+.header img.logo,
+#header-logo,
+.logo-wrap .logo,
+.logo-stack #header-logo {
+  height: auto !important;
+  width: min(72vw, 320px) !important;
+  max-width: min(72vw, 320px) !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  object-position: center top !important;
+  display: block !important;
+  margin: 0 auto !important;
+}
+.splash-mark,
+.splash-logo {
+  width: min(82vw, 340px) !important;
+  height: auto !important;
+  max-height: none !important;
+  object-fit: contain !important;
+}
+.tb-live-logo {
+  width: min(58%, 200px) !important;
+  height: auto !important;
+  max-height: none !important;
+  object-fit: contain !important;
+}
