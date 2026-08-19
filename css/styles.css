@@ -6201,3 +6201,12 @@ img.about-logo,
   max-height: none !important;
   object-fit: contain !important;
 }
+
+/* Header logo stays on every tab — More no longer hides it */
+.about-container {
+  padding-top: 8px !important;
+}
+#main-header.header,
+#main-header {
+  display: block !important;
+}
