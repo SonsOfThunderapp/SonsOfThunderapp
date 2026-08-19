@@ -6010,3 +6010,140 @@ img.about-logo,
 }
 
 
+
+
+/* ===== 7-BOARD TOUR — poster spec (official Thunder) ===== */
+.tb-tour-boards .tb-tour-stage {
+  background: #000 !important;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 18px calc(16px + env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 100%;
+}
+.tb-tour-boards .tb-tour-progress {
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: #9a9a9a;
+  margin: 4px 0 6px;
+  font-weight: 700;
+}
+.tb-tour-boards .tb-tour-headline {
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: clamp(28px, 8vw, 40px);
+  color: #fff !important;
+  letter-spacing: 0.04em;
+  line-height: 0.95;
+  animation: none !important;
+  text-shadow: none !important;
+  margin: 0;
+}
+.tb-tour-boards .tb-tour-sub {
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: clamp(22px, 6.5vw, 32px);
+  color: #FEF105;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  margin: 4px 0 12px;
+}
+.tb-tour-hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 4px 0 10px;
+}
+.tb-tour-boards .tb-guide-bubble {
+  flex: 1;
+  min-width: 0;
+  background: #0a0a0a;
+  border: 1.5px solid #FEF105;
+  border-radius: 14px;
+  padding: 10px 12px;
+  box-shadow: 0 0 16px rgba(254,241,5,0.12);
+}
+.tb-tour-boards .tb-tour-body {
+  color: #eee;
+  font-size: 13px;
+  line-height: 1.35;
+  margin: 0;
+}
+.tb-tour-boards .tb-guide-thunder {
+  width: min(38vw, 148px);
+  height: auto;
+  flex: 0 0 auto;
+  background: none !important;
+  border: none !important;
+  filter: drop-shadow(0 0 12px rgba(254,241,5,0.45));
+  animation: tbLiveThunderIdle var(--tb-breathe);
+}
+.tb-phone {
+  display: none;
+  width: min(78%, 280px);
+  margin: 0 auto 12px;
+  background: #111;
+  border: 2px solid #2a2a2a;
+  border-radius: 22px;
+  padding: 12px 12px 10px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.55);
+}
+.tb-tour-boards .tb-tour-stage:not([data-board="0"]) .tb-phone { display: block; }
+.tb-tour-boards .tb-tour-slide-frame {
+  height: auto !important;
+  max-height: none !important;
+  position: relative;
+  overflow: visible !important;
+  background: transparent !important;
+}
+.tb-tour-boards .tb-live-slide {
+  position: relative !important;
+  inset: auto !important;
+  opacity: 0;
+  display: none;
+}
+.tb-tour-boards .tb-live-slide.is-on {
+  display: block;
+  opacity: 1;
+  animation: tbBoardIn 0.45s ease;
+}
+@keyframes tbBoardIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+.tb-live-bros-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  flex-direction: unset !important;
+}
+.tb-live-bros-grid .tb-live-bro { justify-content: center; padding: 10px 0; }
+.tb-live-phone-foot {
+  text-align: center; color: #aaa; font-size: 11px; margin-top: 8px; letter-spacing: 0.04em;
+}
+.tb-live-remind, .tb-live-muted { text-align: center; color: #888; font-size: 12px; margin-top: 8px; }
+.tb-live-up {
+  display: flex; justify-content: space-between; color: #ddd; font-size: 13px;
+  padding: 8px 0; border-bottom: 1px solid #222;
+}
+.tb-live-allset {
+  margin-top: 12px; color: #FEF105; font-family: var(--font-display);
+  font-size: 18px; letter-spacing: 0.04em; text-align: center; line-height: 1.15;
+}
+.tb-tour-boards .tb-tour-dots { justify-content: center; margin: 4px 0 10px; }
+.tb-tour-boards .tb-tour-actions { margin-top: auto; }
+.tb-tour-boards .tb-tour-stage[data-board="0"] .tb-tour-back { display: none; }
+.tb-tour-boards .tb-tour-stage[data-board="0"] .tb-tour-next {
+  background: #FEF105 !important;
+  color: #000 !important;
+  box-shadow: 0 0 18px rgba(254,241,5,0.35);
+  flex: 1 1 100%;
+}
+.tb-tour-boards .tb-tour-skip { letter-spacing: 0.14em; font-size: 11px; }
+@media (prefers-reduced-motion: reduce) {
+  .tb-tour-boards .tb-live-slide.is-on,
+  .tb-tour-boards .tb-guide-thunder { animation: none !important; }
+}

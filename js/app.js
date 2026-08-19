@@ -6735,7 +6735,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
 
   // ---------- PRODUCT TOUR — 7-slide (restored 20260818) ----------
-  const TB_TOUR_VERSION = 13;
+  const TB_TOUR_VERSION = 14;
   function tourStorageKey() { return 'thunderTourV' + TB_TOUR_VERSION; }
   function isTourComplete() {
     try {
@@ -6756,51 +6756,51 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   const TB_TOUR_STEPS = [
     {
       id: 'welcome',
-      slide: 'assets/tour-01.jpg',
-      headline: 'WELCOME TO SONS OF THUNDER',
-      body: 'I\u2019m Thunder. This is the room. I\u2019ll walk you through it.',
+      headline: 'WELCOME TO',
+      sub: 'SONS OF THUNDER',
+      body: 'I\u2019m Thunder\u2014your guide. This is your brotherhood hub. Let\u2019s walk through the essentials.',
       nextLabel: 'LET\u2019S GO'
     },
     {
       id: 'locked-in',
-      slide: 'assets/tour-02.jpg',
       headline: 'LOCKED IN',
-      body: 'Tap I\u2019M IN. We\u2019ll remind you so you don\u2019t miss it.',
+      sub: 'NEVER MISS WHAT MATTERS',
+      body: 'Tap I\u2019M IN for the next gathering and get reminded so you don\u2019t miss it.',
       nextLabel: 'NEXT'
     },
     {
       id: 'brothers',
-      slide: 'assets/tour-03.jpg',
       headline: 'BROTHERS',
-      body: 'See who\u2019s in. Claim your seat. Real brothers, real names.',
+      sub: 'REAL CONNECTIONS',
+      body: 'See who\u2019s in, update your profile, and strengthen the bond.',
       nextLabel: 'NEXT'
     },
     {
       id: 'memories',
-      slide: 'assets/tour-04.jpg',
       headline: 'MEMORIES',
-      body: 'Photos from the night. The memories we make keep the story alive.',
+      sub: 'CAPTURE. SHARE. REMEMBER.',
+      body: 'Add photos from gatherings and missions. The memories we make keep our story alive.',
       nextLabel: 'NEXT'
     },
     {
       id: 'code',
-      slide: 'assets/tour-05.jpg',
       headline: 'THE CODE',
-      body: 'The Code is our standard. Who we are. How we show up.',
+      sub: 'LIVE IT. EVERY DAY.',
+      body: 'The Code is our standard. It\u2019s who we are and how we show up\u2014for ourselves and each other.',
       nextLabel: 'NEXT'
     },
     {
       id: 'text-leader',
-      slide: 'assets/tour-06.jpg',
       headline: 'TEXT A LEADER',
-      body: 'Rough day? Text a leader. Confidential. Always.',
+      sub: 'WHEN YOU NEED IT MOST',
+      body: 'Rough day? Hard season? Text a leader. Confidential. Always.',
       nextLabel: 'NEXT'
     },
     {
       id: 'whats-next',
-      slide: 'assets/tour-07.jpg',
       headline: 'WHAT\u2019S NEXT',
-      body: 'You\u2019re set, brother. Show up. I\u2019ll be here.',
+      sub: 'STAY AHEAD. STAY READY.',
+      body: 'See what\u2019s coming up so you can plan, invite, and be there.',
       nextLabel: 'DONE'
     }
   ];
@@ -6882,10 +6882,17 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       img.src = step.slide;
       img.alt = step.headline || '';
     }
+    const sub = document.getElementById('tb-tour-sub');
+    const stage = document.querySelector('#tb-tour .tb-tour-stage');
+    if (stage) stage.setAttribute('data-board', String(__tourIdx));
     if (headline) headline.textContent = step.headline || '';
+    if (sub) {
+      sub.textContent = step.sub || '';
+      sub.classList.toggle('hidden', !step.sub);
+    }
     // Thunder speaking — type the body line
     typeTourBody(step.body || '', body);
-    if (progress) progress.textContent = (__tourIdx + 1) + ' of ' + TB_TOUR_STEPS.length;
+    if (progress) progress.textContent = (__tourIdx + 1) + ' OF ' + TB_TOUR_STEPS.length;
     if (next) next.textContent = step.nextLabel || (__tourIdx >= TB_TOUR_STEPS.length - 1 ? 'DONE' : 'NEXT');
     if (back) back.disabled = __tourIdx <= 0;
     if (dots) {

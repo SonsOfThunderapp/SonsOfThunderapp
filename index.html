@@ -19,7 +19,7 @@
   <!-- Web App Manifest -->
   <link rel="manifest" href="manifest.json" />
   
-  <link rel="stylesheet" href="css/styles.css?v=20260819-head1" />
+  <link rel="stylesheet" href="css/styles.css?v=20260819-boards1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -343,78 +343,77 @@
   </div>
 
   
-  <!-- PRODUCT TOUR — 7-slide (restored 20260818). Glow + motion. -->
-  <div id="tb-tour" class="tb-tour tb-tour-slides hidden" aria-hidden="true">
-    <div class="tb-tour-stage" role="dialog" aria-modal="true" aria-labelledby="tb-tour-headline">
+  <!-- PRODUCT TOUR — 7 boards matching the poster spec. Official Thunder. -->
+  <div id="tb-tour" class="tb-tour tb-tour-slides tb-tour-boards hidden" aria-hidden="true">
+    <div class="tb-tour-stage" role="dialog" aria-modal="true" aria-labelledby="tb-tour-headline" data-board="0">
       <button type="button" class="tb-tour-close" id="tb-tour-close" aria-label="Close tour">×</button>
-      <div class="tb-tour-film">
+      <p class="tb-tour-progress" id="tb-tour-progress">1 OF 7</p>
+      <h2 id="tb-tour-headline" class="tb-tour-headline">WELCOME TO</h2>
+      <p id="tb-tour-sub" class="tb-tour-sub">SONS OF THUNDER</p>
+      <div class="tb-tour-hero">
+        <div class="tb-guide-bubble">
+          <p id="tb-tour-body" class="tb-tour-body"></p>
+        </div>
+        <img class="tb-guide-thunder" src="assets/thunder-tour-host.png?v=20260819-host1" alt="" />
+      </div>
+      <div class="tb-phone" id="tb-tour-phone">
         <div class="tb-tour-slide-frame" id="tb-tour-live">
-          <div class="tb-live-slide is-on" data-slide="0">
-            <img class="tb-live-logo" src="assets/logo@2x.png?v=20260819-diecut1" alt="" />
-          </div>
+          <div class="tb-live-slide is-on" data-slide="0"></div>
           <div class="tb-live-slide" data-slide="1">
             <div class="tb-live-card">
               <div class="tb-live-label">NEXT GATHERING</div>
-              <div class="tb-live-date">Monday · 6:30 PM</div>
-              <div class="tb-live-loc">Crooked Can Patio</div>
+              <div class="tb-live-date">Mon · 6:30 PM</div>
+              <div class="tb-live-loc">Crooked Can Brewery</div>
               <div class="tb-live-im-in">I'M IN</div>
+              <div class="tb-live-remind">Set a Reminder</div>
             </div>
           </div>
           <div class="tb-live-slide" data-slide="2">
-            <div class="tb-live-bros">
-              <div class="tb-live-bro"><span class="tb-live-avatar">J</span><span class="tb-live-bname">JAMES</span></div>
-              <div class="tb-live-bro"><span class="tb-live-avatar">J</span><span class="tb-live-bname">JOHN</span></div>
-              <div class="tb-live-bro tb-live-bro-you"><span class="tb-live-avatar">+</span><span class="tb-live-bname">YOUR SEAT</span></div>
+            <div class="tb-live-bros tb-live-bros-grid">
+              <div class="tb-live-bro"><span class="tb-live-avatar">⚡</span></div>
+              <div class="tb-live-bro"><span class="tb-live-avatar">⚡</span></div>
+              <div class="tb-live-bro"><span class="tb-live-avatar">⚡</span></div>
+              <div class="tb-live-bro"><span class="tb-live-avatar">⚡</span></div>
+              <div class="tb-live-bro"><span class="tb-live-avatar">⚡</span></div>
+              <div class="tb-live-bro"><span class="tb-live-avatar">⚡</span></div>
             </div>
+            <div class="tb-live-phone-foot">View All Brothers</div>
           </div>
           <div class="tb-live-slide" data-slide="3">
-            <div class="tb-live-card">
-              <div class="tb-live-label">MEMORIES</div>
-              <div class="tb-live-mem-row">
-                <div class="tb-live-mem"></div>
-                <div class="tb-live-mem"></div>
-                <div class="tb-live-mem tb-live-mem-add">+</div>
-              </div>
+            <div class="tb-live-label">RECENT MEMORIES</div>
+            <div class="tb-live-mem-row">
+              <div class="tb-live-mem"></div>
+              <div class="tb-live-mem"></div>
+              <div class="tb-live-mem"></div>
+              <div class="tb-live-mem tb-live-mem-add">+</div>
             </div>
+            <div class="tb-live-phone-foot">View All Memories</div>
           </div>
           <div class="tb-live-slide" data-slide="4">
-            <div class="tb-live-card">
-              <div class="tb-live-code-title">THE CODE</div>
-              <div class="tb-live-code-line">Show up.</div>
-              <div class="tb-live-code-line">Tell the truth.</div>
-              <div class="tb-live-code-line">Carry your brother.</div>
-            </div>
+            <div class="tb-live-code-title">THE CODE</div>
+            <div class="tb-live-code-line">Be a Man of Faith</div>
+            <div class="tb-live-code-line">Lead Your Family</div>
+            <div class="tb-live-code-line">Protect & Provide</div>
+            <div class="tb-live-code-line">Pursue Excellence</div>
+            <div class="tb-live-code-line">Stand With Brothers</div>
           </div>
           <div class="tb-live-slide" data-slide="5">
-            <div class="tb-live-card">
-              <div class="tb-live-label">NEED A LINE?</div>
-              <div class="tb-live-text-leader">TEXT A LEADER</div>
-            </div>
+            <div class="tb-live-label">TEXT A LEADER</div>
+            <div class="tb-live-text-leader">Text a Leader</div>
+            <p class="tb-live-muted">Confidential. Always.</p>
           </div>
           <div class="tb-live-slide" data-slide="6">
-            <div class="tb-live-card">
-              <div class="tb-live-label">WHAT’S NEXT</div>
-              <div class="tb-live-date">You’re in the room.</div>
-            </div>
+            <div class="tb-live-label">UPCOMING</div>
+            <div class="tb-live-up"><span>Next Gathering</span><span>Sep 14</span></div>
+            <div class="tb-live-up"><span>Men’s Breakfast</span><span>Sep 9</span></div>
+            <p class="tb-live-allset">YOU’RE ALL SET, BROTHER.<br>Now go live it.</p>
           </div>
         </div>
-        <div class="tb-tour-guide">
-          <img class="tb-guide-thunder" src="assets/thunder-tour-host.png?v=20260819-host1" alt="" />
-          <div class="tb-guide-bubble">
-            <p id="tb-tour-body" class="tb-tour-body"></p>
-          </div>
-        </div>
-      </div>
-      <div class="tb-tour-caption">
-        <div class="tb-tour-bolt-row">
-          <span class="tb-tour-progress" id="tb-tour-progress">1 of 7</span>
-        </div>
-        <h2 id="tb-tour-headline" class="tb-tour-headline"></h2>
       </div>
       <div class="tb-tour-dots" id="tb-tour-dots" aria-hidden="true"></div>
       <div class="tb-tour-actions">
         <button type="button" class="tb-tour-back" id="tb-tour-back">BACK</button>
-        <button type="button" class="tb-tour-next" id="tb-tour-next">NEXT</button>
+        <button type="button" class="tb-tour-next" id="tb-tour-next">LET’S GO</button>
         <button type="button" class="tb-tour-skip" id="tb-tour-skip">SKIP TOUR</button>
       </div>
     </div>
@@ -703,9 +702,9 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/config.js?v=20260819-diecut1"></script>
+  <script src="js/config.js?v=20260819-boards1"></script>
   <script src="js/qrcode.min.js?v=20260816LOCKED6"></script>
-  <script src="js/app.js?v=20260819-signin1"></script>
+  <script src="js/app.js?v=20260819-boards1"></script>
 </div>
 
 
