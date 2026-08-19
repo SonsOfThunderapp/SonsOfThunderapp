@@ -5469,6 +5469,55 @@ img.about-logo,
   object-fit: contain !important;
 }
 
+/* Header bolt — drop-shadow pulse on the bolt only. Never a box around the wordmark. */
+.logo-stack {
+  position: relative;
+  display: inline-block;
+  width: auto;
+  max-width: 70vw;
+  line-height: 0;
+  overflow: visible;
+}
+.logo-stack #header-logo,
+.logo-stack .logo {
+  max-width: 100% !important;
+  width: 100% !important;
+}
+.header-bolt-pulse {
+  position: absolute;
+  left: 33.88%;
+  top: 1.18%;
+  width: 31.62%;
+  height: auto;
+  pointer-events: none;
+  z-index: 3;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  animation: headerBoltGlow var(--tb-breathe);
+  will-change: filter;
+}
+@keyframes headerBoltGlow {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 3px rgba(254, 241, 5, 0.35))
+      drop-shadow(0 0 8px rgba(254, 241, 5, 0.18));
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 8px rgba(254, 241, 5, 0.95))
+      drop-shadow(0 0 18px rgba(254, 241, 5, 0.55))
+      drop-shadow(0 0 6px rgba(255, 160, 0, 0.4));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .header-bolt-pulse {
+    animation: none !important;
+    filter: drop-shadow(0 0 8px rgba(254, 241, 5, 0.55));
+  }
+}
+
+
 /* ===== LIVE TOUR SLIDES — layered, manipulable ===== */
 #tb-tour-live.tb-tour-slide-frame {
   height: min(38vh, 280px);
