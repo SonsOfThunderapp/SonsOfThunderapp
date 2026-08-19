@@ -5472,28 +5472,34 @@ img.about-logo,
 /* Header bolt — drop-shadow pulse on the bolt only. Never a box around the wordmark. */
 .logo-stack {
   position: relative;
-  display: inline-block;
-  width: auto;
-  max-width: 70vw;
+  display: block;
+  width: min(70vw, 360px);
+  margin: 0 auto;
   line-height: 0;
   overflow: visible;
+  aspect-ratio: 800 / 591;
 }
 .logo-stack #header-logo,
 .logo-stack .logo {
   max-width: 100% !important;
   width: 100% !important;
+  height: auto !important;
+  display: block !important;
+  position: relative;
+  z-index: 1;
 }
 .header-bolt-pulse {
   position: absolute;
   left: 33.88%;
-  top: 1.18%;
+  top: 2.2%;
   width: 31.62%;
   height: auto;
   pointer-events: none;
-  z-index: 3;
+  z-index: 2;
   display: block !important;
   visibility: visible !important;
-  opacity: 1 !important;
+  background: none !important;
+  border: none !important;
   animation: headerBoltGlow var(--tb-breathe);
   will-change: filter;
 }
