@@ -9,19 +9,19 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "assets/icon-192.png",
+      "src": "assets/icon-192-v2.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "assets/icon-512.png",
+      "src": "assets/icon-512-v2.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "assets/apple-touch-icon.png",
+      "src": "assets/apple-touch-icon-v2.png",
       "sizes": "180x180",
       "type": "image/png"
     }
@@ -34,7 +34,7 @@
       "url": "/?ask=1&voice=1",
       "icons": [
         {
-          "src": "assets/icon-192.png",
+          "src": "assets/icon-192-v2.png",
           "sizes": "192x192",
           "type": "image/png"
         }
@@ -47,7 +47,7 @@
       "url": "/?view=home",
       "icons": [
         {
-          "src": "assets/icon-192.png",
+          "src": "assets/icon-192-v2.png",
           "sizes": "192x192",
           "type": "image/png"
         }
