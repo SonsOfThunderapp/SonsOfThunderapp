@@ -6103,12 +6103,17 @@ img.about-logo,
   position: relative !important;
   inset: auto !important;
   opacity: 0;
-  display: none;
+  display: none !important;
+  pointer-events: none;
+  background: #0a0a0a !important;
 }
 .tb-tour-boards .tb-live-slide.is-on {
-  display: block;
-  opacity: 1;
+  display: block !important;
+  opacity: 1 !important;
+  pointer-events: auto;
   animation: tbBoardIn 0.45s ease;
+  isolation: isolate;
+  background: #111 !important;
 }
 @keyframes tbBoardIn {
   from { opacity: 0; transform: translateY(10px); }
@@ -6244,4 +6249,22 @@ body.tb-ask-open .header .logo {
   height: auto !important;
   object-fit: contain !important;
   object-position: center top !important;
+}
+
+/* Beat 2: I'm In is the only object. Nothing sits behind or on it. */
+.tb-tour-stage[data-board="1"] .tb-tour-hero {
+  align-items: flex-start;
+}
+.tb-tour-stage[data-board="1"] .tb-guide-thunder {
+  max-width: 96px;
+  width: min(28vw, 96px);
+}
+.tb-live-imin-only {
+  position: relative;
+  z-index: 3;
+  isolation: isolate;
+}
+.tb-live-imin-only .tb-live-im-in {
+  position: relative;
+  z-index: 4;
 }
