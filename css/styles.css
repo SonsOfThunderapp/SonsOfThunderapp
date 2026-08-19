@@ -5546,16 +5546,16 @@ img.about-logo,
   animation: none;
 }
 .tb-live-logo {
-  width: min(48%, 150px);
+  width: min(58%, 190px);
   height: auto;
   display: block;
-  margin: 8px auto;
-  animation: tbLiveKen 10s ease-in-out infinite alternate;
-  transform-origin: center 50%;
+  margin: 4px auto;
+  animation: tbLiveKen 9s ease-in-out infinite alternate;
+  transform-origin: center 40%;
 }
 @keyframes tbLiveKen {
-  from { transform: scale(1); }
-  to { transform: scale(1.025); }
+  from { transform: scale(1); filter: brightness(1); }
+  to { transform: scale(1.08); filter: brightness(1.08); }
 }
 .tb-live-card {
   width: 100%;
@@ -5739,17 +5739,25 @@ img.about-logo,
 .tb-tour-guide {
   display: flex;
   align-items: flex-end;
-  gap: 10px;
-  padding: 8px 14px 10px;
-  background: #000;
+  gap: 8px;
+  padding: 0 14px 8px;
+  background: transparent;
   flex: 0 0 auto;
+  margin-top: -18px;
+  position: relative;
+  z-index: 4;
 }
 .tb-guide-thunder {
-  width: 68px;
+  width: 96px;
   height: auto;
-  flex: 0 0 68px;
+  flex: 0 0 auto;
   display: block;
-  filter: drop-shadow(0 0 8px rgba(254,241,5,0.28));
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  overflow: visible;
+  filter: drop-shadow(0 0 10px rgba(254,241,5,0.4));
   animation: tbLiveThunderIdle var(--tb-breathe);
 }
 .tb-guide-bubble {
