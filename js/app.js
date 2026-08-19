@@ -3176,6 +3176,13 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       if (nameEl) nameEl.value = me.name || '';
       if (bioEl) bioEl.value = me.bio || '';
       if (phoneEl) phoneEl.value = me.phone || '';
+
+      const bdayEl = $('#profile-birthday');
+      if (bdayEl) bdayEl.value = (me && me.birthday) ? me.birthday : '';
+
+
+
+      
       if (me.photo) {
         pendingPhotoData = me.photo;
         const preview = $('#photo-preview');
@@ -3194,6 +3201,12 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       if (nameEl) nameEl.value = '';
       if (bioEl) bioEl.value = '';
       if (phoneEl) phoneEl.value = '';
+
+            const bdayEl = $('#profile-birthday');
+      if (bdayEl) bdayEl.value = '';
+
+
+      
       pendingPhotoData = null;
       const preview = $('#photo-preview');
       if (preview) { preview.innerHTML = ''; preview.classList.remove('visible'); }
@@ -4435,6 +4448,10 @@ $('#edit-profile-btn').addEventListener('click', () => {
         const preview = $('#photo-preview');
         preview.innerHTML = `<img src="${esc(pendingPhotoData)}">`;
         preview.classList.add('visible');
+
+
+
+        
       };
       reader.readAsDataURL(file);
     });
@@ -4448,11 +4465,17 @@ $('#edit-profile-btn').addEventListener('click', () => {
       if (!name) { try { tbFeedback.warningOrError($('#profile-name') || $('#save-profile')); } catch (e) {} return alert('Name required'); }
       const id = ensureBrotherId();
       const existing = brothers.findIndex(b => b.id === id);
+
+
+      const rawBday = ($('#profile-birthday') && $('#profile-birthday').value) || '';
+      const birthday = normalizeBirthday(rawBday);
+      
       let entry = {
         id,
         name,
         bio,
         phone,
+        birthday: birthday || null,
         photo: pendingPhotoData || (existing >= 0 ? brothers[existing].photo : null),
         skills: '',
         available: true,
