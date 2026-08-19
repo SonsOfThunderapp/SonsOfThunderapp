@@ -19,7 +19,7 @@
   <!-- Web App Manifest -->
   <link rel="manifest" href="manifest.json" />
   
-  <link rel="stylesheet" href="css/styles.css?v=20260819-prem1" />
+  <link rel="stylesheet" href="css/styles.css?v=20260819-signin1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -103,7 +103,7 @@
           <div class="section-title" id="announcements-title">Announcements</div>
           <div id="announcements" class="feed"></div>
           <!-- Sharpening Iron KILLED permanently — replaced by member sign-in CTA -->
-          <button type="button" id="home-member-cta" class="home-member-cta" aria-label="Already a member? Sign in">
+          <button type="button" id="home-member-cta" class="home-member-cta" aria-label="Already a member? Sign in" onclick="if(window.startMemberSignIn)window.startMemberSignIn();">
             <span class="home-member-cta-title">Already a Member?</span>
             <span class="home-member-cta-sub">Sign in for shared roster &amp; memories</span>
           </button>
@@ -700,9 +700,9 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/config.js?v=20260819-tux1"></script>
+  <script src="js/config.js?v=20260819-signin1"></script>
   <script src="js/qrcode.min.js?v=20260816LOCKED6"></script>
-  <script src="js/app.js?v=20260819-prem1"></script>
+  <script src="js/app.js?v=20260819-signin1"></script>
 </div>
 
 

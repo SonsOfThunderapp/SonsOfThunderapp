@@ -720,8 +720,16 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   }
 
   function startMemberSignIn() {
-    openAuthGate('Sign in for shared roster and memories. Everything else works without an account.');
+    try { openAuthGate('Sign in for shared roster and memories. Everything else works without an account.'); } catch (e) {
+      const gate = document.getElementById('auth-gate');
+      if (gate) {
+        gate.classList.remove('hidden');
+        gate.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+    }
   }
+  try { window.startMemberSignIn = startMemberSignIn; } catch (e) {}
 
   function bindHomeMemberCta() {
     if (document.documentElement.dataset.tbAuthEntryBound === '1') return;
@@ -730,9 +738,15 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       const t = e.target && e.target.closest && e.target.closest('#home-member-cta, #auth-entry-btn');
       if (!t) return;
       e.preventDefault();
+      e.stopPropagation();
       try { tbFeedback.press(t); } catch (err) {}
       startMemberSignIn();
-    });
+    }, true);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindHomeMemberCta);
+  } else {
+    try { bindHomeMemberCta(); } catch (e) {}
   }
 
   async function initAuth() {
