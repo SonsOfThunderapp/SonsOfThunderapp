@@ -5295,3 +5295,80 @@ body.tb-tour-open { overflow: hidden; }
 .about-container {
   padding-top: 8px !important;
 }
+
+
+/* === FIX 1: double logo on More — hide in-page about-logo === */
+.about-logo,
+img.about-logo,
+.about-container .about-logo {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  visibility: hidden !important;
+}
+.about-container {
+  /* header is always visible now — no extra top padding for a second logo */
+  padding-top: 8px !important;
+}
+
+
+/* === FIX 2: tour slide clean frame — no neighbor bleed === */
+.tb-tour-slide-frame {
+  overflow: hidden !important;
+  background: #000 !important;
+  border-radius: 12px 12px 0 0;
+}
+.tb-tour-slide-img {
+  width: 100% !important;
+  height: auto !important;
+  max-height: 52vh !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  display: block !important;
+  background: #000 !important;
+}
+
+
+/* === FIX 4: logo pin reaffirm — same size all pages, top layer === */
+#main-header {
+  display: block !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 500 !important;
+  background: #000 !important;
+}
+.header .logo,
+#header-logo {
+  height: 72px !important;
+  width: auto !important;
+  max-width: 78vw !important;
+  max-height: 72px !important;
+  object-fit: contain !important;
+}
+
+
+/* === TOUR TYPEWRITER — Thunder speaking === */
+.tb-tour-body {
+  min-height: 3.2em;
+  white-space: pre-wrap;
+}
+.tb-tour-body.tb-tour-typing::after {
+  content: '';
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: -0.1em;
+  background: #FEF105;
+  box-shadow: 0 0 8px rgba(254, 241, 5, 0.8);
+  animation: tbTourCursor 0.7s steps(1) infinite;
+}
+@keyframes tbTourCursor {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tb-tour-body.tb-tour-typing::after { display: none !important; animation: none !important; }
+}

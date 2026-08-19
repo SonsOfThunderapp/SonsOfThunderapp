@@ -6689,6 +6689,45 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     try { return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; }
   }
 
+  let __tourTypeTimer = null;
+  let __tourTypeToken = 0;
+
+  function stopTourTypewriter() {
+    if (__tourTypeTimer) {
+      try { clearTimeout(__tourTypeTimer); } catch (e) {}
+      __tourTypeTimer = null;
+    }
+  }
+
+  function typeTourBody(fullText, bodyEl) {
+    stopTourTypewriter();
+    if (!bodyEl) return;
+    const text = fullText || '';
+    if (tourReducedMotion() || !text) {
+      bodyEl.textContent = text;
+      bodyEl.classList.remove('tb-tour-typing');
+      return;
+    }
+    const token = ++__tourTypeToken;
+    bodyEl.textContent = '';
+    bodyEl.classList.add('tb-tour-typing');
+    let i = 0;
+    // ~28–32 chars/sec — speaks, not rushes
+    const ms = 32;
+    function tick() {
+      if (token !== __tourTypeToken) return;
+      i += 1;
+      bodyEl.textContent = text.slice(0, i);
+      if (i < text.length) {
+        __tourTypeTimer = setTimeout(tick, ms);
+      } else {
+        bodyEl.classList.remove('tb-tour-typing');
+        __tourTypeTimer = null;
+      }
+    }
+    __tourTypeTimer = setTimeout(tick, 180);
+  }
+
   function renderTourSlide() {
     const step = TB_TOUR_STEPS[__tourIdx];
     if (!step) return;
@@ -6708,7 +6747,8 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       if (!tourReducedMotion()) img.classList.add('tb-tour-slide-in');
     }
     if (headline) headline.textContent = step.headline || '';
-    if (body) body.textContent = step.body || '';
+    // Thunder speaking — type the body line
+    typeTourBody(step.body || '', body);
     if (progress) progress.textContent = (__tourIdx + 1) + ' of ' + TB_TOUR_STEPS.length;
     if (next) next.textContent = step.nextLabel || (__tourIdx >= TB_TOUR_STEPS.length - 1 ? 'DONE' : 'NEXT');
     if (back) back.disabled = __tourIdx <= 0;
@@ -6729,6 +6769,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   }
 
   function hideTour() {
+    stopTourTypewriter();
     const root = document.getElementById('tb-tour');
     if (root) {
       root.classList.add('hidden');
