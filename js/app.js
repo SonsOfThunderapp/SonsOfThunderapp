@@ -42,7 +42,37 @@
 
   // ---------- DATA ----------
   const DEFAULT_BROTHERS = [];
+function isTodayBirthday(bday) {
+  if (!bday || typeof bday !== 'string') return false;
+  const cleaned = bday.trim().replace(/[^0-9-]/g, '');
+  if (!/^\d{2}-\d{2}$/.test(cleaned)) return false;
+  const now = new Date();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  return cleaned === (mm + '-' + dd);
+}
 
+function normalizeBirthday(val) {
+  if (!val) return null;
+  const cleaned = String(val).trim().replace(/[^0-9-]/g, '');
+  if (/^\d{2}-\d{2}$/.test(cleaned)) return cleaned;
+  const parts = cleaned.split(/[-/]/);
+  if (parts.length === 2) {
+    const m = parts[0].padStart(2, '0');
+    const d = parts[1].padStart(2, '0');
+    if (+m >= 1 && +m <= 12 && +d >= 1 && +d <= 31) return m + '-' + d;
+  }
+  return null;
+}
+
+const BIRTHDAY_THUNDER_LINE = "We're ALL celebrating you being born, my friend!";
+const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
+
+
+
+
+
+  
   function buildUpcoming() {
     const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
     const list = [];
