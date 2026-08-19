@@ -3094,6 +3094,40 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     const bioEl = $('#brother-detail-bio');
     if (bioEl) bioEl.textContent = b.bio || '';
 
+  
+
+
+     // Birthday Honors
+    const isBday = isTodayBirthday(b.birthday);
+    const bdayHeader = $('#brother-birthday-header');
+    const textHimBtn = $('#brother-text-him');
+
+    if (bdayHeader) {
+      if (isBday) {
+        bdayHeader.textContent = 'HAPPY BIRTHDAY';
+        bdayHeader.classList.remove('hidden');
+      } else {
+        bdayHeader.textContent = '';
+        bdayHeader.classList.add('hidden');
+      }
+    }
+
+    if (textHimBtn) {
+      if (isBday && digitsOnly(b.phone)) {
+        textHimBtn.classList.remove('hidden');
+        textHimBtn.onclick = () => {
+          try { tbFeedback.press(textHimBtn); } catch (e) {}
+          const body = encodeURIComponent(BIRTHDAY_SMS_PREFILL);
+          window.location.href = `sms:${digitsOnly(b.phone)}?body=${body}`;
+        };
+      } else {
+        textHimBtn.classList.add('hidden');
+        textHimBtn.onclick = null;
+      }
+    }
+
+
+    
     // Contact actions — phone is opt-in only (SHARE CONTACT + inline QR; no CALL/TEXT chips)
     const actions = $('#brother-contact-actions');
     const shareBtn = $('#brother-share-contact');
@@ -3243,12 +3277,18 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         ? `<img class="brother-photo" src="${esc(b.photo)}" alt="${esc(b.name)}" />`
         : `<div class="brother-photo">${esc(initials)}</div>`;
       const isNew = (typeof b.updatedAt === 'number' && b.updatedAt > (brothersSeenAt || 0));
+      
+      const isBday = isTodayBirthday(b.birthday);
+      const nameClass = isBday ? 'brother-name birthday-today' : 'brother-name';
+      const todayBadge = isBday ? '<span class="today-badge">TODAY</span>' : '';
+      
+      
       return `
         <button type="button" class="brother-card${isNew ? ' card-new' : ''}" data-brother-index="${i}" aria-label="View ${esc(b.name || 'brother')} profile">
           ${isNew ? '<span class="new-badge new-badge-overlay">NEW</span>' : ''}
           ${photoHtml}
           <div class="brother-info">
-            <div class="brother-name">${esc(b.name)}</div>
+            <div class="${nameClass}">${esc(b.name || '')}${todayBadge}</div>
             <div class="brother-bio">${esc(b.bio || '')}</div>
           </div>
         </button>`;
