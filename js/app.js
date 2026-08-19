@@ -15,7 +15,7 @@
   }
 
   // Soft, non-blocking feedback (replaces some abrupt alerts)
-  function tbToast(msg, ms) {
+  function tbToast(msg, ms, onTap) {
     let t = document.getElementById('install-toast');
     if (!t) {
       t = document.createElement('div');
@@ -26,6 +26,8 @@
     }
     t.textContent = msg || '';
     t.classList.remove('hidden');
+    t.onclick = typeof onTap === 'function' ? function () { onTap(); } : null;
+    t.style.cursor = typeof onTap === 'function' ? 'pointer' : '';
     clearTimeout(tbToast._timer);
     tbToast._timer = setTimeout(() => t.classList.add('hidden'), ms || 3200);
   }
@@ -331,64 +333,23 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     try {
       const next = getNextMeetingMonday();
       const ics = buildGatheringIcs(next);
-      const mt = parseMeetingHours();
-      const start = new Date(next);
-      start.setHours(mt.h, mt.m, 0, 0);
-      const end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
-      function pad(n) { return String(n).padStart(2, '0'); }
-      function gStamp(d) {
-        return d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate()) + 'T' +
-          pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + pad(d.getUTCSeconds()) + 'Z';
+      if (__calBlobUrl) {
+        try { URL.revokeObjectURL(__calBlobUrl); } catch (e) {}
+        __calBlobUrl = null;
       }
-      const gTitle = encodeURIComponent('Sons of Thunder — Next Gathering');
-      const gDetails = encodeURIComponent('Sons of Thunder monthly gathering. Show up.\nCheck Thunder Board for the latest gathering details.\nhttps://sonsofthunder.netlify.app/');
-      const gLoc = encodeURIComponent(venueName());
-      const googleUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
-        + '&text=' + gTitle
-        + '&dates=' + gStamp(start) + '/' + gStamp(end)
-        + '&details=' + gDetails
-        + '&location=' + gLoc;
-
-      // 1) data: URI — best chance for iPhone Safari/PWA to open Calendar with Save
-      try {
-        const dataUrl = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
-        const a1 = document.createElement('a');
-        a1.href = dataUrl;
-        a1.setAttribute('download', 'sons-of-thunder-gathering.ics');
-        a1.rel = 'noopener';
-        document.body.appendChild(a1);
-        a1.click();
-        setTimeout(function () { try { a1.remove(); } catch (e) {} }, 800);
-      } catch (e1) {}
-
-      // 2) Blob download — Android / desktop Chrome
-      try {
-        if (__calBlobUrl) {
-          try { URL.revokeObjectURL(__calBlobUrl); } catch (e) {}
-        }
-        const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-        __calBlobUrl = URL.createObjectURL(blob);
-        const a2 = document.createElement('a');
-        a2.href = __calBlobUrl;
-        a2.download = 'sons-of-thunder-gathering.ics';
-        a2.rel = 'noopener';
-        document.body.appendChild(a2);
-        a2.click();
-        setTimeout(function () {
-          try { a2.remove(); } catch (e) {}
-          try { URL.revokeObjectURL(__calBlobUrl); __calBlobUrl = null; } catch (e) {}
-        }, 2500);
-      } catch (e2) {}
-
-      // 3) Google Calendar template in new tab — always works as hard fallback
-      try {
-        setTimeout(function () {
-          try { window.open(googleUrl, '_blank', 'noopener'); } catch (e3) {
-            try { window.location.href = googleUrl; } catch (e4) {}
-          }
-        }, 350);
-      } catch (e3) {}
-
+      const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+      __calBlobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = __calBlobUrl;
+      a.download = 'sons-of-thunder-gathering.ics';
+      a.target = '_blank';
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function () {
+        try { a.remove(); } catch (e) {}
+        try { URL.revokeObjectURL(__calBlobUrl); __calBlobUrl = null; } catch (e) {}
+      }, 4000);
       return true;
     } catch (e) {
       console.warn('Calendar launch failed', e);
@@ -738,9 +699,11 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     const bar = $('#auth-session-bar');
     const who = $('#auth-who');
     const entry = $('#auth-entry-btn');
+    const homeCta = document.getElementById('home-member-cta');
     if (!supabaseEnabled()) {
       if (bar) bar.classList.add('hidden');
       if (entry) entry.classList.add('hidden');
+      if (homeCta) homeCta.classList.add('hidden');
       return;
     }
     if (isSignedIn()) {
@@ -748,20 +711,27 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       if (who) who.textContent = email;
       if (bar) bar.classList.remove('hidden');
       if (entry) entry.classList.add('hidden');
+      if (homeCta) homeCta.classList.add('hidden');
     } else {
       if (bar) bar.classList.add('hidden');
       if (entry) entry.classList.remove('hidden');
+      if (homeCta) homeCta.classList.remove('hidden');
     }
   }
 
+  function startMemberSignIn() {
+    openAuthGate('Sign in for shared roster and memories. Everything else works without an account.');
+  }
+
   function bindHomeMemberCta() {
-    const cta = document.getElementById('home-member-cta');
-    if (!cta || cta.dataset.tbBound) return;
-    cta.dataset.tbBound = '1';
-    cta.addEventListener('click', function () {
-      try {
-        if (typeof openAuthGate === 'function') openAuthGate('Already a member? Sign in for shared roster and memories.');
-      } catch (e) {}
+    if (document.documentElement.dataset.tbAuthEntryBound === '1') return;
+    document.documentElement.dataset.tbAuthEntryBound = '1';
+    document.addEventListener('click', function (e) {
+      const t = e.target && e.target.closest && e.target.closest('#home-member-cta, #auth-entry-btn');
+      if (!t) return;
+      e.preventDefault();
+      try { tbFeedback.press(t); } catch (err) {}
+      startMemberSignIn();
     });
   }
 
@@ -975,7 +945,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       .single();
 
     if (insErr) {
-      // Storage object may remain; surface the DB failure clearly
+      // Exact-scope heal: storage succeeded, DB insert failed → remove that one object.
+      try { await sb.storage.from(memoriesBucket()).remove([storagePath]); } catch (e) {}
       throw new Error('Photo uploaded but could not save the record: ' + (insErr.message || 'database error'));
     }
 
@@ -3256,8 +3227,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       grid.innerHTML = `
         <button type="button" class="empty-state empty-brothers empty-brothers-cta" id="empty-brothers-cta" aria-label="Add your profile">
           <div class="empty-brothers-plus" aria-hidden="true">+</div>
-          <div class="empty-brothers-title">No brothers listed yet.</div>
-          <div class="empty-brothers-sub">Be the first.<br>Add your profile.</div>
+          <div class="empty-brothers-title">The room is waiting.</div>
+          <div class="empty-brothers-sub">Add your name.<br>Take your seat.</div>
         </button>`;
       const cta = $('#empty-brothers-cta');
       if (cta) {
@@ -3686,15 +3657,9 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       try { syncSelfToRoster(true); } catch (e) {}
       const calLocked = !!load('reminderSet');
       btn.classList.add('confirmed');
-      /* YOU'RE LOCKED IN only after successful calendar handoff */
-      btn.textContent = calLocked ? "YOU'RE LOCKED IN" : "I'M IN ✓";
+      btn.textContent = "YOU'RE LOCKED IN";
       if (status) {
-        let meta = calLocked ? 'On this phone' : 'Add to calendar to finish lock-in';
-        try {
-          const next = getNextMeetingMonday();
-          if (calLocked) meta = formatMeetingDate(next) + ' · ' + meetingTime() + ' · ' + venueName();
-          else meta = 'Next: ' + formatMeetingDate(next) + ' · Add to calendar';
-        } catch (e) {}
+        let meta = calLocked ? 'Reminder on · On this phone' : 'On this phone';
         status.textContent = meta;
         status.classList.remove('hidden');
       }
@@ -4384,13 +4349,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         }, 900);
       }
 
-      // Calendar handoff on same gesture — native/OS Save required (no silent insert)
-      // Strip intermediate confirm sheet: go straight to calendar so brother hits Save.
-      try {
-        launchGatheringCalendar();
-      } catch (e) {
-        try { openCalConfirmSheet(); } catch (e2) {}
-      }
+      // Stay in the app. Calendar is optional — in-app sheet, never navigate away.
+      try { openCalConfirmSheet(); } catch (e) {}
 
       if (typeof requestNotifyPermission === 'function') {
         requestNotifyPermission().then((perm) => {
@@ -4404,6 +4364,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       const add = document.getElementById('cal-confirm-add');
       const later = document.getElementById('cal-confirm-later');
       const sheet = document.getElementById('cal-confirm-sheet');
+      const x = document.getElementById('cal-confirm-close');
       if (add && !add.dataset.tbBound) {
         add.dataset.tbBound = '1';
         add.addEventListener('click', () => {
@@ -4418,6 +4379,10 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       if (later && !later.dataset.tbBound) {
         later.dataset.tbBound = '1';
         later.addEventListener('click', () => closeCalConfirmSheet());
+      }
+      if (x && !x.dataset.tbBound) {
+        x.dataset.tbBound = '1';
+        x.addEventListener('click', () => closeCalConfirmSheet());
       }
       if (sheet && !sheet.dataset.tbBound) {
         sheet.dataset.tbBound = '1';
@@ -4702,10 +4667,8 @@ $('#edit-profile-btn').addEventListener('click', () => {
 
     // Auth gate actions
     const authEntryBtn = $('#auth-entry-btn');
-    if (authEntryBtn) {
-      authEntryBtn.addEventListener('click', () => {
-        openAuthGate('Sign in for shared roster and memories. Everything else works without an account.');
-      });
+    if (authEntryBtn && authEntryBtn.dataset.tbBound !== '1') {
+      authEntryBtn.dataset.tbBound = '1';
     }
     const authSignInBtn = $('#auth-signin-btn');
     const authSignUpBtn = $('#auth-signup-btn');
@@ -5034,6 +4997,14 @@ $('#edit-profile-btn').addEventListener('click', () => {
         const alreadyOpen = modal && !modal.classList.contains('hidden');
         openModal('thunder-modal');
         thunderVoiceMode = true;
+        try {
+          const hero = document.querySelector('.thunder-ask-hero-img');
+          if (hero && !alreadyOpen) {
+            hero.classList.remove('tb-tux-in');
+            void hero.offsetWidth;
+            hero.classList.add('tb-tux-in');
+          }
+        } catch (e) {}
         // Do not stack a second recognition session if already listening
         if (alreadyOpen && thunderListening) return;
         if (opts.voice !== false && isSupported()) {
@@ -5432,13 +5403,22 @@ $('#edit-profile-btn').addEventListener('click', () => {
 
     refreshInstallCta();
 
-    // Facebook / IG: one clear gate (once per session) — no dead install path inside in-app browser
+    // Facebook / IG: never interrupt splash or the product tour.
     try {
       if (getInstallState() === 'IN_APP_BROWSER') {
         setInstallProgress('WRONG_BROWSER');
         if (!sessionStorage.getItem('tb_inapp_gate')) {
           sessionStorage.setItem('tb_inapp_gate', '1');
-          setTimeout(() => { try { openInAppInstallOverlay(); } catch (e) {} }, 600);
+          const launchInappGate = function () {
+            try {
+              if (__tourActive) return;
+              const splash = document.getElementById('splash');
+              if (splash && !splash.classList.contains('splash-done') && !splash.classList.contains('hidden')) return;
+              if (typeof isTourComplete === 'function' && !isTourComplete()) return;
+              openInAppInstallOverlay();
+            } catch (e) {}
+          };
+          setTimeout(launchInappGate, 600);
         }
       } else if (getInstallState() !== 'INSTALLED') {
         const prog = getInstallProgress();
@@ -5596,6 +5576,10 @@ $('#edit-profile-btn').addEventListener('click', () => {
         if (typeof closeInfoDetail === 'function') closeInfoDetail();
         return;
       }
+      if ($('#cal-confirm-sheet') && !$('#cal-confirm-sheet').classList.contains('hidden')) {
+        try { closeCalConfirmSheet(); } catch (e) {}
+        return;
+      }
       const open = document.querySelector('.modal:not(.hidden)');
       if (open && open.id) closeModal(open.id);
     });
@@ -5609,32 +5593,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
     const refreshBtn = $('#refresh-app-btn');
     if (refreshBtn) {
       refreshBtn.addEventListener('click', async () => {
-        showInstallToast('Updating… hang tight');
-        try {
-          if ('serviceWorker' in navigator) {
-            const regs = await navigator.serviceWorker.getRegistrations();
-            await Promise.all(regs.map((r) => r.unregister()));
-          }
-        } catch (e) {
-          console.warn('SW unregister', e);
-        }
-        try {
-          if (window.caches && caches.keys) {
-            const keys = await caches.keys();
-            await Promise.all(keys.map((k) => caches.delete(k)));
-          }
-        } catch (e) {
-          console.warn('cache clear', e);
-        }
-        setTimeout(() => {
-          try {
-            const u = new URL(window.location.href);
-            u.searchParams.set('_tb', String(Date.now()));
-            window.location.replace(u.toString());
-          } catch (e) {
-            window.location.reload(true);
-          }
-        }, 280);
+        forceRefreshApp();
       });
     }
 
@@ -6263,8 +6222,13 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     const finish = () => {
       if (finished) return;
       finished = true;
+      // Splash → tour with nothing in between (no home/welcome flash)
+      try {
+        if (typeof isTourComplete === 'function' && !isTourComplete()) {
+          startTour({ force: false });
+        }
+      } catch (e) {}
       el.classList.add('splash-out');
-      // Domino: welcome begins mid-zoom so it feels continuous, not a second scene
       setTimeout(() => {
         try { sessionStorage.setItem('tb_splash_done', '1'); } catch (e) {}
         runWelcome();
@@ -6461,6 +6425,12 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   function openInAppInstallOverlay() {
     const el = document.getElementById('inapp-install-overlay');
     if (!el) return;
+    if (__tourActive) return;
+    const splash = document.getElementById('splash');
+    if (splash && !splash.classList.contains('splash-done') && splash.style.display !== 'none') {
+      if (!splash.classList.contains('hidden')) return;
+    }
+    if (typeof isTourComplete === 'function' && !isTourComplete()) return;
     const title = document.getElementById('inapp-install-title');
     const sub = el.querySelector('.ios-install-sub');
     if (isAndroid()) {
@@ -6642,14 +6612,21 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
 
   // Housekeeping: bounded, event-driven only — no polling, no auto-delete of user data
+  function reconcileOnWake() {
+    try { refreshAlertsToggleUI(); } catch (e) {}
+    try {
+      const sb = getSb && getSb();
+      if (sb && sb.auth && sb.auth.getSession) sb.auth.getSession().catch(function () {});
+    } catch (e) {}
+    try { checkStaleBuild(); } catch (e) {}
+  }
+
   function runLaunchHousekeeping() {
-    /* Once per open: light, event-driven — no polling */
     try {
       const build = (cfg().APP_BUILD || '').toString();
       if (build) sessionStorage.setItem('tb_app_build', build);
     } catch (e) {}
     try {
-      /* Drop ghost dual calendar if any prior build injected it */
       const ghost = document.getElementById('rsvp-add-cal');
       if (ghost) ghost.remove();
     } catch (e) {}
@@ -6664,21 +6641,60 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     try {
       const prev = sessionStorage.getItem('tb_app_build');
       if (build && prev && prev !== build) {
-        // New deploy detected in this browser tab session — nudge, never force mid-task
         console.info('Thunder Board: new build', build, '(was', prev + ')');
       }
       if (build) sessionStorage.setItem('tb_app_build', build);
     } catch (e) {}
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState !== 'visible') return;
-      // Reconcile alerts toggle with real PushManager (never trust localStorage alone)
-      try { refreshAlertsToggleUI(); } catch (e) {}
-      // Soft session touch: if Supabase client exists, refresh session quietly
-      try {
-        const sb = getSb && getSb();
-        if (sb && sb.auth && sb.auth.getSession) sb.auth.getSession().catch(function () {});
-      } catch (e) {}
+      reconcileOnWake();
     });
+    window.addEventListener('online', function () {
+      reconcileOnWake();
+    });
+    setTimeout(function () { try { checkStaleBuild(); } catch (e) {} }, 5500);
+  }
+
+  async function checkStaleBuild() {
+    try {
+      if (sessionStorage.getItem('tb_stale_nudge') === '1') return;
+      if (typeof __tourActive !== 'undefined' && __tourActive) return;
+      const splash = document.getElementById('splash');
+      if (splash && !splash.classList.contains('splash-done') && !splash.classList.contains('hidden')) return;
+      const r = await fetch('build.json?_=' + Date.now(), { cache: 'no-store' });
+      if (!r.ok) return;
+      const j = await r.json();
+      const live = String(j.APP_BUILD || '');
+      const here = String((cfg() && cfg().APP_BUILD) || '');
+      if (!live || !here || live === here) return;
+      sessionStorage.setItem('tb_stale_nudge', '1');
+      tbToast('New drop on the board. Tap to refresh.', 8000, forceRefreshApp);
+    } catch (e) {}
+  }
+
+  async function forceRefreshApp() {
+    try { tbToast('Updating… hang tight', 4000); } catch (e) {}
+    try {
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((r) => r.unregister()));
+      }
+    } catch (e) {}
+    try {
+      if (window.caches && caches.keys) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+    } catch (e) {}
+    setTimeout(() => {
+      try {
+        const u = new URL(window.location.href);
+        u.searchParams.set('_tb', String(Date.now()));
+        window.location.replace(u.toString());
+      } catch (e) {
+        window.location.reload(true);
+      }
+    }, 280);
   }
 
   function setupGatheringAlerts() {
@@ -6728,49 +6744,49 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       id: 'welcome',
       slide: 'assets/tour-01.jpg',
       headline: 'WELCOME TO SONS OF THUNDER',
-      body: 'I\u2019m Thunder\u2014your guide. This is your brotherhood hub. Let\u2019s walk through the essentials.',
+      body: 'I\u2019m Thunder. This is the room. I\u2019ll walk you through it.',
       nextLabel: 'LET\u2019S GO'
     },
     {
       id: 'locked-in',
       slide: 'assets/tour-02.jpg',
       headline: 'LOCKED IN',
-      body: 'Never miss what matters. Tap I\u2019M IN for the next gathering and get reminded so you don\u2019t miss it.',
+      body: 'Tap I\u2019M IN. We\u2019ll remind you so you don\u2019t miss it.',
       nextLabel: 'NEXT'
     },
     {
       id: 'brothers',
       slide: 'assets/tour-03.jpg',
       headline: 'BROTHERS',
-      body: 'Real connections. See who\u2019s in, update your profile, and strengthen the bond.',
+      body: 'See who\u2019s in. Claim your seat. Real brothers, real names.',
       nextLabel: 'NEXT'
     },
     {
       id: 'memories',
       slide: 'assets/tour-04.jpg',
       headline: 'MEMORIES',
-      body: 'Capture. Share. Remember. Add photos from gatherings and missions. The memories we make keep our story alive.',
+      body: 'Photos from the night. The memories we make keep the story alive.',
       nextLabel: 'NEXT'
     },
     {
       id: 'code',
       slide: 'assets/tour-05.jpg',
       headline: 'THE CODE',
-      body: 'Live it. Every day. The Code is our standard\u2014who we are and how we show up for ourselves and each other.',
+      body: 'The Code is our standard. Who we are. How we show up.',
       nextLabel: 'NEXT'
     },
     {
       id: 'text-leader',
       slide: 'assets/tour-06.jpg',
       headline: 'TEXT A LEADER',
-      body: 'When you need it most. Rough day? Hard season? Text a leader. Confidential. Always.',
+      body: 'Rough day? Text a leader. Confidential. Always.',
       nextLabel: 'NEXT'
     },
     {
       id: 'whats-next',
       slide: 'assets/tour-07.jpg',
       headline: 'WHAT\u2019S NEXT',
-      body: 'Stay ahead. Stay ready. See what\u2019s coming up so you can plan, invite, and be there. You\u2019re all set, brother.',
+      body: 'You\u2019re set, brother. Show up. I\u2019ll be here.',
       nextLabel: 'DONE'
     }
   ];
@@ -6796,6 +6812,12 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     stopTourTypewriter();
     if (!bodyEl) return;
     const text = fullText || '';
+    const bubble = bodyEl.closest('.tb-guide-bubble');
+    if (bubble && !tourReducedMotion()) {
+      bubble.classList.remove('tb-speak-flash');
+      void bubble.offsetWidth;
+      bubble.classList.add('tb-speak-flash');
+    }
     if (tourReducedMotion() || !text) {
       bodyEl.textContent = text;
       bodyEl.classList.remove('tb-tour-typing');
@@ -6832,12 +6854,19 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     const back = document.getElementById('tb-tour-back');
     const dots = document.getElementById('tb-tour-dots');
 
+    document.querySelectorAll('.tb-live-slide').forEach(function (el) {
+      const on = Number(el.getAttribute('data-slide')) === __tourIdx;
+      el.classList.toggle('is-on', on);
+    });
+    const live = document.getElementById('tb-tour-live');
+    if (live && !tourReducedMotion()) {
+      live.classList.remove('tb-tour-slide-in');
+      void live.offsetWidth;
+      live.classList.add('tb-tour-slide-in');
+    }
     if (img) {
       img.src = step.slide;
       img.alt = step.headline || '';
-      img.classList.remove('tb-tour-slide-in');
-      void img.offsetWidth;
-      if (!tourReducedMotion()) img.classList.add('tb-tour-slide-in');
     }
     if (headline) headline.textContent = step.headline || '';
     // Thunder speaking — type the body line
@@ -6855,6 +6884,8 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   function showTour() {
     const root = document.getElementById('tb-tour');
     if (!root) return;
+    try { closeInAppInstallOverlay(); } catch (e) {}
+    try { closeIosInstallOverlay(); } catch (e) {}
     root.classList.remove('hidden');
     root.setAttribute('aria-hidden', 'false');
     document.body.classList.add('tb-tour-open');
@@ -6908,13 +6939,13 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   }
 
   function maybeStartProductTour() {
+    /* First-run is chained off splash finish. Only start here if splash
+       already ran this session (so a refresh still gets the tour, with no delay). */
     try {
-      if (isTourComplete()) return;
-      setTimeout(function () {
-        try {
-          if (!isTourComplete() && !__tourActive) startTour({ force: false });
-        } catch (e) {}
-      }, 2200);
+      if (isTourComplete() || __tourActive) return;
+      var splashDone = false;
+      try { splashDone = sessionStorage.getItem('tb_splash_done') === '1'; } catch (e) {}
+      if (splashDone) startTour({ force: false });
     } catch (e) {}
   }
 
@@ -6985,6 +7016,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     bindInfoCardTargets();
     renderRsvp();
     bindEvents();
+    bindHomeMemberCta();
     updateAllNewBadges();
     showView('home');
     /* loadIronFeed retired — RSS cut 2026-08-18 */

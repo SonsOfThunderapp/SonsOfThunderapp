@@ -19,7 +19,7 @@
   <!-- Web App Manifest -->
   <link rel="manifest" href="manifest.json" />
   
-  <link rel="stylesheet" href="css/styles.css?v=20260816-MASTER-LABELBOLT" />
+  <link rel="stylesheet" href="css/styles.css?v=20260819-prem1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -29,16 +29,16 @@
   <div id="splash" class="splash" aria-hidden="true">
     <div class="splash-inner">
       <div class="splash-logo-wrap">
-        <img src="assets/logo@2x.png"
-             srcset="assets/logo@2x.png 503w, assets/logo@3x.png 755w"
+        <img src="assets/logo@2x.png?v=20260819-red7697"
+             srcset="assets/logo@2x.png?v=20260819-red7697 800w, assets/logo@3x.png?v=20260819-red7697 1200w"
              sizes="min(82vw, 340px)"
              alt="Sons of Thunder"
              class="splash-mark splash-logo"
-             width="503"
-             height="291" />
+             width="800"
+             height="735" />
         <span class="splash-logo-bolt-glimmer" aria-hidden="true"></span>
       </div>
-      <p class="splash-line">THUNDER DOESN’T DULL</p>
+      <p class="splash-line hidden" aria-hidden="true">THUNDER DOESN’T DULL</p>
     </div>
   </div>
 
@@ -48,14 +48,14 @@
     <header id="main-header" class="header">
       <div class="logo-wrap">
         <img
-          src="assets/logo@2x.png"
-          srcset="assets/logo@2x.png 503w, assets/logo@3x.png 755w"
-          sizes="(max-width: 480px) 92vw, 400px"
+          src="assets/logo@2x.png?v=20260819-red7697"
+          srcset="assets/logo@2x.png?v=20260819-red7697 800w, assets/logo@3x.png?v=20260819-red7697 1200w"
+          sizes="(max-width: 480px) 78vw, 360px"
           alt="Sons of Thunder"
           class="logo"
           id="header-logo"
-          width="503"
-          height="291"
+          width="800"
+          height="735"
           decoding="async"
         />
       </div>
@@ -330,11 +330,12 @@
   <!-- RSVP calendar handoff (not a success claim until OS adds) -->
   <div id="cal-confirm-sheet" class="cal-confirm-sheet hidden" role="dialog" aria-modal="true" aria-labelledby="cal-confirm-title" aria-hidden="true">
     <div class="cal-confirm-panel">
-      <h2 id="cal-confirm-title" class="cal-confirm-title">YOU’RE IN ⚡</h2>
-      <p class="cal-confirm-body">Your seat is locked on this phone.<br>Put it on your calendar — everything’s filled in.</p>
+      <button type="button" class="cal-confirm-close" id="cal-confirm-close" aria-label="Close">×</button>
+      <h2 id="cal-confirm-title" class="cal-confirm-title">YOU’RE IN</h2>
+      <p class="cal-confirm-body">Your seat is locked on this phone.<br>Want it on your calendar too?</p>
       <button type="button" class="cal-confirm-primary" id="cal-confirm-add">ADD TO CALENDAR</button>
       <button type="button" class="cal-confirm-secondary" id="cal-confirm-later">NOT NOW</button>
-      <p class="cal-confirm-hint">One more tap. Your phone confirms the event.</p>
+      <p class="cal-confirm-hint">Swipe down or tap Not now to stay here.</p>
     </div>
   </div>
 
@@ -343,16 +344,69 @@
   <div id="tb-tour" class="tb-tour tb-tour-slides hidden" aria-hidden="true">
     <div class="tb-tour-stage" role="dialog" aria-modal="true" aria-labelledby="tb-tour-headline">
       <button type="button" class="tb-tour-close" id="tb-tour-close" aria-label="Close tour">×</button>
-      <div class="tb-tour-slide-frame">
-        <img id="tb-tour-slide-img" class="tb-tour-slide-img" src="assets/tour-01.png" alt="" decoding="async" />
+      <div class="tb-tour-film">
+        <div class="tb-tour-slide-frame" id="tb-tour-live">
+          <div class="tb-live-slide is-on" data-slide="0">
+            <img class="tb-live-logo" src="assets/logo@2x.png?v=20260819-red7697" alt="" />
+          </div>
+          <div class="tb-live-slide" data-slide="1">
+            <div class="tb-live-card">
+              <div class="tb-live-label">NEXT GATHERING</div>
+              <div class="tb-live-date">Monday · 6:30 PM</div>
+              <div class="tb-live-loc">Crooked Can Patio</div>
+              <div class="tb-live-im-in">I'M IN</div>
+            </div>
+          </div>
+          <div class="tb-live-slide" data-slide="2">
+            <div class="tb-live-bros">
+              <div class="tb-live-bro"><span class="tb-live-avatar">J</span><span class="tb-live-bname">JAMES</span></div>
+              <div class="tb-live-bro"><span class="tb-live-avatar">J</span><span class="tb-live-bname">JOHN</span></div>
+              <div class="tb-live-bro tb-live-bro-you"><span class="tb-live-avatar">+</span><span class="tb-live-bname">YOUR SEAT</span></div>
+            </div>
+          </div>
+          <div class="tb-live-slide" data-slide="3">
+            <div class="tb-live-card">
+              <div class="tb-live-label">MEMORIES</div>
+              <div class="tb-live-mem-row">
+                <div class="tb-live-mem"></div>
+                <div class="tb-live-mem"></div>
+                <div class="tb-live-mem tb-live-mem-add">+</div>
+              </div>
+            </div>
+          </div>
+          <div class="tb-live-slide" data-slide="4">
+            <div class="tb-live-card">
+              <div class="tb-live-code-title">THE CODE</div>
+              <div class="tb-live-code-line">Show up.</div>
+              <div class="tb-live-code-line">Tell the truth.</div>
+              <div class="tb-live-code-line">Carry your brother.</div>
+            </div>
+          </div>
+          <div class="tb-live-slide" data-slide="5">
+            <div class="tb-live-card">
+              <div class="tb-live-label">NEED A LINE?</div>
+              <div class="tb-live-text-leader">TEXT A LEADER</div>
+            </div>
+          </div>
+          <div class="tb-live-slide" data-slide="6">
+            <div class="tb-live-card">
+              <div class="tb-live-label">WHAT’S NEXT</div>
+              <div class="tb-live-date">You’re in the room.</div>
+            </div>
+          </div>
+        </div>
+        <div class="tb-tour-guide">
+          <img class="tb-guide-thunder" src="assets/thunder-cool.png" alt="" />
+          <div class="tb-guide-bubble">
+            <p id="tb-tour-body" class="tb-tour-body"></p>
+          </div>
+        </div>
       </div>
       <div class="tb-tour-caption">
-        <div class="tb-tour-bolt-row" aria-hidden="true">
-          <span class="tb-tour-follow">FOLLOW THE BOLT</span>
+        <div class="tb-tour-bolt-row">
           <span class="tb-tour-progress" id="tb-tour-progress">1 of 7</span>
         </div>
         <h2 id="tb-tour-headline" class="tb-tour-headline"></h2>
-        <p id="tb-tour-body" class="tb-tour-body"></p>
       </div>
       <div class="tb-tour-dots" id="tb-tour-dots" aria-hidden="true"></div>
       <div class="tb-tour-actions">
@@ -566,7 +620,7 @@
       </div>
       <!-- OVERRIDE 20260818: tuxedo Thunder hero on Ask Thunder page only -->
       <div class="thunder-ask-hero" aria-hidden="true">
-        <img src="assets/thunder-bond-hero.png" alt="" class="thunder-ask-hero-img" width="280" height="360" decoding="async" />
+        <img src="assets/thunder-bond-hero.png?v=20260819-tux1" alt="" class="thunder-ask-hero-img" width="280" height="360" decoding="async" />
       </div>
       <div class="thunder-messages" id="thunder-messages">
         <div class="thunder-msg system">
@@ -646,9 +700,9 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/config.js"></script>
+  <script src="js/config.js?v=20260819-tux1"></script>
   <script src="js/qrcode.min.js?v=20260816LOCKED6"></script>
-  <script src="js/app.js?v=20260816-MASTER-LABELBOLT"></script>
+  <script src="js/app.js?v=20260819-prem1"></script>
 </div>
 
 
