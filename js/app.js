@@ -10,7 +10,7 @@
     try {
       if (location && location.origin && /^https?:/.test(location.origin)) return location.origin;
     } catch (e2) {}
-    return publicOrigin();
+    return 'https://sonsofthunder.netlify.app';
   }
   function publicUrl(path) {
     return publicOrigin() + (path || '/');
@@ -3267,6 +3267,11 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       }
     }, { passive: false });
 
+    root.addEventListener('touchcancel', () => {
+      tracking = false;
+      try { elasticSnapHome(moveEl()); } catch (e) {}
+    });
+
     root.addEventListener('touchend', (e) => {
       if (!tracking) return;
       tracking = false;
@@ -5269,6 +5274,13 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       if (typeof tbGlowHit === 'function') tbGlowHit(nav, 'yellow');
     }
     currentViewName = name;
+    try {
+      const app = document.getElementById('app');
+      if (app) {
+        app.classList.remove('tb-underlay-depth');
+        app.style.removeProperty('--tb-depth');
+      }
+    } catch (e) {}
     const header = $('#main-header');
     if (header) header.style.display = 'block'; /* logo star on all 4 tabs */
     // NEW no longer auto-clears on Home visit — only when items are opened
@@ -5301,7 +5313,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   }
 
   function setupTabSwipe() {
-    const root = $('#app') || document.body;
+    const root = $('#views') || $('#app') || document.body;
     if (!root || root.dataset.tabSwipeBound === '1') return;
     root.dataset.tabSwipeBound = '1';
 
