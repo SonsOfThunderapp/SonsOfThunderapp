@@ -4235,8 +4235,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       el.innerHTML = `
         <button type="button" class="empty-state empty-memories empty-memories-cta" id="empty-memories-cta" aria-label="Add a memory">
           <div class="empty-memories-plus" aria-hidden="true">+</div>
-          <div class="empty-memories-title">No memories yet.</div>
-          <div class="empty-memories-sub">Be the first to drop a photo.<br>Shared album: Sign In under Brothers.</div>
+          <div class="empty-memories-title">No shots yet.</div>
+          <div class="empty-memories-sub">Drop one from the camera.<br>Shared album: Sign In under Brothers.</div>
         </button>`;
       const cta = $('#empty-memories-cta');
       if (cta) {
@@ -4254,8 +4254,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       el.innerHTML = `
         <button type="button" class="empty-state empty-memories empty-memories-cta" id="empty-memories-cta" aria-label="Add a memory">
           <div class="empty-memories-plus" aria-hidden="true">+</div>
-          <div class="empty-memories-title">No memories yet.</div>
-          <div class="empty-memories-sub">Be the first to drop a photo.<br>Build the history.</div>
+          <div class="empty-memories-title">No shots yet.</div>
+          <div class="empty-memories-sub">Drop one from the camera.<br>Build the history.</div>
         </button>`;
       const cta = $('#empty-memories-cta');
       if (cta) {
@@ -4348,6 +4348,17 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       if (night && iShowedUp()) drop.classList.remove('hidden');
       else drop.classList.add('hidden');
     }
+  }
+
+  function openLibraryShot() {
+    if (!isSignedIn()) {
+      try { startMemberSignIn(); } catch (e) {}
+      return;
+    }
+    const lib = document.getElementById('memory-lib');
+    if (!lib) return;
+    try { lib.value = ''; } catch (e) {}
+    lib.click();
   }
 
   function openDropShot() {
@@ -5911,6 +5922,15 @@ $('#edit-profile-btn').addEventListener('click', () => {
         const src = liveCam.files && liveCam.files[0];
         if (src) ingestMemoryFile(src);
         try { liveCam.value = ''; } catch (e) {}
+      });
+    }
+    const liveLib = document.getElementById('memory-lib');
+    if (liveLib && liveLib.dataset.tbBound !== '1') {
+      liveLib.dataset.tbBound = '1';
+      liveLib.addEventListener('change', function () {
+        const src = liveLib.files && liveLib.files[0];
+        if (src) ingestMemoryFile(src);
+        try { liveLib.value = ''; } catch (e) {}
       });
     }
     $('#save-media').addEventListener('click', () => {
@@ -9379,6 +9399,16 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       if (dropShot && dropShot.dataset.bound !== '1') {
         dropShot.dataset.bound = '1';
         dropShot.addEventListener('click', function () { openDropShot(); });
+      }
+      const memDrop = document.getElementById('memories-drop-btn');
+      if (memDrop && memDrop.dataset.bound !== '1') {
+        memDrop.dataset.bound = '1';
+        memDrop.addEventListener('click', function () { openDropShot(); });
+      }
+      const memLib = document.getElementById('memories-library-btn');
+      if (memLib && memLib.dataset.bound !== '1') {
+        memLib.dataset.bound = '1';
+        memLib.addEventListener('click', function () { openLibraryShot(); });
       }
       if (hat && hat.dataset.bound !== '1') {
         hat.dataset.bound = '1';

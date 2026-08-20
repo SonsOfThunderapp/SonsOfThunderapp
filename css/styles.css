@@ -7840,6 +7840,24 @@ body.tb-tour-mandatory .tb-tour-skip {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
+.memories-block { margin-top: 8px; }
+.memories-lead {
+  color: #888;
+  font-size: 13px;
+  margin: 0 0 12px;
+}
+.btn-mem-lib {
+  display: block;
+  width: 100%;
+  margin: 8px 0 16px;
+  background: none;
+  border: 0;
+  color: #777;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.memories-block .btn-rsvp { margin-bottom: 0; }
 .memory-cam-input {
   position: fixed;
   left: 0;

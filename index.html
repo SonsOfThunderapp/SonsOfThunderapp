@@ -33,10 +33,10 @@
   
   <!-- Web App Manifest -->
   <link rel="manifest" href="manifest.json" />
-  <link rel="preload" as="image" href="assets/logo@2x.png?v=20260820-cam1" />
+  <link rel="preload" as="image" href="assets/logo@2x.png?v=20260820-memcam1" />
   <link rel="preload" as="image" href="assets/thunder-cool-fab@2x.png?v=20260819-nogold2" />
   
-  <link rel="stylesheet" href="css/styles.css?v=20260820-cam1" />
+  <link rel="stylesheet" href="css/styles.css?v=20260820-memcam1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -46,14 +46,14 @@
   <div id="splash" class="splash" aria-hidden="true">
     <div class="splash-inner">
       <div class="splash-logo-wrap">
-        <img src="assets/logo@2x.png?v=20260820-cam1"
-             srcset="assets/logo@2x.png?v=20260820-cam1 1200w, assets/logo@3x.png?v=20260820-cam1 1800w"
+        <img src="assets/logo@2x.png?v=20260820-memcam1"
+             srcset="assets/logo@2x.png?v=20260820-memcam1 1200w, assets/logo@3x.png?v=20260820-memcam1 1800w"
              sizes="min(82vw, 340px)"
              alt="Sons of Thunder"
              class="splash-mark splash-logo"
              width="1200"
              height="831" />
-        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-cam1" alt="" aria-hidden="true" width="1200" height="831" />
+        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-memcam1" alt="" aria-hidden="true" width="1200" height="831" />
       </div>
       <p class="splash-line hidden" aria-hidden="true">THUNDER DOESN’T DULL</p>
     </div>
@@ -65,8 +65,8 @@
     <header id="main-header" class="header">
       <div class="logo-wrap">
         <img
-          src="assets/logo@2x.png?v=20260820-cam1"
-          srcset="assets/logo@2x.png?v=20260820-cam1 1200w, assets/logo@3x.png?v=20260820-cam1 1800w"
+          src="assets/logo@2x.png?v=20260820-memcam1"
+          srcset="assets/logo@2x.png?v=20260820-memcam1 1200w, assets/logo@3x.png?v=20260820-memcam1 1800w"
           sizes="(max-width: 480px) 72vw, 320px"
           alt="Sons of Thunder"
           class="logo"
@@ -75,7 +75,7 @@
           height="831"
           decoding="async"
         />
-        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-cam1" alt="" aria-hidden="true" width="1200" height="831" />
+        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-memcam1" alt="" aria-hidden="true" width="1200" height="831" />
       </div>
     </header>
 
@@ -169,7 +169,7 @@
         <div class="container">
           <div class="section-header">
             <h1>Events & Memories</h1>
-            <button id="upload-media-btn" class="btn-secondary">+ Add Memory</button>
+            <button type="button" id="upload-media-btn" class="btn-secondary">DROP A SHOT</button>
           </div>
           <div class="activity-tags" id="activity-tags" role="tablist" aria-label="Activity feeds">
             <button type="button" class="activity-tag" data-feed="range" role="tab" aria-selected="false">RANGE</button>
@@ -190,13 +190,18 @@
             <div class="mission-detail" id="mission-detail">Details dropping at the September gathering. Be ready.</div>
             <div class="mission-cta">OPEN</div>
           </div>
-          <div class="section-title" id="memories-section-title">Past Gatherings</div>
-          <div id="media-feed" class="media-feed">
-            <button type="button" class="empty-state empty-memories empty-memories-cta" id="empty-memories-cta-static" aria-label="Add a memory">
-              <div class="empty-memories-plus" aria-hidden="true">+</div>
-              <div class="empty-memories-title">No memories yet.</div>
-              <div class="empty-memories-sub">Be the first to drop a photo.<br>Build the history.</div>
-            </button>
+          <div class="memories-block" id="memories-block">
+            <div class="section-title" id="memories-section-title">MEMORIES</div>
+            <p class="memories-lead">Native camera. It lands here.</p>
+            <button type="button" id="memories-drop-btn" class="btn-rsvp">DROP A SHOT</button>
+            <button type="button" id="memories-library-btn" class="btn-mem-lib">From the camera roll</button>
+            <div id="media-feed" class="media-feed">
+              <button type="button" class="empty-state empty-memories empty-memories-cta" id="empty-memories-cta-static" aria-label="Drop a shot">
+                <div class="empty-memories-plus" aria-hidden="true">+</div>
+                <div class="empty-memories-title">No shots yet.</div>
+                <div class="empty-memories-sub">Drop one from the camera.<br>Build the history.</div>
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -411,8 +416,8 @@
         <div class="tb-tour-slide-frame" id="tb-tour-live">
           <div class="tb-live-slide is-on" data-slide="0">
             <div class="tb-live-logo-wrap">
-              <img class="tb-live-logo" src="assets/logo@2x.png?v=20260820-cam1" alt="Sons of Thunder" width="1200" height="831" />
-              <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-cam1" alt="" aria-hidden="true" width="1200" height="831" />
+              <img class="tb-live-logo" src="assets/logo@2x.png?v=20260820-memcam1" alt="Sons of Thunder" width="1200" height="831" />
+              <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-memcam1" alt="" aria-hidden="true" width="1200" height="831" />
             </div>
           </div>
           <div class="tb-live-slide" data-slide="1">
@@ -453,9 +458,9 @@
           <div class="tb-live-slide" data-slide="3">
             <div class="tb-live-label">RECENT MEMORIES</div>
             <div class="tb-live-mem-row">
-              <img class="tb-live-mem tb-live-mem-shot" src="assets/tour-memories/mem-patio.jpg?v=20260820-cam1" alt="" />
-              <img class="tb-live-mem tb-live-mem-shot" src="assets/tour-memories/mem-fire.jpg?v=20260820-cam1" alt="" />
-              <img class="tb-live-mem tb-live-mem-shot" src="assets/tour-memories/mem-lake.jpg?v=20260820-cam1" alt="" />
+              <img class="tb-live-mem tb-live-mem-shot" src="assets/tour-memories/mem-patio.jpg?v=20260820-memcam1" alt="" />
+              <img class="tb-live-mem tb-live-mem-shot" src="assets/tour-memories/mem-fire.jpg?v=20260820-memcam1" alt="" />
+              <img class="tb-live-mem tb-live-mem-shot" src="assets/tour-memories/mem-lake.jpg?v=20260820-memcam1" alt="" />
               <div class="tb-live-mem tb-live-mem-add">+</div>
             </div>
             <div class="tb-live-phone-foot">View All Memories</div>
@@ -851,8 +856,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <input type="file" id="memory-cam" class="memory-cam-input" accept="image/*" capture="environment" tabindex="-1" aria-hidden="true" />
-  <script src="js/config.js?v=20260820-cam1"></script>
+  <input type="file" id="memory-lib" class="memory-cam-input" accept="image/*" tabindex="-1" aria-hidden="true" />
+  <script src="js/config.js?v=20260820-memcam1"></script>
   <script src="js/qrcode.min.js?v=20260816LOCKED6"></script>
-  <script src="js/app.js?v=20260820-cam1"></script>
+  <script src="js/app.js?v=20260820-memcam1"></script>
 </body>
 </html>
