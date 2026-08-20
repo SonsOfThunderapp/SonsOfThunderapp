@@ -6451,3 +6451,47 @@ body.tb-ask-open .header .logo {
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
 }
+
+/* Beat 2 jumble kill — date, venue, label each own a line. No stacked slides. */
+body.tb-tour-open #main-header { visibility: hidden !important; pointer-events: none !important; }
+.tb-tour-boards .tb-live-slide {
+  position: relative !important;
+  inset: auto !important;
+  display: none !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+  background: transparent !important;
+  transition: none !important;
+}
+.tb-tour-boards .tb-live-slide.is-on {
+  display: block !important;
+  pointer-events: auto !important;
+}
+.tb-live-imin-only {
+  isolation: isolate;
+  background: #111 !important;
+}
+.tb-live-imin-only .tb-live-label,
+.tb-live-imin-only .tb-live-date,
+.tb-live-imin-only .tb-live-loc,
+.tb-live-imin-only .tb-live-im-in {
+  position: relative !important;
+  display: block !important;
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+  line-height: 1.25;
+}
+.tb-live-imin-only .tb-live-label {
+  color: #FEF105 !important;
+  margin-bottom: 8px;
+}
+.tb-live-imin-only .tb-live-date {
+  color: #fff !important;
+  margin: 0 0 4px !important;
+  font-size: 17px;
+}
+.tb-live-imin-only .tb-live-loc {
+  color: #888 !important;
+  margin: 0 0 12px !important;
+}

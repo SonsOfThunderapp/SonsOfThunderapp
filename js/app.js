@@ -6785,7 +6785,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
 
   // ---------- PRODUCT TOUR — 7-slide (restored 20260818) ----------
-  const TB_TOUR_VERSION = 17;
+  const TB_TOUR_VERSION = 18;
   function tourStorageKey() { return 'thunderTourV' + TB_TOUR_VERSION; }
   function isTourComplete() {
     try {
