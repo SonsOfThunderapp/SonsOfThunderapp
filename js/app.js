@@ -243,6 +243,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   // Shared memories live in Supabase when configured — not localStorage primary
   let media = [];
   let rsvp = load('rsvp') || false;
+  let sharedRsvps = [];
+  let prevRsvpIds = null;
   let myProfileId = load('myProfileId') || null;
   let pendingPhotoData = null;
   let sbClient = null;
@@ -9741,7 +9743,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     renderEventsNote();
     renderLastFire();
     bindInfoCardTargets();
-    renderRsvp();
+    try { renderRsvp(); } catch (e) { console.warn('renderRsvp', e); }
     bindEvents();
     bindHomeMemberCta();
     updateAllNewBadges();
