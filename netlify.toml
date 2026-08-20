@@ -17,6 +17,10 @@
 [functions]
   node_bundler = "esbuild"
 
+[functions."push-gathering-tick"]
+  schedule = "0 * * * *"
+
+
 [[headers]]
   for = "/*"
   [headers.values]

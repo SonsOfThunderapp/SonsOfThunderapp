@@ -1,4 +1,4 @@
-/* Thunder Board service worker — push + minimal fetch (Android install criteria) */
+/* Thunder Board service worker — push + deep-link click */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
@@ -7,18 +7,21 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(self.clients.claim());
 });
 
-/* Required by Chromium Android for full PWA install / WebAPK eligibility.
-   Network-only pass-through — no offline cache bloat. */
 self.addEventListener('fetch', (event) => {
   event.respondWith(fetch(event.request));
 });
 
 self.addEventListener('push', (event) => {
-  let data = { title: 'Sons of Thunder', body: 'Open Thunder Board', url: '/' };
+  let data = {
+    title: 'Sons of Thunder',
+    body: 'Open Thunder Board',
+    url: '/?view=home',
+    tag: 'thunder-gathering'
+  };
   try {
     if (event.data) {
       const parsed = event.data.json();
-      data = { ...data, ...parsed };
+      data = Object.assign({}, data, parsed);
     }
   } catch (e) {
     try {
@@ -29,12 +32,12 @@ self.addEventListener('push', (event) => {
 
   const title = data.title || 'Sons of Thunder';
   const options = {
-    body: data.body || 'Open Thunder Board',
-    icon: '/assets/icon-192.png',
-    badge: '/assets/favicon-32.png',
-    data: { url: data.url || '/' },
+    body: data.body || '',
+    icon: '/assets/icon-192-v2.png',
+    badge: '/assets/icon-official.png',
+    data: { url: data.url || '/?view=home' },
     tag: data.tag || 'thunder-gathering',
-    renotify: true
+    renotify: false
   };
 
   event.waitUntil(self.registration.showNotification(title, options));
@@ -42,18 +45,16 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const target = (event.notification.data && event.notification.data.url) || '/';
+  const target = (event.notification.data && event.notification.data.url) || '/?view=home';
   event.waitUntil(
     (async () => {
       const all = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
       for (const client of all) {
-        if ('focus' in client) {
-          client.focus();
-          if (client.navigate) {
-            try { await client.navigate(target); } catch (e) {}
-          }
+        try {
+          if (client.focus) await client.focus();
+          client.postMessage({ type: 'tb-open', url: target });
           return;
-        }
+        } catch (e) {}
       }
       if (self.clients.openWindow) {
         await self.clients.openWindow(target);

@@ -77,8 +77,10 @@ exports.handler = async (event) => {
       return json(403, { error: 'Leaders only' });
     }
 
-    const title = String(body.title || 'New announcement').slice(0, 80);
-    const msgBody = String(body.body || 'Open Thunder Board').slice(0, 120);
+    const title = String(body.title || 'Sons of Thunder').slice(0, 80);
+    const msgBody = String(body.body || '').slice(0, 120);
+    const url = String(body.url || '/?view=home').slice(0, 120);
+    const tag = String(body.tag || 'thunder-leader').slice(0, 40);
 
     webpush.setVapidDetails(
       process.env.VAPID_SUBJECT || 'mailto:thunder@sonsofthunder.local',
@@ -102,10 +104,10 @@ exports.handler = async (event) => {
 
     const subRows = await listRes.json();
     const payload = JSON.stringify({
-      title: 'Sons of Thunder',
-      body: title + (msgBody ? ' — ' + msgBody : ''),
-      url: '/',
-      tag: 'thunder-announcement'
+      title: title,
+      body: msgBody || 'Open Thunder Board',
+      url: url,
+      tag: tag
     });
 
     let sent = 0;

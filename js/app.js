@@ -1441,11 +1441,14 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   // ---------- LOCAL NOTIFICATIONS (client-side) ----------
   // Fires when the brother opens the app (or keeps it open).
   // Key windows: 7 days, 3 days, 1 day, morning of meeting.
+  // Local notifications when the PWA is awake.
+  // Locked: 7 days, 1 day, optional 2 hours. No 3-day. No nags.
   const NOTIFY_KEYS = {
     d7: 'tb_notified_7d',
-    d3: 'tb_notified_3d',
     d1: 'tb_notified_1d',
-    morning: 'tb_notified_morning'
+    h2: 'tb_notified_2h',
+    morning: 'tb_notified_morning',
+    bday: 'tb_notified_bday'
   };
 
   function canNotify() {
@@ -1459,33 +1462,61 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     return Notification.requestPermission();
   }
 
-  function fireLocalNotification(title, body, tag) {
+  function wantsGatheringPing() {
+    return !!(load('reminderSet') || load('gatheringAlertsOn'));
+  }
+
+  function fireLocalNotification(title, body, tag, url) {
     if (!canNotify()) return;
+    const target = url || '/?view=home';
+    const opts = {
+      body: body || '',
+      icon: 'assets/icon-192-v2.png',
+      badge: 'assets/icon-official.png',
+      tag: tag || 'thunder-gathering',
+      renotify: false,
+      data: { url: target }
+    };
+    const go = function () {
+      try { applyDeepLink(target); } catch (e) {}
+    };
     try {
-      const n = new Notification(title, {
-        body,
-        icon: 'assets/icon-192.png',
-        badge: 'assets/icon-192.png',
-        tag: tag || 'thunder-meeting',
-        requireInteraction: false
-      });
-      n.onclick = () => {
-        window.focus();
-        n.close();
-      };
-    } catch (e) {
-      console.warn('Notification failed', e);
+      if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+        navigator.serviceWorker.ready.then(function (reg) {
+          return reg.showNotification(title, opts);
+        }).catch(function () {
+          const n = new Notification(title, opts);
+          n.onclick = function () { window.focus(); go(); n.close(); };
+        });
+        return;
+      }
+    } catch (e) {}
+    try {
+      const n = new Notification(title, opts);
+      n.onclick = function () { window.focus(); go(); n.close(); };
+    } catch (e2) {
+      console.warn('Notification failed', e2);
     }
   }
 
+  function applyDeepLink(raw) {
+    try {
+      const u = new URL(raw, location.origin);
+      const view = u.searchParams.get('view');
+      if (view && typeof showView === 'function' && ['home', 'brothers', 'events', 'about'].indexOf(view) !== -1) {
+        showView(view, { silent: true });
+      }
+    } catch (e) {}
+  }
+
   function checkAndFireMeetingNotifications() {
+    if (!wantsGatheringPing()) return;
     const next = getNextMeetingMonday();
     const days = daysUntil(next);
     const now = new Date();
     const hour = now.getHours();
-
-    // Only fire each window once per meeting cycle
-    const meetingKey = next.toISOString().slice(0, 10); // YYYY-MM-DD of meeting
+    const mt = parseMeetingHours();
+    const meetingKey = next.getFullYear() + '-' + String(next.getMonth() + 1).padStart(2, '0') + '-' + String(next.getDate()).padStart(2, '0');
 
     function alreadyFired(key) {
       return load(key) === meetingKey;
@@ -1494,42 +1525,37 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       save(key, meetingKey);
     }
 
+    const when = meetingTime() + ' · ' + venueName();
+
     if (days === 7 && !alreadyFired(NOTIFY_KEYS.d7)) {
-      fireLocalNotification(
-        '⚡ 7 Days Out',
-        'Sons of Thunder gathers in one week. Lock it in.',
-        'thunder-7d'
-      );
+      fireLocalNotification('Gathering in 7 days', when + '. Lock it in.', 'thunder-7d', '/?view=home');
       markFired(NOTIFY_KEYS.d7);
     }
-
-    if (days === 3 && !alreadyFired(NOTIFY_KEYS.d3)) {
-      fireLocalNotification(
-        '⚡ 3 Days Out',
-        'Three days. Show up. Carry weight.',
-        'thunder-3d'
-      );
-      markFired(NOTIFY_KEYS.d3);
-    }
-
     if (days === 1 && !alreadyFired(NOTIFY_KEYS.d1)) {
-      fireLocalNotification(
-        '⚡ Tomorrow',
-        'Gathering is tomorrow at ' + meetingTime() + ' — ' + venueName() + '.',
-        'thunder-1d'
-      );
+      fireLocalNotification('Tomorrow night', when + '.', 'thunder-1d', '/?view=home');
       markFired(NOTIFY_KEYS.d1);
     }
-
-    // Morning of meeting (between 7am – 11am local)
+    // ~2 hours before (meeting hour minus 2, one-hour window)
+    if (days === 0 && hour === Math.max(0, (mt.h || 18) - 2) && !alreadyFired(NOTIFY_KEYS.h2)) {
+      fireLocalNotification('Two hours', 'Sons of Thunder. ' + when + '.', 'thunder-2h', '/?view=home');
+      markFired(NOTIFY_KEYS.h2);
+    }
     if (days === 0 && hour >= 7 && hour < 11 && !alreadyFired(NOTIFY_KEYS.morning)) {
-      fireLocalNotification(
-        '⚡ Tonight',
-        'Sons of Thunder. ' + meetingTime() + '. ' + venueName() + '. Be there.',
-        'thunder-morning'
-      );
+      fireLocalNotification('Tonight', when + '. See you there.', 'thunder-morning', '/?view=home');
       markFired(NOTIFY_KEYS.morning);
     }
+  }
+
+  function checkBirthdayHonorsNotify() {
+    if (!leaderUnlocked) return;
+    const hits = (brothers || []).filter(function (b) { return b && isTodayBirthday(b.birthday); });
+    if (!hits.length) return;
+    const today = new Date();
+    const key = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+    if (load(NOTIFY_KEYS.bday) === key) return;
+    const names = hits.map(function (b) { return (b.name || 'A brother').split(' ')[0]; }).slice(0, 3).join(', ');
+    fireLocalNotification('Birthday', names + (hits.length > 1 ? ' — honor them.' : ' — honor him.'), 'thunder-bday', '/?view=brothers');
+    save(NOTIFY_KEYS.bday, key);
   }
 
   function setupNotificationSystem() {
@@ -1540,6 +1566,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
 
     // Check immediately on load
     checkAndFireMeetingNotifications();
+    try { checkBirthdayHonorsNotify(); } catch (e) {}
 
     // Re-check every 30 minutes while the app is open
     setInterval(checkAndFireMeetingNotifications, 30 * 60 * 1000);
@@ -1548,6 +1575,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
         checkAndFireMeetingNotifications();
+        try { checkBirthdayHonorsNotify(); } catch (e) {}
       }
     });
   }
@@ -3941,6 +3969,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       $$('.nav-item').forEach(n => n.classList.remove('nav-peek'));
       if (typeof tbGlowHit === 'function') tbGlowHit(nav, 'yellow');
     }
+    currentViewName = name;
     currentViewName = name;
     const header = $('#main-header');
     if (header) header.style.display = 'block'; /* logo star on all 4 tabs */
@@ -6954,7 +6983,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     }
 
     save('gatheringAlertsOn', true);
-    setAlertsHint('On. You’ll get a ping when leadership posts an announcement.');
+    setAlertsHint('On. Gathering, leadership line. Nothing else.');
     return true;
   }
 
@@ -7013,7 +7042,9 @@ $('#thunder-input').addEventListener('keydown', (e) => {
         },
         body: JSON.stringify({
           title: String(title || 'Sons of Thunder').slice(0, 80),
-          body: String(bodyText != null ? bodyText : 'Open Thunder Board').slice(0, 120)
+          body: String(bodyText != null ? bodyText : '').slice(0, 120),
+          url: '/?view=home',
+          tag: 'thunder-leader'
         })
       });
       const data = await res.json().catch(() => ({}));
@@ -7603,6 +7634,14 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     setupReminderButton();
     setupNotificationSystem();
     setupGatheringAlerts();
+    try { applyDeepLink(location.href); } catch (e) {}
+    try {
+      if (navigator.serviceWorker) {
+        navigator.serviceWorker.addEventListener('message', function (ev) {
+          if (ev.data && ev.data.type === 'tb-open') applyDeepLink(ev.data.url || '/?view=home');
+        });
+      }
+    } catch (e) {}
     setupHousekeeping();
     renderAnnouncements();
     renderBrothers();
