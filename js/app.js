@@ -409,7 +409,6 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
 
   function offerCalendarNow() {
     lockInAppReminder();
-    paintInAppCalendar();
     try { renderRsvp(); } catch (e) {}
     return true;
   }
@@ -441,6 +440,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   }
 
   function openCalConfirmSheet() {
+    if (roomCut()) return;
     try { document.body.classList.add('cal-sheet-open'); } catch (e) {}
     const el = document.getElementById('cal-confirm-sheet');
     if (!el) return;
@@ -1060,8 +1060,13 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     const sub = $('#auth-sub');
     const imin = !!(gate && gate.classList.contains('auth-gate-imin'));
     if (sub && !imin) {
-      sub.textContent = reason || 'Sign in for shared roster and memories.';
-      sub.classList.remove('hidden');
+      if (reason) {
+        sub.textContent = reason;
+        sub.classList.remove('hidden');
+      } else {
+        sub.textContent = '';
+        sub.classList.add('hidden');
+      }
     }
     setAuthError('');
     if (gate) {
@@ -1087,8 +1092,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     const forgot = document.getElementById('auth-forgot-btn');
     const invite = document.getElementById('auth-signup-btn');
     const magic = document.getElementById('auth-magic-btn');
-    if (sub) sub.classList.remove('hidden');
-    if (hint) hint.classList.remove('hidden');
+    if (sub) { sub.textContent = ''; sub.classList.add('hidden'); }
+    if (hint) { hint.textContent = ''; hint.classList.add('hidden'); }
     if (pass) pass.classList.remove('hidden');
     if (forgot) forgot.classList.remove('hidden');
     if (invite) invite.classList.remove('hidden');
@@ -1125,7 +1130,17 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   }
 
   function startMemberSignIn() {
-    try { openAuthGate('Sign in for shared roster and memories. Everything else works without an account.'); } catch (e) {
+    try {
+      const gate = document.getElementById('auth-gate');
+      if (gate) gate.classList.remove('auth-gate-imin');
+      const title = document.getElementById('auth-title');
+      if (title) title.textContent = 'LOCK YOUR SEAT';
+      const sub = document.getElementById('auth-sub');
+      if (sub) { sub.textContent = ''; sub.classList.add('hidden'); }
+      const hint = document.getElementById('auth-hint');
+      if (hint) hint.classList.add('hidden');
+      openAuthGate('');
+    } catch (e) {
       const gate = document.getElementById('auth-gate');
       if (gate) {
         gate.classList.remove('hidden');
@@ -1176,7 +1191,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         closeAuthGate();
         try { flushPendingRsvp(); } catch (e) {}
         try { flushPendingShot(); } catch (e) {}
-        try { offerCalendarNow(); } catch (e) {}
+        try { lockInAppReminder(); } catch (e) {}
         if (event === 'SIGNED_IN') {
           try { fireSignedInWelcome(); } catch (e) {}
           try { issueAxumCoffee(); } catch (e) {}
@@ -6347,12 +6362,6 @@ $('#edit-profile-btn').addEventListener('click', () => {
       authCancelBtn.dataset.bound = '1';
       authCancelBtn.addEventListener('click', () => {
         closeAuthGate();
-        try {
-          const title = document.getElementById('auth-title');
-          if (title && /PUT A NAME/.test(title.textContent || '')) {
-            offerCalendarNow();
-          }
-        } catch (e) {}
       });
     }
     // Enter in password field = Sign In (fewer taps)
@@ -9529,6 +9538,20 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     renderTourSlide();
   }
 
+  function presentationScrub() {
+    try { closeCalConfirmSheet(); } catch (e) {}
+    try { closeAxumDrop(); } catch (e) {}
+    try { closeAxumCard(); } catch (e) {}
+    ['ios-install-overlay', 'inapp-install-overlay', 'welcome', 'axum-drop', 'axum-card', 'cal-confirm-sheet'].forEach(function (id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.add('hidden');
+        el.setAttribute('aria-hidden', 'true');
+      }
+    });
+    try { document.body.classList.remove('cal-sheet-open', 'tb-axum-open'); } catch (e) {}
+  }
+
   function bindLeaderGhost() {
     const zone = document.querySelector('.admin-zone');
     if (!zone) return;
@@ -9615,6 +9638,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   async function init() {
     runSplash();
     try { if (roomCut()) document.body.classList.add('tb-room-cut'); } catch (e) {}
+    try { presentationScrub(); } catch (e) {}
     try { bindLeaderGhost(); } catch (e) {}
     try {
       const live = document.getElementById('install-live-link');

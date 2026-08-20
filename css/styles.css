@@ -8087,7 +8087,10 @@ body.tb-room-cut #raffle-board,
 body.tb-room-cut #axum-chip,
 body.tb-room-cut #axum-drop,
 body.tb-room-cut #axum-card,
-body.tb-room-cut #drop-shot-btn {
+body.tb-room-cut #cal-confirm-sheet,
+body.tb-room-cut #drop-shot-btn,
+body.tb-room-cut #auth-sub,
+body.tb-room-cut #auth-hint {
   display: none !important;
 }
 .tb-leader-ghost { display: none !important; }
