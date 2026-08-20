@@ -330,7 +330,7 @@ html, body {
   font-size: 15px;
   font-weight: 800;
   margin-bottom: 4px;
-  color: #FEF105;
+  color: #fff;
   animation: none;
   text-shadow: none;
 }
@@ -5237,7 +5237,7 @@ body.tb-tour-open { overflow: hidden; }
   letter-spacing: 0.06em;
 }
 .tb-tour-headline {
-  color: #FEF105;
+  color: #fff;
   font-size: 1.3rem;
   margin: 4px 0 6px;
   letter-spacing: 0.04em;
@@ -5898,7 +5898,9 @@ img.about-logo,
 .tb-tour-headline {
   font-size: 1.05rem !important;
   margin: 2px 0 0 !important;
-  animation: brotherNamePulse var(--tb-breathe) !important;
+  animation: none !important;
+  color: #fff !important;
+  text-shadow: none !important;
 }
 .tb-tour-follow { display: none !important; }
 .tb-tour-bolt-row { justify-content: flex-end; }
@@ -6056,11 +6058,12 @@ img.about-logo,
 }
 .cal-confirm-title {
   font-family: var(--font-display);
-  color: #FEF105;
+  color: #fff;
   font-size: 28px;
   letter-spacing: 0.04em;
   margin: 0 36px 8px 0;
-  animation: brotherNamePulse var(--tb-breathe);
+  animation: none;
+  text-shadow: none;
 }
 .cal-confirm-body {
   color: #ccc;
@@ -6746,15 +6749,23 @@ body.tb-tour-open #main-header { visibility: hidden !important; pointer-events: 
 }
 h1, h2, h3,
 .announcement-card h3,
+.event-details h3,
 .info-detail-title,
 .tb-tour-headline,
 .tb-tour-sub,
 .brother-detail-name,
 .cal-confirm-title,
 .modal-header h2,
-.iron-title {
+.iron-title,
+.mission-title,
+.meeting-date,
+.meeting-countdown,
+.auth-card h2,
+#auth-title {
   animation: none !important;
   text-shadow: none !important;
+  color: #fff !important;
+  filter: none !important;
 }
 .announcement-card p,
 .info-detail-body,
@@ -8031,21 +8042,33 @@ label.btn-rsvp, label.btn-drop-shot {
 
 /* CARDINAL: modal titles white + still. Labels yellow + pulse. */
 .info-detail-label,
-.announcement-card-label {
+.announcement-card-label,
+.card-label,
+.tb-live-label,
+.last-fire-label {
   animation: brotherNamePulse var(--tb-breathe) !important;
   color: #FEF105 !important;
   text-shadow:
     0 0 8px rgba(254, 241, 5, 0.55),
     0 0 16px rgba(254, 241, 5, 0.25) !important;
 }
+#info-detail-title,
 .info-detail-title,
+.info-detail-panel .info-detail-title,
 .modal-header h2,
 .cal-confirm-title,
 .brother-detail-name,
 .announcement-card h3,
+.event-details h3,
 .axum-card-title,
-.axum-drop-title {
+.axum-drop-title,
+.mission-title,
+.tb-tour-headline,
+.tb-tour-sub,
+#auth-title,
+.auth-card h2 {
   color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
   animation: none !important;
   text-shadow: none !important;
   filter: none !important;
