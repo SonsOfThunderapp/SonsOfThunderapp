@@ -33,10 +33,10 @@
   
   <!-- Web App Manifest -->
   <link rel="manifest" href="manifest.json" />
-  <link rel="preload" as="image" href="assets/logo@2x.png?v=20260820-raffle1" />
+  <link rel="preload" as="image" href="assets/logo@2x.png?v=20260820-tonight1" />
   <link rel="preload" as="image" href="assets/thunder-cool-fab@2x.png?v=20260819-nogold2" />
   
-  <link rel="stylesheet" href="css/styles.css?v=20260820-raffle1" />
+  <link rel="stylesheet" href="css/styles.css?v=20260820-tonight1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -46,14 +46,14 @@
   <div id="splash" class="splash" aria-hidden="true">
     <div class="splash-inner">
       <div class="splash-logo-wrap">
-        <img src="assets/logo@2x.png?v=20260820-raffle1"
-             srcset="assets/logo@2x.png?v=20260820-raffle1 1200w, assets/logo@3x.png?v=20260820-raffle1 1800w"
+        <img src="assets/logo@2x.png?v=20260820-tonight1"
+             srcset="assets/logo@2x.png?v=20260820-tonight1 1200w, assets/logo@3x.png?v=20260820-tonight1 1800w"
              sizes="min(82vw, 340px)"
              alt="Sons of Thunder"
              class="splash-mark splash-logo"
              width="1200"
              height="831" />
-        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-raffle1" alt="" aria-hidden="true" width="1200" height="831" />
+        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-tonight1" alt="" aria-hidden="true" width="1200" height="831" />
       </div>
       <p class="splash-line hidden" aria-hidden="true">THUNDER DOESN’T DULL</p>
     </div>
@@ -65,8 +65,8 @@
     <header id="main-header" class="header">
       <div class="logo-wrap">
         <img
-          src="assets/logo@2x.png?v=20260820-raffle1"
-          srcset="assets/logo@2x.png?v=20260820-raffle1 1200w, assets/logo@3x.png?v=20260820-raffle1 1800w"
+          src="assets/logo@2x.png?v=20260820-tonight1"
+          srcset="assets/logo@2x.png?v=20260820-tonight1 1200w, assets/logo@3x.png?v=20260820-tonight1 1800w"
           sizes="(max-width: 480px) 72vw, 320px"
           alt="Sons of Thunder"
           class="logo"
@@ -75,7 +75,7 @@
           height="831"
           decoding="async"
         />
-        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-raffle1" alt="" aria-hidden="true" width="1200" height="831" />
+        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-tonight1" alt="" aria-hidden="true" width="1200" height="831" />
       </div>
     </header>
 
@@ -109,6 +109,7 @@
             <!-- Who's In removed: local-only roster read as group presence. Personal LOCKED IN stays. -->
             <button type="button" id="here-btn" class="btn-here hidden">I'M HERE</button>
             <div id="here-status" class="here-status hidden">IN THE BEER RAFFLE · PIZZA'S ON</div>
+            <button type="button" id="drop-shot-btn" class="btn-drop-shot hidden">DROP A SHOT</button>
             <div id="raffle-board" class="raffle-board hidden"></div>
             <button type="button" id="axum-chip" class="axum-chip hidden">FREE AXUM COFFEE</button>
             <button id="reminder-btn" class="btn-reminder btn-reminder-compact">SET REMINDER</button>
@@ -117,9 +118,9 @@
           </div>
 
           <!-- Last Fire: one photo + one line between gatherings -->
-          <div id="last-fire" class="last-fire card hidden" role="button" tabindex="0" aria-label="Last Fire">
-            <div class="card-label last-fire-label">🔥 LAST FIRE</div>
-            <div class="last-fire-media" id="last-fire-media"></div>
+          <div id="last-fire" class="last-fire card hidden" role="button" tabindex="0" aria-label="Tonight">
+            <div class="card-label last-fire-label" id="last-fire-label">TONIGHT</div>
+            <div class="last-fire-media last-fire-strip" id="last-fire-media"></div>
             <div class="last-fire-cap" id="last-fire-cap"></div>
           </div>
 
@@ -410,8 +411,8 @@
         <div class="tb-tour-slide-frame" id="tb-tour-live">
           <div class="tb-live-slide is-on" data-slide="0">
             <div class="tb-live-logo-wrap">
-              <img class="tb-live-logo" src="assets/logo@2x.png?v=20260820-raffle1" alt="Sons of Thunder" width="1200" height="831" />
-              <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-raffle1" alt="" aria-hidden="true" width="1200" height="831" />
+              <img class="tb-live-logo" src="assets/logo@2x.png?v=20260820-tonight1" alt="Sons of Thunder" width="1200" height="831" />
+              <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-tonight1" alt="" aria-hidden="true" width="1200" height="831" />
             </div>
           </div>
           <div class="tb-live-slide" data-slide="1">
@@ -452,9 +453,9 @@
           <div class="tb-live-slide" data-slide="3">
             <div class="tb-live-label">RECENT MEMORIES</div>
             <div class="tb-live-mem-row">
-              <img class="tb-live-mem tb-live-mem-shot" src="assets/tour-memories/mem-patio.jpg?v=20260820-raffle1" alt="" />
-              <img class="tb-live-mem tb-live-mem-shot" src="assets/tour-memories/mem-fire.jpg?v=20260820-raffle1" alt="" />
-              <img class="tb-live-mem tb-live-mem-shot" src="assets/tour-memories/mem-lake.jpg?v=20260820-raffle1" alt="" />
+              <img class="tb-live-mem tb-live-mem-shot" src="assets/tour-memories/mem-patio.jpg?v=20260820-tonight1" alt="" />
+              <img class="tb-live-mem tb-live-mem-shot" src="assets/tour-memories/mem-fire.jpg?v=20260820-tonight1" alt="" />
+              <img class="tb-live-mem tb-live-mem-shot" src="assets/tour-memories/mem-lake.jpg?v=20260820-tonight1" alt="" />
               <div class="tb-live-mem tb-live-mem-add">+</div>
             </div>
             <div class="tb-live-phone-foot">View All Memories</div>
@@ -849,8 +850,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/config.js?v=20260820-raffle1"></script>
+  <script src="js/config.js?v=20260820-tonight1"></script>
   <script src="js/qrcode.min.js?v=20260816LOCKED6"></script>
-  <script src="js/app.js?v=20260820-raffle1"></script>
+  <script src="js/app.js?v=20260820-tonight1"></script>
 </body>
 </html>

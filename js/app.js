@@ -4343,6 +4343,23 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         board.classList.remove('hidden');
       } else board.classList.add('hidden');
     }
+    const drop = document.getElementById('drop-shot-btn');
+    if (drop) {
+      if (night && iShowedUp()) drop.classList.remove('hidden');
+      else drop.classList.add('hidden');
+    }
+  }
+
+  function openDropShot() {
+    if (!isSignedIn()) {
+      try { startMemberSignIn(); } catch (e) {}
+      return;
+    }
+    try { openModal('media-modal'); } catch (e) {}
+    setTimeout(function () {
+      const cam = document.getElementById('media-file-cam');
+      if (cam) try { cam.click(); } catch (e) {}
+    }, 200);
   }
 
   async function pullRaffle() {
@@ -4381,6 +4398,9 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     renderHere();
     try { showInstallToast("YOU'RE IN THE RAFFLE. PIZZA'S ON.", { success: true }); } catch (e) {}
     try { tbFeedback.confirm(); } catch (e) {}
+    setTimeout(function () {
+      try { renderLastFire(); } catch (e) {}
+    }, 400);
   }
 
   async function drawRaffle(prize) {
@@ -4791,6 +4811,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     try { parkFabByImin(); } catch (e) {}
     try { renderInCount(); } catch (e) {}
     try { renderHere(); } catch (e) {}
+    const btn = $('#rsvp-btn');
     const status = $('#rsvp-status');
     const prompt = $('#rsvp-prompt');
     if (!btn) return;
@@ -4834,24 +4855,63 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     }
   }
 
+  function nightShots(key) {
+    const k = key || meetingKey();
+    return (media || []).filter(function (m) {
+      if (!m || m.type === 'video') return false;
+      return String(m.meeting_key || '') === String(k);
+    }).slice(0, 8);
+  }
+
   function renderLastFire() {
     const el = $('#last-fire');
     if (!el) return;
-    const media = $('#last-fire-media');
+    const mediaEl = $('#last-fire-media');
     const cap = $('#last-fire-cap');
+    const label = document.getElementById('last-fire-label');
+    const night = isGatheringDay();
+    const shots = nightShots(meetingKey());
+    let prevKey = '';
+    if (!night && !(shots && shots.length)) {
+      const keys = [];
+      (media || []).forEach(function (m) {
+        if (m && m.meeting_key && keys.indexOf(m.meeting_key) === -1) keys.push(m.meeting_key);
+      });
+      keys.sort();
+      prevKey = keys.filter(function (k) { return k < meetingKey(); }).pop() || '';
+    }
+    const roll = (shots && shots.length) ? shots : nightShots(prevKey);
+    if (label) label.textContent = night ? 'TONIGHT' : 'LAST FIRE';
+    if (night && (!roll || !roll.length)) {
+      if (mediaEl) mediaEl.innerHTML = '';
+      if (cap) cap.textContent = iShowedUp() ? "Drop a shot. That's tonight." : 'Check in. Then drop a shot.';
+      el.classList.remove('hidden');
+      updateAllNewBadges();
+      return;
+    }
+    if (roll && roll.length) {
+      if (mediaEl) {
+        mediaEl.innerHTML = roll.map(function (m) {
+          return '<img src="' + esc(m.data) + '" alt="">';
+        }).join('');
+      }
+      if (cap) cap.textContent = night ? (roll.length + ' from the patio') : 'Last Monday.';
+      el.classList.remove('hidden');
+      updateAllNewBadges();
+      return;
+    }
     const hasCap = lastFire && String(lastFire.caption || '').trim();
     const hasPhoto = lastFire && lastFire.photo;
     if (!hasCap && !hasPhoto) {
       el.classList.add('hidden');
-      if (media) media.innerHTML = '';
+      if (mediaEl) mediaEl.innerHTML = '';
       if (cap) cap.textContent = '';
       updateAllNewBadges();
       return;
     }
-    if (media) {
-      media.innerHTML = hasPhoto ? `<img src="${esc(lastFire.photo)}" alt="">` : '';
-    }
+    if (mediaEl) mediaEl.innerHTML = hasPhoto ? '<img src="' + esc(lastFire.photo) + '" alt="">' : '';
     if (cap) cap.textContent = hasCap ? String(lastFire.caption).trim() : '';
+    if (label) label.textContent = 'LAST FIRE';
     el.classList.remove('hidden');
     updateAllNewBadges();
   }
@@ -6557,6 +6617,15 @@ $('#edit-profile-btn').addEventListener('click', () => {
     }
     function fabNextLine() {
       const signed = typeof isSignedIn === 'function' && isSignedIn();
+      const night = typeof isGatheringDay === 'function' && isGatheringDay();
+      if (night && Math.random() < 0.4) {
+        const nite = [
+          "Patio's lit. Drop a shot. That's tonight.",
+          "Pizza's here. Phone out. One frame.",
+          "If it was worth laughing at, it's worth the roll."
+        ];
+        return nite[Math.floor(Math.random() * nite.length)];
+      }
       if (!signed && Math.random() < 0.45) {
         if (!__fabSignDeck.length) __fabSignDeck = fabShuffle(SIGN_IN_LINES);
         return __fabSignDeck.pop();
@@ -9252,6 +9321,11 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       if (beer && beer.dataset.bound !== '1') {
         beer.dataset.bound = '1';
         beer.addEventListener('click', function () { drawRaffle('beer'); });
+      }
+      const dropShot = document.getElementById('drop-shot-btn');
+      if (dropShot && dropShot.dataset.bound !== '1') {
+        dropShot.dataset.bound = '1';
+        dropShot.addEventListener('click', function () { openDropShot(); });
       }
       if (hat && hat.dataset.bound !== '1') {
         hat.dataset.bound = '1';
