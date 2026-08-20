@@ -5986,7 +5986,22 @@ $('#edit-profile-btn').addEventListener('click', () => {
       'A fathom is six feet. That’s why it’s a grave measure too.',
       'The word “deadline” was a Civil War prison line. Cross it, you’re done.'
     ];
+    const SIGN_IN_LINES = [
+      'Sign in. I’m In actually counts. The room sees you.',
+      'Without sign-in, you’re a ghost. The patio doesn’t know.',
+      'Sign in once. Then when you lock in, every phone pings.',
+      'Your name on the board. That’s sign-in. Not a costume.',
+      'Brothers get the ping. Only if you’re signed in.',
+      'Memories follow you. Sign in. Don’t leave nights on one phone.',
+      'Sign in. Your seat is real. Not just this screen.',
+      'Tap Already a Member. That’s how you join the count.',
+      'Signed in = the boys see you locked in. Unsigned = silence.',
+      'Want the room to move when you move? Sign in.',
+      'I’m In is louder when you’re signed in. That’s the point.',
+      'One sign-in. Then your name hits every brother’s phone.'
+    ];
     let __fabDeck = [];
+    let __fabSignDeck = [];
     function fabShuffle(arr) {
       const a = arr.slice();
       for (let i = a.length - 1; i > 0; i--) {
@@ -5996,6 +6011,11 @@ $('#edit-profile-btn').addEventListener('click', () => {
       return a;
     }
     function fabNextLine() {
+      const unsigned = !(typeof isSignedIn === 'function' && isSignedIn());
+      if (unsigned && Math.random() < 0.45) {
+        if (!__fabSignDeck.length) __fabSignDeck = fabShuffle(SIGN_IN_LINES);
+        return __fabSignDeck.pop();
+      }
       if (!__fabDeck.length) __fabDeck = fabShuffle(FAB_BUBBLES);
       return __fabDeck.pop();
     }

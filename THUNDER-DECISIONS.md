@@ -5,6 +5,8 @@
 ### Decision
 Backstage Thunder speaks from `FAB_BUBBLES` in `js/app.js`. Shuffle the full deck. No repeat until empty. ~90 seconds apart. 8s hold. First line ~20s.
 
+Unsigned brothers: ~45% of bubbles are **sign-in benefit** lines (`SIGN_IN_LINES`). Signed-in: those lines stay off. Reward, never nag.
+
 Three families only:
 1. **Locked 10 encouragement** — never rewrite unless Obie reopens.
 2. **Feature rewards** — clever, never nag. Reward the brother. Don’t sell the app.
