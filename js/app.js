@@ -7851,6 +7851,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
   let __tourTypeTimer = null;
   let __tourTypeToken = 0;
+  let __tourBubbleDelay = null;
   let __hostFidgetTimer = null;
   let __hostGlintTimer = null;
   let __hostSwayTimer = null;
@@ -8062,21 +8063,9 @@ $('#thunder-input').addEventListener('keydown', (e) => {
         const gap = (2800 + Math.random() * 4200) * S + i * 180;
         broAfter(gap, loop);
       }
-      function loop() {
-        if (__tourIdx !== 2) return;
-        const quiet = Date.now() - born;
-        const r = Math.random();
-        if (quiet > 8000 && r < 0.18) mechRare();
-        else if (r < 0.28) mechLook();
-        else if (r < 0.55) mechShift();
-        else if (r < 0.78) mechReset();
-        else mechLook();
-        const gap = (2800 + Math.random() * 4200) * S + i * 180;
-        broAfter(gap, loop);
-      }
       broAfter(i * 28, function () {
         mechLook();
-        broAfter(1400 + Math.random() * 900, loop);
+        broAfter(900 + Math.random() * 400, loop);
       });
     });
   }
@@ -8114,11 +8103,21 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       sub.textContent = step.sub || '';
       sub.classList.toggle('hidden', !step.sub);
     }
-    // Thunder speaking — type the body line
-    typeTourBody(step.body || '', body);
     applyTourHostExpression(__tourIdx);
-    if (__tourIdx === 2) startBroPersonaIdle();
-    else stopBroPersonaIdle();
+    if (__tourBubbleDelay) {
+      try { clearTimeout(__tourBubbleDelay); } catch (e) {}
+      __tourBubbleDelay = null;
+    }
+    if (__tourIdx === 2) {
+      startBroPersonaIdle();
+      if (body) body.textContent = '';
+      __tourBubbleDelay = setTimeout(function () {
+        typeTourBody(step.body || '', body);
+      }, 1100);
+    } else {
+      stopBroPersonaIdle();
+      typeTourBody(step.body || '', body);
+    }
     if (progress) progress.textContent = (__tourIdx + 1) + ' OF ' + TB_TOUR_STEPS.length;
     if (next) next.textContent = step.nextLabel || (__tourIdx >= TB_TOUR_STEPS.length - 1 ? 'DONE' : 'NEXT');
     if (back) back.disabled = __tourIdx <= 0;
@@ -8143,6 +8142,10 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
   function hideTour() {
     stopTourTypewriter();
+    if (__tourBubbleDelay) {
+      try { clearTimeout(__tourBubbleDelay); } catch (e) {}
+      __tourBubbleDelay = null;
+    }
     stopTourHostMotion();
     stopBroPersonaIdle();
     const root = document.getElementById('tb-tour');
