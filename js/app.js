@@ -5727,6 +5727,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
     let __fabBeatTimer = null;
     let __fabMidTimer = null;
     let __fabSigTimer = null;
+    let __fabHoldTimer = null;
     let __fabOpenedAt = 0;
     function fabJustOpened() {
       return __fabOpenedAt && (Date.now() - __fabOpenedAt < 12000);
@@ -5795,13 +5796,13 @@ $('#edit-profile-btn').addEventListener('click', () => {
       return true;
     }
     function stopThunderBackstageIdle() {
-      [__fabBeatTimer, __fabMidTimer, __fabSigTimer].forEach(function (t) {
+      [__fabBeatTimer, __fabMidTimer, __fabSigTimer, __fabHoldTimer].forEach(function (t) {
         if (t) try { clearTimeout(t); } catch (e) {}
       });
-      __fabBeatTimer = __fabMidTimer = __fabSigTimer = null;
+      __fabBeatTimer = __fabMidTimer = __fabSigTimer = __fabHoldTimer = null;
+      fabStopMotion();
       const img = fabImg();
       if (img) img.classList.remove('tb-host-alive', 'tb-fab-alive', 'tb-fab-look');
-      fabBaseline();
     }
     let __fabLastMicro = '';
     const FAB_BUBBLES = [
@@ -5865,60 +5866,94 @@ $('#edit-profile-btn').addEventListener('click', () => {
       fab.style.right = 'auto';
       fab.style.bottom = 'auto';
     }
-    function fabGlance() {
+    let __fabRaf = 0;
+    let __fabT0 = Date.now();
+    let __fabPose = { x: 0, y: 0, r: 0, s: 1 };
+    let __fabTarget = { x: 0, y: 0, r: 0, s: 1 };
+    function fabLerp(a, b, k) { return a + (b - a) * k; }
+    function fabGo(x, y, r, s) {
+      __fabTarget = { x: x || 0, y: y || 0, r: r || 0, s: (s == null ? 1 : s) };
+    }
+    function fabRestSmooth() { fabGo(0, 0, 0, 1); }
+    function fabAfter(ms, fn) {
+      if (__fabHoldTimer) try { clearTimeout(__fabHoldTimer); } catch (e) {}
+      __fabHoldTimer = setTimeout(fn, ms);
+    }
+    function fabTick() {
+      __fabRaf = requestAnimationFrame(fabTick);
       const img = fabImg();
-      if (!img || fabBusy()) return;
-      const rot = (Math.random() < 0.5 ? -1 : 1) * (6 + Math.random() * 3);
-      img.style.setProperty('--fab-r', rot.toFixed(2) + 'deg');
-      setTimeout(function () { img.style.setProperty('--fab-r', '0deg'); }, 3200);
+      if (!img) return;
+      if (fabBusy()) return;
+      const k = 0.042;
+      __fabPose.x = fabLerp(__fabPose.x, __fabTarget.x, k);
+      __fabPose.y = fabLerp(__fabPose.y, __fabTarget.y, k);
+      __fabPose.r = fabLerp(__fabPose.r, __fabTarget.r, k);
+      __fabPose.s = fabLerp(__fabPose.s, __fabTarget.s, k);
+      const t = (Date.now() - __fabT0) / 1000;
+      const bx = Math.sin(t * 0.58) * 2.4 + Math.sin(t * 0.27) * 1.1;
+      const by = Math.sin(t * 0.71 + 0.9) * -5.2 + Math.sin(t * 0.37) * -1.3;
+      const br = Math.sin(t * 0.46 + 0.3) * 1.5;
+      const bs = 1 + Math.sin(t * 0.66) * 0.016;
+      img.style.animation = 'none';
+      img.style.transformOrigin = '50% 82%';
+      img.style.transform = 'translate(' + (__fabPose.x + bx).toFixed(2) + 'px,' +
+        (__fabPose.y + by).toFixed(2) + 'px) rotate(' + (__fabPose.r + br).toFixed(2) +
+        'deg) scale(' + (__fabPose.s * bs).toFixed(3) + ')';
+    }
+    function fabStartMotion() {
+      if (__fabRaf) return;
+      __fabT0 = Date.now();
+      __fabPose = { x: 0, y: 0, r: 0, s: 1 };
+      __fabTarget = { x: 0, y: 0, r: 0, s: 1 };
+      __fabRaf = requestAnimationFrame(fabTick);
+    }
+    function fabStopMotion() {
+      if (__fabRaf) cancelAnimationFrame(__fabRaf);
+      __fabRaf = 0;
+      const img = fabImg();
+      if (img) img.style.transform = '';
+    }
+    function fabGlance() {
+      if (fabBusy()) return;
+      fabGo(0, -2, (Math.random() < 0.5 ? -1 : 1) * (6 + Math.random() * 2.5), 1);
+      fabAfter(2800, fabRestSmooth);
     }
     function fabLookAround() {
-      const img = fabImg();
-      if (!img || fabBusy()) return;
-      img.style.setProperty('--fab-r', '-7deg');
-      setTimeout(function () { img.style.setProperty('--fab-r', '7deg'); }, 2200);
-      setTimeout(function () { img.style.setProperty('--fab-r', '0deg'); }, 4600);
+      if (fabBusy()) return;
+      fabGo(-1, -2, -6.5, 1);
+      fabAfter(2400, function () {
+        fabGo(1, -2, 6.5, 1);
+        fabAfter(2400, fabRestSmooth);
+      });
     }
     function fabShift() {
-      const img = fabImg();
-      if (!img || fabBusy()) return;
-      const rot = (Math.random() < 0.5 ? -1 : 1) * (4 + Math.random() * 3);
-      img.style.setProperty('--fab-r', rot.toFixed(2) + 'deg');
-      setTimeout(function () { img.style.setProperty('--fab-r', '0deg'); }, 3600);
+      if (fabBusy()) return;
+      fabGo((Math.random() < 0.5 ? -1 : 1) * 5, -1, (Math.random() < 0.5 ? -1 : 1) * 4, 1);
+      fabAfter(3200, fabRestSmooth);
     }
     function fabMicroNod() {
-      const img = fabImg();
-      if (!img || fabBusy()) return;
-      img.style.setProperty('--fab-r', '-8deg');
-      setTimeout(function () { img.style.setProperty('--fab-r', '0deg'); }, 2800);
+      if (fabBusy()) return;
+      fabGo(0, 3, -7, 1.01);
+      fabAfter(1600, function () {
+        fabGo(0, -1, 0, 1);
+        fabAfter(1400, fabRestSmooth);
+      });
     }
     function fabDrift() {
-      const img = fabImg();
-      if (!img || fabBusy()) return;
-      const x = (Math.random() < 0.5 ? -1 : 1) * (5 + Math.random() * 4);
-      img.style.setProperty('--fab-x', x.toFixed(1) + 'px');
-      setTimeout(function () { img.style.setProperty('--fab-x', '0px'); }, 4000);
+      if (fabBusy()) return;
+      fabGo((Math.random() < 0.5 ? -1 : 1) * 6, -4, 2, 1);
+      fabAfter(3600, fabRestSmooth);
     }
     function fabBob() {
-      const img = fabImg();
-      if (!img || fabBusy()) return;
-      img.style.setProperty('--fab-y', '-8px');
-      img.style.setProperty('--fab-s', '1.03');
-      setTimeout(function () {
-        img.style.setProperty('--fab-y', '0px');
-        img.style.setProperty('--fab-s', '1');
-      }, 3400);
+      if (fabBusy()) return;
+      fabGo(0, -7, 0, 1.03);
+      fabAfter(3000, fabRestSmooth);
     }
     function fabLean() {
-      const img = fabImg();
-      if (!img || fabBusy()) return;
-      const rot = (Math.random() < 0.5 ? -1 : 1) * (5 + Math.random() * 3);
-      img.style.setProperty('--fab-r', rot.toFixed(2) + 'deg');
-      img.style.setProperty('--fab-x', (rot > 0 ? 4 : -4) + 'px');
-      setTimeout(function () {
-        img.style.setProperty('--fab-r', '0deg');
-        img.style.setProperty('--fab-x', '0px');
-      }, 3800);
+      if (fabBusy()) return;
+      const side = Math.random() < 0.5 ? -1 : 1;
+      fabGo(side * 5, -2, side * 6, 1);
+      fabAfter(3400, fabRestSmooth);
     }
     function fabBubbleBeat() {
       const line = FAB_BUBBLES[__fabBubbleIdx % FAB_BUBBLES.length];
@@ -5950,6 +5985,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
       fabBaseline();
       try { parkFabByImin(); } catch (e) {}
       img.classList.add('tb-fab-alive');
+      fabStartMotion();
       if (!__fabOpenedAt) __fabOpenedAt = Date.now();
       function beatTick() {
         if (fabBusy()) {

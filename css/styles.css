@@ -6383,12 +6383,7 @@ body.tb-ask-open .header .logo {
   height: 68px !important;
 }
 .thunder-fab-img.tb-fab-alive {
-  transform-origin: 50% 80%;
-  --fab-r: 0deg;
-  --fab-s: 1;
-  --fab-x: 0px;
-  --fab-y: 0px;
-  animation: tbFabBreath 7.2s ease-in-out infinite !important;
+  animation: none !important;
 }
 @keyframes tbFabBreath {
   0%, 100% {
@@ -7618,8 +7613,8 @@ body.tb-tour-mandatory .tb-tour-skip {
 }
 
 #thunder-fab .thunder-fab-img.tb-fab-alive {
-  animation: tbFabBreath 7.2s ease-in-out infinite !important;
-  transition: --fab-r 1.6s ease-in-out, --fab-x 1.6s ease-in-out, --fab-y 1.6s ease-in-out, --fab-s 1.6s ease-in-out;
+  animation: none !important;
+  will-change: transform;
 }
 #thunder-fab .thunder-fab-img.tb-fab-twirl {
   animation: tbFabTwirl 1.4s ease-in-out !important;
