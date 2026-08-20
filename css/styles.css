@@ -6363,16 +6363,25 @@ body.tb-ask-open .header .logo {
   height: 68px !important;
   animation: none !important;
 }
-.thunder-fab-img.tb-host-alive {
+.thunder-fab-img.tb-fab-alive {
   transform-origin: 50% 80%;
-  animation: tbHostBreath 5.9s ease-in-out infinite !important;
+  --fab-r: 0deg;
+  --fab-s: 1;
+  animation: tbFabBreath 5.2s ease-in-out infinite;
+}
+@keyframes tbFabBreath {
+  0%, 100% { transform: translateY(0) rotate(var(--fab-r, 0deg)) scale(var(--fab-s, 1)); }
+  50% { transform: translateY(-3px) rotate(var(--fab-r, 0deg)) scale(var(--fab-s, 1)); }
+}
+.thunder-fab-img.tb-fab-look {
+  filter: drop-shadow(0 0 10px rgba(254,241,5,0.4));
 }
 .thunder-fab-aura {
   animation: none !important;
   inset: -6px;
 }
 @media (prefers-reduced-motion: reduce) {
-  .thunder-fab-img.tb-host-alive,
+  .thunder-fab-img.tb-fab-alive,
   .thunder-fab-img.tb-host-fidget,
   .thunder-fab-img.tb-host-sway {
     animation: none !important;

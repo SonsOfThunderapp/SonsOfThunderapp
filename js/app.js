@@ -5090,53 +5090,99 @@ $('#edit-profile-btn').addEventListener('click', () => {
     })();
     try { window.ThunderVoice = ThunderVoice; } catch (e) {}
 
-    let __fabGlintTimer = null;
-    let __fabFidgetTimer = null;
-    let __fabSwayTimer = null;
+    let __fabBeatTimer = null;
+    let __fabMidTimer = null;
+    let __fabSigTimer = null;
+    let __fabQuietSince = Date.now();
+    function fabImg() { return document.querySelector('#thunder-fab .thunder-fab-img'); }
+    function fabBusy() {
+      return document.body.classList.contains('tb-ask-open') || document.body.classList.contains('tb-tour-open');
+    }
+    function fabBaseline() {
+      const img = fabImg();
+      if (!img) return;
+      img.style.setProperty('--fab-r', '0deg');
+      img.style.setProperty('--fab-s', '1');
+      img.classList.remove('tb-fab-look');
+    }
     function stopThunderBackstageIdle() {
-      [__fabGlintTimer, __fabFidgetTimer, __fabSwayTimer].forEach(function (t) {
+      [__fabBeatTimer, __fabMidTimer, __fabSigTimer].forEach(function (t) {
         if (t) try { clearTimeout(t); } catch (e) {}
       });
-      __fabGlintTimer = __fabFidgetTimer = __fabSwayTimer = null;
-      const img = document.querySelector('#thunder-fab .thunder-fab-img');
-      if (img) img.classList.remove('tb-host-alive', 'tb-host-arrive', 'tb-host-glint', 'tb-host-fidget', 'tb-host-sway');
+      __fabBeatTimer = __fabMidTimer = __fabSigTimer = null;
+      const img = fabImg();
+      if (img) img.classList.remove('tb-host-alive', 'tb-fab-alive', 'tb-fab-look');
+      fabBaseline();
+    }
+    function fabGlance() {
+      const img = fabImg();
+      if (!img || fabBusy()) return;
+      const target = document.querySelector('.btn-rsvp, #rsvp-btn, .announcement-card, .next-meeting');
+      let rot = (Math.random() < 0.5 ? -1 : 1) * (1.2 + Math.random() * 1.6);
+      if (target) {
+        const a = document.getElementById('thunder-fab').getBoundingClientRect();
+        const b = target.getBoundingClientRect();
+        const dx = (b.left + b.width / 2) - (a.left + a.width / 2);
+        rot = dx < 0 ? -(1.4 + Math.random() * 1.4) : (1.4 + Math.random() * 1.4);
+      }
+      img.style.setProperty('--fab-r', rot.toFixed(2) + 'deg');
+      setTimeout(function () { img.style.setProperty('--fab-r', '0deg'); }, 900 + Math.random() * 400);
+    }
+    function fabShift() {
+      const img = fabImg();
+      if (!img || fabBusy()) return;
+      const rot = (Math.random() < 0.5 ? -1 : 1) * (1 + Math.random() * 2);
+      img.style.setProperty('--fab-r', rot.toFixed(2) + 'deg');
+      setTimeout(function () { img.style.setProperty('--fab-r', '0deg'); }, 1100);
+    }
+    function fabSignature() {
+      const img = fabImg();
+      if (!img || fabBusy()) return;
+      img.classList.add('tb-fab-look');
+      img.style.setProperty('--fab-s', '1.06');
+      img.style.setProperty('--fab-r', '0deg');
+      setTimeout(function () {
+        img.style.setProperty('--fab-s', '1');
+        img.classList.remove('tb-fab-look');
+      }, 1400);
     }
     function startThunderBackstageIdle() {
       stopThunderBackstageIdle();
-      const img = document.querySelector('#thunder-fab .thunder-fab-img');
+      const img = fabImg();
       if (!img) return;
-      img.classList.add('tb-host-alive', 'tb-host-arrive');
+      img.classList.add('tb-fab-alive');
+      fabBaseline();
       try {
         if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       } catch (e) {}
-      function glintTick() {
-        if (document.body.classList.contains('tb-ask-open') || document.body.classList.contains('tb-tour-open')) {
-          __fabGlintTimer = setTimeout(glintTick, 4000);
-          return;
+      __fabQuietSince = Date.now();
+      function beatTick() {
+        if (!fabBusy() && Date.now() - __fabQuietSince > 8000) {
+          if (Math.random() < 0.55) fabGlance();
+          else fabShift();
         }
-        img.classList.add('tb-host-glint');
-        setTimeout(function () { img.classList.remove('tb-host-glint'); }, 260);
-        __fabGlintTimer = setTimeout(glintTick, 5200 + Math.random() * 7800);
+        __fabBeatTimer = setTimeout(beatTick, 8000 + Math.random() * 7000);
       }
-      __fabGlintTimer = setTimeout(glintTick, 2400 + Math.random() * 2200);
-      function fidgetTick() {
-        if (!document.body.classList.contains('tb-ask-open')) {
-          img.classList.add('tb-host-fidget');
-          setTimeout(function () { img.classList.remove('tb-host-fidget'); }, 520);
+      __fabBeatTimer = setTimeout(beatTick, 9000 + Math.random() * 4000);
+      function midTick() {
+        if (!fabBusy() && Date.now() - __fabQuietSince > 20000) fabShift();
+        __fabMidTimer = setTimeout(midTick, 20000 + Math.random() * 10000);
+      }
+      __fabMidTimer = setTimeout(midTick, 22000 + Math.random() * 6000);
+      function sigTick() {
+        if (!fabBusy() && Date.now() - __fabQuietSince > 45000) {
+          fabSignature();
+          __fabQuietSince = Date.now();
         }
-        __fabFidgetTimer = setTimeout(fidgetTick, 7000 + Math.random() * 9000);
+        __fabSigTimer = setTimeout(sigTick, 8000);
       }
-      __fabFidgetTimer = setTimeout(fidgetTick, 3800 + Math.random() * 2400);
-      function swayTick() {
-        if (!document.body.classList.contains('tb-ask-open')) {
-          img.classList.add('tb-host-sway');
-          setTimeout(function () { img.classList.remove('tb-host-sway'); }, 1400);
-        }
-        __fabSwayTimer = setTimeout(swayTick, 9000 + Math.random() * 8000);
-      }
-      __fabSwayTimer = setTimeout(swayTick, 5600 + Math.random() * 3000);
+      __fabSigTimer = setTimeout(sigTick, 48000);
     }
     try { startThunderBackstageIdle(); } catch (e) {}
+    document.addEventListener('pointerdown', function () {
+      __fabQuietSince = Date.now();
+      fabBaseline();
+    }, { passive: true });
 
     // Thunder FAB — THUNDER WAKE then open (full once/session, soft after)
     $('#thunder-fab').addEventListener('click', () => {

@@ -381,3 +381,6 @@ Do not restyle glasses white. Do not humanize the skull.
 Anywhere a **label** exists (ANNOUNCEMENT, NEXT GATHERING, MISSION, LAST FIRE, THE NEXT MISSION, tour kickers), it glows and pulses.
 **Titles** and **body/description** never pulse. They stand still.
 Not labels: form field-label, file-label, QR wordmark, close-chip, brother names, dates.
+
+## 2026-08-19 — Backstage Thunder idle (FAB)
+Game-character idle, not a GIF. Baseline: 3px breath. 8–15s glance toward I’m In / announcements or 1–3° weight shift. 20–30s orientation. 45–60s quiet: look-at-you (slight scale hold). Any pointerdown snaps to baseline. No bounce, shake, spin, electricity. Tuxedo Ask page unchanged. Smirk / glasses-down / brow frames deferred until approved assets.
