@@ -853,6 +853,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       updateAuthSessionBar();
       if (session) {
         closeAuthGate();
+        try { flushPendingRsvp(); } catch (e) {}
         pullMemories().then(() => {
           renderMedia();
           if (typeof renderLastFire === 'function') renderLastFire();
@@ -3961,7 +3962,33 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     }
   }
 
-  async function pushRsvp(inFlag) {
+  function utilizeImInBackground() {
+    try { save('rsvpMeeting', meetingKey()); } catch (e) {}
+    try {
+      if (!isSignedIn()) save('pendingRsvp', { on: true, key: meetingKey(), at: Date.now() });
+    } catch (e) {}
+    try {
+      if (navigator.storage && navigator.storage.persist) navigator.storage.persist();
+    } catch (e) {}
+    try {
+      if (navigator.clearAppBadge) navigator.clearAppBadge();
+    } catch (e) {}
+    try {
+      if (navigator.serviceWorker && navigator.serviceWorker.ready) navigator.serviceWorker.ready.catch(function () {});
+    } catch (e) {}
+    try { fetch('/gathering.ics', { cache: 'reload' }).catch(function () {}); } catch (e) {}
+    try { updateOsBadge(); } catch (e) {}
+  }
+
+  async function flushPendingRsvp() {
+    try {
+      const p = load('pendingRsvp');
+      if (!p || !p.on) return;
+      if (!supabaseEnabled() || !isSignedIn()) return;
+      const ok = await pushRsvp(true);
+      if (ok) save('pendingRsvp', null);
+    } catch (e) {}
+  }
     if (!supabaseEnabled() || !isSignedIn()) return false;
     const id = myProfileId || (currentUser() && currentUser().id);
     if (!id) return false;
@@ -4801,6 +4828,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       }
 
       // I'm In = seat + phone reminder + calendar handoff (same tap).
+      try { utilizeImInBackground(); } catch (e) {}
       try { offerCalendarNow(); } catch (e) {}
       try { renderRsvp(); } catch (e) {}
 
