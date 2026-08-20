@@ -7103,3 +7103,36 @@ body.tb-ask-open .logo-wrap { width: min(28vw, 110px) !important; }
   width: 64px !important;
   height: 64px !important;
 }
+
+/* Brothers — no containers. Faces live on the page. */
+.tb-tour-stage[data-board="2"] .tb-phone,
+.tb-tour-stage[data-board="2"] .tb-tour-slide-frame,
+.tb-tour-stage[data-board="2"] .tb-live-slide,
+.tb-tour-stage[data-board="2"] .tb-live-bros,
+.tb-tour-stage[data-board="2"] .tb-live-bros-full,
+.tb-tour-stage[data-board="2"] .tb-live-bro {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 0 !important;
+}
+.tb-tour-stage[data-board="2"] .tb-phone {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 0 !important;
+  margin: 6px 0 0 !important;
+  flex: 0 0 auto !important;
+}
+.tb-tour-stage[data-board="2"] .tb-tour-slide-frame::after {
+  display: none !important;
+}
+.tb-tour-stage[data-board="2"] .tb-tour-dots {
+  position: relative !important;
+  z-index: 6 !important;
+  margin: 10px 0 6px !important;
+  padding: 0 !important;
+  flex-shrink: 0 !important;
+}
