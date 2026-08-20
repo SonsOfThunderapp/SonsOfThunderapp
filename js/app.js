@@ -329,32 +329,21 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
    * PWA cannot silently write to Calendar — OS requires user Save/Add.
    * Strategy: data: ICS (iOS often hands to Calendar) → blob download → Google Calendar template.
    */
-  function launchGatheringCalendar() {
+  /**
+   * In-app gathering reminder only. Never ICS, never Google, never _blank.
+   * Brothers do not leave the app.
+   */
+  function lockInAppReminder() {
+    try { save('reminderSet', true); } catch (e) {}
     try {
-      const next = getNextMeetingMonday();
-      const ics = buildGatheringIcs(next);
-      if (__calBlobUrl) {
-        try { URL.revokeObjectURL(__calBlobUrl); } catch (e) {}
-        __calBlobUrl = null;
-      }
-      const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-      __calBlobUrl = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = __calBlobUrl;
-      a.download = 'sons-of-thunder-gathering.ics';
-      a.target = '_blank';
-      a.rel = 'noopener';
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(function () {
-        try { a.remove(); } catch (e) {}
-        try { URL.revokeObjectURL(__calBlobUrl); __calBlobUrl = null; } catch (e) {}
-      }, 4000);
-      return true;
-    } catch (e) {
-      console.warn('Calendar launch failed', e);
-      return false;
-    }
+      requestNotifyPermission().then(function (perm) {
+        if (perm === 'granted') checkAndFireMeetingNotifications();
+      });
+    } catch (e) {}
+    return true;
+  }
+  function launchGatheringCalendar() {
+    return lockInAppReminder();
   }
 
   function openCalConfirmSheet() {
@@ -1603,27 +1592,23 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
 
     if (load('reminderSet')) {
       btn.classList.add('set');
-      btn.textContent = 'ON CALENDAR';
+      btn.textContent = 'REMINDER ON';
       if (status) {
-        status.textContent = 'Opened calendar — hit Save in your calendar app.';
+        status.textContent = 'We’ll ping this phone.';
         status.classList.remove('hidden');
       }
     }
 
     btn.addEventListener('click', () => {
-      try { launchGatheringCalendar(); } catch (e) {}
+      try { lockInAppReminder(); } catch (e) {}
       btn.classList.add('set');
-      btn.textContent = 'ON CALENDAR';
-      save('reminderSet', true);
+      btn.textContent = 'REMINDER ON';
       try { renderRsvp(); } catch (e) {}
       try { tbGlowHit(btn, 'yellow'); } catch (e) {}
       if (status) {
-        status.textContent = 'Opened calendar — hit Save so 7-day / 1-day / 2-hour alerts can fire.';
+        status.textContent = 'We’ll ping this phone before the gathering.';
         status.classList.remove('hidden');
       }
-      requestNotifyPermission().then((perm) => {
-        if (perm === 'granted') checkAndFireMeetingNotifications();
-      });
     });
   }
 
@@ -4385,11 +4370,10 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       if (add && !add.dataset.tbBound) {
         add.dataset.tbBound = '1';
         add.addEventListener('click', () => {
-          try { launchGatheringCalendar(); } catch (e) {}
-          try { save('reminderSet', true); } catch (e) {}
+          try { lockInAppReminder(); } catch (e) {}
           try { renderRsvp(); } catch (e) {}
           const rb = document.getElementById('reminder-btn');
-          if (rb) { rb.classList.add('set'); rb.textContent = 'ON CALENDAR'; }
+          if (rb) { rb.classList.add('set'); rb.textContent = 'REMINDER ON'; }
           closeCalConfirmSheet();
         });
       }
@@ -6200,6 +6184,18 @@ $('#thunder-input').addEventListener('keydown', (e) => {
         collapseActivityFeed();
       });
     }
+    el.querySelectorAll('.activity-card').forEach(function (card) {
+      card.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        openInfoDetail({
+          label: 'STORY',
+          title: card.getAttribute('data-rss-title') || '',
+          meta: card.getAttribute('data-rss-meta') || '',
+          body: card.getAttribute('data-rss-body') || ''
+        });
+      });
+    });
   }
 
   function renderActivityItems(items, source) {
@@ -6213,11 +6209,11 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       let excerpt = decodeFeedText(item.description || '');
       if (excerpt.length > 120) excerpt = excerpt.slice(0, 117) + '…';
       excerpt = esc(excerpt);
-      return `<a class="activity-card" href="${link}" target="_blank" rel="noopener noreferrer">
+      return `<button type="button" class="activity-card" data-rss-title="${title}" data-rss-body="${excerpt}" data-rss-meta="${esc(source)}${date ? ' · ' + esc(date) : ''}">
         <div class="activity-card-meta">${esc(source)}${date ? ' · ' + esc(date) : ''}</div>
         <div class="activity-card-title">${title}</div>
         <div class="activity-card-excerpt">${excerpt}</div>
-      </a>`;
+      </button>`;
     }).join('');
   }
 

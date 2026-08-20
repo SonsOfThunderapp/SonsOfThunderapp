@@ -18,7 +18,7 @@
   
   <!-- Web App Manifest -->
   <link rel="manifest" href="manifest.json" />
-  <link rel="preload" as="image" href="assets/logo@2x.png?v=20260819-pulseen" />
+  <link rel="preload" as="image" href="assets/logo@2x.png?v=20260819-stay" />
   <link rel="preload" as="image" href="assets/thunder-cool-fab@2x.png?v=20260819-nogold2" />
   
   <link rel="stylesheet" href="css/styles.css?v=20260819-nogold2" />
@@ -31,14 +31,14 @@
   <div id="splash" class="splash" aria-hidden="true">
     <div class="splash-inner">
       <div class="splash-logo-wrap">
-        <img src="assets/logo@2x.png?v=20260819-pulseen"
-             srcset="assets/logo@2x.png?v=20260819-pulseen 1200w, assets/logo@3x.png?v=20260819-pulseen 1800w"
+        <img src="assets/logo@2x.png?v=20260819-stay"
+             srcset="assets/logo@2x.png?v=20260819-stay 1200w, assets/logo@3x.png?v=20260819-stay 1800w"
              sizes="min(82vw, 340px)"
              alt="Sons of Thunder"
              class="splash-mark splash-logo"
              width="1200"
              height="831" />
-        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260819-pulseen" alt="" aria-hidden="true" width="1200" height="831" />
+        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260819-stay" alt="" aria-hidden="true" width="1200" height="831" />
       </div>
       <p class="splash-line hidden" aria-hidden="true">THUNDER DOESN’T DULL</p>
     </div>
@@ -50,8 +50,8 @@
     <header id="main-header" class="header">
       <div class="logo-wrap">
         <img
-          src="assets/logo@2x.png?v=20260819-pulseen"
-          srcset="assets/logo@2x.png?v=20260819-pulseen 1200w, assets/logo@3x.png?v=20260819-pulseen 1800w"
+          src="assets/logo@2x.png?v=20260819-stay"
+          srcset="assets/logo@2x.png?v=20260819-stay 1200w, assets/logo@3x.png?v=20260819-stay 1800w"
           sizes="(max-width: 480px) 72vw, 320px"
           alt="Sons of Thunder"
           class="logo"
@@ -60,7 +60,7 @@
           height="831"
           decoding="async"
         />
-        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260819-pulseen" alt="" aria-hidden="true" width="1200" height="831" />
+        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260819-stay" alt="" aria-hidden="true" width="1200" height="831" />
       </div>
     </header>
 
@@ -81,7 +81,7 @@
             <button id="rsvp-btn" class="btn-rsvp">I'M IN</button>
             <div id="rsvp-status" class="rsvp-status hidden">⚡ YOU'RE LOCKED IN</div>
             <!-- Who's In removed: local-only roster read as group presence. Personal LOCKED IN stays. -->
-            <button id="reminder-btn" class="btn-reminder btn-reminder-compact">ADD TO CALENDAR</button>
+            <button id="reminder-btn" class="btn-reminder btn-reminder-compact">SET REMINDER</button>
             <div id="reminder-status" class="reminder-status hidden"></div>
             <button type="button" id="text-leader-btn" class="btn-text-leader">HAVE A QUESTION? TEXT A LEADER</button>
           </div>
@@ -338,10 +338,10 @@
     <div class="cal-confirm-panel">
       <button type="button" class="cal-confirm-close" id="cal-confirm-close" aria-label="Close">×</button>
       <h2 id="cal-confirm-title" class="cal-confirm-title">YOU’RE IN</h2>
-      <p class="cal-confirm-body">Your seat is locked on this phone.<br>Want it on your calendar too?</p>
-      <button type="button" class="cal-confirm-primary" id="cal-confirm-add">ADD TO CALENDAR</button>
+      <p class="cal-confirm-body">Your seat is locked on this phone.<br>Want a reminder here too?</p>
+      <button type="button" class="cal-confirm-primary" id="cal-confirm-add">SET REMINDER</button>
       <button type="button" class="cal-confirm-secondary" id="cal-confirm-later">NOT NOW</button>
-      <p class="cal-confirm-hint">Swipe down or tap Not now to stay here.</p>
+      <p class="cal-confirm-hint">Stays in the app.</p>
     </div>
   </div>
 
@@ -367,8 +367,8 @@
         <div class="tb-tour-slide-frame" id="tb-tour-live">
           <div class="tb-live-slide is-on" data-slide="0">
             <div class="tb-live-logo-wrap">
-              <img class="tb-live-logo" src="assets/logo@2x.png?v=20260819-pulseen" alt="Sons of Thunder" width="1200" height="831" />
-              <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260819-pulseen" alt="" aria-hidden="true" width="1200" height="831" />
+              <img class="tb-live-logo" src="assets/logo@2x.png?v=20260819-stay" alt="Sons of Thunder" width="1200" height="831" />
+              <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260819-stay" alt="" aria-hidden="true" width="1200" height="831" />
             </div>
           </div>
           <div class="tb-live-slide" data-slide="1">
@@ -447,9 +447,7 @@
       <div class="modal-body install-modal-body">
         <video id="install-gif" class="install-video install-gif" src="assets/install-explainer.mp4" poster="assets/install-poster.jpg" width="540" height="804" playsinline loop preload="auto" webkit-playsinline data-tb-explainer-lock="capcut-vo" aria-label="How to add Thunder Board to your home screen"></video>
         <p class="install-tap-hint">Tap to play / replay · loops automatically</p>
-        <a id="install-live-link" class="install-live-link" href="https://sonsofthunder.netlify.app/" target="_blank" rel="noopener noreferrer">
-          sonsofthunder.netlify.app
-        </a>
+        <span id="install-live-link" class="install-live-link">sonsofthunder.netlify.app</span>
         <p class="install-link-hint">Open in Safari or Chrome → Share → Add to Home Screen</p>
         <div class="install-steps-static">
           <p><strong>iPhone</strong> — Safari → Share → Add to Home Screen</p>

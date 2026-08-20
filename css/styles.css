@@ -3539,6 +3539,10 @@ h1.code-title-glow {
 }
 .activity-card {
   display: block;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
   text-decoration: none;
   color: inherit;
   background: #0e0e0e;
