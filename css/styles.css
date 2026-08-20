@@ -716,7 +716,8 @@ h1.code-title-glow {
   height: calc(62px + var(--safe-bottom));
   padding-bottom: var(--safe-bottom);
   background: #0a0a0a; border-top: 1px solid #1a1a1a;
-  display: flex; justify-content: space-around; align-items: center; z-index: 100;
+  display: flex; justify-content: space-around; align-items: center; z-index: 40000;
+  pointer-events: auto;
 }
 .nav-item {
   flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;

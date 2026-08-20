@@ -1072,6 +1072,12 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     if (gate) {
       gate.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
+      if (gate.dataset.backdropBound !== '1') {
+        gate.dataset.backdropBound = '1';
+        gate.addEventListener('click', function (e) {
+          if (e.target === gate) closeAuthGate();
+        });
+      }
     }
     // Focus email for fewer taps
     try {
@@ -3176,6 +3182,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
 
     function swallowClick() {
       const eat = function (ev) {
+        if (ev.target && ev.target.closest && ev.target.closest('.bottom-nav, .nav-item, #thunder-fab')) return;
         ev.preventDefault();
         ev.stopPropagation();
         document.removeEventListener('click', eat, true);
@@ -3222,10 +3229,10 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       lx = x; lt = Date.now();
       const dx = x - sx;
       const dy = y - sy;
-      if (axis == null && (Math.abs(dx) > 6 || Math.abs(dy) > 6)) {
-        axis = Math.abs(dx) >= Math.abs(dy) * 0.72 ? 'x' : 'y';
+      if (axis == null && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) {
+        axis = Math.abs(dx) > Math.abs(dy) * 1.15 ? 'x' : 'y';
       }
-      if (axis === 'x' && e.cancelable) {
+      if (axis === 'x' && Math.abs(dx) > 18 && e.cancelable) {
         try { e.preventDefault(); } catch (e2) {}
       }
       if (prefersReducedMotion()) return;
@@ -5230,7 +5237,12 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   function showView(name, opts) {
     if (!TAB_ORDER.includes(name)) return;
     const fromSwipe = opts && opts.fromSwipe;
-    $$('.view').forEach(v => v.classList.remove('active', 'view-swipe-in', 'view-enter'));
+    $$('.view').forEach(function (v) {
+      v.classList.remove('active', 'view-swipe-in', 'view-enter', 'view-swipe-in-prev', 'view-swipe-in-next', 'elastic-dragging', 'elastic-settling');
+      v.style.transform = '';
+      v.style.opacity = '';
+      v.style.transition = '';
+    });
     $$('.nav-item').forEach(n => n.classList.remove('active'));
     const view = $(`#view-${name}`);
     const nav = $(`.nav-item[data-view="${name}"]`);
@@ -5255,7 +5267,6 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       $$('.nav-item').forEach(n => n.classList.remove('nav-peek'));
       if (typeof tbGlowHit === 'function') tbGlowHit(nav, 'yellow');
     }
-    currentViewName = name;
     currentViewName = name;
     const header = $('#main-header');
     if (header) header.style.display = 'block'; /* logo star on all 4 tabs */
@@ -5800,7 +5811,14 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   // ---------- EVENTS ----------
   function bindEvents() {
     $$('.nav-item').forEach(btn => {
-      btn.addEventListener('click', () => showView(btn.dataset.view));
+      if (btn.dataset.navBound === '1') return;
+      btn.dataset.navBound = '1';
+      const go = function (e) {
+        if (e) { e.preventDefault(); e.stopPropagation(); }
+        showView(btn.dataset.view);
+      };
+      btn.addEventListener('click', go);
+      btn.addEventListener('touchend', go, { passive: false });
     });
     setupTabSwipe();
 
@@ -6276,7 +6294,8 @@ $('#edit-profile-btn').addEventListener('click', () => {
           authSignInBtn.disabled = true;
           try {
             await authMagicLink(email);
-            setAuthError('Link sent. Open it — you’re on the seat.');
+            setAuthError('Link sent.');
+            setTimeout(function () { try { closeAuthGate(); } catch (e2) {} }, 900);
           } catch (e) {
             setAuthError((e && e.message) || 'Could not send the link.');
           } finally {
@@ -6336,7 +6355,8 @@ $('#edit-profile-btn').addEventListener('click', () => {
         authMagicBtn.disabled = true;
         try {
           await authMagicLink(email);
-          setAuthError('Link sent. Open it — your name’s on the seat.');
+          setAuthError('Link sent.');
+          setTimeout(function () { try { closeAuthGate(); } catch (e2) {} }, 900);
         } catch (e) {
           setAuthError((e && e.message) || 'Could not send the link.');
         } finally {
@@ -9550,6 +9570,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       }
     });
     try { document.body.classList.remove('cal-sheet-open', 'tb-axum-open'); } catch (e) {}
+    try { document.body.style.overflow = ''; } catch (e) {}
   }
 
   function bindLeaderGhost() {
