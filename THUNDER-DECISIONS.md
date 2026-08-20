@@ -353,3 +353,20 @@ Thunder is the single official mascot and concierge character. The concierge lig
 - Vocabulary: electric trace, focus falloff, living idle, type-out emphasis, feature ack, depth shift, electrified progress
 - Cross-refs: MOTION_HAPTICS_SPEC.md, CONCIERGE_TOUR_SPEC.md updated
 - Implementation only when explicitly ordered; this is the permanent allowed set
+
+## 2026-08-19 — Brotherhood of Thunders (multifaceted group)
+When Obie asks for a **group of Thunders**, he wants many personalities of **one authorized character** — not new mascots.
+
+**Always**
+- Gold 3D lightning-bolt HEAD
+- Black sunglasses (never white)
+- Same face geometry as `assets/thunder-cool.png`
+- No human body in the group grid
+- Tuxedo Thunder is **Ask Thunder page only** — never in a brothers grid
+
+**Personality is accessories + expression, not a different species**
+Locked examples: smirk, grin, wink, think, laugh, care, mustache, hat backwards, cigar.
+
+A group should read as **brothers who all look like Thunder** — multifaceted, still one mark.
+
+Live set: `assets/tour-faces/thunder-*.png`
