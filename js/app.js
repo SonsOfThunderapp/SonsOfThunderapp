@@ -1207,7 +1207,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     try {
       const { data, error } = await sb
         .from('brothers')
-        .select('id,name,bio,photo_url,phone,skills,available,updated_at')
+        .select('id,name,bio,photo_url,phone,skills,available,updated_at,birthday')
         .order('updated_at', { ascending: false });
       if (error) {
         console.warn('brothers pull', error);
@@ -1226,6 +1226,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
           name: row.name || (local && local.name) || '',
           bio: row.bio || (local && local.bio) || '',
           phone: row.phone || (local && local.phone) || '',
+          birthday: row.birthday || (local && local.birthday) || '',
           photo,
           skills: row.skills || (local && local.skills) || '',
           available: row.available !== false,
@@ -1315,6 +1316,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         photo_url: photoUrl,
         skills: entry.skills || '',
         available: entry.available !== false,
+        birthday: entry.birthday || null,
         updated_at: new Date().toISOString(),
         owner_id: uid || null
       };
