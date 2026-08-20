@@ -7840,24 +7840,45 @@ body.tb-tour-mandatory .tb-tour-skip {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
-.memories-block { margin-top: 8px; }
+.memories-block { margin: 4px 0 28px; }
+.memories-block .card-label {
+  margin-bottom: 6px;
+}
 .memories-lead {
   color: #888;
-  font-size: 13px;
-  margin: 0 0 12px;
+  font-size: 14px;
+  margin: 0 0 14px;
+}
+.memories-block .btn-rsvp {
+  width: 100%;
 }
 .btn-mem-lib {
   display: block;
   width: 100%;
-  margin: 8px 0 16px;
+  margin: 10px 0 16px;
   background: none;
   border: 0;
-  color: #777;
+  color: #666;
   font-size: 12px;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
-.memories-block .btn-rsvp { margin-bottom: 0; }
+.media-hero {
+  margin-bottom: 8px;
+}
+.media-hero.hidden { display: none !important; }
+.media-thumb-hero {
+  aspect-ratio: 16 / 10;
+  width: 100%;
+  border-radius: 14px;
+}
+.events-subhead {
+  margin-top: 8px;
+}
+.events-subhead h1 {
+  font-size: 18px;
+  letter-spacing: 0.14em;
+}
 .memory-cam-input {
   position: fixed;
   left: 0;

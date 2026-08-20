@@ -4226,74 +4226,89 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     });
   }
 
-  function renderMedia() {
-    const el = $('#media-feed');
-    if (!el) return;
-    updateAuthSessionBar();
-    /* Auth lives on Brothers — no Sign In wall on Events / Past Gatherings */
-    if (supabaseEnabled() && !isSignedIn()) {
-      el.innerHTML = `
-        <button type="button" class="empty-state empty-memories empty-memories-cta" id="empty-memories-cta" aria-label="Add a memory">
-          <div class="empty-memories-plus" aria-hidden="true">+</div>
-          <div class="empty-memories-title">No shots yet.</div>
-          <div class="empty-memories-sub">Drop one from the camera.<br>Shared album: Sign In under Brothers.</div>
-        </button>`;
-      const cta = $('#empty-memories-cta');
-      if (cta) {
-        cta.addEventListener('click', () => {
-          if (typeof tbGlowHit === 'function') tbGlowHit(cta, 'yellow');
-          try { tbFeedback.selection(); } catch (e) {}
-          const up = $('#upload-media-btn');
-          if (up) up.click();
-        });
-      }
-      updateAllNewBadges();
-      return;
-    }
-    if (!media.length) {
-      el.innerHTML = `
-        <button type="button" class="empty-state empty-memories empty-memories-cta" id="empty-memories-cta" aria-label="Add a memory">
-          <div class="empty-memories-plus" aria-hidden="true">+</div>
-          <div class="empty-memories-title">No shots yet.</div>
-          <div class="empty-memories-sub">Drop one from the camera.<br>Build the history.</div>
-        </button>`;
-      const cta = $('#empty-memories-cta');
-      if (cta) {
-        cta.addEventListener('click', () => {
-          if (typeof tbGlowHit === 'function') tbGlowHit(cta, 'yellow');
-          try { tbFeedback.selection(); } catch (e) {}
-          const up = $('#upload-media-btn');
-          if (up) up.click();
-        });
-      }
-      updateAllNewBadges();
-      return;
-    }
-    el.innerHTML = media.map((m, i) => {
-      const isVideo = m.type === 'video';
-      const src = m.data ? esc(m.data) : '';
-      const mediaTag = isVideo
-        ? `<video src="${src}" muted playsinline preload="metadata"></video><div class="media-thumb-play">▶</div>`
-        : `<img src="${src}" alt="" loading="lazy" />`;
-      const who = m.uploader_name ? esc(m.uploader_name) : '';
-      const capText = m.caption ? esc(m.caption) : '';
-      const cap = (capText || who)
-        ? `<div class="media-thumb-cap">${capText}${who ? (capText ? ' · ' : '') + who : ''}</div>`
-        : '';
-      const t = m.date ? Date.parse(m.date) : 0;
-      const isNew = t > 0 && t > (mediaSeenAt || 0);
-      return `<button type="button" class="media-thumb${isNew ? ' card-new' : ''}" data-media-index="${i}" aria-label="View memory">${isNew ? '<span class="new-badge new-badge-overlay">NEW</span>' : ''}${mediaTag}${cap}</button>`;
-    }).join('');
-    el.querySelectorAll('.media-thumb').forEach((btn, i) => {
+  function memoryThumbHtml(m, i, hero) {
+    const isVideo = m.type === 'video';
+    const src = m.data ? esc(m.data) : '';
+    const mediaTag = isVideo
+      ? '<video src="' + src + '" muted playsinline preload="metadata"></video><div class="media-thumb-play">▶</div>'
+      : '<img src="' + src + '" alt="" loading="lazy" />';
+    const who = m.uploader_name ? esc(m.uploader_name) : '';
+    const capText = m.caption ? esc(m.caption) : '';
+    const cap = (capText || who)
+      ? '<div class="media-thumb-cap">' + capText + (who ? (capText ? ' · ' : '') + who : '') + '</div>'
+      : '';
+    const t = m.date ? Date.parse(m.date) : 0;
+    const isNew = t > 0 && t > (mediaSeenAt || 0);
+    return '<button type="button" class="media-thumb' + (hero ? ' media-thumb-hero' : '') + (isNew ? ' card-new' : '') + '" data-media-index="' + i + '" aria-label="View memory">' +
+      (isNew ? '<span class="new-badge new-badge-overlay">NEW</span>' : '') + mediaTag + cap + '</button>';
+  }
+
+  function bindMediaThumbs(root) {
+    if (!root) return;
+    root.querySelectorAll('.media-thumb').forEach(function (btn, i) {
       btn.style.animationDelay = (Math.min(i, 8) * 0.04) + 's';
       btn.classList.add('media-enter');
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', function () {
         tbGlowHit(btn, 'yellow');
         const idx = parseInt(btn.getAttribute('data-media-index'), 10) || 0;
         openMemoryViewer(idx, btn);
         markMediaSeen();
       });
     });
+  }
+
+  function renderMedia() {
+    const el = $('#media-feed');
+    const hero = document.getElementById('media-hero');
+    if (!el) return;
+    updateAuthSessionBar();
+    if (hero) { hero.innerHTML = ''; hero.classList.add('hidden'); }
+    /* Auth lives on Brothers — no Sign In wall on Events / Past Gatherings */
+    if (supabaseEnabled() && !isSignedIn()) {
+      el.innerHTML =
+        '<button type="button" class="empty-state empty-memories empty-memories-cta" id="empty-memories-cta" aria-label="Drop a shot">' +
+        '<div class="empty-memories-plus" aria-hidden="true">+</div>' +
+        '<div class="empty-memories-title">No shots yet.</div>' +
+        '<div class="empty-memories-sub">Drop one from the camera.<br>Shared album: Sign In under Brothers.</div>' +
+        '</button>';
+      const cta = $('#empty-memories-cta');
+      if (cta) {
+        cta.addEventListener('click', function () {
+          if (typeof tbGlowHit === 'function') tbGlowHit(cta, 'yellow');
+          try { tbFeedback.selection(); } catch (e) {}
+          openDropShot();
+        });
+      }
+      updateAllNewBadges();
+      return;
+    }
+    if (!media.length) {
+      el.innerHTML =
+        '<button type="button" class="empty-state empty-memories empty-memories-cta" id="empty-memories-cta" aria-label="Drop a shot">' +
+        '<div class="empty-memories-plus" aria-hidden="true">+</div>' +
+        '<div class="empty-memories-title">No shots yet.</div>' +
+        '<div class="empty-memories-sub">Drop one from the camera.<br>Build the history.</div>' +
+        '</button>';
+      const cta = $('#empty-memories-cta');
+      if (cta) {
+        cta.addEventListener('click', function () {
+          if (typeof tbGlowHit === 'function') tbGlowHit(cta, 'yellow');
+          try { tbFeedback.selection(); } catch (e) {}
+          openDropShot();
+        });
+      }
+      updateAllNewBadges();
+      return;
+    }
+    if (hero) {
+      hero.innerHTML = memoryThumbHtml(media[0], 0, true);
+      hero.classList.remove('hidden');
+      bindMediaThumbs(hero);
+    }
+    el.innerHTML = media.slice(1).map(function (m, i) {
+      return memoryThumbHtml(m, i + 1, false);
+    }).join('');
+    bindMediaThumbs(el);
     updateAllNewBadges();
   }
 
