@@ -737,6 +737,15 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     return (sbSession && sbSession.user) || null;
   }
 
+  function fireSignedInWelcome() {
+    if (load('signedInWelcomeSent')) return;
+    try { save('signedInWelcomeSent', 1); } catch (e) {}
+    const title = 'You’re in the room.';
+    const body = 'I’m In carries your name. Memories follow you. Thunder’s in the corner.';
+    try { fireLocalNotification(title, body, 'thunder-signedin', '/?view=home'); } catch (e) {}
+    try { showInstallToast("YOU'RE IN THE ROOM", { success: true }); } catch (e) {}
+  }
+
   function isSignedIn() {
     return !!(currentUser() && currentUser().id);
   }
@@ -926,12 +935,15 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       console.warn('auth session', e);
       sbSession = null;
     }
-    sb.auth.onAuthStateChange((_event, session) => {
+    sb.auth.onAuthStateChange((event, session) => {
       sbSession = session;
       updateAuthSessionBar();
       if (session) {
         closeAuthGate();
         try { flushPendingRsvp(); } catch (e) {}
+        if (event === 'SIGNED_IN') {
+          try { fireSignedInWelcome(); } catch (e) {}
+        }
         pullMemories().then(() => {
           renderMedia();
           if (typeof renderLastFire === 'function') renderLastFire();
@@ -6102,8 +6114,19 @@ $('#edit-profile-btn').addEventListener('click', () => {
       'I’m In is louder when you’re signed in. That’s the point.',
       'One sign-in. Then your name hits every brother’s phone.'
     ];
+    const SIGNED_BENEFIT_LINES = [
+      'You’re signed in. I’m In now has your name on it.',
+      'Your seat is real. The patio can see you.',
+      'Lock in — every brother’s phone can ping.',
+      'Memories you drop live in the room. Not just this phone.',
+      'Tap me. I answer. That’s yours now.',
+      'Text a leader anytime. You’re in the circle.',
+      'The count includes you. That’s the whole point.',
+      'Signed in is the backstage pass. You already used it.'
+    ];
     let __fabDeck = [];
     let __fabSignDeck = [];
+    let __fabBenefitDeck = [];
     function fabShuffle(arr) {
       const a = arr.slice();
       for (let i = a.length - 1; i > 0; i--) {
@@ -6113,10 +6136,14 @@ $('#edit-profile-btn').addEventListener('click', () => {
       return a;
     }
     function fabNextLine() {
-      const unsigned = !(typeof isSignedIn === 'function' && isSignedIn());
-      if (unsigned && Math.random() < 0.45) {
+      const signed = typeof isSignedIn === 'function' && isSignedIn();
+      if (!signed && Math.random() < 0.45) {
         if (!__fabSignDeck.length) __fabSignDeck = fabShuffle(SIGN_IN_LINES);
         return __fabSignDeck.pop();
+      }
+      if (signed && Math.random() < 0.4) {
+        if (!__fabBenefitDeck.length) __fabBenefitDeck = fabShuffle(SIGNED_BENEFIT_LINES);
+        return __fabBenefitDeck.pop();
       }
       if (!__fabDeck.length) __fabDeck = fabShuffle(FAB_BUBBLES);
       return __fabDeck.pop();
