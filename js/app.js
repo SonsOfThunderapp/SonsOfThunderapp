@@ -4993,7 +4993,10 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       }
       try { pushRsvp(!!rsvp); } catch (e) {}
       if (rsvp) {
-        try { notifyImInBroadcast(); } catch (e) {}
+        Promise.resolve()
+          .then(function () { return quietPushSubscribe(); })
+          .then(function () { return notifyImInBroadcast(); })
+          .catch(function () {});
       }
 
       if (!rsvp) {
@@ -7828,6 +7831,37 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     save('gatheringAlertsOn', false);
     setAlertsHint('Alerts off.');
     return true;
+  }
+
+  async function quietPushSubscribe() {
+    try {
+      if (typeof isIos === 'function' && isIos() && typeof isStandalonePwa === 'function' && !isStandalonePwa()) {
+        return false;
+      }
+      const vapid = (cfg().VAPID_PUBLIC_KEY || '').trim();
+      if (!vapid || !('serviceWorker' in navigator) || !('PushManager' in window)) return false;
+      if (!('Notification' in window) || Notification.permission === 'denied') return false;
+      const perm = await requestNotifyPermission();
+      if (perm !== 'granted') return false;
+      const reg = await ensureServiceWorker();
+      if (!reg) return false;
+      let sub = await reg.pushManager.getSubscription();
+      if (!sub) {
+        sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(vapid)
+        });
+      }
+      await fetch('/.netlify/functions/push-subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subscription: sub.toJSON() })
+      });
+      save('gatheringAlertsOn', true);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   async function notifyImInBroadcast() {

@@ -77,9 +77,9 @@ exports.handler = async (event) => {
     const subRows = await listRes.json();
     const payload = JSON.stringify({
       title: first + ' locked in',
-      body: 'Next gathering. Seat claimed.',
+      body: 'The patio is filling. See who’s in.',
       url: '/?view=home',
-      tag: 'thunder-imin-' + kind
+      tag: 'thunder-imin-' + meetingKey
     });
 
     let sent = 0;
