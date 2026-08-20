@@ -973,12 +973,14 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       key: '',
       at: new Date().toISOString(),
       tz: '',
+      hour: new Date().getHours(),
       standalone: false,
       platform: 'web',
       alerts: 'unknown',
       signed: false,
       name: '',
-      lang: (navigator.language || '').slice(0, 12)
+      lang: (navigator.language || '').slice(0, 12),
+      persist: false
     };
     try { signal.key = meetingKey(); } catch (e) {}
     try { signal.tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
@@ -4822,12 +4824,21 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   function utilizeImInBackground() {
     try { save('rsvpMeeting', meetingKey()); } catch (e) {}
     try { save('lastImInAt', Date.now()); } catch (e) {}
+    try { lockInAppReminder(); } catch (e) {}
     try { captureImInSignal(); } catch (e) {}
     try {
       if (!isSignedIn()) save('pendingRsvp', { on: true, key: meetingKey(), at: Date.now() });
     } catch (e) {}
     try {
-      if (navigator.storage && navigator.storage.persist) navigator.storage.persist();
+      if (navigator.storage && navigator.storage.persist) {
+        navigator.storage.persist().then(function (ok) {
+          try {
+            const s = load('lastImInSignal') || {};
+            s.persist = !!ok;
+            save('lastImInSignal', s);
+          } catch (e) {}
+        }).catch(function () {});
+      }
     } catch (e) {}
     try {
       if (navigator.clearAppBadge) navigator.clearAppBadge();
@@ -5721,7 +5732,13 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
 
       /* I'm In = consent. Same tap as the OS alert prompt. No extra screen. */
       if (turningOn) {
-        try { requestNotifyPermission(); } catch (e) {}
+        try {
+          requestNotifyPermission().then(function (perm) {
+            if (perm === 'granted') {
+              try { checkAndFireMeetingNotifications(); } catch (e) {}
+            }
+          });
+        } catch (e) {}
       }
 
       // Contact haptic only (no tb-press class on RSVP — that transform:!important
@@ -5798,14 +5815,6 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         setTimeout(function () {
           try { openImInSignIn(); } catch (e) {}
         }, 700);
-      } else {
-        try { offerCalendarNow(); } catch (e) {}
-      }
-
-      if (typeof requestNotifyPermission === 'function') {
-        requestNotifyPermission().then((perm) => {
-          if (perm === 'granted') checkAndFireMeetingNotifications();
-        });
       }
     });
 
