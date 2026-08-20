@@ -7229,14 +7229,24 @@ body.tb-ask-open .header .logo {
 }
 
 .in-count {
-  margin-top: 10px;
-  font-size: 15px;
-  letter-spacing: 0.16em;
+  margin-top: 12px;
+  text-align: center;
+}
+.in-count-num {
+  font-size: 16px;
+  letter-spacing: 0.18em;
   font-weight: 800;
   color: #FEF105;
-  text-align: center;
   text-transform: uppercase;
-  text-shadow: 0 0 12px rgba(254,241,5,0.45);
+  text-shadow: 0 0 14px rgba(254,241,5,0.5);
+}
+.in-count-names {
+  margin-top: 6px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  color: #ddd;
+  text-transform: uppercase;
 }
 
 .memory-viewer-stage {

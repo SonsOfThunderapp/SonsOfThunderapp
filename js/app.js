@@ -4176,16 +4176,50 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     }
   }
 
+  function lockedFirstNames() {
+    const names = [];
+    const seen = {};
+    (sharedRsvps || []).forEach(function (r) {
+      const f = firstNameForId(r && r.brother_id);
+      if (!f) return;
+      const key = f.toUpperCase();
+      if (seen[key]) return;
+      seen[key] = true;
+      names.push(key);
+    });
+    return names;
+  }
+
   function renderInCount() {
     const el = document.getElementById('in-count');
     if (!el) return;
     const n = (sharedRsvps || []).length;
     if (n < 1) {
-      el.textContent = '';
       el.classList.add('hidden');
       return;
     }
-    el.textContent = n === 1 ? '1 BROTHER LOCKED IN' : (n + ' BROTHERS LOCKED IN');
+    let days = null;
+    try { days = daysUntil(getNextMeetingMonday()); } catch (e) {}
+    const head = n === 1 ? '1 LOCKED IN' : (n + ' LOCKED IN');
+    let clock = '';
+    if (days === 0) clock = 'TONIGHT';
+    else if (days === 1) clock = 'TOMORROW';
+    else if (days > 1) clock = days + ' DAYS';
+    const names = lockedFirstNames();
+    let nameLine = '';
+    if (names.length) {
+      const show = names.slice(0, 4);
+      nameLine = show.join(' · ');
+      if (names.length > 4) nameLine += ' · +' + (names.length - 4);
+    }
+    const numEl = document.getElementById('in-count-num');
+    const namesEl = document.getElementById('in-count-names');
+    if (numEl) numEl.textContent = clock ? (clock + '  ·  ' + head) : head;
+    else el.textContent = head;
+    if (namesEl) {
+      namesEl.textContent = nameLine;
+      namesEl.classList.toggle('hidden', !nameLine);
+    }
     el.classList.remove('hidden');
   }
 
@@ -4293,7 +4327,10 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       const meetCardOff = document.querySelector('.next-meeting');
       if (meetCardOff) meetCardOff.classList.remove('commit-energized');
       if (prompt) {
-        prompt.textContent = "Your seat is open. Lock it in.";
+        const nIn = (sharedRsvps || []).length;
+        prompt.textContent = nIn >= 1
+          ? (nIn === 1 ? '1 already in. Your seat is open.' : (nIn + ' already in. Your seat is open.'))
+          : "Your seat is open. Lock it in.";
         prompt.classList.remove('hidden');
       }
     }
