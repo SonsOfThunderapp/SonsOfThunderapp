@@ -1592,20 +1592,41 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         showView(view, { silent: true });
       }
       if (u.searchParams.get('imin') === '1') {
+        if (typeof isTourMandatory === 'function' && isTourMandatory()) return;
         if (typeof showView === 'function') showView('home', { silent: true });
         if (!rsvp) {
           setTimeout(function () {
             const btn = document.getElementById('rsvp-btn');
-            if (btn && !btn.classList.contains('confirmed')) btn.click();
+            if (btn && !rsvp) btn.click();
           }, 450);
         }
       }
-      if (u.searchParams.get('add') === '1') {
+      if (u.searchParams.get('add') === '1' || u.searchParams.get('shared') === '1') {
         if (typeof showView === 'function') showView('events', { silent: true });
         setTimeout(function () {
           try { openModal('media-modal'); } catch (e) {}
+          if (u.searchParams.get('shared') === '1') consumeSharedMemory();
         }, 350);
       }
+    } catch (e) {}
+  }
+
+  async function consumeSharedMemory() {
+    try {
+      const cache = await caches.open('tb-share');
+      const res = await cache.match('/__shared_memory');
+      if (!res) return;
+      const blob = await res.blob();
+      const name = (res.headers && res.headers.get('X-Filename')) || 'shared.jpg';
+      const file = new File([blob], name, { type: blob.type || 'image/jpeg' });
+      const input = document.getElementById('media-file');
+      if (input && typeof DataTransfer !== 'undefined') {
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        input.files = dt.files;
+        try { input.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) {}
+      }
+      await cache.delete('/__shared_memory');
     } catch (e) {}
   }
 
@@ -1614,7 +1635,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       if (!navigator.setAppBadge && !navigator.clearAppBadge) return;
       const d = daysUntil(getNextMeetingMonday());
       let n = 0;
-      if (d === 0 || d === 1) n = 1;
+      if ((d === 0 || d === 1) && !rsvp) n = 1;
       else if (typeof hasNewAnnouncements === 'function' && hasNewAnnouncements()) n = 1;
       else if (typeof hasNewLastFire === 'function' && hasNewLastFire()) n = 1;
       if (n && navigator.setAppBadge) navigator.setAppBadge(n);
@@ -4043,6 +4064,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
 
   function renderRsvp() {
     try { updatePersonalHome(); } catch (e) {}
+    try { updateOsBadge(); } catch (e) {}
     const btn = $('#rsvp-btn');
     const status = $('#rsvp-status');
     const prompt = $('#rsvp-prompt');
@@ -5010,6 +5032,20 @@ $('#edit-profile-btn').addEventListener('click', () => {
     });
 
     // Media — shared Supabase when configured; requires signed-in session
+    const camInput = $('#media-file-cam');
+    if (camInput && camInput.dataset.tbBound !== '1') {
+      camInput.dataset.tbBound = '1';
+      camInput.addEventListener('change', function () {
+        const src = camInput.files && camInput.files[0];
+        const dest = $('#media-file');
+        if (!src || !dest || typeof DataTransfer === 'undefined') return;
+        try {
+          const dt = new DataTransfer();
+          dt.items.add(src);
+          dest.files = dt.files;
+        } catch (e) {}
+      });
+    }
     $('#save-media').addEventListener('click', () => {
       try { tbFeedback.press($('#save-media')); } catch (e) {}
       const file = $('#media-file').files[0];

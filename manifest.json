@@ -57,13 +57,16 @@
     }
   ],
   "share_target": {
-    "action": "/?view=events&add=1",
-    "method": "GET",
-    "enctype": "application/x-www-form-urlencoded",
+    "action": "/share-memory",
+    "method": "POST",
+    "enctype": "multipart/form-data",
     "params": {
       "title": "title",
       "text": "text",
-      "url": "url"
+      "url": "url",
+      "files": [
+        { "name": "media", "accept": ["image/*", "video/*"] }
+      ]
     }
   }
 }

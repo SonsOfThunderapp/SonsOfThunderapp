@@ -7378,3 +7378,28 @@ body.tb-tour-mandatory .tb-tour-skip {
 @media (prefers-reduced-motion: reduce) {
   .tb-cal-cell.is-gathering { animation: none; }
 }
+
+.file-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.file-row .file-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 10px;
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+.file-row .file-label-cam {
+  border-color: #E30600;
+  color: #fff;
+}
