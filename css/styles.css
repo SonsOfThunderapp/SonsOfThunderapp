@@ -6502,17 +6502,19 @@ body.tb-tour-open #main-header { visibility: hidden !important; pointer-events: 
   filter: none !important;
 }
 
-/* Slide 1 — little spin, then a noticeable float. Smooth. */
+/* Slide 1 — zoom in, gentleman head-tip, then float. No spin. */
 .tb-tour-stage[data-board="0"] #tb-tour-host.tb-guide-thunder.tb-host-alive {
   width: min(46vw, 168px) !important;
   animation:
-    tbHostSpinIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) 1 forwards,
-    tbHostFloat 2.6s ease-in-out 0.95s infinite !important;
-  transform-origin: 50% 55%;
+    tbHostZoomTip 1.4s cubic-bezier(0.22, 1, 0.36, 1) 1 forwards,
+    tbHostFloat 2.6s ease-in-out 1.45s infinite !important;
+  transform-origin: 50% 70%;
 }
-@keyframes tbHostSpinIn {
-  0%   { transform: rotate(-30deg) scale(0.9); opacity: 0.55; }
-  100% { transform: rotate(360deg) scale(1); opacity: 1; }
+@keyframes tbHostZoomTip {
+  0%   { transform: scale(0.28) rotate(0deg); opacity: 0.25; }
+  48%  { transform: scale(1.08) rotate(0deg); opacity: 1; }
+  70%  { transform: scale(1) rotate(-18deg); }
+  100% { transform: scale(1) rotate(0deg); }
 }
 @keyframes tbHostFloat {
   0%, 100% { transform: translateY(0); }
