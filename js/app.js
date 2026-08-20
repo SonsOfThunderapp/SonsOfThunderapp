@@ -1442,6 +1442,33 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     return Math.round((target - now) / 86400000);
   }
 
+  function parkFabByImin() {
+    const fab = document.getElementById('thunder-fab');
+    const btn = document.getElementById('rsvp-btn');
+    if (!fab) return;
+    const home = currentViewName === 'home';
+    let gathering = false;
+    try { gathering = daysUntil(getNextMeetingMonday()) === 0; } catch (e) {}
+    const busy = document.body.classList.contains('tb-ask-open') || document.body.classList.contains('tb-tour-open');
+    if (!home || !gathering || !btn || busy) {
+      fab.classList.remove('tb-fab-by-imin');
+      fab.style.left = '';
+      fab.style.top = '';
+      fab.style.right = '';
+      fab.style.bottom = '';
+      return;
+    }
+    const r = btn.getBoundingClientRect();
+    const w = 88;
+    let left = r.right + 6;
+    if (left + w > window.innerWidth - 8) left = Math.max(8, r.left - w - 6);
+    fab.classList.add('tb-fab-by-imin');
+    fab.style.left = left + 'px';
+    fab.style.top = (r.top + (r.height / 2) - (w / 2)) + 'px';
+    fab.style.right = 'auto';
+    fab.style.bottom = 'auto';
+  }
+
   function formatMeetingDate(d) {
     return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   }
@@ -4204,6 +4231,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   function renderRsvp() {
     try { updatePersonalHome(); } catch (e) {}
     try { updateOsBadge(); } catch (e) {}
+    try { parkFabByImin(); } catch (e) {}
     const btn = $('#rsvp-btn');
     const status = $('#rsvp-status');
     const prompt = $('#rsvp-prompt');
@@ -4325,6 +4353,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       // Roster NEW clears when the brothers tab is opened
       markBrothersSeen();
     }
+    try { parkFabByImin(); } catch (e) {}
   }
 
   function isOverlayBlockingSwipe() {
@@ -5773,49 +5802,73 @@ $('#edit-profile-btn').addEventListener('click', () => {
       fabBaseline();
     }
     let __fabLastMicro = '';
-    let __fabLastArm = 0;
-    function fabArmOk() {
-      return fabWaitingLong() && (Date.now() - __fabLastArm > 18000);
+    const FAB_BUBBLES = [
+      'Hey, brother—you’re doing better than you think.',
+      'Whatever today handed you, you’re strong enough to carry it.',
+      'Keep going. I’ve seen your kind—you don’t quit.',
+      'You’ve got this, brother. And your brothers have you.',
+      'Bad day? Maybe. Bad life? Not even close.',
+      'Just a reminder: you matter more than you realize.',
+      'Take a breath, reset, and bring the thunder.',
+      'Look at you—still showing up. That counts for something.',
+      'You don’t have to have it all figured out today.',
+      'Head up, brother. You were built for more than this moment.'
+    ];
+    let __fabBubbleIdx = 0;
+    let __fabBubbleTimer = null;
+    function fabHideBubble() {
+      const b = document.getElementById('fab-bubble');
+      if (b) { b.classList.add('hidden'); b.textContent = ''; }
+      if (__fabBubbleTimer) try { clearTimeout(__fabBubbleTimer); } catch (e) {}
+      __fabBubbleTimer = null;
     }
-    function fabGlint() {
+    function fabSay(text, ms) {
+      const b = document.getElementById('fab-bubble');
+      if (!b) return;
+      b.textContent = text;
+      b.classList.remove('hidden');
+      if (__fabBubbleTimer) try { clearTimeout(__fabBubbleTimer); } catch (e) {}
+      __fabBubbleTimer = setTimeout(fabHideBubble, ms || 8000);
+    }
+    function fabTwirl() {
       const img = fabImg();
-      if (!img || fabBusy()) return;
-      img.classList.add('tb-fab-glint');
-      setTimeout(function () { img.classList.remove('tb-fab-glint'); }, 320);
+      if (!img) return;
+      img.classList.remove('tb-fab-twirl');
+      void img.offsetWidth;
+      img.classList.add('tb-fab-twirl');
+      setTimeout(function () { img.classList.remove('tb-fab-twirl'); }, 800);
     }
-    function fabMicroNod() {
-      const img = fabImg();
-      if (!img || fabBusy()) return;
-      img.style.setProperty('--fab-r', '-10deg');
-      setTimeout(function () { img.style.setProperty('--fab-r', '0deg'); }, 820);
-    }
-    function fabImpatient() {
-      /* Waiting on you — check the watch, then settle. */
-      if (fabPlayFrame('watch', 2200)) return;
-      fabMicroNod();
-    }
-    function fabMicro() {
-      const pool = ['glance', 'shift', 'nod', 'glint'].filter(function (x) { return x !== __fabLastMicro; });
-      const pick = pool[Math.floor(Math.random() * pool.length)];
-      __fabLastMicro = pick;
-      if (pick === 'glance') fabGlance();
-      else if (pick === 'shift') fabShift();
-      else if (pick === 'nod') fabMicroNod();
-      else fabGlint();
-    }
-    function fabArm(kind) {
-      if (!fabArmOk()) { fabMicro(); return; }
-      __fabLastArm = Date.now();
-      if (kind === 'inspect') fabInspect();
-      else if (kind === 'salute') fabPlayFrame('salute', 1700);
-      else fabImpatient();
+    function parkFabByImin() {
+      const fab = document.getElementById('thunder-fab');
+      const btn = document.getElementById('rsvp-btn');
+      if (!fab) return;
+      const home = currentViewName === 'home';
+      let gathering = false;
+      try { gathering = daysUntil(getNextMeetingMonday()) === 0; } catch (e) {}
+      if (!home || !gathering || !btn || fabBusy()) {
+        fab.classList.remove('tb-fab-by-imin');
+        fab.style.left = '';
+        fab.style.top = '';
+        fab.style.right = '';
+        fab.style.bottom = '';
+        return;
+      }
+      const r = btn.getBoundingClientRect();
+      const w = 88;
+      let left = r.right + 6;
+      if (left + w > window.innerWidth - 8) left = Math.max(8, r.left - w - 6);
+      fab.classList.add('tb-fab-by-imin');
+      fab.style.left = left + 'px';
+      fab.style.top = (r.top + (r.height / 2) - (w / 2)) + 'px';
+      fab.style.right = 'auto';
+      fab.style.bottom = 'auto';
     }
     function fabGlance() {
       const img = fabImg();
       if (!img || fabBusy()) return;
-      const target = document.querySelector('.btn-rsvp, #rsvp-btn, .announcement-card, .next-meeting');
+      const target = document.getElementById('rsvp-btn') || document.querySelector('.next-meeting');
       let rot = (Math.random() < 0.5 ? -1 : 1) * (5 + Math.random() * 4);
-      if (target) {
+      if (target && document.getElementById('thunder-fab')) {
         const a = document.getElementById('thunder-fab').getBoundingClientRect();
         const b = target.getBoundingClientRect();
         const dx = (b.left + b.width / 2) - (a.left + a.width / 2);
@@ -5826,7 +5879,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
       setTimeout(function () {
         img.style.setProperty('--fab-r', '0deg');
         img.classList.remove('tb-fab-look');
-      }, 1100 + Math.random() * 500);
+      }, 1100);
     }
     function fabShift() {
       const img = fabImg();
@@ -5835,23 +5888,40 @@ $('#edit-profile-btn').addEventListener('click', () => {
       img.style.setProperty('--fab-r', rot.toFixed(2) + 'deg');
       setTimeout(function () { img.style.setProperty('--fab-r', '0deg'); }, 1400);
     }
-    function fabSignature() {
+    function fabMicroNod() {
       const img = fabImg();
       if (!img || fabBusy()) return;
-      if (fabPlayFrame('watch', 2000)) return;
-      img.classList.add('tb-fab-look');
-      img.style.setProperty('--fab-s', '1.06');
-      img.style.setProperty('--fab-r', '0deg');
-      setTimeout(function () {
-        img.style.setProperty('--fab-s', '1');
-        img.classList.remove('tb-fab-look');
-      }, 1400);
+      img.style.setProperty('--fab-r', '-10deg');
+      setTimeout(function () { img.style.setProperty('--fab-r', '0deg'); }, 820);
+    }
+    function fabBubbleBeat() {
+      const line = FAB_BUBBLES[__fabBubbleIdx % FAB_BUBBLES.length];
+      __fabBubbleIdx += 1;
+      fabSay(line, 8000);
+    }
+    function fabBeat() {
+      if (fabBusy()) return;
+      const pool = ['watch', 'salute', 'inspect', 'glance', 'nod', 'shift'].filter(function (x) {
+        return x !== __fabLastMicro;
+      });
+      if (Math.random() < 0.2) pool.push('bubble');
+      const pick = pool[Math.floor(Math.random() * pool.length)];
+      __fabLastMicro = pick;
+      if (pick === 'watch') fabPlayFrame('watch', 2200);
+      else if (pick === 'salute') fabPlayFrame('salute', 1700);
+      else if (pick === 'inspect') fabInspect();
+      else if (pick === 'glance') fabGlance();
+      else if (pick === 'nod') fabMicroNod();
+      else if (pick === 'shift') fabShift();
+      else fabBubbleBeat();
     }
     function startThunderBackstageIdle() {
       stopThunderBackstageIdle();
       const img = fabImg();
       if (!img) return;
+      fabHideBubble();
       fabBaseline();
+      try { parkFabByImin(); } catch (e) {}
       try {
         if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
           img.classList.add('tb-fab-alive');
@@ -5860,7 +5930,6 @@ $('#edit-profile-btn').addEventListener('click', () => {
       } catch (e) {}
       const first = !__fabOpenedAt;
       if (first) __fabOpenedAt = Date.now();
-      __fabQuietSince = Date.now();
       if (first) {
         img.classList.add('tb-fab-enter');
         setTimeout(function () {
@@ -5871,61 +5940,35 @@ $('#edit-profile-btn').addEventListener('click', () => {
         img.classList.add('tb-fab-alive');
       }
       function beatTick() {
-        if (fabBusy() || fabJustOpened()) {
-          __fabBeatTimer = setTimeout(beatTick, 3000);
+        if (fabBusy()) {
+          __fabBeatTimer = setTimeout(beatTick, 7000);
           return;
         }
-        if (Date.now() - __fabQuietSince > 6000) fabMicro();
-        __fabBeatTimer = setTimeout(beatTick, 7000 + Math.random() * 6000);
+        fabBeat();
+        __fabBeatTimer = setTimeout(beatTick, 7000);
       }
-      __fabBeatTimer = setTimeout(beatTick, first ? 7000 : 5000);
-      function midTick() {
-        if (fabBusy() || !fabWaitingLong()) {
-          __fabMidTimer = setTimeout(midTick, 6000);
-          return;
-        }
-        const roll = Math.random();
-        if (roll < 0.34) fabArm('watch');
-        else if (roll < 0.58) fabArm('inspect');
-        else if (roll < 0.74) fabArm('salute');
-        else fabMicro();
-        __fabMidTimer = setTimeout(midTick, 16000 + Math.random() * 12000);
-      }
-      __fabMidTimer = setTimeout(midTick, first ? 16000 : 12000);
-      function sigTick() {
-        if (!fabBusy() && !fabJustOpened() && Date.now() - __fabQuietSince > 28000) {
-          fabArm('watch');
-          __fabQuietSince = Date.now();
-        }
-        __fabSigTimer = setTimeout(sigTick, 8000);
-      }
-      __fabSigTimer = setTimeout(sigTick, 24000);
+      __fabBeatTimer = setTimeout(beatTick, first ? 4000 : 7000);
     }
     try { startThunderBackstageIdle(); } catch (e) {}
+    window.addEventListener('resize', function () { try { parkFabByImin(); } catch (e) {} });
     document.addEventListener('pointerdown', function (e) {
-      __fabQuietSince = Date.now();
       const t = e.target;
       if (t && t.closest && t.closest('#thunder-fab')) return;
-      /* Don't yank him back to rest on every tap — waiting character has to finish. */
     }, { passive: true });
 
-    // Thunder FAB — THUNDER WAKE then open (full once/session, soft after)
+    let __fabTapAsk = false;
     $('#thunder-fab').addEventListener('click', () => {
       const fab = $('#thunder-fab');
-      const first = !window.__tbThunderWokeSession;
-      window.__tbThunderWokeSession = true;
-      try {
-        if (window.ThunderFX && ThunderFX.thunderWake) ThunderFX.thunderWake(fab, first ? 'full' : 'soft');
-        else {
-          try { tbFeedback.press(fab); } catch (e) {}
-          if (fab) {
-            fab.classList.remove('fab-hit');
-            void fab.offsetWidth;
-            fab.classList.add('fab-hit');
-            setTimeout(() => fab.classList.remove('fab-hit'), 480);
-          }
-        }
-      } catch (e) {}
+      if (fabBusy() && document.body.classList.contains('tb-ask-open')) return;
+      if (!__fabTapAsk) {
+        __fabTapAsk = true;
+        try { tbFeedback.press(fab); } catch (e) {}
+        fabTwirl();
+        fabSay('Yeah?', 2200);
+        return;
+      }
+      __fabTapAsk = false;
+      fabHideBubble();
       try {
         if (window.ThunderVoice) ThunderVoice.openAsk({ voice: false });
         else openThunderVoiceMode();
@@ -5948,7 +5991,9 @@ $('#edit-profile-btn').addEventListener('click', () => {
         if (thunderModal.classList.contains('hidden')) {
           stopThunderVoice();
           try { document.body.classList.remove('tb-ask-open'); } catch (e) {}
+          try { __fabTapAsk = false; } catch (e) {}
           try { startThunderBackstageIdle(); } catch (e) {}
+          try { parkFabByImin(); } catch (e) {}
         } else {
           try { stopThunderBackstageIdle(); } catch (e) {}
         }
