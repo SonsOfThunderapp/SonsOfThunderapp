@@ -3163,6 +3163,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     ];
     if (phone) lines.push('TEL;TYPE=CELL:' + phone);
     lines.push('ORG:Sons of Thunder');
+    lines.push('URL:https://sonsofthunder.netlify.app/');
     if (bio && !forQr) lines.push('NOTE:' + bio.replace(/,/g, '\\,'));
     lines.push('END:VCARD');
     return lines.join('\r\n');
@@ -6136,6 +6137,23 @@ $('#edit-profile-btn').addEventListener('click', () => {
           text: 'Sons of Thunder — Thunder doesn’t dull. Put this on your Home Screen.',
           url
         };
+        try {
+          const qrRes = await fetch('assets/qr-board.png');
+          const qrBlob = await qrRes.blob();
+          const qrFile = new File([qrBlob], 'thunder-board.png', { type: 'image/png' });
+          if (navigator.canShare && navigator.canShare({ files: [qrFile], url })) {
+            await navigator.share({ files: [qrFile], title: payload.title, text: payload.text, url });
+            showInstallToast('Shared with a brother.');
+            return;
+          }
+          if (navigator.canShare && navigator.canShare({ files: [qrFile] })) {
+            await navigator.share({ files: [qrFile], title: payload.title, text: payload.text + '\n' + url });
+            showInstallToast('Shared with a brother.');
+            return;
+          }
+        } catch (err) {
+          if (err && err.name === 'AbortError') return;
+        }
         if (navigator.share) {
           try {
             await navigator.share(payload);
