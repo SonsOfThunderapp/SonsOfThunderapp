@@ -7235,3 +7235,13 @@ body.tb-ask-open .header .logo {
   .view.view-swipe-in-next,
   .view.view-swipe-in-prev { animation: none !important; }
 }
+
+.in-count {
+  margin-top: 8px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+  color: #FEF105;
+  text-align: center;
+  text-shadow: 0 0 10px rgba(254,241,5,0.35);
+}

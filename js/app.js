@@ -442,6 +442,11 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
             .catch((e) => console.warn('realtime events_board pull', e && e.message ? e.message : e))
         );
       }
+      if (!kind || kind === 'rsvps' || kind === 'all') {
+        tasks.push(
+          pullRsvps().catch((e) => console.warn('realtime rsvps pull', e && e.message ? e.message : e))
+        );
+      }
       if ((!kind || kind === 'memories' || kind === 'all') && typeof isSignedIn === 'function' && isSignedIn()) {
         tasks.push(
           pullMemories()
@@ -560,6 +565,14 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         () => {
           try { scheduleRealtimeRefresh('events_board'); }
           catch (e) { console.warn('Thunder realtime events_board handler', e && e.message ? e.message : e); }
+        }
+      );
+      ch.on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'rsvps' },
+        () => {
+          try { scheduleRealtimeRefresh('rsvps'); }
+          catch (e) { console.warn('Thunder realtime rsvps handler', e && e.message ? e.message : e); }
         }
       );
       ch.on(
@@ -1157,6 +1170,11 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       if (typeof renderBrothers === 'function') renderBrothers();
     } catch (e) {
       console.warn('Brothers sync failed', e);
+    }
+    try {
+      await pullRsvps();
+    } catch (e) {
+      console.warn('Rsvps sync failed', e);
     }
     if (!isSignedIn()) {
       media = [];
@@ -3598,10 +3616,75 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   function meetingKey() {
     try {
       const d = getNextMeetingMonday();
-      return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return d.getFullYear() + '-' + m + '-' + day;
     } catch (e) {
       return 'default';
     }
+  }
+
+  let sharedRsvps = [];
+
+  async function pullRsvps() {
+    if (!supabaseEnabled()) return false;
+    const sb = getSb();
+    if (!sb) return false;
+    try {
+      const { data, error } = await sb
+        .from('rsvps')
+        .select('brother_id,meeting_key,in_at')
+        .eq('meeting_key', meetingKey());
+      if (error) {
+        console.warn('rsvps pull', error);
+        return false;
+      }
+      sharedRsvps = Array.isArray(data) ? data : [];
+      try { renderInCount(); } catch (e) {}
+      return true;
+    } catch (e) {
+      console.warn('rsvps pull failed', e);
+      return false;
+    }
+  }
+
+  async function pushRsvp(inFlag) {
+    if (!supabaseEnabled() || !isSignedIn()) return false;
+    const id = myProfileId || (currentUser() && currentUser().id);
+    if (!id) return false;
+    const sb = getSb();
+    if (!sb) return false;
+    const key = meetingKey();
+    try {
+      if (inFlag) {
+        const { error } = await sb.from('rsvps').upsert(
+          { brother_id: id, meeting_key: key, in_at: new Date().toISOString() },
+          { onConflict: 'brother_id,meeting_key' }
+        );
+        if (error) { console.warn('rsvps push', error); return false; }
+      } else {
+        const { error } = await sb.from('rsvps').delete().eq('brother_id', id).eq('meeting_key', key);
+        if (error) { console.warn('rsvps delete', error); return false; }
+      }
+      await pullRsvps();
+      return true;
+    } catch (e) {
+      console.warn('rsvps push failed', e);
+      return false;
+    }
+  }
+
+  function renderInCount() {
+    const el = document.getElementById('in-count');
+    if (!el) return;
+    const n = (sharedRsvps || []).length;
+    if (n < 1) {
+      el.textContent = '';
+      el.classList.add('hidden');
+      return;
+    }
+    el.textContent = n === 1 ? '1 BROTHER IS IN' : (n + ' BROTHERS ARE IN');
+    el.classList.remove('hidden');
   }
 
   function myInitials() {
@@ -4364,6 +4447,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         alert("We couldn’t lock that in. Try again.");
         return;
       }
+      try { pushRsvp(!!rsvp); } catch (e) {}
 
       if (!rsvp) {
         // Calm un-commit — no reverse lightning
@@ -7496,6 +7580,11 @@ $('#thunder-input').addEventListener('keydown', (e) => {
         renderBrothers();
       } catch (eB) {
         console.warn('brothers init', eB);
+      }
+      try {
+        await pullRsvps();
+      } catch (eR) {
+        console.warn('rsvps init', eR);
       }
       if (isSignedIn()) {
         await pullMemories();
