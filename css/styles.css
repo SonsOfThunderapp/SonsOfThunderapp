@@ -6381,7 +6381,6 @@ body.tb-ask-open .header .logo {
 .thunder-fab-img {
   width: 68px !important;
   height: 68px !important;
-  animation: none !important;
 }
 .thunder-fab-img.tb-fab-alive {
   transform-origin: 50% 80%;
@@ -6389,20 +6388,20 @@ body.tb-ask-open .header .logo {
   --fab-s: 1;
   --fab-x: 0px;
   --fab-y: 0px;
-  animation: tbFabBreath 3.6s ease-in-out infinite;
+  animation: tbFabBreath 2.4s ease-in-out infinite !important;
 }
 @keyframes tbFabBreath {
   0%, 100% {
     transform: translate(var(--fab-x, 0px), var(--fab-y, 0px)) rotate(var(--fab-r, 0deg)) scale(var(--fab-s, 1));
   }
   25% {
-    transform: translate(calc(var(--fab-x, 0px) + 7px), calc(var(--fab-y, 0px) - 16px)) rotate(calc(var(--fab-r, 0deg) + 4deg)) scale(calc(var(--fab-s, 1) * 1.06));
+    transform: translate(calc(var(--fab-x, 0px) + 12px), calc(var(--fab-y, 0px) - 22px)) rotate(calc(var(--fab-r, 0deg) + 8deg)) scale(calc(var(--fab-s, 1) * 1.08));
   }
   50% {
-    transform: translate(calc(var(--fab-x, 0px) - 8px), calc(var(--fab-y, 0px) - 8px)) rotate(calc(var(--fab-r, 0deg) - 5deg)) scale(calc(var(--fab-s, 1) * 1.03));
+    transform: translate(calc(var(--fab-x, 0px) - 14px), calc(var(--fab-y, 0px) - 10px)) rotate(calc(var(--fab-r, 0deg) - 9deg)) scale(calc(var(--fab-s, 1) * 1.04));
   }
   75% {
-    transform: translate(calc(var(--fab-x, 0px) + 5px), calc(var(--fab-y, 0px) - 14px)) rotate(calc(var(--fab-r, 0deg) + 3deg)) scale(calc(var(--fab-s, 1) * 1.05));
+    transform: translate(calc(var(--fab-x, 0px) + 9px), calc(var(--fab-y, 0px) - 18px)) rotate(calc(var(--fab-r, 0deg) + 6deg)) scale(calc(var(--fab-s, 1) * 1.07));
   }
 }
 .thunder-fab-img.tb-fab-look {
@@ -7619,4 +7618,11 @@ body.tb-tour-mandatory .tb-tour-skip {
 }
 @media (prefers-reduced-motion: reduce) {
   .tb-tour-stage[data-board="5"] #tb-tour-host.tb-host-bond-pop { animation: none !important; }
+}
+
+#thunder-fab .thunder-fab-img.tb-fab-alive {
+  animation: tbFabBreath 2.4s ease-in-out infinite !important;
+}
+#thunder-fab .thunder-fab-img.tb-fab-twirl {
+  animation: tbFabTwirl 1.4s ease-in-out !important;
 }
