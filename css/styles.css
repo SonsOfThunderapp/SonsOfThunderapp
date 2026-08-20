@@ -7923,6 +7923,22 @@ label.btn-rsvp, label.btn-drop-shot {
   pointer-events: none !important;
 }
 
+/* Splash mark: optical center, not sitting in the lower half. */
+.splash {
+  align-items: flex-start !important;
+  justify-content: center !important;
+  padding-top: calc(env(safe-area-inset-top, 24px) + 12vh) !important;
+}
+.splash-inner {
+  width: 100%;
+  margin-top: 0 !important;
+  transform: translateY(0);
+}
+.splash-logo-wrap {
+  margin: 0 auto !important;
+}
+
+
 /* CARDINAL: modal titles white + still. Labels yellow + pulse. */
 .info-detail-label,
 .announcement-card-label {
