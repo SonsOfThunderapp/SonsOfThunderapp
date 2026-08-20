@@ -3993,6 +3993,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     }
     const body = encodeURIComponent(message || 'Sons of Thunder — ');
     const list = nums.join(',');
+    try { navigator.clipboard && navigator.clipboard.writeText(nums.join('\n')); } catch (e) {}
     const ios = typeof isIos === 'function' && isIos();
     window.location.href = ios
       ? ('sms:/open?addresses=' + list + '&body=' + body)
@@ -6467,7 +6468,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     }
     const adminSmsSend = $('#admin-sms-send');
     if (adminSmsSend) {
-      adminSmsSend.addEventListener('click', async () => {
+      adminSmsSend.addEventListener('click', () => {
         if (!requireLeader()) return;
         const message = (($('#admin-sms-body') && $('#admin-sms-body').value) || '').trim();
         const st = $('#admin-sms-status');
@@ -6475,42 +6476,8 @@ $('#thunder-input').addEventListener('keydown', (e) => {
           if (st) st.textContent = 'Write the line first.';
           return;
         }
-        if (!isSignedIn || !isSignedIn()) {
-          if (st) st.textContent = 'Sign in on Brothers first (leader account).';
-          return;
-        }
-        adminSmsSend.disabled = true;
-        if (st) st.textContent = 'Sending…';
-        try {
-          const sb = getSb && getSb();
-          let accessToken = '';
-          if (sb && sb.auth && sb.auth.getSession) {
-            const { data } = await sb.auth.getSession();
-            accessToken = (data && data.session && data.session.access_token) || '';
-          }
-          const res = await fetch('/.netlify/functions/sms-club', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + accessToken },
-            body: JSON.stringify({ message })
-          });
-          const data = await res.json().catch(() => ({}));
-          if (res.status === 503 && data.fallback) {
-            if (st) st.textContent = 'Twilio not on Netlify yet. Opening Messages…';
-            openDeviceSmsClub(message);
-            return;
-          }
-          if (!res.ok) {
-            if (st) st.textContent = (data && data.error) || 'Send failed.';
-            return;
-          }
-          if (st) st.textContent = 'Sent to ' + (data.sent || 0) + ' phone' + ((data.sent === 1) ? '.' : 's.');
-          try { tbToast('Club text sent · ' + (data.sent || 0)); } catch (e) {}
-        } catch (e) {
-          if (st) st.textContent = 'Couldn’t send. Opening Messages…';
-          openDeviceSmsClub(message);
-        } finally {
-          adminSmsSend.disabled = false;
-        }
+        if (st) st.textContent = 'Opening your Messages…';
+        openDeviceSmsClub(message);
       });
     }
     const adminPushBtn = $('#admin-push-btn');
