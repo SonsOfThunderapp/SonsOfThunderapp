@@ -5093,7 +5093,13 @@ $('#edit-profile-btn').addEventListener('click', () => {
     let __fabBeatTimer = null;
     let __fabMidTimer = null;
     let __fabSigTimer = null;
-    let __fabQuietSince = Date.now();
+    let __fabOpenedAt = 0;
+    function fabJustOpened() {
+      return __fabOpenedAt && (Date.now() - __fabOpenedAt < 40000);
+    }
+    function fabWaitingLong() {
+      return !fabJustOpened() && (Date.now() - __fabQuietSince > 18000);
+    }
     const FAB_DEFAULT = 'assets/thunder-cool-fab.png';
     const FAB_FRAMES = {
       watch: 'assets/thunder-idle-watch.png',
@@ -5198,34 +5204,51 @@ $('#edit-profile-btn').addEventListener('click', () => {
       stopThunderBackstageIdle();
       const img = fabImg();
       if (!img) return;
-      img.classList.add('tb-fab-alive');
       fabBaseline();
       try {
-        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          img.classList.add('tb-fab-alive');
+          return;
+        }
       } catch (e) {}
+      const first = !__fabOpenedAt;
+      if (first) __fabOpenedAt = Date.now();
       __fabQuietSince = Date.now();
+      if (first) {
+        img.classList.add('tb-fab-enter');
+        setTimeout(function () {
+          img.classList.remove('tb-fab-enter');
+          img.classList.add('tb-fab-alive');
+        }, 2300);
+      } else {
+        img.classList.add('tb-fab-alive');
+      }
       function beatTick() {
-        if (!fabBusy() && Date.now() - __fabQuietSince > 8000) {
-          const r = Math.random();
-          if (r < 0.22) fabInspect();
-          else if (r < 0.50) fabGlance();
+        if (fabBusy() || fabJustOpened()) {
+          __fabBeatTimer = setTimeout(beatTick, 4000);
+          return;
+        }
+        if (Date.now() - __fabQuietSince > 8000) {
+          if (Math.random() < 0.5) fabGlance();
           else fabShift();
         }
         __fabBeatTimer = setTimeout(beatTick, 8000 + Math.random() * 7000);
       }
-      __fabBeatTimer = setTimeout(beatTick, 9000 + Math.random() * 4000);
+      __fabBeatTimer = setTimeout(beatTick, first ? 12000 : 9000);
       function midTick() {
-        if (!fabBusy() && Date.now() - __fabQuietSince > 20000) {
-          const r = Math.random();
-          if (r < 0.45) fabInspect();
-          else if (r < 0.75) fabPlayFrame('salute', 1700);
-          else fabShift();
+        if (fabBusy() || !fabWaitingLong()) {
+          __fabMidTimer = setTimeout(midTick, 8000);
+          return;
         }
+        const r = Math.random();
+        if (r < 0.45) fabInspect();
+        else if (r < 0.75) fabPlayFrame('salute', 1700);
+        else fabShift();
         __fabMidTimer = setTimeout(midTick, 20000 + Math.random() * 10000);
       }
-      __fabMidTimer = setTimeout(midTick, 22000 + Math.random() * 6000);
+      __fabMidTimer = setTimeout(midTick, first ? 45000 : 22000);
       function sigTick() {
-        if (!fabBusy() && Date.now() - __fabQuietSince > 45000) {
+        if (!fabBusy() && !fabJustOpened() && Date.now() - __fabQuietSince > 45000) {
           fabSignature();
           __fabQuietSince = Date.now();
         }
