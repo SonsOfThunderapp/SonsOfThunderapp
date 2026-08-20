@@ -7556,3 +7556,25 @@ body.tb-tour-mandatory .tb-tour-skip {
   width: 74px !important;
   height: 74px !important;
 }
+
+.tb-tour-stage[data-board="3"] .tb-live-mem-row {
+  gap: 10px;
+  margin: 12px 4px 8px;
+}
+.tb-tour-stage[data-board="3"] .tb-live-mem,
+.tb-tour-stage[data-board="3"] .tb-live-mem-shot,
+.tb-tour-stage[data-board="3"] .tb-live-mem-add {
+  height: 96px !important;
+  min-height: 96px !important;
+  border-radius: 12px !important;
+  padding: 0 !important;
+}
+.tb-tour-stage[data-board="3"] .tb-live-mem-shot {
+  object-fit: cover !important;
+  width: 100% !important;
+  background: #111 !important;
+  filter: none !important;
+}
+.tb-tour-stage[data-board="3"] .tb-live-mem-add {
+  font-size: 36px;
+}
