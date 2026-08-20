@@ -6792,6 +6792,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
       b.classList.remove('is-on');
       void b.offsetWidth;
       b.classList.add('is-on');
+      try { tbFeedback.selection(); } catch (e) {}
       try { fabGo(0, -6, 6, 1.02); } catch (e) {}
       fabAfter(1400, fabRestSmooth);
       if (__fabBubbleTimer) try { clearTimeout(__fabBubbleTimer); } catch (e) {}
@@ -9003,8 +9004,9 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     bodyEl.textContent = '';
     bodyEl.classList.add('tb-tour-typing');
     let i = 0;
-    // ~28–32 chars/sec — speaks, not rushes
-    const ms = 32;
+    /* ~70 chars/sec — snappy, still a speak. Reduced-motion dumps full text above. */
+    const ms = 14;
+    try { tbFeedback.selection(); } catch (e) {}
     function tick() {
       if (token !== __tourTypeToken) return;
       i += 1;
@@ -9016,7 +9018,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
         __tourTypeTimer = null;
       }
     }
-    __tourTypeTimer = setTimeout(tick, 180);
+    __tourTypeTimer = setTimeout(tick, 50);
   }
 
   /* Brothers grid — 5 mechanics, personality changes speed/amp/timing. No float. */
