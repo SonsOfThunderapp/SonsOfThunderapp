@@ -6725,3 +6725,29 @@ h1, h2, h3,
   z-index: 3;
 }
 .tb-tour-close { z-index: 90; }
+
+/* Slide 1 layout: Thunder above the words. Never cover the bubble. */
+.tb-tour-stage[data-board="0"] .tb-tour-hero {
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  perspective: 520px;
+  perspective-origin: 50% 30%;
+}
+.tb-tour-stage[data-board="0"] #tb-tour-host.tb-guide-thunder {
+  order: -1;
+  width: min(52vw, 200px) !important;
+  z-index: 2 !important;
+  margin: 4px 0 0;
+}
+.tb-tour-stage[data-board="0"] .tb-guide-bubble {
+  width: 100%;
+  max-width: 100%;
+  z-index: 10 !important;
+  position: relative;
+}
+.tb-tour-boards .tb-tour-dots,
+.tb-tour-boards .tb-tour-actions {
+  position: relative;
+  z-index: 15;
+}
