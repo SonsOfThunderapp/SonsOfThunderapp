@@ -6810,7 +6810,7 @@ h1, h2, h3,
 }
 @keyframes tbHostBond {
   0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-5px) scale(1.015); }
+  50% { transform: translateY(-4px) scale(1.01); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -6845,4 +6845,41 @@ h1, h2, h3,
 .tb-tour-stage[data-board="6"] .tb-guide-bubble {
   width: 100%;
   z-index: 10 !important;
+}
+
+/* 007 staging — finale + Ask Thunder only. Ring, not a logo. */
+.tb-tour-stage[data-board="6"] .tb-tour-hero {
+  position: relative;
+}
+.tb-tour-stage[data-board="6"] .tb-tour-hero::before,
+.thunder-ask-hero::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  width: min(56vw, 210px);
+  height: min(56vw, 210px);
+  transform: translate(-50%, -58%);
+  border-radius: 50%;
+  border: 1.5px solid rgba(254, 241, 5, 0.32);
+  box-shadow:
+    0 0 28px rgba(254, 241, 5, 0.12),
+    inset 0 0 40px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  z-index: 0;
+}
+.thunder-ask-hero {
+  position: relative;
+  overflow: visible !important;
+}
+.thunder-ask-hero-img {
+  position: relative;
+  z-index: 2;
+}
+.tb-tour-stage[data-board="6"] #tb-tour-host {
+  position: relative;
+  z-index: 2;
+}
+.tb-tour-stage[data-board="6"] #tb-tour-host.tb-guide-thunder.tb-host-alive {
+  animation: tbHostBond 6.4s ease-in-out infinite !important;
 }

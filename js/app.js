@@ -6785,7 +6785,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
 
   // ---------- PRODUCT TOUR — 7-slide (restored 20260818) ----------
-  const TB_TOUR_VERSION = 29;
+  const TB_TOUR_VERSION = 30;
   function tourStorageKey() { return 'thunderTourV' + TB_TOUR_VERSION; }
   function isTourComplete() {
     try {
@@ -6849,7 +6849,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     {
       id: 'ask-thunder',
       headline: 'ASK THUNDER',
-      sub: 'HE\u2019S GOT YOUR BACK',
+      sub: 'AT YOUR SERVICE',
       body: 'Questions? I\u2019m in the corner. Tap me when you\u2019re ready. You\u2019re set, brother.',
       nextLabel: 'LET\u2019S GO'
     }
