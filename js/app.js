@@ -3983,6 +3983,21 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   }
 
   let sharedRsvps = [];
+  let prevRsvpIds = null;
+
+  function firstNameForId(id) {
+    const b = (brothers || []).find(function (x) { return x && x.id === id; });
+    const n = b && (b.name || b.displayName || b.display_name);
+    if (!n) return '';
+    return String(n).trim().split(/\s+/)[0];
+  }
+
+  function toastBrotherIn(first) {
+    if (!first) return;
+    try {
+      showInstallToast(String(first).toUpperCase() + ' LOCKED IN', { success: true });
+    } catch (e) {}
+  }
 
   async function pullRsvps() {
     if (!supabaseEnabled()) return false;
@@ -3998,7 +4013,17 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         return false;
       }
       sharedRsvps = Array.isArray(data) ? data : [];
+      const nextIds = sharedRsvps.map(function (r) { return r && r.brother_id; }).filter(Boolean);
       try { renderInCount(); } catch (e) {}
+      if (prevRsvpIds) {
+        nextIds.forEach(function (id) {
+          if (prevRsvpIds.indexOf(id) !== -1) return;
+          if (id === myProfileId) return;
+          const first = firstNameForId(id);
+          if (first) toastBrotherIn(first);
+        });
+      }
+      prevRsvpIds = nextIds;
       return true;
     } catch (e) {
       console.warn('rsvps pull failed', e);
@@ -4160,7 +4185,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       el.classList.add('hidden');
       return;
     }
-    el.textContent = n === 1 ? '1 BROTHER IS IN' : (n + ' BROTHERS ARE IN');
+    el.textContent = n === 1 ? '1 BROTHER LOCKED IN' : (n + ' BROTHERS LOCKED IN');
     el.classList.remove('hidden');
   }
 
@@ -4232,6 +4257,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     try { updatePersonalHome(); } catch (e) {}
     try { updateOsBadge(); } catch (e) {}
     try { parkFabByImin(); } catch (e) {}
+    try { renderInCount(); } catch (e) {}
     const btn = $('#rsvp-btn');
     const status = $('#rsvp-status');
     const prompt = $('#rsvp-prompt');
