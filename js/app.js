@@ -5806,6 +5806,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
       if (img) img.classList.remove('tb-host-alive', 'tb-fab-alive', 'tb-fab-look');
     }
     let __fabLastMicro = '';
+    /* FAB_BUBBLES — 90-day refresh: THUNDER-DECISIONS.md “BUBBLE REFRESH”. Locked 10 stay. */
     const FAB_BUBBLES = [
       /* Encouragement — locked 10 */
       'Hey, brother—you’re doing better than you think.',
@@ -5918,7 +5919,6 @@ $('#edit-profile-btn').addEventListener('click', () => {
       'Cowboys hats? The crease told the ranch. Quiet ID.',
       'A fathom is six feet. That’s why it’s a grave measure too.',
       'The word “deadline” was a Civil War prison line. Cross it, you’re done.'
-    ];
     ];
     let __fabDeck = [];
     function fabShuffle(arr) {

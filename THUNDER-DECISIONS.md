@@ -1,5 +1,49 @@
 # Thunder Board Decisions Log
 
+## 2026-08-20 — Thunder bubble library / 90-day refresh
+
+### Decision
+Backstage Thunder speaks from `FAB_BUBBLES` in `js/app.js`. Shuffle the full deck. No repeat until empty. ~90 seconds apart. 8s hold. First line ~20s.
+
+Three families only:
+1. **Locked 10 encouragement** — never rewrite unless Obie reopens.
+2. **Feature rewards** — clever, never nag. Reward the brother. Don’t sell the app.
+3. **Nuggets** — short guy-facts. Sports, music, entertainment, building, tools, cars, cigars, fishing, history, space, food. Word economy. Thunder voice.
+
+Jokes that try too hard: rejected.
+
+### 90-DAY REFRESH PROMPT (paste this)
+
+```
+THUNDER BUBBLE REFRESH — 90 day.
+
+Read js/app.js FAB_BUBBLES, js/config.js, THUNDER-DECISIONS.md.
+
+Do not touch the locked 10 encouragement lines.
+
+Refresh two packs only:
+
+A) FEATURE REWARDS (8–12 lines)
+Reward the brother for using the room. Never “open the app.” Never FOMO. Never daily-verse. Thunder voice: Bond + best friend. Wise, sexy, smooth. Least words.
+Cover: Memories (drop a night), Text a leader, Ask Thunder (he answers anything), I’m In / lock the seat, Brothers (you’re not solo).
+Tone = after he already belongs. “That’s how the room remembers.” Not “don’t forget to upload.”
+
+B) NUGGETS (add 40–60 new, retire any that feel quiz-show or already burned)
+Categories: sports, country/music, movies/TV, building/tools, trucks/cars, cigars, fishing/outdoors, military/history, space, food.
+Rules: 6–14 words. Periods, not setups. No “Did you know.” No dad jokes. No church words. True, or don’t ship.
+Keep the best current nuggets. Cut duds. Total nugget pile ~80–120. Quality over a thousand.
+
+Keep shuffle + 90s gap + 8s hold. Bump APP_BUILD. Deploy.
+
+Show Obie: the new feature lines, and 10 sample new nuggets. Don’t dump the whole deck in chat.
+```
+
+### Revisit
+Every 90 days, or when Obie says refresh.
+
+---
+
+
 ## 2026-08-20 — Tour slides 2 / 3 / 4 APPROVED
 
 ### Decision

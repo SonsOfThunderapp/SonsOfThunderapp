@@ -58,6 +58,10 @@ window.TB_CONFIG = {
   /* Backstage FAB: head only, no arms. Float + glance/nod/shift/drift/bob/lean. Tap opens Ask. No glow. */
   BACKSTAGE_IDLE: true,
 
+  /* Bubble library refresh: every 90 days. Run BUBBLE-REFRESH prompt in THUNDER-DECISIONS.md.
+     Keep locked 10 encouragement. Refresh nuggets + feature rewards. Shuffle. 90s apart. */
+  BUBBLE_REFRESH_EVERY_DAYS: 90,
+
   /* Cardinal: labels glow+pulse. Titles and body never do. */
   LABEL_PULSE: true,
 
