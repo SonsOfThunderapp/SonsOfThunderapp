@@ -7622,8 +7622,13 @@ body.tb-tour-mandatory .tb-tour-skip {
 
 .tb-tour-stage[data-board="2"] .tb-live-bros-full .tb-live-face,
 .tb-tour-stage[data-board="2"] .tb-live-bros-grid .tb-live-face {
-  width: 74px !important;
-  height: 74px !important;
+  width: 108px !important;
+  height: 108px !important;
+}
+.tb-tour-stage[data-board="2"] .tb-live-bros-full {
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 8px !important;
+  padding: 8px 4px !important;
 }
 
 .tb-live-drop {
