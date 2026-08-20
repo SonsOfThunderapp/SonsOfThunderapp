@@ -765,6 +765,71 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     if (el) el.textContent = msg || '';
   }
 
+  function captureImInSignal() {
+    const signal = {
+      key: '',
+      at: new Date().toISOString(),
+      tz: '',
+      standalone: false,
+      platform: 'web',
+      alerts: 'unknown',
+      signed: false,
+      name: '',
+      lang: (navigator.language || '').slice(0, 12)
+    };
+    try { signal.key = meetingKey(); } catch (e) {}
+    try { signal.tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
+    try {
+      signal.standalone = !!(window.navigator.standalone || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches));
+    } catch (e) {}
+    const ua = navigator.userAgent || '';
+    signal.platform = /iPhone|iPad|iPod/.test(ua) ? 'ios' : (/Android/.test(ua) ? 'android' : 'web');
+    try { signal.alerts = Notification.permission; } catch (e) {}
+    try { signal.signed = !!isSignedIn(); } catch (e) {}
+    try { signal.name = (typeof knownFirstName === 'function' && knownFirstName()) || ''; } catch (e) {}
+    try { save('lastImInSignal', signal); } catch (e) {}
+    try {
+      const log = load('imInSignalLog') || [];
+      log.push(signal);
+      save('imInSignalLog', log.slice(-24));
+    } catch (e) {}
+    return signal;
+  }
+
+  function openImInSignIn() {
+    if (isSignedIn() || !supabaseEnabled()) return false;
+    const title = document.getElementById('auth-title');
+    const sub = document.getElementById('auth-sub');
+    const hint = document.getElementById('auth-hint');
+    const signBtn = document.getElementById('auth-signin-btn');
+    const magic = document.getElementById('auth-magic-btn');
+    const invite = document.getElementById('auth-signup-btn');
+    if (title) title.textContent = "YOU'RE IN. PUT A NAME ON IT.";
+    if (sub) sub.textContent = 'So the brothers get the ping with your name — not “A brother.”';
+    if (hint) hint.textContent = 'Email leadership set up. Or get a link. One time.';
+    if (signBtn) signBtn.textContent = 'LOCK MY SEAT';
+    if (magic) magic.classList.remove('hidden');
+    if (invite) invite.classList.add('hidden');
+    try {
+      const em = document.getElementById('auth-email');
+      const me = (brothers || []).find(function (b) { return b && b.id === myProfileId; });
+      if (em && me && me.email && !em.value) em.value = me.email;
+    } catch (e) {}
+    openAuthGate((sub && sub.textContent) || '');
+    return true;
+  }
+
+  async function authMagicLink(email) {
+    const sb = getSb();
+    if (!sb) throw new Error('Supabase is not configured.');
+    const redirectTo = (window.location && window.location.origin) ? (window.location.origin + '/') : '/';
+    const { error } = await sb.auth.signInWithOtp({
+      email: email,
+      options: { emailRedirectTo: redirectTo }
+    });
+    if (error) throw error;
+  }
+
   function openAuthGate(reason) {
     const gate = $('#auth-gate');
     const sub = $('#auth-sub');
@@ -4121,6 +4186,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   function utilizeImInBackground() {
     try { save('rsvpMeeting', meetingKey()); } catch (e) {}
     try { save('lastImInAt', Date.now()); } catch (e) {}
+    try { captureImInSignal(); } catch (e) {}
     try {
       if (!isSignedIn()) save('pendingRsvp', { on: true, key: meetingKey(), at: Date.now() });
     } catch (e) {}
@@ -5036,10 +5102,16 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         }, 900);
       }
 
-      // I'm In = seat + phone reminder + calendar handoff (same tap).
+      // I'm In = seat + alerts consent + optional name lock-in.
       try { utilizeImInBackground(); } catch (e) {}
-      try { offerCalendarNow(); } catch (e) {}
       try { renderRsvp(); } catch (e) {}
+      if (!isSignedIn() && supabaseEnabled()) {
+        setTimeout(function () {
+          try { openImInSignIn(); } catch (e) {}
+        }, 700);
+      } else {
+        try { offerCalendarNow(); } catch (e) {}
+      }
 
       if (typeof requestNotifyPermission === 'function') {
         requestNotifyPermission().then((perm) => {
@@ -5394,6 +5466,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
     const authSignInBtn = $('#auth-signin-btn');
     const authSignUpBtn = $('#auth-signup-btn');
     const authForgotBtn = $('#auth-forgot-btn');
+    const authMagicBtn = $('#auth-magic-btn');
     const authCancelBtn = $('#auth-cancel-btn');
     const authSignOutBtn = $('#auth-signout-btn');
 
@@ -5444,6 +5517,23 @@ $('#edit-profile-btn').addEventListener('click', () => {
         }
       });
     }
+    if (authMagicBtn && authMagicBtn.dataset.bound !== '1') {
+      authMagicBtn.dataset.bound = '1';
+      authMagicBtn.addEventListener('click', async () => {
+        const email = ($('#auth-email') && $('#auth-email').value || '').trim();
+        if (!email) return setAuthError('Email first. We’ll send the link.');
+        setAuthError('');
+        authMagicBtn.disabled = true;
+        try {
+          await authMagicLink(email);
+          setAuthError('Link sent. Open it — your name’s on the seat.');
+        } catch (e) {
+          setAuthError((e && e.message) || 'Could not send the link.');
+        } finally {
+          authMagicBtn.disabled = false;
+        }
+      });
+    }
     if (authForgotBtn && authForgotBtn.dataset.bound !== '1') {
       authForgotBtn.dataset.bound = '1';
       authForgotBtn.addEventListener('click', async () => {
@@ -5460,7 +5550,15 @@ $('#edit-profile-btn').addEventListener('click', () => {
     }
     if (authCancelBtn && authCancelBtn.dataset.bound !== '1') {
       authCancelBtn.dataset.bound = '1';
-      authCancelBtn.addEventListener('click', () => closeAuthGate());
+      authCancelBtn.addEventListener('click', () => {
+        closeAuthGate();
+        try {
+          const title = document.getElementById('auth-title');
+          if (title && /PUT A NAME/.test(title.textContent || '')) {
+            offerCalendarNow();
+          }
+        } catch (e) {}
+      });
     }
     // Enter in password field = Sign In (fewer taps)
     const authPw = $('#auth-password');
