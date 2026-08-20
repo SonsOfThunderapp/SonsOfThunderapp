@@ -6598,8 +6598,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
     }
     let __fabLastMicro = '';
     /* FAB_BUBBLES — 90-day refresh: THUNDER-DECISIONS.md “BUBBLE REFRESH”. Locked 10 stay. */
-    const FAB_BUBBLES = [
-      /* Encouragement — locked 10 */
+    const FAB_ENCOURAGE = [
       'Hey, brother—you’re doing better than you think.',
       'Whatever today handed you, you’re strong enough to carry it.',
       'Keep going. I’ve seen your kind—you don’t quit.',
@@ -6609,18 +6608,86 @@ $('#edit-profile-btn').addEventListener('click', () => {
       'Take a breath, reset, and bring the thunder.',
       'Look at you—still showing up. That counts for something.',
       'You don’t have to have it all figured out today.',
-      'Head up, brother. You were built for more than this moment.',
-      /* Features */
-      'Night worth keeping? Drop it in Memories. That’s how the room remembers.',
-      'Got a shot from last fire? The boys should see it.',
-      'Rough day? Text a leader. Confidential. Always.',
-      'Idea for the patio? Don’t sit on it. Text a leader.',
-      'Question? Tap me. I don’t listen until you do.',
-      'World-sized question. Tiny tap. I can take it.',
-      'I answer anything. Sports. Women. God. The weird one at 2 a.m.',
-      'Seat’s not locked till you hit I’M IN.',
-      'Brothers page. Faces. Numbers. You’re not flying solo.',
-      /* Nuggets — sports, music, entertainment, building, hobbies, history, cars, food, space */
+      'Head up, brother. You were built for more than this moment.'
+    ];
+    const FEATURE_SELL = [
+      /* I'm In */
+      'Hit I’M IN. The room knows you’re coming.',
+      'Seat’s a rumor till you lock it.',
+      'I’M IN is the nod. One tap. Done.',
+      'Lock the seat. Forget it till Monday.',
+      'Your name on the patio starts with I’M IN.',
+      'Don’t ghost the count. Lock in.',
+      'Brothers watch that number climb. Be on it.',
+      'The reminder rides I’M IN. That’s the trick.',
+      'Open seat. Close it.',
+      'Monday doesn’t guess. I’M IN tells it.',
+      /* Calendar */
+      'I’M IN puts a 7-day tap on your phone.',
+      'Don’t trust your memory. Trust the lock.',
+      'Calendar stays in the app. You don’t leave.',
+      /* I'm Here / raffle */
+      'Patio night: I’M HERE. That’s the beer ticket.',
+      'Walk up. Check in. Pizza’s on. Hat’s in play.',
+      'Showed up? Prove it. I’M HERE.',
+      'Raffle’s for men who walked in. Not the maybe list.',
+      /* Memories / DROP A SHOT */
+      'Drop a shot. That’s how Monday survives the week.',
+      'The night only lives if someone shoots it.',
+      'Camera. One frame. The boys keep it.',
+      'Memories isn’t homework. It’s the proof.',
+      'If it was worth laughing at, it’s on the roll.',
+      'Patio pics don’t live in your camera roll. Drop them.',
+      'Newest shot sits up top. Make it yours.',
+      'History doesn’t write itself. DROP A SHOT.',
+      'One picture from tonight beats ten stories next month.',
+      'The room remembers what you drop. Not what you meant to.',
+      /* Brothers / round table */
+      'Brothers page. Round table. Your seat’s a face.',
+      'Names. Faces. A way to reach the man.',
+      'You’re not a roster number. Open Brothers.',
+      'Every man has a chair. That’s the round table.',
+      'Find a brother. Share the contact. That’s the app.',
+      'The storm has faces. They’re in Brothers.',
+      'Don’t be a name they can’t text. Fill the card.',
+      'Round table energy. No cheap seats.',
+      /* Text a leader */
+      'Rough week? Text a leader. It stays in the room.',
+      'Idea for the patio? Don’t sit on it.',
+      'Confidential. Always. That’s Text a Leader.',
+      'Leaders aren’t mind readers. Hit the line.',
+      'One text. No stage. No speech.',
+      'Got a hobby the fellas would ride for? Tell a leader.',
+      /* Ask Thunder */
+      'Tap me when you’re ready. I don’t eavesdrop.',
+      'Sports. Work. God. The weird one. I take it.',
+      'I’m in the corner. Not in your pocket till you tap.',
+      'World-sized question. Tiny tap.',
+      'I don’t listen until you do. That’s the deal.',
+      'Stuck? Ask. That’s why I’m here.',
+      /* Sign-in */
+      'Sign in. I’M IN actually counts.',
+      'Unsigned, you’re a ghost. The patio doesn’t know.',
+      'One sign-in. Then your name hits every phone.',
+      'Memories follow you. Sign in. Don’t leave nights on one phone.',
+      'Signed in is the backstage pass.',
+      'Already a Member. That’s how you join the count.',
+      /* Axum */
+      'First sign-in. Free coffee at Axum. One cup.',
+      'Axum. Winter Garden. First time in, coffee’s on us.',
+      /* Install / share */
+      'Put it on the Home Screen. That’s when it becomes a room.',
+      'Share Thunder with a brother. One link. He’s in.',
+      'Icon on the phone. That’s how you don’t forget Monday.',
+      /* The Code */
+      'The Code isn’t wallpaper. It’s why you’re here.',
+      'Read The Code once. Then live it on the patio.',
+      /* Gathering night */
+      'Patio’s lit. Drop a shot. That’s tonight.',
+      'Pizza’s here. Phone out. One frame.',
+      'If you showed, check in. Beer and a hat don’t guess.'
+    ];
+    const FAB_FACTS = [
       'Golf. On the moon. 1971. Six-iron.',
       'A baseball lasts seven pitches. Then it’s history.',
       'Olympic gold is mostly silver.',
@@ -6711,33 +6778,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
       'A fathom is six feet. That’s why it’s a grave measure too.',
       'The word “deadline” was a Civil War prison line. Cross it, you’re done.'
     ];
-    const SIGN_IN_LINES = [
-      'Sign in. I’m In actually counts. The room sees you.',
-      'Without sign-in, you’re a ghost. The patio doesn’t know.',
-      'Sign in once. Then when you lock in, every phone pings.',
-      'Your name on the board. That’s sign-in. Not a costume.',
-      'Brothers get the ping. Only if you’re signed in.',
-      'Memories follow you. Sign in. Don’t leave nights on one phone.',
-      'Sign in. Your seat is real. Not just this screen.',
-      'Tap Already a Member. That’s how you join the count.',
-      'Signed in = the boys see you locked in. Unsigned = silence.',
-      'Want the room to move when you move? Sign in.',
-      'I’m In is louder when you’re signed in. That’s the point.',
-      'One sign-in. Then your name hits every brother’s phone.'
-    ];
-    const SIGNED_BENEFIT_LINES = [
-      'You’re signed in. I’m In now has your name on it.',
-      'Your seat is real. The patio can see you.',
-      'Lock in — every brother’s phone can ping.',
-      'Memories you drop live in the room. Not just this phone.',
-      'Tap me. I answer. That’s yours now.',
-      'Text a leader anytime. You’re in the circle.',
-      'The count includes you. That’s the whole point.',
-      'Signed in is the backstage pass. You already used it.'
-    ];
     let __fabDeck = [];
-    let __fabSignDeck = [];
-    let __fabBenefitDeck = [];
     function fabShuffle(arr) {
       const a = arr.slice();
       for (let i = a.length - 1; i > 0; i--) {
@@ -6747,25 +6788,9 @@ $('#edit-profile-btn').addEventListener('click', () => {
       return a;
     }
     function fabNextLine() {
-      const signed = typeof isSignedIn === 'function' && isSignedIn();
-      const night = typeof isGatheringDay === 'function' && isGatheringDay();
-      if (night && Math.random() < 0.4) {
-        const nite = [
-          "Patio's lit. Drop a shot. That's tonight.",
-          "Pizza's here. Phone out. One frame.",
-          "If it was worth laughing at, it's worth the roll."
-        ];
-        return nite[Math.floor(Math.random() * nite.length)];
+      if (!__fabDeck.length) {
+        __fabDeck = fabShuffle([].concat(FAB_ENCOURAGE, FEATURE_SELL, FAB_FACTS));
       }
-      if (!signed && Math.random() < 0.45) {
-        if (!__fabSignDeck.length) __fabSignDeck = fabShuffle(SIGN_IN_LINES);
-        return __fabSignDeck.pop();
-      }
-      if (signed && Math.random() < 0.4) {
-        if (!__fabBenefitDeck.length) __fabBenefitDeck = fabShuffle(SIGNED_BENEFIT_LINES);
-        return __fabBenefitDeck.pop();
-      }
-      if (!__fabDeck.length) __fabDeck = fabShuffle(FAB_BUBBLES);
       return __fabDeck.pop();
     }
     let __fabBubbleTimer = null;
@@ -6950,9 +6975,9 @@ $('#edit-profile-btn').addEventListener('click', () => {
       if (!__fabOpenedAt) __fabOpenedAt = Date.now();
       function lineTick() {
         if (!fabBusy()) fabBubbleBeat();
-        __fabLineTimer = setTimeout(lineTick, 90000);
+        __fabLineTimer = setTimeout(lineTick, 150000);
       }
-      __fabLineTimer = setTimeout(lineTick, 20000);
+      __fabLineTimer = setTimeout(lineTick, 40000);
       function beatTick() {
         if (fabBusy()) {
           __fabBeatTimer = setTimeout(beatTick, 8000);
