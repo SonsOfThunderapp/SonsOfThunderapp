@@ -1,5 +1,24 @@
 # Thunder Board Decisions Log
 
+## 2026-08-20 — SPOTLIGHT LAW (locked)
+
+### Decision
+The highlighted thing is the star. Everything else is shadow.
+
+1. Spotlight the feature (logo, I’M IN, faces, memories, CTA). Full brightness. Front layer. Never covered.
+2. Dim the rest of the stage to ~40% — shadow, not gone.
+3. Word bubble is SUPPORTING. Above, below, or beside — with a gap. NEVER on text, CTAs, faces, or the logo.
+4. Thunder never covers the spotlight or the bubble.
+5. If bubble and feature collide, MOVE THE BUBBLE. Do not shrink the feature.
+6. One-second test: What is highlighted? Can I read every word on it? If no = fail.
+
+Forbidden: bubble on OF THUNDER, I’M IN, brother faces, DROP A SHOT, or any live label.
+
+`TB_CONFIG.SPOTLIGHT_LAW = true`. Tour CSS: bubble stacks above the phone mock, never `position:absolute` on the feature.
+
+### Revisit
+Never, unless Obie explicitly reopens it.
+
 ## 2026-08-20 — Thunder bubble library / 90-day refresh
 
 ### Decision
