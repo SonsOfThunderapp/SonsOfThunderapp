@@ -5788,7 +5788,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
     function fabInspect() {
       const img = fabImg();
       if (!img || fabBusy()) return false;
-      if (!fabPlayFrame('bond', 3000)) return false;
+      if (!fabPlayFrame('bond', 4500)) return false;
       img.classList.add('tb-fab-inspect');
       return true;
     }
@@ -5836,7 +5836,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
       img.classList.remove('tb-fab-twirl');
       void img.offsetWidth;
       img.classList.add('tb-fab-twirl');
-      setTimeout(function () { img.classList.remove('tb-fab-twirl'); }, 800);
+      setTimeout(function () { img.classList.remove('tb-fab-twirl'); }, 1500);
     }
     function parkFabByImin() {
       const fab = document.getElementById('thunder-fab');
@@ -5867,32 +5867,32 @@ $('#edit-profile-btn').addEventListener('click', () => {
       const img = fabImg();
       if (!img || fabBusy()) return;
       const target = document.getElementById('rsvp-btn') || document.querySelector('.next-meeting');
-      let rot = (Math.random() < 0.5 ? -1 : 1) * (5 + Math.random() * 4);
+      let rot = (Math.random() < 0.5 ? -1 : 1) * (10 + Math.random() * 6);
       if (target && document.getElementById('thunder-fab')) {
         const a = document.getElementById('thunder-fab').getBoundingClientRect();
         const b = target.getBoundingClientRect();
         const dx = (b.left + b.width / 2) - (a.left + a.width / 2);
-        rot = dx < 0 ? -(6 + Math.random() * 3) : (6 + Math.random() * 3);
+        rot = dx < 0 ? -(12 + Math.random() * 4) : (12 + Math.random() * 4);
       }
       img.style.setProperty('--fab-r', rot.toFixed(2) + 'deg');
       img.classList.add('tb-fab-look');
       setTimeout(function () {
         img.style.setProperty('--fab-r', '0deg');
         img.classList.remove('tb-fab-look');
-      }, 1100);
+      }, 2400);
     }
     function fabShift() {
       const img = fabImg();
       if (!img || fabBusy()) return;
-      const rot = (Math.random() < 0.5 ? -1 : 1) * (3.5 + Math.random() * 3);
+      const rot = (Math.random() < 0.5 ? -1 : 1) * (8 + Math.random() * 5);
       img.style.setProperty('--fab-r', rot.toFixed(2) + 'deg');
-      setTimeout(function () { img.style.setProperty('--fab-r', '0deg'); }, 1400);
+      setTimeout(function () { img.style.setProperty('--fab-r', '0deg'); }, 2400);
     }
     function fabMicroNod() {
       const img = fabImg();
       if (!img || fabBusy()) return;
-      img.style.setProperty('--fab-r', '-10deg');
-      setTimeout(function () { img.style.setProperty('--fab-r', '0deg'); }, 820);
+      img.style.setProperty('--fab-r', '-16deg');
+      setTimeout(function () { img.style.setProperty('--fab-r', '0deg'); }, 1800);
     }
     function fabBubbleBeat() {
       const line = FAB_BUBBLES[__fabBubbleIdx % FAB_BUBBLES.length];
@@ -5907,8 +5907,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
       if (Math.random() < 0.2) pool.push('bubble');
       const pick = pool[Math.floor(Math.random() * pool.length)];
       __fabLastMicro = pick;
-      if (pick === 'watch') fabPlayFrame('watch', 2200);
-      else if (pick === 'salute') fabPlayFrame('salute', 1700);
+      if (pick === 'salute') fabPlayFrame('salute', 3200);
       else if (pick === 'inspect') fabInspect();
       else if (pick === 'glance') fabGlance();
       else if (pick === 'nod') fabMicroNod();
@@ -5945,9 +5944,9 @@ $('#edit-profile-btn').addEventListener('click', () => {
           return;
         }
         fabBeat();
-        __fabBeatTimer = setTimeout(beatTick, 7000);
+        __fabBeatTimer = setTimeout(beatTick, 9000);
       }
-      __fabBeatTimer = setTimeout(beatTick, first ? 4000 : 7000);
+      __fabBeatTimer = setTimeout(beatTick, first ? 5000 : 9000);
     }
     try { startThunderBackstageIdle(); } catch (e) {}
     window.addEventListener('resize', function () { try { parkFabByImin(); } catch (e) {} });

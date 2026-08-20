@@ -6387,11 +6387,11 @@ body.tb-ask-open .header .logo {
   transform-origin: 50% 80%;
   --fab-r: 0deg;
   --fab-s: 1;
-  animation: tbFabBreath 5.2s ease-in-out infinite;
+  animation: tbFabBreath 6.8s ease-in-out infinite;
 }
 @keyframes tbFabBreath {
   0%, 100% { transform: translateY(0) rotate(var(--fab-r, 0deg)) scale(var(--fab-s, 1)); }
-  50% { transform: translateY(-5px) rotate(var(--fab-r, 0deg)) scale(calc(var(--fab-s, 1) * 1.03)); }
+  50% { transform: translateY(-9px) rotate(var(--fab-r, 0deg)) scale(calc(var(--fab-s, 1) * 1.04)); }
 }
 .thunder-fab-img.tb-fab-look {
   filter: drop-shadow(0 0 10px rgba(254,241,5,0.4));
@@ -6913,7 +6913,7 @@ h1, h2, h3,
 
 /* Special-agent inspect: glasses down, scan the room, 3 seconds */
 .thunder-fab-img.tb-fab-inspect {
-  animation: tbFabInspect 3s ease-in-out 1 forwards !important;
+  animation: tbFabInspect 4.5s ease-in-out 1 forwards !important;
   transform-origin: 50% 55%;
 }
 @keyframes tbFabInspect {
@@ -7508,7 +7508,7 @@ body.tb-tour-mandatory .tb-tour-skip {
 }
 .thunder-fab-img.tb-fab-look { filter: none !important; }
 .thunder-fab-img.tb-fab-twirl {
-  animation: tbFabTwirl 0.7s ease-in-out;
+  animation: tbFabTwirl 1.4s ease-in-out;
   transform-origin: 50% 55%;
 }
 @keyframes tbFabTwirl {
