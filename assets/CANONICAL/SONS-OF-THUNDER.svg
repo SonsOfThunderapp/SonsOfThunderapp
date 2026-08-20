@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="1200" height="831" viewBox="0 0 1200 831">
+  <title>Sons of Thunder — official layered mark</title>
+  <!-- Ungroup in Illustrator / Figma / Inkscape. File > Save As > EPS. -->
+  <g id="sons">
+    <image width="1200" height="831" href="../logo-parts/sons-white.png" xlink:href="../logo-parts/sons-white.png"/>
+  </g>
+  <g id="of-thunder">
+    <image width="1200" height="831" href="../logo-parts/of-thunder-red.png" xlink:href="../logo-parts/of-thunder-red.png"/>
+  </g>
+  <g id="bolt">
+    <image width="1200" height="831" href="../logo-parts/bolt-gold.png" xlink:href="../logo-parts/bolt-gold.png"/>
+  </g>
+  <g id="tagline">
+    <text x="600" y="800" text-anchor="middle"
+          font-family="Arial, Helvetica, sans-serif" font-weight="700"
+          font-size="28" letter-spacing="6" fill="#FFFFFF">THUNDER DOESN'T DULL</text>
+  </g>
+</svg>
