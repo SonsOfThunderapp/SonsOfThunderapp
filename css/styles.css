@@ -7958,6 +7958,10 @@ label.btn-rsvp, label.btn-drop-shot {
 .fab-bubble {
   pointer-events: none !important;
 }
+.fab-bubble.is-on {
+  pointer-events: auto !important;
+  cursor: pointer;
+}
 
 /* Splash mark: optical center, not sitting in the lower half. */
 .splash {

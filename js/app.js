@@ -6905,7 +6905,16 @@ $('#edit-profile-btn').addEventListener('click', () => {
       if (__fabBubbleTimer) try { clearTimeout(__fabBubbleTimer); } catch (e) {}
       __fabBubbleTimer = null;
     }
+    function fabMuted() {
+      try { return sessionStorage.getItem('tb_fab_mute') === '1'; } catch (e) { return !!window.__tbFabMuted; }
+    }
+    function fabMuteSession() {
+      try { window.__tbFabMuted = true; } catch (e) {}
+      try { sessionStorage.setItem('tb_fab_mute', '1'); } catch (e) {}
+      fabHideBubble();
+    }
     function fabSay(text, ms) {
+      if (fabMuted()) return;
       const b = document.getElementById('fab-bubble');
       if (!b) return;
       b.textContent = text;
@@ -6921,6 +6930,16 @@ $('#edit-profile-btn').addEventListener('click', () => {
       __fabBubbleTimer = setTimeout(fabHideBubble, ms || 8000);
     }
     window.tbFabSay = fabSay;
+    (function bindFabMute() {
+      const b = document.getElementById('fab-bubble');
+      if (!b || b.dataset.muteBound === '1') return;
+      b.dataset.muteBound = '1';
+      b.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        fabMuteSession();
+      });
+    })();
     function fabTwirl() {
       const img = fabImg();
       if (!img) return;
@@ -7044,6 +7063,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
       fabAfter(3400, fabRestSmooth);
     }
     function fabBubbleBeat() {
+      if (fabMuted()) return;
       fabSay(fabNextLine(), 8000);
     }
     function fabBeat() {
