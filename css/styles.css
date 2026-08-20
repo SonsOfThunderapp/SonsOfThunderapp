@@ -5921,14 +5921,15 @@ img.about-logo,
   color: #8a8a8a !important;
 }
 .info-detail-title {
-  color: #FEF105 !important;
+  color: #fff !important;
   animation: none !important;
   text-shadow: none !important;
   font-weight: 800;
 }
 .brother-detail-name {
-  animation: brotherNamePulse var(--tb-breathe) !important;
-  will-change: opacity, text-shadow;
+  animation: none !important;
+  color: #fff !important;
+  text-shadow: none !important;
 }
 .announcement-card-label {
   display: block;
@@ -6640,7 +6641,7 @@ body.tb-tour-open #main-header { visibility: hidden !important; pointer-events: 
 .announcement-card h3 {
   animation: none !important;
   text-shadow: none !important;
-  color: #FEF105 !important;
+  color: #fff !important;
   opacity: 1 !important;
   filter: none !important;
 }
@@ -6673,15 +6674,10 @@ h1, h2, h3,
 .info-detail-title,
 .tb-tour-headline,
 .tb-tour-sub,
-.brother-name,
 .brother-detail-name,
 .cal-confirm-title,
-.about-title,
-.code-title,
 .modal-header h2,
-.iron-title,
-.event-month,
-.event-day {
+.iron-title {
   animation: none !important;
   text-shadow: none !important;
 }
@@ -7903,3 +7899,32 @@ label.btn-rsvp, label.btn-drop-shot {
   opacity: 0;
   overflow: hidden;
 }
+
+/* CARDINAL: modal titles white + still. Labels yellow + pulse. */
+.info-detail-label,
+.announcement-card-label {
+  animation: brotherNamePulse var(--tb-breathe) !important;
+  color: #FEF105 !important;
+  text-shadow:
+    0 0 8px rgba(254, 241, 5, 0.55),
+    0 0 16px rgba(254, 241, 5, 0.25) !important;
+}
+.info-detail-title,
+.modal-header h2,
+.cal-confirm-title,
+.brother-detail-name,
+.announcement-card h3,
+.axum-card-title,
+.axum-drop-title {
+  color: #fff !important;
+  animation: none !important;
+  text-shadow: none !important;
+  filter: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .info-detail-label,
+  .announcement-card-label {
+    animation: none !important;
+  }
+}
+
