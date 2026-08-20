@@ -5807,6 +5807,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
     }
     let __fabLastMicro = '';
     const FAB_BUBBLES = [
+      /* Encouragement — locked 10 */
       'Hey, brother—you’re doing better than you think.',
       'Whatever today handed you, you’re strong enough to carry it.',
       'Keep going. I’ve seen your kind—you don’t quit.',
@@ -5816,9 +5817,47 @@ $('#edit-profile-btn').addEventListener('click', () => {
       'Take a breath, reset, and bring the thunder.',
       'Look at you—still showing up. That counts for something.',
       'You don’t have to have it all figured out today.',
-      'Head up, brother. You were built for more than this moment.'
+      'Head up, brother. You were built for more than this moment.',
+      /* Features */
+      'Night worth keeping? Drop it in Memories. That’s how the room remembers.',
+      'Got a shot from last fire? The boys should see it.',
+      'Rough day? Text a leader. Confidential. Always.',
+      'Idea for the patio? Don’t sit on it. Text a leader.',
+      'Question? Tap me. I don’t listen until you do.',
+      'World-sized question. Tiny tap. I can take it.',
+      'I answer anything. Sports. Women. God. The weird one at 2 a.m.',
+      'Seat’s not locked till you hit I’M IN.',
+      'Brothers page. Faces. Numbers. You’re not flying solo.',
+      /* 15 jokes */
+      'I don’t sleep. I hover. It’s a lifestyle.',
+      'Sunglasses stay on. Even in here. Especially in here.',
+      'If you’re waiting for a sign… I’m the sign.',
+      'I checked the forecast. Thunder. You’re welcome.',
+      'I don’t do small talk. I do this. Then I float.',
+      'Yes, the bolt is the whole look. I peaked early.',
+      'I’ve got one expression. Works for Friday and a funeral.',
+      'Don’t tap me unless you mean it. I’m not a doorbell.',
+      'They put me in the corner on purpose. Best seat in the house.',
+      'If I had pockets I’d have a cigar.',
+      'Bond had a tux. I have a tux. We should talk.',
+      'If this is a staring contest, you’re losing.',
+      'The corner is a choice. I like watching the door.',
+      'I don’t fetch. I don’t sit. I do answer.',
+      'Calm down. I’m gold. You’re going to be fine.'
     ];
-    let __fabBubbleIdx = 0;
+    let __fabDeck = [];
+    function fabShuffle(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const t = a[i]; a[i] = a[j]; a[j] = t;
+      }
+      return a;
+    }
+    function fabNextLine() {
+      if (!__fabDeck.length) __fabDeck = fabShuffle(FAB_BUBBLES);
+      return __fabDeck.pop();
+    }
     let __fabBubbleTimer = null;
     let __fabLineTimer = null;
     function fabHideBubble() {
@@ -5971,9 +6010,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
       fabAfter(3400, fabRestSmooth);
     }
     function fabBubbleBeat() {
-      const line = FAB_BUBBLES[__fabBubbleIdx % FAB_BUBBLES.length];
-      __fabBubbleIdx += 1;
-      fabSay(line, 8000);
+      fabSay(fabNextLine(), 8000);
     }
     function fabBeat() {
       if (fabBusy()) return;
