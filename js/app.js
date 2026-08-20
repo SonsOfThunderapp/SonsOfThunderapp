@@ -5987,7 +5987,6 @@ $('#edit-profile-btn').addEventListener('click', () => {
     try { startThunderBackstageIdle(); } catch (e) {}
     window.addEventListener('resize', function () { try { parkFabByImin(); } catch (e) {} });
 
-    let __fabYeahUntil = 0;
     const fabBtn = document.getElementById('thunder-fab');
     if (fabBtn && fabBtn.dataset.tbTap !== '1') {
       fabBtn.dataset.tbTap = '1';
@@ -5995,22 +5994,14 @@ $('#edit-profile-btn').addEventListener('click', () => {
         e.preventDefault();
         e.stopImmediatePropagation();
         if (document.body.classList.contains('tb-ask-open')) return;
-        const now = Date.now();
-        if (__fabYeahUntil && now < __fabYeahUntil) {
-          __fabYeahUntil = 0;
-          fabHideBubble();
-          try {
-            if (window.ThunderVoice) ThunderVoice.openAsk({ voice: false });
-            else openThunderVoiceMode();
-          } catch (err) {
-            openThunderVoiceMode();
-          }
-          return;
-        }
-        __fabYeahUntil = now + 5000;
+        fabHideBubble();
         try { tbFeedback.press(fabBtn); } catch (err) {}
-        fabTwirl();
-        fabSay('Yeah?', 2200);
+        try {
+          if (window.ThunderVoice) ThunderVoice.openAsk({ voice: false });
+          else openThunderVoiceMode();
+        } catch (err) {
+          openThunderVoiceMode();
+        }
       }, true);
     }
     $('#thunder-send').addEventListener('click', handleThunderSend);
@@ -6028,7 +6019,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
         if (thunderModal.classList.contains('hidden')) {
           stopThunderVoice();
           try { document.body.classList.remove('tb-ask-open'); } catch (e) {}
-          try { __fabYeahUntil = 0; } catch (e) {}
+          try { fabHideBubble(); } catch (e) {}
           try { startThunderBackstageIdle(); } catch (e) {}
           try { parkFabByImin(); } catch (e) {}
         } else {
