@@ -2487,6 +2487,9 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     root.addEventListener('touchstart', (e) => {
       if (!e.touches || e.touches.length !== 1) { tracking = false; return; }
       if (typeof opts.blocked === 'function' && opts.blocked(e.target)) { tracking = false; return; }
+      if (root.classList && root.classList.contains('is-zoomed')) { tracking = false; return; }
+      const moving = (typeof opts.getEl === 'function' ? opts.getEl() : null) || root;
+      if (moving && moving.classList && moving.classList.contains('is-zoomed')) { tracking = false; return; }
       tracking = true;
       axis = null;
       sx = lx = e.touches[0].clientX;
@@ -2610,6 +2613,68 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       tracking = false;
       elasticSnapHome(moveEl());
     }, { passive: true });
+  }
+
+  /**
+   * Double-tap zoom on a photo. Second tap restores. Blocks swipe while live.
+   */
+  function bindDoubleTapZoom(root, getImg) {
+    if (!root || root.dataset.dtZoom === '1') return;
+    root.dataset.dtZoom = '1';
+    let lastT = 0, lastX = 0, lastY = 0, zoomed = false;
+    function imgEl() {
+      return typeof getImg === 'function' ? getImg() : (root.querySelector && root.querySelector('img'));
+    }
+    function resetZoom() {
+      zoomed = false;
+      root.classList.remove('is-zoomed');
+      const img = imgEl();
+      if (img) {
+        img.style.transition = 'transform 0.2s cubic-bezier(0.22, 1, 0.36, 1)';
+        img.style.transform = 'scale(1)';
+        setTimeout(function () {
+          if (!zoomed && img) {
+            img.style.transition = '';
+            img.style.transform = '';
+            img.style.transformOrigin = '';
+          }
+        }, 220);
+      }
+    }
+    root.__tbResetZoom = resetZoom;
+    root.addEventListener('touchend', function (e) {
+      if (!e.changedTouches || e.changedTouches.length !== 1) return;
+      if (e.target && e.target.closest && e.target.closest('button, a, input, textarea, video, .memory-viewer-close')) return;
+      const t = e.changedTouches[0];
+      const now = Date.now();
+      const dt = now - lastT;
+      const dist = Math.hypot(t.clientX - lastX, t.clientY - lastY);
+      lastT = now;
+      lastX = t.clientX;
+      lastY = t.clientY;
+      if (!(dt > 40 && dt < 320 && dist < 40)) return;
+      try { e.preventDefault(); } catch (err) {}
+      const img = imgEl();
+      if (!img || (img.tagName && img.tagName.toLowerCase() === 'video')) return;
+      if (zoomed) {
+        resetZoom();
+        try { tbFeedback.selection(); } catch (err) {}
+        return;
+      }
+      if (prefersReducedMotion()) return;
+      const r = img.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      let px = ((t.clientX - r.left) / r.width) * 100;
+      let py = ((t.clientY - r.top) / r.height) * 100;
+      px = Math.max(8, Math.min(92, px));
+      py = Math.max(8, Math.min(92, py));
+      img.style.transformOrigin = px + '% ' + py + '%';
+      img.style.transition = 'transform 0.22s cubic-bezier(0.22, 1, 0.36, 1)';
+      img.style.transform = 'scale(2.2)';
+      zoomed = true;
+      root.classList.add('is-zoomed');
+      try { tbFeedback.selection(); } catch (err) {}
+    }, { passive: false });
   }
 
 
@@ -3209,6 +3274,10 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       follow: 0.88,
       blocked: (t) => !!(t && t.closest && t.closest('.brother-detail-close, button, a, input, textarea'))
     });
+    bindDoubleTapZoom(detail, function () {
+      const p = document.getElementById('brother-detail-photo');
+      return p ? p.querySelector('img') : null;
+    });
     document.addEventListener('keydown', (e) => {
       if (!detail.classList.contains('hidden') && e.key === 'Escape') closeBrotherDetail();
     });
@@ -3440,6 +3509,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   function closeMemoryViewer() {
     const viewer = $('#memory-viewer');
     if (!viewer) return;
+    try { if (viewer.__tbResetZoom) viewer.__tbResetZoom(); } catch (e) {}
     releaseFocusAndZoom();
     setUnderlayDepth(false);
     memoryFlipOrigin = null;
@@ -3455,6 +3525,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   }
 
   function paintMemoryViewer() {
+    const viewer = $('#memory-viewer');
+    try { if (viewer && viewer.__tbResetZoom) viewer.__tbResetZoom(); } catch (e) {}
     const list = viewableMemories();
     if (!list.length) { closeMemoryViewer(); return; }
     if (memoryViewerIndex < 0) memoryViewerIndex = 0;
@@ -3533,6 +3605,10 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       onDownDist: 52,
       follow: 0.88,
       blocked: (t) => !!(t && t.closest && t.closest('.memory-viewer-close, video, button'))
+    });
+    bindDoubleTapZoom(viewer, function () {
+      const s = document.getElementById('memory-viewer-stage');
+      return s ? s.querySelector('img') : null;
     });
     document.addEventListener('keydown', (e) => {
       if (!$('#memory-viewer') || $('#memory-viewer').classList.contains('hidden')) return;

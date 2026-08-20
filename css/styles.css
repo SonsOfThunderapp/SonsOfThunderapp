@@ -7245,3 +7245,22 @@ body.tb-ask-open .header .logo {
   text-align: center;
   text-shadow: 0 0 10px rgba(254,241,5,0.35);
 }
+
+.memory-viewer-stage {
+  overflow: hidden;
+  touch-action: manipulation;
+}
+.memory-viewer-stage img {
+  transform-origin: 50% 50%;
+  will-change: transform;
+}
+.memory-viewer.is-zoomed {
+  touch-action: none;
+}
+.brother-detail-photo {
+  touch-action: manipulation;
+}
+.brother-detail.is-zoomed .brother-detail-photo {
+  overflow: visible !important;
+  z-index: 8;
+}
