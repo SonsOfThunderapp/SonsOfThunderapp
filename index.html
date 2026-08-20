@@ -8,6 +8,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Thunder Board" />
   <title>Thunder Board | Sons of Thunder</title>
+  <style>
+    html, body { background: #000 !important; color: #fff; margin: 0; }
+  </style>
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Thunder Board | Sons of Thunder" />
   <meta property="og:description" content="Thunder doesn’t dull. Put this on your Home Screen." />
@@ -30,10 +33,10 @@
   
   <!-- Web App Manifest -->
   <link rel="manifest" href="manifest.json" />
-  <link rel="preload" as="image" href="assets/logo@2x.png?v=20260820-fab8b" />
+  <link rel="preload" as="image" href="assets/logo@2x.png?v=20260820-fab9" />
   <link rel="preload" as="image" href="assets/thunder-cool-fab@2x.png?v=20260819-nogold2" />
   
-  <link rel="stylesheet" href="css/styles.css?v=20260819-nogold2" />
+  <link rel="stylesheet" href="css/styles.css?v=20260820-fab9" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -43,14 +46,14 @@
   <div id="splash" class="splash" aria-hidden="true">
     <div class="splash-inner">
       <div class="splash-logo-wrap">
-        <img src="assets/logo@2x.png?v=20260820-fab8b"
-             srcset="assets/logo@2x.png?v=20260820-fab8b 1200w, assets/logo@3x.png?v=20260820-fab8b 1800w"
+        <img src="assets/logo@2x.png?v=20260820-fab9"
+             srcset="assets/logo@2x.png?v=20260820-fab9 1200w, assets/logo@3x.png?v=20260820-fab9 1800w"
              sizes="min(82vw, 340px)"
              alt="Sons of Thunder"
              class="splash-mark splash-logo"
              width="1200"
              height="831" />
-        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-fab8b" alt="" aria-hidden="true" width="1200" height="831" />
+        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-fab9" alt="" aria-hidden="true" width="1200" height="831" />
       </div>
       <p class="splash-line hidden" aria-hidden="true">THUNDER DOESN’T DULL</p>
     </div>
@@ -62,8 +65,8 @@
     <header id="main-header" class="header">
       <div class="logo-wrap">
         <img
-          src="assets/logo@2x.png?v=20260820-fab8b"
-          srcset="assets/logo@2x.png?v=20260820-fab8b 1200w, assets/logo@3x.png?v=20260820-fab8b 1800w"
+          src="assets/logo@2x.png?v=20260820-fab9"
+          srcset="assets/logo@2x.png?v=20260820-fab9 1200w, assets/logo@3x.png?v=20260820-fab9 1800w"
           sizes="(max-width: 480px) 72vw, 320px"
           alt="Sons of Thunder"
           class="logo"
@@ -72,7 +75,7 @@
           height="831"
           decoding="async"
         />
-        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-fab8b" alt="" aria-hidden="true" width="1200" height="831" />
+        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-fab9" alt="" aria-hidden="true" width="1200" height="831" />
       </div>
     </header>
 
@@ -400,8 +403,8 @@
         <div class="tb-tour-slide-frame" id="tb-tour-live">
           <div class="tb-live-slide is-on" data-slide="0">
             <div class="tb-live-logo-wrap">
-              <img class="tb-live-logo" src="assets/logo@2x.png?v=20260820-fab8b" alt="Sons of Thunder" width="1200" height="831" />
-              <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-fab8b" alt="" aria-hidden="true" width="1200" height="831" />
+              <img class="tb-live-logo" src="assets/logo@2x.png?v=20260820-fab9" alt="Sons of Thunder" width="1200" height="831" />
+              <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-fab9" alt="" aria-hidden="true" width="1200" height="831" />
             </div>
           </div>
           <div class="tb-live-slide" data-slide="1">
@@ -790,14 +793,6 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/config.js?v=20260819-nogold2"></script>
-  <script src="js/qrcode.min.js?v=20260816LOCKED6"></script>
-  <script src="js/app.js?v=20260819-nogold2"></script>
-</div>
-
-
-  <!-- LEADER PUSH ALERT -->
   <div id="admin-push-modal" class="modal hidden">
     <div class="modal-content">
       <div class="modal-header">
@@ -815,5 +810,9 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js?v=20260820-fab9"></script>
+  <script src="js/qrcode.min.js?v=20260816LOCKED6"></script>
+  <script src="js/app.js?v=20260820-fab9"></script>
 </body>
 </html>

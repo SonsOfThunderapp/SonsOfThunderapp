@@ -8401,5 +8401,5 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     }
   }
 
-  init();
+  try { init(); } catch (e) { console.error('Thunder Board init', e); }
 })();
