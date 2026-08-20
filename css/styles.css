@@ -7550,3 +7550,9 @@ body.tb-tour-mandatory .tb-tour-skip {
 .thunder-fab-img.tb-fab-inspect {
   filter: none !important;
 }
+
+.tb-tour-stage[data-board="2"] .tb-live-bros-full .tb-live-face,
+.tb-tour-stage[data-board="2"] .tb-live-bros-grid .tb-live-face {
+  width: 74px !important;
+  height: 74px !important;
+}
