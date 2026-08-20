@@ -7190,7 +7190,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
           return;
         }
         fabBeat();
-        __fabBeatTimer = setTimeout(beatTick, 8000);
+        __fabBeatTimer = setTimeout(beatTick, 6500 + Math.floor(Math.random() * 5000));
       }
       __fabBeatTimer = setTimeout(beatTick, 2500);
     }
