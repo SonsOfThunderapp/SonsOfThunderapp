@@ -7008,3 +7008,72 @@ h1, h2, h3,
     filter: drop-shadow(0 0 8px rgba(254, 241, 5, 0.55));
   }
 }
+
+/* Isolated bolt from the authorized mark — NOT an overlay graphic. Same pixels, same box. */
+.tb-logo-bolt-life { display: none !important; }
+.logo-wrap,
+.splash-logo-wrap,
+.tb-live-logo-wrap {
+  position: relative !important;
+  margin-left: auto;
+  margin-right: auto;
+}
+.logo-wrap { width: min(72vw, 320px) !important; }
+.splash-logo-wrap { width: min(82vw, 340px) !important; }
+.tb-live-logo-wrap { width: min(70%, 260px); }
+.logo-wordmark {
+  width: 100% !important;
+  height: auto !important;
+  display: block !important;
+  position: relative;
+  z-index: 1;
+}
+.logo-bolt-isolated {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center top !important;
+  z-index: 2 !important;
+  pointer-events: none !important;
+  display: block !important;
+  animation: logoBoltLife var(--tb-breathe) !important;
+  will-change: filter;
+}
+@keyframes logoBoltLife {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 3px rgba(254,241,5,0.35))
+      drop-shadow(0 0 8px rgba(254,241,5,0.18));
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 10px rgba(254,241,5,0.95))
+      drop-shadow(0 0 20px rgba(254,241,5,0.55))
+      drop-shadow(0 0 6px rgba(255,140,0,0.4));
+  }
+}
+body.tb-ask-open .logo-wrap { width: min(28vw, 110px) !important; }
+@media (prefers-reduced-motion: reduce) {
+  .logo-bolt-isolated { animation: none !important; filter: drop-shadow(0 0 8px rgba(254,241,5,0.5)); }
+}
+
+/* Brothers grid — light staggered motion, more spotlight */
+.tb-tour-stage[data-board="2"] .tb-live-bros-full .tb-live-face {
+  width: 58px !important;
+  height: 58px !important;
+  animation: tbFaceIdle 4.4s ease-in-out infinite !important;
+  transform-origin: 50% 80%;
+}
+@keyframes tbFaceIdle {
+  0%, 100% { transform: translateY(0) scale(1); filter: brightness(1); }
+  50% { transform: translateY(-3px) scale(1.05); filter: brightness(1.1); }
+}
+.tb-live-bros-full .tb-live-bro:nth-child(4n+1) .tb-live-face { animation-delay: 0s !important; animation-duration: 4.2s !important; }
+.tb-live-bros-full .tb-live-bro:nth-child(4n+2) .tb-live-face { animation-delay: 0.8s !important; animation-duration: 4.8s !important; }
+.tb-live-bros-full .tb-live-bro:nth-child(4n+3) .tb-live-face { animation-delay: 1.5s !important; animation-duration: 5.1s !important; }
+.tb-live-bros-full .tb-live-bro:nth-child(4n+4) .tb-live-face { animation-delay: 2.2s !important; animation-duration: 4.5s !important; }
+@media (prefers-reduced-motion: reduce) {
+  .tb-tour-stage[data-board="2"] .tb-live-bros-full .tb-live-face { animation: none !important; }
+}
