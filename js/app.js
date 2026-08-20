@@ -8877,8 +8877,8 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     {
       id: 'brothers',
       headline: 'BROTHERS',
-      sub: 'YOU\u2019RE NOT ALONE',
-      body: 'These are your brothers. Different faces. Same storm.',
+      sub: 'THE ROUND TABLE',
+      body: 'This is where we stay connected. Names. Faces. A seat for every man — like knights at one table.',
       nextLabel: 'NEXT'
     },
     {
