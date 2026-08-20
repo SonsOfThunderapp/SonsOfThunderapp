@@ -3964,6 +3964,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
 
   function utilizeImInBackground() {
     try { save('rsvpMeeting', meetingKey()); } catch (e) {}
+    try { save('lastImInAt', Date.now()); } catch (e) {}
     try {
       if (!isSignedIn()) save('pendingRsvp', { on: true, key: meetingKey(), at: Date.now() });
     } catch (e) {}
@@ -3973,11 +3974,14 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     try {
       if (navigator.clearAppBadge) navigator.clearAppBadge();
     } catch (e) {}
+    try { updateOsBadge(); } catch (e) {}
     try {
       if (navigator.serviceWorker && navigator.serviceWorker.ready) navigator.serviceWorker.ready.catch(function () {});
     } catch (e) {}
     try { fetch('/gathering.ics', { cache: 'reload' }).catch(function () {}); } catch (e) {}
-    try { updateOsBadge(); } catch (e) {}
+    try { if (typeof pullRsvps === 'function') pullRsvps(); } catch (e) {}
+    try { if (typeof pullAnnouncements === 'function') pullAnnouncements(); } catch (e) {}
+    try { if (typeof syncSelfToRoster === 'function') syncSelfToRoster(true); } catch (e) {}
   }
 
   async function flushPendingRsvp() {
@@ -3989,6 +3993,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       if (ok) save('pendingRsvp', null);
     } catch (e) {}
   }
+
+  async function pushRsvp(inFlag) {
     if (!supabaseEnabled() || !isSignedIn()) return false;
     const id = myProfileId || (currentUser() && currentUser().id);
     if (!id) return false;
