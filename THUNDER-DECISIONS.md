@@ -1,5 +1,23 @@
 # Thunder Board Decisions Log
 
+## 2026-08-20 — Tour slides 2 / 3 / 4 APPROVED
+
+### Decision
+Lock tour slides 2, 3, and 4. Do not restyle, rewrite copy, or swap assets unless Obie reopens them.
+
+- **2 LOCKED IN** — I'm In card, Crooked Can, tap-to-lock
+- **3 BROTHERS** — personality grid is the show (no guide). Faces move before the bubble types. 74px heads, no boxes
+- **4 MEMORIES** — larger tiles. Scenes: patio / fire pit / lake (`assets/tour-memories/mem-*.jpg`)
+
+### Reason
+Device-approved. Further "improvements" on these three burn the same credits as logo drift.
+
+### Revisit when
+Obie explicitly reopens a numbered slide.
+
+---
+
+
 ## 2026-08-16 — Living interface (alive1)
 
 ### Decision

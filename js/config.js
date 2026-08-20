@@ -48,6 +48,13 @@ window.TB_CONFIG = {
   /* Tour host idle — #tb-tour-host only. Breath + irregular glint/fidget/sway. No metronome. */
   TOUR_HOST_IDLE: true,
 
+  /* LOCKED 2026-08-20 — Obie approved tour slides 2, 3, 4. Do not restyle.
+     2 LOCKED IN / I'm In card
+     3 BROTHERS grid — faces animate first, then bubble; 74px personalities
+     4 MEMORIES — large tiles: patio, fire pit, lake (assets/tour-memories)
+     Slide 6 Bond tux pop is separate. */
+  TOUR_SLIDES_APPROVED: [2, 3, 4],
+
   /* Backstage FAB: 7s variety (watch/salute/inspect/glance/nod/shift + rare bubble). First tap = twirl Yeah?, second = Ask. Gathering day parks on I'm In. No glow. */
   BACKSTAGE_IDLE: true,
 

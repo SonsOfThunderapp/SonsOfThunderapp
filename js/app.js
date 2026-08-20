@@ -7797,6 +7797,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     try { return load(tourStorageKey()) || {}; } catch (e) { return {}; }
   }
 
+  /* Tour copy/boards. Slides 2–4 (locked-in, brothers, memories) APPROVED 2026-08-20 — do not restyle. */
   const TB_TOUR_STEPS = [
     {
       id: 'welcome',
