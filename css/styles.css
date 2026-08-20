@@ -6557,7 +6557,7 @@ body.tb-tour-open #main-header { visibility: hidden !important; pointer-events: 
   50% { transform: translateY(-8px); }
 }
 
-/* Slide 3 — small guide, gentle float only. Faces sharp, no glitter. Room for NEXT. */
+/* Brothers slide — no guide. Grid is the show. Copy stays. */
 .tb-tour-stage[data-board="2"] .tb-tour-hero {
   margin-bottom: 2px;
 }
@@ -6565,13 +6565,7 @@ body.tb-tour-open #main-header { visibility: hidden !important; pointer-events: 
   padding: 8px 10px;
 }
 .tb-tour-stage[data-board="2"] #tb-tour-host.tb-guide-thunder {
-  width: min(22vw, 72px) !important;
-  max-width: 72px !important;
-  transform-origin: 50% 80%;
-}
-.tb-tour-stage[data-board="2"] #tb-tour-host.tb-guide-thunder.tb-host-alive {
-  animation: tbHostFloat 3.2s ease-in-out infinite !important;
-  filter: drop-shadow(0 0 8px rgba(254,241,5,0.35));
+  display: none !important;
 }
 .tb-tour-stage[data-board="2"] .tb-phone {
   width: min(90%, 300px) !important;
@@ -7076,4 +7070,36 @@ body.tb-ask-open .logo-wrap { width: min(28vw, 110px) !important; }
 @keyframes tbFaceIdle { 0%, 100% { transform: none; } }
 @media (prefers-reduced-motion: reduce) {
   .tb-tour-stage[data-board="2"] .tb-live-bros-full .tb-live-face { animation: none !important; }
+}
+
+/* Brothers beat — guide gone. Copy + the square. */
+.tb-tour-stage[data-board="2"] #tb-tour-host {
+  display: none !important;
+}
+.tb-tour-stage[data-board="2"] .tb-tour-hero {
+  flex-direction: column;
+  width: 100%;
+  justify-content: center;
+}
+.tb-tour-stage[data-board="2"] .tb-guide-bubble {
+  width: 100%;
+  max-width: 100%;
+  text-align: center;
+  padding: 8px 12px;
+}
+.tb-tour-stage[data-board="2"] .tb-guide-bubble::before,
+.tb-tour-stage[data-board="2"] .tb-guide-bubble::after {
+  display: none !important;
+}
+.tb-tour-stage[data-board="2"] .tb-phone {
+  width: min(94%, 360px) !important;
+  max-width: 360px !important;
+  flex: 1 1 auto !important;
+  min-height: 42vh !important;
+  padding: 10px 8px 8px !important;
+  margin: 4px auto 0 !important;
+}
+.tb-tour-stage[data-board="2"] .tb-live-bros-full .tb-live-face {
+  width: 64px !important;
+  height: 64px !important;
 }
