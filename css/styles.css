@@ -6894,12 +6894,16 @@ h1, h2, h3,
 }
 
 #thunder-fab.tb-fab-acting {
-  width: 96px !important;
-  height: 96px !important;
+  width: 78px !important;
+  height: 78px !important;
 }
 .thunder-fab-img.tb-fab-act {
-  width: 90px !important;
-  height: 90px !important;
+  width: 72px !important;
+  height: 72px !important;
+}
+.thunder-fab-img.tb-fab-glint {
+  filter: brightness(1.18) drop-shadow(0 0 8px rgba(254,241,5,0.35));
+  transition: filter 0.2s ease;
 }
 
 /* Special-agent inspect: glasses down, scan the room, 3 seconds */
