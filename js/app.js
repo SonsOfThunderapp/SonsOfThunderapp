@@ -5105,23 +5105,30 @@ $('#edit-profile-btn').addEventListener('click', () => {
     function fabHasFrame(key) {
       return !!(FAB_FRAMES[key] && window.__tbFabFrames && window.__tbFabFrames[key]);
     }
+    let __fabFrameTimer = null;
+    function fabRestoreHead() {
+      const img = fabImg();
+      const fab = document.getElementById('thunder-fab');
+      if (!img) return;
+      img.setAttribute('src', FAB_DEFAULT + '?v=20260819-arms2');
+      img.setAttribute('srcset', 'assets/thunder-cool-fab.png?v=20260819-arms2 256w, assets/thunder-cool-fab@2x.png?v=20260819-arms2 512w');
+      img.classList.remove('tb-fab-act', 'tb-fab-inspect', 'tb-fab-look');
+      if (fab) fab.classList.remove('tb-fab-acting');
+    }
     function fabPlayFrame(key, ms) {
       const img = fabImg();
       const fab = document.getElementById('thunder-fab');
       if (!img || fabBusy()) return false;
       const src = FAB_FRAMES[key];
       if (!src || !fabHasFrame(key)) return false;
-      const prev = img.getAttribute('src');
-      const prevSet = img.getAttribute('srcset');
-      img.setAttribute('src', src + '?v=20260819-arms1');
+      if (__fabFrameTimer) try { clearTimeout(__fabFrameTimer); } catch (e) {}
+      img.setAttribute('src', src + '?v=20260819-arms2');
       img.removeAttribute('srcset');
       if (fab) fab.classList.add('tb-fab-acting');
       img.classList.add('tb-fab-act');
-      setTimeout(function () {
-        img.setAttribute('src', prev || FAB_DEFAULT);
-        if (prevSet) img.setAttribute('srcset', prevSet);
-        img.classList.remove('tb-fab-act');
-        if (fab) fab.classList.remove('tb-fab-acting');
+      __fabFrameTimer = setTimeout(function () {
+        fabRestoreHead();
+        img.classList.add('tb-fab-alive');
       }, ms || 1800);
       return true;
     }
@@ -5131,9 +5138,19 @@ $('#edit-profile-btn').addEventListener('click', () => {
     function fabBaseline() {
       const img = fabImg();
       if (!img) return;
+      if (__fabFrameTimer) try { clearTimeout(__fabFrameTimer); } catch (e) {}
+      __fabFrameTimer = null;
       img.style.setProperty('--fab-r', '0deg');
       img.style.setProperty('--fab-s', '1');
-      img.classList.remove('tb-fab-look');
+      fabRestoreHead();
+      img.classList.add('tb-fab-alive');
+    }
+    function fabInspect() {
+      const img = fabImg();
+      if (!img || fabBusy()) return false;
+      if (!fabPlayFrame('bond', 3000)) return false;
+      img.classList.add('tb-fab-inspect');
+      return true;
     }
     function stopThunderBackstageIdle() {
       [__fabBeatTimer, __fabMidTimer, __fabSigTimer].forEach(function (t) {
@@ -5190,8 +5207,8 @@ $('#edit-profile-btn').addEventListener('click', () => {
       function beatTick() {
         if (!fabBusy() && Date.now() - __fabQuietSince > 8000) {
           const r = Math.random();
-          if (r < 0.28 && fabPlayFrame('bond', 1600)) {}
-          else if (r < 0.55) fabGlance();
+          if (r < 0.22) fabInspect();
+          else if (r < 0.50) fabGlance();
           else fabShift();
         }
         __fabBeatTimer = setTimeout(beatTick, 8000 + Math.random() * 7000);
@@ -5199,7 +5216,9 @@ $('#edit-profile-btn').addEventListener('click', () => {
       __fabBeatTimer = setTimeout(beatTick, 9000 + Math.random() * 4000);
       function midTick() {
         if (!fabBusy() && Date.now() - __fabQuietSince > 20000) {
-          if (Math.random() < 0.5) fabPlayFrame('salute', 1700);
+          const r = Math.random();
+          if (r < 0.45) fabInspect();
+          else if (r < 0.75) fabPlayFrame('salute', 1700);
           else fabShift();
         }
         __fabMidTimer = setTimeout(midTick, 20000 + Math.random() * 10000);

@@ -6901,3 +6901,19 @@ h1, h2, h3,
   width: 90px !important;
   height: 90px !important;
 }
+
+/* Special-agent inspect: glasses down, scan the room, 3 seconds */
+.thunder-fab-img.tb-fab-inspect {
+  animation: tbFabInspect 3s ease-in-out 1 forwards !important;
+  transform-origin: 50% 55%;
+}
+@keyframes tbFabInspect {
+  0%   { transform: translateY(0) rotate(-2deg) scale(1.02); }
+  28%  { transform: translateY(-2px) rotate(9deg) scale(1.05); }
+  55%  { transform: translateY(-2px) rotate(-9deg) scale(1.05); }
+  78%  { transform: translateY(-1px) rotate(4deg) scale(1.03); }
+  100% { transform: translateY(0) rotate(0deg) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .thunder-fab-img.tb-fab-inspect { animation: none !important; }
+}
