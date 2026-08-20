@@ -324,15 +324,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   }
 
   let __calBlobUrl = null;
-  /**
-   * Open native calendar with next gathering prefilled.
-   * PWA cannot silently write to Calendar — OS requires user Save/Add.
-   * Strategy: data: ICS (iOS often hands to Calendar) → blob download → Google Calendar template.
-   */
-  /**
-   * In-app gathering reminder only. Never ICS, never Google, never _blank.
-   * Brothers do not leave the app.
-   */
+
   function lockInAppReminder() {
     try { save('reminderSet', true); } catch (e) {}
     try {
@@ -342,8 +334,47 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     } catch (e) {}
     return true;
   }
+
+  /**
+   * Hand the gathering to the OS calendar from the I'm In tap (user gesture).
+   * PWA cannot write Calendar silently — one Add tap is the floor.
+   * Prefer Share (Calendar in the sheet). No _blank. No Google tab.
+   */
+  async function offerCalendarNow() {
+    lockInAppReminder();
+    try {
+      const next = getNextMeetingMonday();
+      const ics = buildGatheringIcs(next);
+      const file = new File([ics], 'sons-of-thunder-gathering.ics', { type: 'text/calendar;charset=utf-8' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'Sons of Thunder' });
+        return true;
+      }
+      if (__calBlobUrl) {
+        try { URL.revokeObjectURL(__calBlobUrl); } catch (e) {}
+        __calBlobUrl = null;
+      }
+      const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+      __calBlobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = __calBlobUrl;
+      a.download = 'sons-of-thunder-gathering.ics';
+      a.rel = 'noopener';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function () {
+        try { a.remove(); } catch (e) {}
+        try { URL.revokeObjectURL(__calBlobUrl); __calBlobUrl = null; } catch (e) {}
+      }, 4000);
+      return true;
+    } catch (e) {
+      console.warn('Calendar offer', e);
+      return false;
+    }
+  }
   function launchGatheringCalendar() {
-    return lockInAppReminder();
+    offerCalendarNow();
+    return true;
   }
 
   function openCalConfirmSheet() {
@@ -1646,7 +1677,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     }
 
     btn.addEventListener('click', () => {
-      try { lockInAppReminder(); } catch (e) {}
+      try { offerCalendarNow(); } catch (e) {}
       btn.classList.add('set');
       btn.textContent = 'REMINDER ON';
       try { renderRsvp(); } catch (e) {}
@@ -4592,8 +4623,9 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         }, 900);
       }
 
-      // Stay in the app. Calendar is optional — in-app sheet, never navigate away.
-      try { openCalConfirmSheet(); } catch (e) {}
+      // I'm In = seat + phone reminder + calendar handoff (same tap).
+      try { offerCalendarNow(); } catch (e) {}
+      try { renderRsvp(); } catch (e) {}
 
       if (typeof requestNotifyPermission === 'function') {
         requestNotifyPermission().then((perm) => {
