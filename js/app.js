@@ -6002,9 +6002,9 @@ $('#edit-profile-btn').addEventListener('click', () => {
       if (!__fabOpenedAt) __fabOpenedAt = Date.now();
       function lineTick() {
         if (!fabBusy()) fabBubbleBeat();
-        __fabLineTimer = setTimeout(lineTick, 28000);
+        __fabLineTimer = setTimeout(lineTick, 90000);
       }
-      __fabLineTimer = setTimeout(lineTick, 12000);
+      __fabLineTimer = setTimeout(lineTick, 20000);
       function beatTick() {
         if (fabBusy()) {
           __fabBeatTimer = setTimeout(beatTick, 8000);
