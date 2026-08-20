@@ -7228,25 +7228,55 @@ body.tb-ask-open .header .logo {
   .view.view-swipe-in-prev { animation: none !important; }
 }
 
+.next-meeting .btn-rsvp.confirmed {
+  background: #FEF105 !important;
+  color: #000 !important;
+  border: none !important;
+  box-shadow: 0 0 28px rgba(254, 241, 5, 0.4);
+  animation: none !important;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+.next-meeting .rsvp-status:not(.hidden) {
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #FEF105 !important;
+}
 .in-count {
-  margin-top: 12px;
+  margin-top: 14px;
   text-align: center;
 }
 .in-count-num {
-  font-size: 16px;
-  letter-spacing: 0.18em;
+  font-size: 18px;
+  letter-spacing: 0.2em;
   font-weight: 800;
   color: #FEF105;
   text-transform: uppercase;
-  text-shadow: 0 0 14px rgba(254,241,5,0.5);
+  text-shadow:
+    0 0 8px rgba(254, 241, 5, 0.7),
+    0 0 18px rgba(254, 241, 5, 0.4);
 }
 .in-count-names {
-  margin-top: 6px;
+  margin-top: 8px;
   font-size: 12px;
-  letter-spacing: 0.08em;
-  font-weight: 600;
-  color: #ddd;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+  color: #cfcfcf;
   text-transform: uppercase;
+}
+.install-toast.toast-success {
+  background: #111;
+  border: 1.5px solid #FEF105;
+  color: #FEF105;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.5), 0 0 20px rgba(254,241,5,0.25);
 }
 
 .memory-viewer-stage {
