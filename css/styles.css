@@ -6387,11 +6387,23 @@ body.tb-ask-open .header .logo {
   transform-origin: 50% 80%;
   --fab-r: 0deg;
   --fab-s: 1;
-  animation: tbFabBreath 6.8s ease-in-out infinite;
+  --fab-x: 0px;
+  --fab-y: 0px;
+  animation: tbFabBreath 7.4s ease-in-out infinite;
 }
 @keyframes tbFabBreath {
-  0%, 100% { transform: translateY(0) rotate(var(--fab-r, 0deg)) scale(var(--fab-s, 1)); }
-  50% { transform: translateY(-9px) rotate(var(--fab-r, 0deg)) scale(calc(var(--fab-s, 1) * 1.04)); }
+  0%, 100% {
+    transform: translate(var(--fab-x, 0px), var(--fab-y, 0px)) rotate(var(--fab-r, 0deg)) scale(var(--fab-s, 1));
+  }
+  28% {
+    transform: translate(calc(var(--fab-x, 0px) + 5px), calc(var(--fab-y, 0px) - 12px)) rotate(var(--fab-r, 0deg)) scale(calc(var(--fab-s, 1) * 1.045));
+  }
+  56% {
+    transform: translate(calc(var(--fab-x, 0px) - 6px), calc(var(--fab-y, 0px) - 7px)) rotate(var(--fab-r, 0deg)) scale(calc(var(--fab-s, 1) * 1.02));
+  }
+  78% {
+    transform: translate(calc(var(--fab-x, 0px) + 3px), calc(var(--fab-y, 0px) - 10px)) rotate(var(--fab-r, 0deg)) scale(calc(var(--fab-s, 1) * 1.035));
+  }
 }
 .thunder-fab-img.tb-fab-look {
   filter: drop-shadow(0 0 10px rgba(254,241,5,0.4));

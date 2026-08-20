@@ -5741,7 +5741,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
       bond: 'assets/thunder-idle-bond.png'
     };
     function fabImg() { return document.querySelector('#thunder-fab .thunder-fab-img'); }
-    window.__tbFabFrames = { watch: true, salute: true, bond: true };
+    window.__tbFabFrames = { watch: false, salute: false, bond: false };
     function fabHasFrame(key) {
       return !!(FAB_FRAMES[key] && window.__tbFabFrames && window.__tbFabFrames[key]);
     }
@@ -5782,6 +5782,8 @@ $('#edit-profile-btn').addEventListener('click', () => {
       __fabFrameTimer = null;
       img.style.setProperty('--fab-r', '0deg');
       img.style.setProperty('--fab-s', '1');
+      img.style.setProperty('--fab-x', '0px');
+      img.style.setProperty('--fab-y', '0px');
       fabRestoreHead();
       img.classList.add('tb-fab-alive');
     }
@@ -5881,6 +5883,13 @@ $('#edit-profile-btn').addEventListener('click', () => {
         img.classList.remove('tb-fab-look');
       }, 2400);
     }
+    function fabLookAround() {
+      const img = fabImg();
+      if (!img || fabBusy()) return;
+      img.style.setProperty('--fab-r', '-14deg');
+      setTimeout(function () { img.style.setProperty('--fab-r', '14deg'); }, 1400);
+      setTimeout(function () { img.style.setProperty('--fab-r', '0deg'); }, 3000);
+    }
     function fabShift() {
       const img = fabImg();
       if (!img || fabBusy()) return;
@@ -5894,6 +5903,34 @@ $('#edit-profile-btn').addEventListener('click', () => {
       img.style.setProperty('--fab-r', '-16deg');
       setTimeout(function () { img.style.setProperty('--fab-r', '0deg'); }, 1800);
     }
+    function fabDrift() {
+      const img = fabImg();
+      if (!img || fabBusy()) return;
+      const x = (Math.random() < 0.5 ? -1 : 1) * (10 + Math.random() * 8);
+      img.style.setProperty('--fab-x', x.toFixed(1) + 'px');
+      setTimeout(function () { img.style.setProperty('--fab-x', '0px'); }, 2800);
+    }
+    function fabBob() {
+      const img = fabImg();
+      if (!img || fabBusy()) return;
+      img.style.setProperty('--fab-y', '-14px');
+      img.style.setProperty('--fab-s', '1.07');
+      setTimeout(function () {
+        img.style.setProperty('--fab-y', '0px');
+        img.style.setProperty('--fab-s', '1');
+      }, 2600);
+    }
+    function fabLean() {
+      const img = fabImg();
+      if (!img || fabBusy()) return;
+      const rot = (Math.random() < 0.5 ? -1 : 1) * (9 + Math.random() * 5);
+      img.style.setProperty('--fab-r', rot.toFixed(2) + 'deg');
+      img.style.setProperty('--fab-x', (rot > 0 ? 8 : -8) + 'px');
+      setTimeout(function () {
+        img.style.setProperty('--fab-r', '0deg');
+        img.style.setProperty('--fab-x', '0px');
+      }, 2600);
+    }
     function fabBubbleBeat() {
       const line = FAB_BUBBLES[__fabBubbleIdx % FAB_BUBBLES.length];
       __fabBubbleIdx += 1;
@@ -5901,17 +5938,19 @@ $('#edit-profile-btn').addEventListener('click', () => {
     }
     function fabBeat() {
       if (fabBusy()) return;
-      const pool = ['salute', 'inspect', 'glance', 'nod', 'shift'].filter(function (x) {
+      const pool = ['glance', 'nod', 'shift', 'drift', 'bob', 'lean', 'look'].filter(function (x) {
         return x !== __fabLastMicro;
       });
-      if (Math.random() < 0.2) pool.push('bubble');
+      if (Math.random() < 0.16) pool.push('bubble');
       const pick = pool[Math.floor(Math.random() * pool.length)];
       __fabLastMicro = pick;
-      if (pick === 'salute') fabPlayFrame('salute', 3200);
-      else if (pick === 'inspect') fabInspect();
-      else if (pick === 'glance') fabGlance();
+      if (pick === 'glance') fabGlance();
       else if (pick === 'nod') fabMicroNod();
       else if (pick === 'shift') fabShift();
+      else if (pick === 'drift') fabDrift();
+      else if (pick === 'bob') fabBob();
+      else if (pick === 'lean') fabLean();
+      else if (pick === 'look') fabLookAround();
       else fabBubbleBeat();
     }
     function startThunderBackstageIdle() {

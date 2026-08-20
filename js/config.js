@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260820-slowfab',
+  APP_BUILD: '20260820-float1',
   /* AUTHORITATIVE LINEAGE — do not package from mixed branches */
   SOURCE_PARENT: '20260818-p0-recovery1',
   REJECTED_ARCHIVES: ['20260818-whatsnext1', '20260818-header-safe1'],
@@ -55,7 +55,7 @@ window.TB_CONFIG = {
      Slide 6 Bond tux pop is separate. */
   TOUR_SLIDES_APPROVED: [2, 3, 4],
 
-  /* Backstage FAB: 7s variety (salute/inspect/glance/nod/shift + rare bubble). WATCH killed. First tap = twirl Yeah?, second = Ask. Gathering day parks on I'm In. No glow. */
+  /* Backstage FAB: head only, no arms. Float + glance/nod/shift/drift/bob/lean. First tap = twirl Yeah?, second = Ask. No glow. */
   BACKSTAGE_IDLE: true,
 
   /* Cardinal: labels glow+pulse. Titles and body never do. */
