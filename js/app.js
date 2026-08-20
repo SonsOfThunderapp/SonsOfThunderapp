@@ -6785,7 +6785,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
 
   // ---------- PRODUCT TOUR — 7-slide (restored 20260818) ----------
-  const TB_TOUR_VERSION = 30;
+  const TB_TOUR_VERSION = 31;
   function tourStorageKey() { return 'thunderTourV' + TB_TOUR_VERSION; }
   function isTourComplete() {
     try {
@@ -6833,13 +6833,6 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       nextLabel: 'NEXT'
     },
     {
-      id: 'code',
-      headline: 'THE CODE',
-      sub: 'LIVE IT. EVERY DAY.',
-      body: 'This is how we show up \u2014 for ourselves and each other.',
-      nextLabel: 'NEXT'
-    },
-    {
       id: 'text-leader',
       headline: 'TEXT A LEADER',
       sub: 'WHEN YOU NEED IT MOST',
@@ -6884,11 +6877,11 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     const host = document.getElementById('tb-tour-host');
     if (!host) return;
     stopTourHostMotion();
-    const moods = ['arrive', 'lockin', 'brotherhood', 'watch', 'think', 'listen', 'appreciate'];
+    const moods = ['arrive', 'lockin', 'brotherhood', 'watch', 'listen', 'appreciate'];
     const mood = moods[idx] || 'arrive';
-    const bolt = 'assets/thunder-tour-host.png?v=20260819-s47';
+    const bolt = 'assets/thunder-tour-host.png?v=20260819-bond2';
     const tux = 'assets/thunder-bond-hero.png?v=20260819-tux2';
-    if (idx === 6) {
+    if (idx === 5) {
       host.className = 'tb-guide-thunder tb-host-alive tb-host-bond';
       host.src = tux;
       host.removeAttribute('srcset');

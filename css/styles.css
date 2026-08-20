@@ -6781,8 +6781,8 @@ h1, h2, h3,
 }
 
 .tb-tour-stage[data-board="4"] #tb-tour-host.tb-guide-thunder.tb-host-alive {
-  animation: tbHostCode 6.4s ease-in-out infinite !important;
-  transform-origin: 50% 75%;
+  animation: tbHostListen 4.8s ease-in-out infinite !important;
+  transform-origin: 50% 80%;
 }
 @keyframes tbHostCode {
   0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
@@ -6804,7 +6804,7 @@ h1, h2, h3,
   70% { transform: translateY(-12px) rotate(6deg) scale(1.05); }
 }
 
-.tb-tour-stage[data-board="6"] #tb-tour-host.tb-guide-thunder.tb-host-alive {
+.tb-tour-stage[data-board="5"] #tb-tour-host.tb-guide-thunder.tb-host-alive {
   animation: tbHostBond 5.2s ease-in-out infinite !important;
   transform-origin: 50% 88%;
 }
@@ -6817,20 +6817,20 @@ h1, h2, h3,
   .tb-tour-stage[data-board="3"] #tb-tour-host.tb-guide-thunder.tb-host-alive,
   .tb-tour-stage[data-board="4"] #tb-tour-host.tb-guide-thunder.tb-host-alive,
   .tb-tour-stage[data-board="5"] #tb-tour-host.tb-guide-thunder.tb-host-alive,
-  .tb-tour-stage[data-board="6"] #tb-tour-host.tb-guide-thunder.tb-host-alive {
+  .tb-tour-stage[data-board="5"] #tb-tour-host.tb-guide-thunder.tb-host-alive {
     animation: none !important;
   }
 }
 
 /* Final slide — tuxedo Thunder, Ask Thunder page energy, Bond idle */
-.tb-tour-stage[data-board="6"] .tb-phone { display: none !important; }
-.tb-tour-stage[data-board="6"] .tb-tour-hero {
+.tb-tour-stage[data-board="5"] .tb-phone { display: none !important; }
+.tb-tour-stage[data-board="5"] .tb-tour-hero {
   flex-direction: column;
   align-items: center;
   gap: 8px;
 }
-.tb-tour-stage[data-board="6"] #tb-tour-host.tb-guide-thunder,
-.tb-tour-stage[data-board="6"] #tb-tour-host.tb-host-bond {
+.tb-tour-stage[data-board="5"] #tb-tour-host.tb-guide-thunder,
+.tb-tour-stage[data-board="5"] #tb-tour-host.tb-host-bond {
   order: -1;
   width: min(70vw, 240px) !important;
   max-width: 240px !important;
@@ -6842,16 +6842,16 @@ h1, h2, h3,
   filter: drop-shadow(0 10px 20px rgba(0,0,0,0.55)) drop-shadow(0 0 14px rgba(254,241,5,0.2)) !important;
   z-index: 2 !important;
 }
-.tb-tour-stage[data-board="6"] .tb-guide-bubble {
+.tb-tour-stage[data-board="5"] .tb-guide-bubble {
   width: 100%;
   z-index: 10 !important;
 }
 
 /* 007 staging — finale + Ask Thunder only. Ring, not a logo. */
-.tb-tour-stage[data-board="6"] .tb-tour-hero {
+.tb-tour-stage[data-board="5"] .tb-tour-hero {
   position: relative;
 }
-.tb-tour-stage[data-board="6"] .tb-tour-hero::before,
+.tb-tour-stage[data-board="5"] .tb-tour-hero::before,
 .thunder-ask-hero::before {
   content: "";
   position: absolute;
@@ -6876,10 +6876,10 @@ h1, h2, h3,
   position: relative;
   z-index: 2;
 }
-.tb-tour-stage[data-board="6"] #tb-tour-host {
+.tb-tour-stage[data-board="5"] #tb-tour-host {
   position: relative;
   z-index: 2;
 }
-.tb-tour-stage[data-board="6"] #tb-tour-host.tb-guide-thunder.tb-host-alive {
+.tb-tour-stage[data-board="5"] #tb-tour-host.tb-guide-thunder.tb-host-alive {
   animation: tbHostBond 6.4s ease-in-out infinite !important;
 }
