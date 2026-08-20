@@ -8858,7 +8858,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     try { return load(tourStorageKey()) || {}; } catch (e) { return {}; }
   }
 
-  /* Tour copy/boards. Slides 2–4 (locked-in, brothers, memories) APPROVED 2026-08-20 — do not restyle. */
+  /* Tour copy/boards. Memories slide = DROP A SHOT, no fake mini photos. */
   const TB_TOUR_STEPS = [
     {
       id: 'welcome',
@@ -8884,7 +8884,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     {
       id: 'memories',
       headline: 'MEMORIES',
-      sub: 'CAPTURE. SHARE. REMEMBER.',
+      sub: 'DROP A SHOT.',
       body: 'The nights we keep. Drop a photo. Build the history.',
       nextLabel: 'NEXT'
     },
