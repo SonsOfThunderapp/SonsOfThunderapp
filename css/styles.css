@@ -6260,12 +6260,18 @@ body.tb-ask-open .header .logo {
   width: min(34vw, 120px);
 }
 .tb-tour-stage[data-board="1"] #tb-tour-host.tb-guide-thunder.tb-host-alive {
-  animation: tbHostSlide2 2.7s ease-in-out infinite !important;
+  animation: tbHostSlide2 5.8s ease-in-out infinite !important;
   transform-origin: 50% 80%;
 }
 @keyframes tbHostSlide2 {
-  0%, 100% { transform: translateY(0) rotate(3deg) scale(1); }
-  50% { transform: translateY(-11px) rotate(7deg) scale(1.04); }
+  0%   { transform: translateY(0) rotate(2deg) scale(1); }
+  16%  { transform: translateY(-9px) rotate(9deg) scale(1.05); }
+  26%  { transform: translateY(-9px) rotate(9deg) scale(1.05); }
+  38%  { transform: translateY(-2px) rotate(-5deg) scale(1); }
+  50%  { transform: translateY(-13px) rotate(3deg) scale(1.04); }
+  64%  { transform: translateY(0) rotate(7deg) scale(1.02); }
+  78%  { transform: translateY(-6px) rotate(1deg) scale(1.01); }
+  100% { transform: translateY(0) rotate(2deg) scale(1); }
 }
 .tb-live-imin-only {
   position: relative;
