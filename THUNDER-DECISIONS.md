@@ -384,3 +384,11 @@ Not labels: form field-label, file-label, QR wordmark, close-chip, brother names
 
 ## 2026-08-19 — Backstage Thunder idle (FAB)
 Game-character idle, not a GIF. Baseline: 3px breath. 8–15s glance toward I’m In / announcements or 1–3° weight shift. 20–30s orientation. 45–60s quiet: look-at-you (slight scale hold). Any pointerdown snaps to baseline. No bounce, shake, spin, electricity. Tuxedo Ask page unchanged. Smirk / glasses-down / brow frames deferred until approved assets.
+
+## 2026-08-19 — Cartoon arms, three beats only
+Default Thunder remains bolt HEAD only.
+Cute cartoon gold 4-finger arms allowed ONLY on backstage FAB for:
+1. Watch check — waiting too long (~45–60s quiet)
+2. Salute — soldier to captain (rare mid beat)
+3. Bond glasses — hand pulls shades, eyebrow (occasional)
+No torso. No skin. No arms on baseline idle. Touch = back to head-only.

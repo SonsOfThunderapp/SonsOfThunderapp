@@ -6892,3 +6892,12 @@ h1, h2, h3,
 .tb-tour-stage[data-board="5"] #tb-tour-host.tb-guide-thunder.tb-host-alive {
   animation: tbHostBond 6.4s ease-in-out infinite !important;
 }
+
+#thunder-fab.tb-fab-acting {
+  width: 96px !important;
+  height: 96px !important;
+}
+.thunder-fab-img.tb-fab-act {
+  width: 90px !important;
+  height: 90px !important;
+}

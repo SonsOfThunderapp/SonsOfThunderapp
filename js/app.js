@@ -5094,7 +5094,37 @@ $('#edit-profile-btn').addEventListener('click', () => {
     let __fabMidTimer = null;
     let __fabSigTimer = null;
     let __fabQuietSince = Date.now();
+    const FAB_DEFAULT = 'assets/thunder-cool-fab.png';
+    const FAB_FRAMES = {
+      watch: 'assets/thunder-idle-watch.png',
+      salute: 'assets/thunder-idle-salute.png',
+      bond: 'assets/thunder-idle-bond.png'
+    };
     function fabImg() { return document.querySelector('#thunder-fab .thunder-fab-img'); }
+    window.__tbFabFrames = { watch: true, salute: true, bond: true };
+    function fabHasFrame(key) {
+      return !!(FAB_FRAMES[key] && window.__tbFabFrames && window.__tbFabFrames[key]);
+    }
+    function fabPlayFrame(key, ms) {
+      const img = fabImg();
+      const fab = document.getElementById('thunder-fab');
+      if (!img || fabBusy()) return false;
+      const src = FAB_FRAMES[key];
+      if (!src || !fabHasFrame(key)) return false;
+      const prev = img.getAttribute('src');
+      const prevSet = img.getAttribute('srcset');
+      img.setAttribute('src', src + '?v=20260819-arms1');
+      img.removeAttribute('srcset');
+      if (fab) fab.classList.add('tb-fab-acting');
+      img.classList.add('tb-fab-act');
+      setTimeout(function () {
+        img.setAttribute('src', prev || FAB_DEFAULT);
+        if (prevSet) img.setAttribute('srcset', prevSet);
+        img.classList.remove('tb-fab-act');
+        if (fab) fab.classList.remove('tb-fab-acting');
+      }, ms || 1800);
+      return true;
+    }
     function fabBusy() {
       return document.body.classList.contains('tb-ask-open') || document.body.classList.contains('tb-tour-open');
     }
@@ -5138,6 +5168,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
     function fabSignature() {
       const img = fabImg();
       if (!img || fabBusy()) return;
+      if (fabPlayFrame('watch', 2000)) return;
       img.classList.add('tb-fab-look');
       img.style.setProperty('--fab-s', '1.06');
       img.style.setProperty('--fab-r', '0deg');
@@ -5158,14 +5189,19 @@ $('#edit-profile-btn').addEventListener('click', () => {
       __fabQuietSince = Date.now();
       function beatTick() {
         if (!fabBusy() && Date.now() - __fabQuietSince > 8000) {
-          if (Math.random() < 0.55) fabGlance();
+          const r = Math.random();
+          if (r < 0.28 && fabPlayFrame('bond', 1600)) {}
+          else if (r < 0.55) fabGlance();
           else fabShift();
         }
         __fabBeatTimer = setTimeout(beatTick, 8000 + Math.random() * 7000);
       }
       __fabBeatTimer = setTimeout(beatTick, 9000 + Math.random() * 4000);
       function midTick() {
-        if (!fabBusy() && Date.now() - __fabQuietSince > 20000) fabShift();
+        if (!fabBusy() && Date.now() - __fabQuietSince > 20000) {
+          if (Math.random() < 0.5) fabPlayFrame('salute', 1700);
+          else fabShift();
+        }
         __fabMidTimer = setTimeout(midTick, 20000 + Math.random() * 10000);
       }
       __fabMidTimer = setTimeout(midTick, 22000 + Math.random() * 6000);
