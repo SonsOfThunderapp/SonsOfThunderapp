@@ -6937,7 +6937,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
 
   // ---------- PRODUCT TOUR — 7-slide (restored 20260818) ----------
-  const TB_TOUR_VERSION = 37;
+  const TB_TOUR_VERSION = 38;
   function tourStorageKey() { return 'thunderTourV' + TB_TOUR_VERSION; }
   function isTourComplete() {
     try {
@@ -7220,7 +7220,22 @@ $('#thunder-input').addEventListener('keydown', (e) => {
         const gap = (2800 + Math.random() * 4200) * S + i * 180;
         broAfter(gap, loop);
       }
-      broAfter(600 + i * 220 + Math.random() * 800, loop);
+      function loop() {
+        if (__tourIdx !== 2) return;
+        const quiet = Date.now() - born;
+        const r = Math.random();
+        if (quiet > 8000 && r < 0.18) mechRare();
+        else if (r < 0.28) mechLook();
+        else if (r < 0.55) mechShift();
+        else if (r < 0.78) mechReset();
+        else mechLook();
+        const gap = (2800 + Math.random() * 4200) * S + i * 180;
+        broAfter(gap, loop);
+      }
+      broAfter(i * 28, function () {
+        mechLook();
+        broAfter(1400 + Math.random() * 900, loop);
+      });
     });
   }
 
