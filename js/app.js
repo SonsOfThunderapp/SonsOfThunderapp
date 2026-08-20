@@ -5828,22 +5828,25 @@ $('#edit-profile-btn').addEventListener('click', () => {
       'I answer anything. Sports. Women. God. The weird one at 2 a.m.',
       'Seat’s not locked till you hit I’M IN.',
       'Brothers page. Faces. Numbers. You’re not flying solo.',
-      /* 15 jokes */
-      'I don’t sleep. I hover. It’s a lifestyle.',
-      'Sunglasses stay on. Even in here. Especially in here.',
-      'If you’re waiting for a sign… I’m the sign.',
-      'I checked the forecast. Thunder. You’re welcome.',
-      'I don’t do small talk. I do this. Then I float.',
-      'Yes, the bolt is the whole look. I peaked early.',
-      'I’ve got one expression. Works for Friday and a funeral.',
-      'Don’t tap me unless you mean it. I’m not a doorbell.',
-      'They put me in the corner on purpose. Best seat in the house.',
-      'If I had pockets I’d have a cigar.',
-      'Bond had a tux. I have a tux. We should talk.',
-      'If this is a staring contest, you’re losing.',
-      'The corner is a choice. I like watching the door.',
-      'I don’t fetch. I don’t sit. I do answer.',
-      'Calm down. I’m gold. You’re going to be fine.'
+      /* Nuggets — sports, music, entertainment, building, hobbies, history */
+      'Golf. On the moon. 1971. Six-iron.',
+      'A baseball lasts seven pitches. Then it’s history.',
+      'Olympic gold is mostly silver.',
+      'Gretzky and his brother? Highest-scoring siblings in the NHL. Brent had four points.',
+      'Dolly kept Jolene from Elvis. She kept the publishing.',
+      'Bohemian Rhapsody. No chorus. Still won.',
+      'That old Nokia ring? Classical guitar.',
+      'Stallone wrote Rocky in three days. And kept the part.',
+      'Bond was offered to Cary Grant. He passed.',
+      'The Great Pyramid held the height record for 3,800 years.',
+      'Chrysler hid a 185-foot spire inside. Beat the rival overnight.',
+      'Empire State. 410 days. 3,400 men.',
+      'Roman concrete still laughs at seawater.',
+      'About 200 hands touch a cigar before you do.',
+      'Men have fished for 40,000 years. You’re in a long line.',
+      'Cleopatra lived closer to us than to the pyramids.',
+      'Horned Vikings? Opera did that. Not history.',
+      'Napoleon wasn’t short. British cartoons were.'
     ];
     let __fabDeck = [];
     function fabShuffle(arr) {
