@@ -370,3 +370,9 @@ Locked examples: smirk, grin, wink, think, laugh, care, mustache, hat backwards,
 A group should read as **brothers who all look like Thunder** — multifaceted, still one mark.
 
 Live set: `assets/tour-faces/thunder-*.png`
+
+## 2026-08-19 — Brotherhood roster LOCKED (app personality library)
+Permanent set: `assets/tour-faces/` + index `assets/tour-faces/BROTHERHOOD.json`.
+24 personalities of one Thunder. Use anywhere a *group of brothers* needs life (tour grid, empty states, celebrations) — never as a second mascot.
+Tuxedo remains Ask Thunder page only.
+Do not restyle glasses white. Do not humanize the skull.

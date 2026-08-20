@@ -42,6 +42,9 @@ window.TB_CONFIG = {
     banned: ['pre-7697-wordmark', 'white-outline-legacy', 'logo*.old-backup']
   },
 
+  /* Brotherhood of Thunders — 24 personalities, one character. Tour + future group UI. */
+  THUNDER_BROTHERHOOD: 'assets/tour-faces/BROTHERHOOD.json',
+
   VISUAL_LOCKS: {
     welcomeBoltSrc: 'assets/bolt-only.png',
     welcomeBoltSize: 72,
