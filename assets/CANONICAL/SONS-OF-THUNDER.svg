@@ -13,8 +13,6 @@
     <image width="1200" height="831" href="../logo-parts/bolt-gold.png" xlink:href="../logo-parts/bolt-gold.png"/>
   </g>
   <g id="tagline">
-    <text x="600" y="800" text-anchor="middle"
-          font-family="Arial, Helvetica, sans-serif" font-weight="700"
-          font-size="28" letter-spacing="6" fill="#FFFFFF">THUNDER DOESN'T DULL</text>
+    <image width="1200" height="831" href="../logo-parts/tagline.png"/>
   </g>
 </svg>
