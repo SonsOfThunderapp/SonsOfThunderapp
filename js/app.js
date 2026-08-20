@@ -1064,6 +1064,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   }
 
   function updateAuthSessionBar() {
+    try { syncDropShotAuth(); } catch (e) {}
     const bar = $('#auth-session-bar');
     const who = $('#auth-who');
     const entry = $('#auth-entry-btn');
@@ -4310,6 +4311,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     }).join('');
     bindMediaThumbs(el);
     updateAllNewBadges();
+    try { syncDropShotAuth(); } catch (e) {}
   }
 
   function meetingKey() {
@@ -4363,6 +4365,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       if (night && iShowedUp()) drop.classList.remove('hidden');
       else drop.classList.add('hidden');
     }
+    try { syncDropShotAuth(); } catch (e) {}
   }
 
   function openLibraryShot() {
@@ -4374,6 +4377,14 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     if (!lib) return;
     try { lib.value = ''; } catch (e) {}
     lib.click();
+  }
+
+  function syncDropShotAuth() {
+    const on = typeof isSignedIn === 'function' && isSignedIn();
+    const lab = document.getElementById('memories-drop-btn');
+    const sign = document.getElementById('memories-signin-shot');
+    if (lab) lab.classList.toggle('hidden', !on);
+    if (sign) sign.classList.toggle('hidden', on);
   }
 
   function openDropShot() {
@@ -4479,9 +4490,29 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   }
 
   async function drawRaffle(prize) {
-    const pool = (window.__tbRoomPeople || []).filter(function (p) { return p && p.showed; });
-    if (!pool.length) {
-      alert('Nobody checked in yet.');
+    if (!supabaseEnabled() || !isSignedIn()) {
+      alert('Sign in as a leader to draw.');
+      return;
+    }
+    const sb = getSb();
+    const key = meetingKey();
+    let pool = [];
+    try {
+      const { data: rows, error } = await sb.from('rsvps').select('brother_id').eq('meeting_key', key).eq('showed_up', true);
+      if (error) throw error;
+      const ids = (rows || []).map(function (r) { return r.brother_id; }).filter(Boolean);
+      if (!ids.length) {
+        alert('Nobody checked in yet.');
+        return;
+      }
+      const { data: bros } = await sb.from('brothers').select('id,name');
+      pool = ids.map(function (id) {
+        const b = (bros || []).find(function (x) { return x.id === id; });
+        const local = (brothers || []).find(function (x) { return x.id === id; });
+        return { id: id, name: (b && b.name) || (local && local.name) || 'Brother' };
+      });
+    } catch (e) {
+      alert('Could not load who showed.');
       return;
     }
     const pick = pool[Math.floor(Math.random() * pool.length)];
@@ -4752,10 +4783,22 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     const key = meetingKey();
     try {
       if (inFlag) {
-        const { error } = await sb.from('rsvps').upsert(
-          { brother_id: id, meeting_key: key, in_at: new Date().toISOString() },
-          { onConflict: 'brother_id,meeting_key' }
-        );
+        const now = new Date().toISOString();
+        const { data: existing, error: lookErr } = await sb
+          .from('rsvps')
+          .select('brother_id')
+          .eq('brother_id', id)
+          .eq('meeting_key', key)
+          .maybeSingle();
+        if (lookErr) { console.warn('rsvps lookup', lookErr); return false; }
+        let error = null;
+        if (existing) {
+          const res = await sb.from('rsvps').update({ in_at: now }).eq('brother_id', id).eq('meeting_key', key);
+          error = res.error;
+        } else {
+          const res = await sb.from('rsvps').insert({ brother_id: id, meeting_key: key, in_at: now });
+          error = res.error;
+        }
         if (error) { console.warn('rsvps push', error); return false; }
       } else {
         const { error } = await sb.from('rsvps').delete().eq('brother_id', id).eq('meeting_key', key);
@@ -9410,15 +9453,10 @@ $('#thunder-input').addEventListener('keydown', (e) => {
         beer.dataset.bound = '1';
         beer.addEventListener('click', function () { drawRaffle('beer'); });
       }
-      const dropShot = document.getElementById('drop-shot-btn');
-      if (dropShot && dropShot.dataset.bound !== '1') {
-        dropShot.dataset.bound = '1';
-        dropShot.addEventListener('click', function () { openDropShot(); });
-      }
-      const memDrop = document.getElementById('memories-drop-btn');
-      if (memDrop && memDrop.dataset.bound !== '1') {
-        memDrop.dataset.bound = '1';
-        memDrop.addEventListener('click', function () { openDropShot(); });
+      const memSign = document.getElementById('memories-signin-shot');
+      if (memSign && memSign.dataset.bound !== '1') {
+        memSign.dataset.bound = '1';
+        memSign.addEventListener('click', function () { startMemberSignIn(); });
       }
       const memLib = document.getElementById('memories-library-btn');
       if (memLib && memLib.dataset.bound !== '1') {

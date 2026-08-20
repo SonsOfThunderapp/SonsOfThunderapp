@@ -7879,11 +7879,16 @@ body.tb-tour-mandatory .tb-tour-skip {
   font-size: 18px;
   letter-spacing: 0.14em;
 }
+label.btn-rsvp, label.btn-drop-shot {
+  display: block;
+  text-align: center;
+  box-sizing: border-box;
+  cursor: pointer;
+}
 .memory-cam-input {
-  position: fixed;
-  left: 0;
-  bottom: 0;
+  position: absolute;
   width: 1px;
   height: 1px;
-  opacity: 0.01;
+  opacity: 0;
+  overflow: hidden;
 }
