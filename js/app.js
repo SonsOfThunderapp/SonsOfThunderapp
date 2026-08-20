@@ -2450,6 +2450,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     const MAX = opts.maxDrag != null ? opts.maxDrag : 72;
     const EDGE = opts.edgeMax != null ? opts.edgeMax : 28;
     const FOLLOW = opts.follow != null ? opts.follow : 0.55;
+    const DOWN = opts.onDownDist != null ? opts.onDownDist : 64;
 
     let sx = 0, sy = 0, st = 0, lx = 0, lt = 0, tracking = false, axis = null;
 
@@ -2496,11 +2497,10 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       // Vertical dismiss preview when onDown is wired (sheet follows finger)
       if (opts.onDown && axis === 'y' && dy > 0) {
         el.classList.add('elastic-dragging');
-        const ty = Math.min(160, dy * 0.72);
-        const op = Math.max(0.35, 1 - ty / 220);
+        const ty = Math.min(240, dy * 0.88);
+        const op = Math.max(0.28, 1 - ty / 280);
         el.style.transform = 'translate3d(0,' + ty + 'px,0)';
         el.style.opacity = String(op);
-        // Foreground follows finger; underlay eases back slightly
         setUnderlayDepth(true, Math.min(1, ty / 140));
         return;
       }
@@ -2531,14 +2531,17 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       const dt = Math.max(1, (lt || Date.now()) - st);
       const vx = absX / dt;
 
-      // vertical dismiss with momentum handoff
-      if (opts.onDown && dy > 80 && absY > absX) {
+      const vy = absY / dt;
+      const flickDown = !!(opts.onDown && dy > 0 && vy >= 0.38 && absY > 24 && absY > absX * 0.85);
+      const pullDown = !!(opts.onDown && dy >= DOWN && absY > absX);
+      if (flickDown || pullDown) {
+        try { tbFeedback.selection(); } catch (e) {}
         if (el && !prefersReducedMotion()) {
           el.classList.add('overlay-dismissing');
-          el.style.transition = 'transform 0.2s cubic-bezier(0.4, 0, 1, 1), opacity 0.18s ease';
-          el.style.transform = 'translate3d(0, 24%, 0)';
-          el.style.opacity = '0.3';
-          setTimeout(() => { elasticClear(el); opts.onDown(); }, 190);
+          el.style.transition = 'transform 0.22s cubic-bezier(0.4, 0, 1, 1), opacity 0.18s ease';
+          el.style.transform = 'translate3d(0, 32%, 0)';
+          el.style.opacity = '0.15';
+          setTimeout(() => { elasticClear(el); opts.onDown(); }, 200);
         } else {
           elasticClear(el);
           opts.onDown();
@@ -2640,7 +2643,10 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     });
     // Permanent: every window supports swipe-down dismiss (same elastic path as brother/memory)
     bindElasticSwipe(detail, {
+      getEl: () => detail.querySelector('.info-detail-panel') || detail,
       onDown: () => closeInfoDetail(),
+      onDownDist: 52,
+      follow: 0.88,
       blocked: (t) => !!(t && t.closest && t.closest('.info-detail-close, button, a, input, textarea'))
     });
     document.addEventListener('keydown', (e) => {
@@ -2653,6 +2659,12 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
    * X + backdrop + Escape still work. Inputs/buttons block gesture start.
    * Tour tip is NOT a dismissible window — excluded.
    */
+  function overlayPanel(el) {
+    if (!el) return el;
+    return el.querySelector(
+      '.cal-confirm-panel, .brother-detail-panel, .info-detail-panel, .modal-content, .ios-install-panel, .auth-card, .auth-gate-card'
+    ) || el.firstElementChild || el;
+  }
   function bindSwipeCloseAllWindows() {
     const specs = [
       { id: 'install-modal', close: () => closeModal('install-modal') },
@@ -2682,7 +2694,10 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       if (!el || el.dataset.swipeClose === '1') return;
       el.dataset.swipeClose = '1';
       bindElasticSwipe(el, {
+        getEl: () => overlayPanel(el),
         onDown: close,
+        onDownDist: 52,
+        follow: 0.88,
         blocked: (t) => !!(t && t.closest && t.closest(
           'input, textarea, select, button, a, video, .modal-close, [data-close]'
         ))
@@ -3172,6 +3187,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       onPrev: () => openBrotherDetail(brotherDetailIndex - 1),
       onNext: () => openBrotherDetail(brotherDetailIndex + 1),
       onDown: () => closeBrotherDetail(),
+      onDownDist: 52,
+      follow: 0.88,
       blocked: (t) => !!(t && t.closest && t.closest('.brother-detail-close, button, a, input, textarea'))
     });
     document.addEventListener('keydown', (e) => {
@@ -3495,6 +3512,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       onPrev: () => memoryViewerStep(-1),
       onNext: () => memoryViewerStep(1),
       onDown: () => closeMemoryViewer(),
+      onDownDist: 52,
+      follow: 0.88,
       blocked: (t) => !!(t && t.closest && t.closest('.memory-viewer-close, video, button'))
     });
     document.addEventListener('keydown', (e) => {
@@ -6401,7 +6420,8 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       canNext: () => feedIsOpen() && feedIndex() < FEED_ORDER.length - 1,
       onPrev: goPrevFeed,
       onNext: goNextFeed,
-      // Allow swipe on story cards — only ignore other Events sections
+      onDown: () => { try { collapseActivityFeed(); } catch (e) {} },
+      onDownDist: 56,
       blocked: (t) => !!(t && t.closest && (
         t.closest('#media-feed') ||
         t.closest('#upcoming-events') ||
