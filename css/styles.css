@@ -6393,7 +6393,7 @@ body.tb-ask-open .header .logo {
 }
 @keyframes tbFabBreath {
   0%, 100% { transform: translateY(0) rotate(var(--fab-r, 0deg)) scale(var(--fab-s, 1)); }
-  50% { transform: translateY(-3px) rotate(var(--fab-r, 0deg)) scale(var(--fab-s, 1)); }
+  50% { transform: translateY(-5px) rotate(var(--fab-r, 0deg)) scale(calc(var(--fab-s, 1) * 1.03)); }
 }
 .thunder-fab-img.tb-fab-look {
   filter: drop-shadow(0 0 10px rgba(254,241,5,0.4));

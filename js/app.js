@@ -5420,10 +5420,10 @@ $('#edit-profile-btn').addEventListener('click', () => {
     let __fabSigTimer = null;
     let __fabOpenedAt = 0;
     function fabJustOpened() {
-      return __fabOpenedAt && (Date.now() - __fabOpenedAt < 40000);
+      return __fabOpenedAt && (Date.now() - __fabOpenedAt < 12000);
     }
     function fabWaitingLong() {
-      return !fabJustOpened() && (Date.now() - __fabQuietSince > 18000);
+      return !fabJustOpened() && (Date.now() - __fabQuietSince > 8000);
     }
     const FAB_DEFAULT = 'assets/thunder-cool-fab.png';
     const FAB_FRAMES = {
@@ -5495,19 +5495,24 @@ $('#edit-profile-btn').addEventListener('click', () => {
     let __fabLastMicro = '';
     let __fabLastArm = 0;
     function fabArmOk() {
-      return fabWaitingLong() && (Date.now() - __fabLastArm > 52000);
+      return fabWaitingLong() && (Date.now() - __fabLastArm > 18000);
     }
     function fabGlint() {
       const img = fabImg();
       if (!img || fabBusy()) return;
       img.classList.add('tb-fab-glint');
-      setTimeout(function () { img.classList.remove('tb-fab-glint'); }, 280);
+      setTimeout(function () { img.classList.remove('tb-fab-glint'); }, 320);
     }
     function fabMicroNod() {
       const img = fabImg();
       if (!img || fabBusy()) return;
-      img.style.setProperty('--fab-r', '-5deg');
-      setTimeout(function () { img.style.setProperty('--fab-r', '0deg'); }, 700);
+      img.style.setProperty('--fab-r', '-10deg');
+      setTimeout(function () { img.style.setProperty('--fab-r', '0deg'); }, 820);
+    }
+    function fabImpatient() {
+      /* Waiting on you — check the watch, then settle. */
+      if (fabPlayFrame('watch', 2200)) return;
+      fabMicroNod();
     }
     function fabMicro() {
       const pool = ['glance', 'shift', 'nod', 'glint'].filter(function (x) { return x !== __fabLastMicro; });
@@ -5522,29 +5527,33 @@ $('#edit-profile-btn').addEventListener('click', () => {
       if (!fabArmOk()) { fabMicro(); return; }
       __fabLastArm = Date.now();
       if (kind === 'inspect') fabInspect();
-      else if (kind === 'salute') fabPlayFrame('salute', 1600);
-      else fabPlayFrame('watch', 2000);
+      else if (kind === 'salute') fabPlayFrame('salute', 1700);
+      else fabImpatient();
     }
     function fabGlance() {
       const img = fabImg();
       if (!img || fabBusy()) return;
       const target = document.querySelector('.btn-rsvp, #rsvp-btn, .announcement-card, .next-meeting');
-      let rot = (Math.random() < 0.5 ? -1 : 1) * (1.2 + Math.random() * 1.6);
+      let rot = (Math.random() < 0.5 ? -1 : 1) * (5 + Math.random() * 4);
       if (target) {
         const a = document.getElementById('thunder-fab').getBoundingClientRect();
         const b = target.getBoundingClientRect();
         const dx = (b.left + b.width / 2) - (a.left + a.width / 2);
-        rot = dx < 0 ? -(1.4 + Math.random() * 1.4) : (1.4 + Math.random() * 1.4);
+        rot = dx < 0 ? -(6 + Math.random() * 3) : (6 + Math.random() * 3);
       }
       img.style.setProperty('--fab-r', rot.toFixed(2) + 'deg');
-      setTimeout(function () { img.style.setProperty('--fab-r', '0deg'); }, 900 + Math.random() * 400);
+      img.classList.add('tb-fab-look');
+      setTimeout(function () {
+        img.style.setProperty('--fab-r', '0deg');
+        img.classList.remove('tb-fab-look');
+      }, 1100 + Math.random() * 500);
     }
     function fabShift() {
       const img = fabImg();
       if (!img || fabBusy()) return;
-      const rot = (Math.random() < 0.5 ? -1 : 1) * (1 + Math.random() * 2);
+      const rot = (Math.random() < 0.5 ? -1 : 1) * (3.5 + Math.random() * 3);
       img.style.setProperty('--fab-r', rot.toFixed(2) + 'deg');
-      setTimeout(function () { img.style.setProperty('--fab-r', '0deg'); }, 1100);
+      setTimeout(function () { img.style.setProperty('--fab-r', '0deg'); }, 1400);
     }
     function fabSignature() {
       const img = fabImg();
@@ -5583,36 +5592,41 @@ $('#edit-profile-btn').addEventListener('click', () => {
       }
       function beatTick() {
         if (fabBusy() || fabJustOpened()) {
-          __fabBeatTimer = setTimeout(beatTick, 4000);
+          __fabBeatTimer = setTimeout(beatTick, 3000);
           return;
         }
-        if (Date.now() - __fabQuietSince > 10000) fabMicro();
-        __fabBeatTimer = setTimeout(beatTick, 11000 + Math.random() * 9000);
+        if (Date.now() - __fabQuietSince > 6000) fabMicro();
+        __fabBeatTimer = setTimeout(beatTick, 7000 + Math.random() * 6000);
       }
-      __fabBeatTimer = setTimeout(beatTick, first ? 12000 : 9000);
+      __fabBeatTimer = setTimeout(beatTick, first ? 7000 : 5000);
       function midTick() {
         if (fabBusy() || !fabWaitingLong()) {
-          __fabMidTimer = setTimeout(midTick, 8000);
+          __fabMidTimer = setTimeout(midTick, 6000);
           return;
         }
-        if (Math.random() < 0.28) fabArm(Math.random() < 0.55 ? 'inspect' : 'salute');
+        const roll = Math.random();
+        if (roll < 0.34) fabArm('watch');
+        else if (roll < 0.58) fabArm('inspect');
+        else if (roll < 0.74) fabArm('salute');
         else fabMicro();
-        __fabMidTimer = setTimeout(midTick, 28000 + Math.random() * 16000);
+        __fabMidTimer = setTimeout(midTick, 16000 + Math.random() * 12000);
       }
-      __fabMidTimer = setTimeout(midTick, first ? 45000 : 22000);
+      __fabMidTimer = setTimeout(midTick, first ? 16000 : 12000);
       function sigTick() {
-        if (!fabBusy() && !fabJustOpened() && Date.now() - __fabQuietSince > 50000) {
+        if (!fabBusy() && !fabJustOpened() && Date.now() - __fabQuietSince > 28000) {
           fabArm('watch');
           __fabQuietSince = Date.now();
         }
         __fabSigTimer = setTimeout(sigTick, 8000);
       }
-      __fabSigTimer = setTimeout(sigTick, 48000);
+      __fabSigTimer = setTimeout(sigTick, 24000);
     }
     try { startThunderBackstageIdle(); } catch (e) {}
-    document.addEventListener('pointerdown', function () {
+    document.addEventListener('pointerdown', function (e) {
       __fabQuietSince = Date.now();
-      fabBaseline();
+      const t = e.target;
+      if (t && t.closest && t.closest('#thunder-fab')) return;
+      /* Don't yank him back to rest on every tap — waiting character has to finish. */
     }, { passive: true });
 
     // Thunder FAB — THUNDER WAKE then open (full once/session, soft after)
