@@ -37,7 +37,11 @@ self.addEventListener('push', (event) => {
     badge: '/assets/icon-official.png',
     data: { url: data.url || '/?view=home' },
     tag: data.tag || 'thunder-gathering',
-    renotify: false
+    renotify: false,
+    actions: [
+      { action: 'imin', title: "I'M IN" },
+      { action: 'open', title: 'OPEN' }
+    ]
   };
 
   event.waitUntil(self.registration.showNotification(title, options));
@@ -45,7 +49,8 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const target = (event.notification.data && event.notification.data.url) || '/?view=home';
+  let target = (event.notification.data && event.notification.data.url) || '/?view=home';
+  if (event.action === 'imin') target = '/?view=home&imin=1';
   event.waitUntil(
     (async () => {
       const all = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });

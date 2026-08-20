@@ -1556,7 +1556,11 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       badge: 'assets/icon-official.png',
       tag: tag || 'thunder-gathering',
       renotify: false,
-      data: { url: target }
+      data: { url: target },
+      actions: [
+        { action: 'imin', title: "I'M IN" },
+        { action: 'open', title: 'OPEN' }
+      ]
     };
     const go = function () {
       try { applyDeepLink(target); } catch (e) {}
@@ -1587,6 +1591,34 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       if (view && typeof showView === 'function' && ['home', 'brothers', 'events', 'about'].indexOf(view) !== -1) {
         showView(view, { silent: true });
       }
+      if (u.searchParams.get('imin') === '1') {
+        if (typeof showView === 'function') showView('home', { silent: true });
+        if (!rsvp) {
+          setTimeout(function () {
+            const btn = document.getElementById('rsvp-btn');
+            if (btn && !btn.classList.contains('confirmed')) btn.click();
+          }, 450);
+        }
+      }
+      if (u.searchParams.get('add') === '1') {
+        if (typeof showView === 'function') showView('events', { silent: true });
+        setTimeout(function () {
+          try { openModal('media-modal'); } catch (e) {}
+        }, 350);
+      }
+    } catch (e) {}
+  }
+
+  function updateOsBadge() {
+    try {
+      if (!navigator.setAppBadge && !navigator.clearAppBadge) return;
+      const d = daysUntil(getNextMeetingMonday());
+      let n = 0;
+      if (d === 0 || d === 1) n = 1;
+      else if (typeof hasNewAnnouncements === 'function' && hasNewAnnouncements()) n = 1;
+      else if (typeof hasNewLastFire === 'function' && hasNewLastFire()) n = 1;
+      if (n && navigator.setAppBadge) navigator.setAppBadge(n);
+      else if (navigator.clearAppBadge) navigator.clearAppBadge();
     } catch (e) {}
   }
 
@@ -1885,6 +1917,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     setNavDot('home', hasNewAnnouncements() || hasNewLastFire());
     setNavDot('brothers', hasNewBrothers());
     setNavDot('events', hasNewEvents() || hasNewMedia());
+    try { updateOsBadge(); } catch (e) {}
   }
 
   // First install of this feature: don't mark all existing content NEW
