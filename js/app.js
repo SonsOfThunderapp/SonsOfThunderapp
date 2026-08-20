@@ -400,8 +400,31 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     try { renderRsvp(); } catch (e) {}
     return true;
   }
-  function launchGatheringCalendar() {
-    return offerCalendarNow();
+  function addToNativeCalendar() {
+    const host = location.host || 'sonsofthunder.netlify.app';
+    const icsPath = '/gathering.ics';
+    const httpsUrl = location.origin + icsPath;
+    try {
+      if (typeof isIos === 'function' && isIos()) {
+        location.href = 'webcal://' + host + icsPath;
+        return true;
+      }
+    } catch (e) {}
+    try {
+      const next = getNextMeetingMonday();
+      const mt = parseMeetingHours();
+      const start = new Date(next);
+      start.setHours(mt.h, mt.m, 0, 0);
+      const end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
+      const title = encodeURIComponent('Sons of Thunder — Next Gathering');
+      const loc = encodeURIComponent(venueName());
+      location.href = 'intent://vnd.android.cursor.dir/event#Intent;action=android.intent.action.INSERT;S.title=' +
+        title + ';S.eventLocation=' + loc + ';l.beginTime=' + start.getTime() +
+        ';l.endTime=' + end.getTime() + ';end';
+      return true;
+    } catch (e) {}
+    try { location.href = httpsUrl; } catch (e2) {}
+    return true;
   }
 
   function openCalConfirmSheet() {
@@ -4737,6 +4760,14 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       const later = document.getElementById('cal-confirm-later');
       const sheet = document.getElementById('cal-confirm-sheet');
       const x = document.getElementById('cal-confirm-close');
+      const native = document.getElementById('cal-confirm-native');
+      if (native && !native.dataset.tbBound) {
+        native.dataset.tbBound = '1';
+        native.addEventListener('click', () => {
+          try { lockInAppReminder(); } catch (e) {}
+          try { addToNativeCalendar(); } catch (e) {}
+        });
+      }
       if (add && !add.dataset.tbBound) {
         add.dataset.tbBound = '1';
         add.addEventListener('click', () => {
