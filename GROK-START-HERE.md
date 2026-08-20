@@ -1,5 +1,7 @@
 # GROK-START-HERE — Thunder Board
 
+**`VISUAL-PROOF-PROTOCOL.md` is permanent law.** Human-eye approval required. If the work is visual, SHOW THE VISUAL in the same turn. Description / code / path / "I generated it" is not proof. Design proof ≠ runtime proof.
+
 **Before modifying Thunder Board, read this file, then the permanent constitution, then the current production source.**
 
 ## Authority order (highest first)
@@ -16,7 +18,8 @@ The repository remembers Thunder Board.
 ## Mandatory read order before code changes
 
 1. `GROK-START-HERE.md` (this file)
-2. `SONS-OF-THUNDER-PRODUCT-CONSTITUTION.md`
+2. `VISUAL-PROOF-PROTOCOL.md` (eyes first — if the work is visual, SHOW IT)
+3. `SONS-OF-THUNDER-PRODUCT-CONSTITUTION.md`
 3. `APPROVED-ASSET-MANIFEST.md` + `DO-NOT-RESURRECT-REGISTRY.md`
 4. `THUNDER-CONSTITUTION.md`
 5. `THUNDER-VISUAL-DNA.md`

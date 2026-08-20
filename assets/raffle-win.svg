@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     viewBox="0 0 375 812" width="375" height="812"
+     id="raffle-win-vector">
+  <!-- LOCKED 2026-08-20  Source poster: assets/raffle-win-lock.jpg (IMG_7854)
+       Each group is a separate object. Edit / animate / hide independently.
+       Character art is official bolt-heads (raster) inside vector layout.
+       IDs: rw-bg, rw-glow, rw-close, rw-kicker, rw-winner, rw-ticket,
+            rw-name, rw-gotit, rw-host, rw-laugh, rw-cigar, rw-hat,
+            rw-beard, rw-grin, rw-wink -->
+  <defs>
+    <radialGradient id="rw-gold-glow" cx="50%" cy="42%" r="48%">
+      <stop offset="0%" stop-color="#FEF105" stop-opacity="0.28"/>
+      <stop offset="55%" stop-color="#FEF105" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="rw-name-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <style>
+      .rw-display { font-family: "Bebas Neue", Impact, "Arial Narrow", sans-serif; font-weight: 400; }
+      #rw-winner { transform-box: fill-box; transform-origin: center; animation: rwPulse 1.8s ease-in-out infinite; }
+      #rw-ticket { transform-box: fill-box; transform-origin: center; animation: rwTicket 2.2s ease-in-out infinite; }
+      #rw-name { transform-box: fill-box; transform-origin: center; animation: rwPulse 1.6s ease-in-out infinite; }
+      #rw-host { transform-box: fill-box; transform-origin: center; animation: rwHost 2.2s ease-in-out infinite; }
+      #rw-laugh { transform-box: fill-box; transform-origin: center; animation: rwLaugh 0.55s ease-in-out infinite; }
+      #rw-cigar { transform-box: fill-box; transform-origin: center; animation: rwCigar 1.35s ease-in-out infinite; }
+      #rw-hat { transform-box: fill-box; transform-origin: center; animation: rwHat 0.95s ease-in-out infinite; }
+      #rw-beard { transform-box: fill-box; transform-origin: center; animation: rwBeard 1.15s ease-in-out infinite; }
+      #rw-grin { transform-box: fill-box; transform-origin: center; animation: rwGrin 0.75s ease-in-out infinite; }
+      #rw-wink { transform-box: fill-box; transform-origin: center; animation: rwWink 1.2s ease-in-out infinite; }
+      @keyframes rwPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+      @keyframes rwTicket { 0%,100%{transform:scale(1)} 50%{transform:scale(1.03)} }
+      @keyframes rwHost { 0%,100%{transform:translateY(0) rotate(0)} 40%{transform:translateY(-8px) rotate(-5deg)} 70%{transform:translateY(-3px) rotate(5deg)} }
+      @keyframes rwLaugh { 0%,100%{transform:rotate(-12deg)} 50%{transform:rotate(14deg) translateY(-6px)} }
+      @keyframes rwCigar { 0%,100%{transform:rotate(-8deg) translateY(0)} 50%{transform:rotate(10deg) translateY(-10px)} }
+      @keyframes rwHat { 0%,100%{transform:rotate(-16deg)} 50%{transform:rotate(12deg) translateY(-8px)} }
+      @keyframes rwBeard { 0%,100%{transform:translateY(0) rotate(-3deg)} 50%{transform:translateY(-12px) rotate(6deg)} }
+      @keyframes rwGrin { 0%,100%{transform:scale(1) rotate(-4deg)} 50%{transform:scale(1.14) rotate(8deg)} }
+      @keyframes rwWink { 0%,45%,55%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.92) rotate(-8deg)} }
+    </style>
+  </defs>
+
+  <g id="rw-bg">
+    <rect width="375" height="812" fill="#000000"/>
+  </g>
+
+  <g id="rw-glow">
+    <rect width="375" height="812" fill="url(#rw-gold-glow)"/>
+  </g>
+
+  <g id="rw-close" transform="translate(327,14)">
+    <circle cx="16" cy="16" r="16" fill="#ffffff" fill-opacity="0.08"/>
+    <path d="M10 10 L22 22 M22 10 L10 22" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+  </g>
+
+  <g id="rw-kicker" transform="translate(187.5,118)">
+    <text class="rw-display" text-anchor="middle" fill="#FEF105" font-size="13"
+          letter-spacing="8">THE WIN</text>
+  </g>
+
+  <g id="rw-winner" transform="translate(187.5,168)">
+    <text class="rw-display" text-anchor="middle" fill="#FEF105" font-size="64"
+          letter-spacing="2" filter="url(#rw-name-glow)">WINNER</text>
+  </g>
+
+  <g id="rw-ticket" transform="translate(48,210)">
+    <rect x="0" y="0" width="279" height="168" rx="6" fill="#0a0a0a"
+          stroke="#E8B923" stroke-width="3"/>
+    <rect x="5" y="5" width="269" height="158" rx="3" fill="none"
+          stroke="#FEF105" stroke-width="1" stroke-opacity="0.55"/>
+    <g id="rw-name" transform="translate(139.5,78)">
+      <text class="rw-display" text-anchor="middle" fill="#FEF105" font-size="48"
+            letter-spacing="1" filter="url(#rw-name-glow)">MARCUS</text>
+    </g>
+    <g id="rw-gotit" transform="translate(139.5,128)">
+      <text class="rw-display" text-anchor="middle" fill="#FEF105" font-size="13"
+            letter-spacing="5">—  HE'S GOT IT  —</text>
+    </g>
+  </g>
+
+  <g id="rw-laugh" transform="translate(8,210)">
+    <image xlink:href="raffle-win-parts/laugh.png" width="72" height="72"/>
+  </g>
+  <g id="rw-beard" transform="translate(295,200)">
+    <image xlink:href="raffle-win-parts/beard.png" width="72" height="72"/>
+  </g>
+  <g id="rw-cigar" transform="translate(4,360)">
+    <image xlink:href="raffle-win-parts/cigar.png" width="72" height="72"/>
+  </g>
+  <g id="rw-grin" transform="translate(299,350)">
+    <image xlink:href="raffle-win-parts/grin.png" width="72" height="72"/>
+  </g>
+  <g id="rw-hat" transform="translate(22,560)">
+    <image xlink:href="raffle-win-parts/hat.png" width="72" height="72"/>
+  </g>
+  <g id="rw-wink" transform="translate(281,560)">
+    <image xlink:href="raffle-win-parts/wink.png" width="72" height="72"/>
+  </g>
+
+  <g id="rw-host" transform="translate(121.5,620)">
+    <image xlink:href="raffle-win-parts/host.png" width="132" height="132"/>
+  </g>
+</svg>

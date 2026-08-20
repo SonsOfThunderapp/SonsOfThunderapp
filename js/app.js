@@ -81,6 +81,34 @@
     brothers = [Object.assign({}, FOUNDER_OBIE)].concat(brothers);
     try { save('brothers', brothers); } catch (e) {}
   }
+  function brotherScore(b) {
+    if (!b) return -1;
+    let s = 0;
+    if (b.photo) s += 10;
+    if (String(b.bio || '').trim()) s += 5;
+    if (String(b.phone || '').trim()) s += 2;
+    if (b.birthday) s += 1;
+    if (b.updatedAt) s += 1;
+    return s;
+  }
+  function collapseDuplicateBrothers() {
+    if (!Array.isArray(brothers)) return;
+    const out = [];
+    const idxByName = {};
+    brothers.forEach(function (b) {
+      if (!b) return;
+      const key = String(b.name || '').trim().toLowerCase();
+      if (!key) { out.push(b); return; }
+      if (idxByName[key] == null) {
+        idxByName[key] = out.length;
+        out.push(b);
+        return;
+      }
+      const i = idxByName[key];
+      if (brotherScore(b) > brotherScore(out[i])) out[i] = b;
+    });
+    brothers = out;
+  }
 function isTodayBirthday(bday) {
   if (!bday || typeof bday !== 'string') return false;
   const cleaned = bday.trim().replace(/[^0-9-]/g, '');
@@ -265,6 +293,10 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
 
   let brothers = load('brothers') || DEFAULT_BROTHERS.slice();
   try { if (!hasObieSeat(brothers)) ensureFounderSeat(); } catch (e) {}
+  try {
+    collapseDuplicateBrothers();
+    save('brothers', brothers);
+  } catch (e) {}
   // Shared memories live in Supabase when configured — not localStorage primary
   let media = [];
   let rsvp = load('rsvp') || false;
@@ -568,6 +600,11 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
           pullRsvps().catch((e) => console.warn('realtime rsvps pull', e && e.message ? e.message : e))
         );
       }
+      if (!kind || kind === 'raffle' || kind === 'all') {
+        tasks.push(
+          pullRaffle().catch((e) => console.warn('realtime raffle pull', e && e.message ? e.message : e))
+        );
+      }
       if ((!kind || kind === 'memories' || kind === 'all') && typeof isSignedIn === 'function' && isSignedIn()) {
         tasks.push(
           pullMemories()
@@ -694,6 +731,14 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         () => {
           try { scheduleRealtimeRefresh('rsvps'); }
           catch (e) { console.warn('Thunder realtime rsvps handler', e && e.message ? e.message : e); }
+        }
+      );
+      ch.on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'raffle_draws' },
+        () => {
+          try { scheduleRealtimeRefresh('raffle'); }
+          catch (e) { console.warn('Thunder realtime raffle handler', e && e.message ? e.message : e); }
         }
       );
       ch.on(
@@ -873,7 +918,6 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   function renderAxumChip() {
     const chip = document.getElementById('axum-chip');
     if (!chip) return;
-    if (roomCut()) { chip.classList.add('hidden'); return; }
     const c = axumCoffeeState();
     if (c && c.code && !c.redeemedAt) {
       chip.classList.remove('hidden');
@@ -928,7 +972,6 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   }
 
   function openAxumDrop() {
-    if (roomCut()) return;
     const c = axumCoffeeState();
     if (!c || !c.code || c.redeemedAt) return;
     const drop = document.getElementById('axum-drop');
@@ -938,7 +981,6 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   }
 
   function maybeShowAxumCoffee() {
-    if (roomCut()) { renderAxumChip(); return; }
     const c = axumCoffeeState();
     if (!c || !c.code) {
       renderAxumChip();
@@ -1037,7 +1079,6 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   }
 
   function openImInSignIn() {
-    if (isSignedIn() || !supabaseEnabled()) return false;
     const gate = document.getElementById('auth-gate');
     const title = document.getElementById('auth-title');
     const sub = document.getElementById('auth-sub');
@@ -1051,7 +1092,10 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     if (title) title.textContent = 'LOCK YOUR SEAT';
     if (sub) { sub.textContent = ''; sub.classList.add('hidden'); }
     if (hint) hint.classList.add('hidden');
-    if (signBtn) signBtn.textContent = 'LOCK MY SEAT';
+    if (signBtn) {
+      signBtn.classList.remove('hidden');
+      signBtn.textContent = 'LOCK MY SEAT';
+    }
     if (magic) {
       magic.classList.remove('hidden');
       magic.textContent = 'Email unlocks the whole experience';
@@ -1084,17 +1128,15 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
 
   function openAuthGate(reason) {
     const gate = $('#auth-gate');
+    if (gate) gate.classList.add('auth-gate-imin');
     const sub = $('#auth-sub');
-    const imin = !!(gate && gate.classList.contains('auth-gate-imin'));
-    if (sub && !imin) {
-      if (reason) {
-        sub.textContent = reason;
-        sub.classList.remove('hidden');
-      } else {
-        sub.textContent = '';
-        sub.classList.add('hidden');
-      }
-    }
+    if (sub) { sub.textContent = ''; sub.classList.add('hidden'); }
+    const pass = document.getElementById('auth-password');
+    const forgot = document.getElementById('auth-forgot-btn');
+    const invite = document.getElementById('auth-signup-btn');
+    if (pass) { pass.classList.add('hidden'); pass.value = ''; }
+    if (forgot) forgot.classList.add('hidden');
+    if (invite) invite.classList.add('hidden');
     setAuthError('');
     if (gate) {
       gate.classList.remove('hidden');
@@ -1106,7 +1148,6 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         });
       }
     }
-    // Focus email for fewer taps
     try {
       const em = $('#auth-email');
       if (em) setTimeout(() => em.focus(), 80);
@@ -1127,9 +1168,9 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     const magic = document.getElementById('auth-magic-btn');
     if (sub) { sub.textContent = ''; sub.classList.add('hidden'); }
     if (hint) { hint.textContent = ''; hint.classList.add('hidden'); }
-    if (pass) pass.classList.remove('hidden');
-    if (forgot) forgot.classList.remove('hidden');
-    if (invite) invite.classList.remove('hidden');
+    if (pass) pass.classList.add('hidden');
+    if (forgot) forgot.classList.add('hidden');
+    if (invite) invite.classList.add('hidden');
     if (magic) magic.textContent = 'Email unlocks the whole experience';
     setAuthError('');
     releaseFocusAndZoom();
@@ -1139,9 +1180,29 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
 
   function syncBrothersSeatBtn() {
     const btn = document.getElementById('edit-profile-btn');
-    if (!btn) return;
+    const entry = document.getElementById('auth-entry-btn');
     const me = (brothers || []).find(function (b) { return b && b.id === myProfileId && (b.name || '').trim(); });
-    btn.textContent = me ? 'EDIT PROFILE' : 'YOUR SEAT';
+    if (!isSignedIn()) {
+      if (btn) {
+        btn.classList.add('hidden');
+        btn.textContent = 'EDIT PROFILE';
+      }
+      if (entry) {
+        entry.classList.remove('hidden');
+        entry.removeAttribute('hidden');
+        entry.setAttribute('aria-hidden', 'false');
+      }
+    } else {
+      if (btn) {
+        btn.classList.remove('hidden');
+        btn.textContent = me ? 'EDIT PROFILE' : 'YOUR SEAT';
+      }
+      if (entry) {
+        entry.classList.add('hidden');
+        entry.setAttribute('hidden', 'hidden');
+        entry.setAttribute('aria-hidden', 'true');
+      }
+    }
   }
 
   function updateAuthSessionBar() {
@@ -1152,8 +1213,13 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     const entry = $('#auth-entry-btn');
     const homeCta = document.getElementById('home-member-cta');
     if (entry) {
-      entry.classList.add('hidden');
-      entry.setAttribute('hidden', 'hidden');
+      if (isSignedIn()) {
+        entry.classList.add('hidden');
+        entry.setAttribute('hidden', 'hidden');
+      } else {
+        entry.classList.remove('hidden');
+        entry.removeAttribute('hidden');
+      }
     }
     if (!supabaseEnabled()) {
       if (bar) bar.classList.add('hidden');
@@ -1172,24 +1238,11 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   }
 
   function startMemberSignIn() {
-    try {
-      const gate = document.getElementById('auth-gate');
-      if (gate) gate.classList.remove('auth-gate-imin');
-      const title = document.getElementById('auth-title');
-      if (title) title.textContent = 'LOCK YOUR SEAT';
-      const sub = document.getElementById('auth-sub');
-      if (sub) { sub.textContent = ''; sub.classList.add('hidden'); }
-      const hint = document.getElementById('auth-hint');
-      if (hint) hint.classList.add('hidden');
-      openAuthGate('');
-    } catch (e) {
-      const gate = document.getElementById('auth-gate');
-      if (gate) {
-        gate.classList.remove('hidden');
-        gate.setAttribute('aria-hidden', 'false');
-        document.body.style.overflow = 'hidden';
-      }
+    if (isSignedIn()) {
+      try { openProfileEditor(); } catch (e) {}
+      return;
     }
+    openImInSignIn();
   }
   try { window.startMemberSignIn = startMemberSignIn; } catch (e) {}
 
@@ -1197,7 +1250,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     if (document.documentElement.dataset.tbAuthEntryBound === '1') return;
     document.documentElement.dataset.tbAuthEntryBound = '1';
     document.addEventListener('click', function (e) {
-      const t = e.target && e.target.closest && e.target.closest('#home-member-cta, #auth-entry-btn');
+      const t = e.target && e.target.closest && e.target.closest('#home-member-cta, #auth-entry-btn, #memories-signin-shot');
       if (!t) return;
       e.preventDefault();
       e.stopPropagation();
@@ -1237,8 +1290,21 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         if (event === 'SIGNED_IN') {
           try { fireSignedInWelcome(); } catch (e) {}
           try { issueAxumCoffee(); } catch (e) {}
+          try {
+            Promise.resolve(pullAxumCoffee()).then(function () {
+              try { maybeShowAxumCoffee(); } catch (e2) {}
+            });
+          } catch (e) {}
           try { claimBrotherOnSignIn(); } catch (e) {}
           try { markInviteUsed(); } catch (e) {}
+          try {
+            const me = (brothers || []).find(function (b) { return b && b.id === myProfileId && (b.name || '').trim(); });
+            const coffee = axumCoffeeState();
+            const showingCoffee = !!(coffee && coffee.code && !coffee.redeemedAt);
+            if (!me && !showingCoffee) {
+              setTimeout(function () { try { openProfileEditor(); } catch (e2) {} }, 350);
+            }
+          } catch (e) {}
         }
         pullMemories().then(() => {
           renderMedia();
@@ -1660,6 +1726,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       const localOnly = (brothers || []).filter(b => b && b.id && !remoteIds.has(b.id));
       brothers = remote.concat(localOnly);
       try { ensureFounderSeat(); } catch (e) {}
+      try { collapseDuplicateBrothers(); } catch (e) {}
       save('brothers', brothers);
       return true;
     } catch (e) {
@@ -3545,7 +3612,10 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         const el = document.getElementById('inapp-install-overlay');
         if (el) { el.classList.add('hidden'); el.setAttribute('aria-hidden', 'true'); unlockBodyIfClear(); }
       }},
-      { id: 'cal-confirm-sheet', close: () => { try { closeCalConfirmSheet(); } catch (e) {} } }
+      { id: 'cal-confirm-sheet', close: () => { try { closeCalConfirmSheet(); } catch (e) {} } },
+      { id: 'axum-drop', close: () => { try { closeAxumDrop(); } catch (e) {} } },
+      { id: 'axum-card', close: () => { try { closeAxumCard(); } catch (e) {} } },
+      { id: 'raffle-live', close: () => { try { closeRaffleLive(); } catch (e) {} } }
     ];
     specs.forEach(({ id, close }) => {
       const el = document.getElementById(id);
@@ -4113,6 +4183,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   function renderBrothers() {
     const grid = $('#brothers-grid');
     if (!grid) return;
+    try { collapseDuplicateBrothers(); } catch (e) {}
     if (!brothers.length) {
       grid.innerHTML = `
         <button type="button" class="empty-state empty-brothers empty-brothers-cta" id="empty-brothers-cta" aria-label="Add your profile">
@@ -4154,15 +4225,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
           </div>
         </button>`;
     }).join('');
-    // Next open slot — invites another brother to claim a seat
     const inviteHtml = `
-      <button type="button" class="brother-card brother-slot-invite" id="brother-slot-invite" aria-label="Add your profile">
-        <div class="brother-slot-plus" aria-hidden="true">+</div>
-        <div class="brother-slot-copy">
-          <div class="brother-slot-title">Your seat</div>
-          <div class="brother-slot-sub">Tap to add your profile</div>
-        </div>
-      </button>
       <button type="button" class="brother-card brother-chair" id="brother-open-chair" aria-label="Invite a brother">
         <div class="brother-chair-seat" aria-hidden="true"></div>
         <div class="brother-info">
@@ -4178,14 +4241,6 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         openBrotherDetail(idx);
       });
     });
-    const slot = $('#brother-slot-invite');
-    if (slot) {
-      slot.addEventListener('click', () => {
-        if (typeof tbGlowHit === 'function') tbGlowHit(slot, 'yellow');
-        try { tbFeedback.selection(); } catch (e) {}
-        openProfileEditor();
-      });
-    }
     const chair = $('#brother-open-chair');
     if (chair) {
       chair.addEventListener('click', function () {
@@ -4511,9 +4566,28 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   }
 
   let raffleDraws = [];
+  let patioOverride = null;
 
   function isGatheringDay() {
     try { return daysUntil(getNextMeetingMonday()) === 0; } catch (e) { return false; }
+  }
+
+  function isPatioLive() {
+    if (patioOverride === true) return true;
+    if (patioOverride === false) return false;
+    return isGatheringDay();
+  }
+
+  function syncPatioToggle() {
+    const btn = document.getElementById('patio-toggle-btn');
+    const hint = document.getElementById('patio-toggle-hint');
+    const live = isPatioLive();
+    if (btn) btn.textContent = live ? 'CLOSE THE PATIO' : 'OPEN THE PATIO';
+    if (hint) {
+      hint.textContent = live
+        ? 'Patio is live. Brothers tap I’M HERE on Home. Then DRAW BEER / DRAW HAT.'
+        : 'Opens I’M HERE on Home. Men who check in are in the beer and hat raffle.';
+    }
   }
 
   function iShowedUp() {
@@ -4526,16 +4600,9 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     const btn = document.getElementById('here-btn');
     const st = document.getElementById('here-status');
     const board = document.getElementById('raffle-board');
-    const night = isGatheringDay();
-    if (roomCut()) {
-      if (btn) btn.classList.add('hidden');
-      if (st) st.classList.add('hidden');
-      if (board) board.classList.add('hidden');
-      const drop = document.getElementById('drop-shot-btn');
-      if (drop) drop.classList.add('hidden');
-      try { syncDropShotAuth(); } catch (e) {}
-      return;
-    }
+    const night = isPatioLive();
+    try { syncPatioToggle(); } catch (e) {}
+    try { if (night) startPatioWatch(); else stopPatioWatch(); } catch (e) {}
     if (btn) {
       if (night && !iShowedUp()) btn.classList.remove('hidden');
       else btn.classList.add('hidden');
@@ -4546,7 +4613,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     }
     if (board) {
       const lines = (raffleDraws || []).map(function (d) {
-        const prize = d.prize === 'hat' ? 'HAT' : 'BEER';
+        const prize = 'WINNER';
         return prize + ' · ' + String(d.winner_name || 'Brother').toUpperCase();
       });
       if (lines.length) {
@@ -4612,7 +4679,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   async function ingestMemoryFile(file) {
     if (!file) return;
     if (supabaseEnabled() && !isSignedIn()) {
-      try { openAuthGate('Sign in to add a memory the whole brotherhood can see.'); } catch (e) {}
+      try { startMemberSignIn(); } catch (e) {}
       return;
     }
     if (!String(file.type || '').startsWith('image')) {
@@ -4662,15 +4729,16 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   async function pullRaffle() {
     if (!supabaseEnabled()) return;
     try {
-      const { data, error } = await getSb().from('raffle_draws').select('prize,winner_name,meeting_key').eq('meeting_key', meetingKey());
+      const { data, error } = await getSb().from('raffle_draws').select('prize,winner_name,winner_id,meeting_key,drawn_at').eq('meeting_key', meetingKey());
       if (error) return;
       raffleDraws = Array.isArray(data) ? data : [];
       renderHere();
+      try { maybePlayLiveRaffle(); } catch (e) {}
     } catch (e) {}
   }
 
   async function checkInHere() {
-    if (roomCut()) return;
+    if (!isPatioLive()) return;
     if (!isSignedIn()) {
       try { openImInSignIn(); } catch (e) { startMemberSignIn(); }
       return;
@@ -4743,7 +4811,129 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       return;
     }
     try { await pullRaffle(); } catch (e) {}
-    alert((prize === 'hat' ? 'HAT' : 'BEER') + ' · ' + (pick.name || 'Brother').toUpperCase());
+    try { playRaffleLive(prize, pick.name || 'Brother'); } catch (e) {}
+  }
+
+  let raffleSeen = {};
+  let raffleAnimTimer = null;
+  let patioWatch = null;
+
+  function patioPoolNames() {
+    const ids = (sharedRsvps || []).filter(function (r) { return r && r.showed_up; }).map(function (r) { return r.brother_id; });
+    const names = [];
+    ids.forEach(function (id) {
+      const b = (brothers || []).find(function (x) { return x && x.id === id; });
+      const n = (b && b.name) || firstNameForId(id) || '';
+      if (n) names.push(n);
+    });
+    if (names.length) return names;
+    return (brothers || []).map(function (b) { return b && b.name; }).filter(Boolean);
+  }
+
+  function closeRaffleLive() {
+    if (raffleAnimTimer) { clearTimeout(raffleAnimTimer); raffleAnimTimer = null; }
+    const overlay = document.getElementById('raffle-live');
+    if (overlay) {
+      overlay.classList.add('hidden');
+      overlay.classList.remove('is-landed');
+      overlay.setAttribute('aria-hidden', 'true');
+    }
+    document.body.classList.remove('tb-raffle-live');
+  }
+
+  const RAFFLE_CAST = [
+    { slot: 'hat', file: 'thunder-hat.png' },
+    { slot: 'beard', file: 'thunder-beard.png' },
+    { slot: 'laugh', file: 'thunder-laugh.png' },
+    { slot: 'cigar', file: 'thunder-cigar.png' },
+    { slot: 'grin', file: 'thunder-grin.png' },
+    { slot: 'wink', file: 'thunder-wink.png' }
+  ];
+
+  function paintRaffleCast() {
+    const wrap = document.getElementById('raffle-cast');
+    if (!wrap || wrap.dataset.painted === '1') return;
+    wrap.innerHTML = RAFFLE_CAST.map(function (c) {
+      return '<img class="raffle-cast-face" data-slot="' + c.slot + '" src="assets/tour-faces/' + c.file + '" alt="" width="64" height="64" decoding="async" />';
+    }).join('');
+    wrap.dataset.painted = '1';
+  }
+
+  function playRaffleLive(prize, winner, names) {
+    const overlay = document.getElementById('raffle-live');
+    const nameEl = document.getElementById('raffle-live-name');
+    const prizeEl = document.getElementById('raffle-live-prize');
+    const sub = document.getElementById('raffle-live-sub');
+    if (!overlay || !nameEl) return;
+    if (raffleAnimTimer) { clearTimeout(raffleAnimTimer); raffleAnimTimer = null; }
+    const win = String(winner || 'Brother').trim() || 'Brother';
+    raffleSeen[prize] = win;
+    const pool = (Array.isArray(names) && names.length ? names : patioPoolNames()).slice();
+    if (pool.indexOf(win) === -1) pool.push(win);
+    if (prizeEl) prizeEl.textContent = 'WINNER';
+    const kicker = document.getElementById('raffle-live-kicker');
+    if (kicker) kicker.textContent = 'THE WIN';
+    if (sub) sub.textContent = 'Drawing…';
+    try { paintRaffleCast(); } catch (e) {}
+    overlay.classList.remove('hidden', 'is-landed');
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('tb-raffle-live');
+    const host = document.getElementById('raffle-live-host');
+    if (host) {
+      host.style.animation = 'none';
+      void host.offsetWidth;
+      host.style.animation = '';
+    }
+    const reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    function land() {
+      nameEl.textContent = win.toUpperCase();
+      overlay.classList.add('is-landed');
+      if (sub) sub.textContent = "HE'S GOT IT";
+      try { tbFeedback.confirm(); } catch (e) {}
+    }
+    if (reduce || pool.length < 2) {
+      land();
+      return;
+    }
+    let i = 0;
+    const start = Date.now();
+    function tick() {
+      if (Date.now() - start < 2400) {
+        nameEl.textContent = String(pool[i % pool.length] || 'Brother').toUpperCase();
+        i += 1;
+        raffleAnimTimer = setTimeout(tick, 75 + Math.floor(Math.random() * 45));
+        if (i % 4 === 0) { try { tbFeedback.selection(); } catch (e) {} }
+      } else {
+        land();
+      }
+    }
+    tick();
+  }
+  try { window.playRaffleLive = playRaffleLive; } catch (e) {}
+
+  function maybePlayLiveRaffle() {
+    (raffleDraws || []).forEach(function (d) {
+      if (!d || !d.prize || !d.winner_name) return;
+      const t = d.drawn_at ? Date.parse(d.drawn_at) : 0;
+      if (t && (Date.now() - t) > 90000) {
+        raffleSeen[d.prize] = d.winner_name;
+        return;
+      }
+      if (raffleSeen[d.prize] === d.winner_name) return;
+      playRaffleLive(d.prize, d.winner_name);
+    });
+  }
+
+  function startPatioWatch() {
+    if (patioWatch) return;
+    patioWatch = setInterval(function () {
+      if (!isPatioLive()) { stopPatioWatch(); return; }
+      try { pullRaffle(); } catch (e) {}
+      try { pullRsvps(); } catch (e) {}
+    }, 1400);
+  }
+  function stopPatioWatch() {
+    if (patioWatch) { clearInterval(patioWatch); patioWatch = null; }
   }
 
   function firstNameForId(id) {
@@ -6033,11 +6223,13 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     }
 
 $('#edit-profile-btn').addEventListener('click', () => {
-      openProfileEditor();
+      if (typeof tbGlowHit === 'function') tbGlowHit($('#edit-profile-btn'), 'yellow');
+      if (!isSignedIn()) startMemberSignIn();
+      else openProfileEditor();
     });
     $('#upload-media-btn').addEventListener('click', () => {
       if (supabaseEnabled() && !isSignedIn()) {
-        openAuthGate('Sign in to add a memory the whole brotherhood can see.');
+        startMemberSignIn();
         return;
       }
       if (!supabaseEnabled()) {
@@ -6216,7 +6408,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
 
       if (supabaseEnabled() && !isSignedIn()) {
         closeModal('media-modal');
-        openAuthGate('Sign in to add a memory the whole brotherhood can see.');
+        startMemberSignIn();
         return;
       }
 
@@ -6315,34 +6507,15 @@ $('#edit-profile-btn').addEventListener('click', () => {
       authSignInBtn.dataset.bound = '1';
       authSignInBtn.addEventListener('click', async () => {
         const email = ($('#auth-email') && $('#auth-email').value || '').trim();
-        const imin = !!(document.getElementById('auth-gate') && document.getElementById('auth-gate').classList.contains('auth-gate-imin'));
-        if (imin) {
-          if (!email) return setAuthError('Email first.');
-          setAuthError('');
-          authSignInBtn.disabled = true;
-          try {
-            await authMagicLink(email);
-            setAuthError('Link sent.');
-            setTimeout(function () { try { closeAuthGate(); } catch (e2) {} }, 900);
-          } catch (e) {
-            setAuthError((e && e.message) || 'Could not send the link.');
-          } finally {
-            authSignInBtn.disabled = false;
-          }
-          return;
-        }
-        const password = ($('#auth-password') && $('#auth-password').value || '');
-        if (!email || !password) return setAuthError('Email and password required.');
+        if (!email) return setAuthError('Email first.');
         setAuthError('');
         authSignInBtn.disabled = true;
         try {
-          await authSignIn(email, password);
-          closeAuthGate();
-          await pullMemories();
-          renderMedia();
-          renderLastFire();
+          await authMagicLink(email);
+          setAuthError('Link sent.');
+          setTimeout(function () { try { closeAuthGate(); } catch (e2) {} }, 900);
         } catch (e) {
-          setAuthError((e && e.message) || 'Sign in failed.');
+          setAuthError((e && e.message) || 'Could not send the link.');
         } finally {
           authSignInBtn.disabled = false;
         }
@@ -6352,23 +6525,15 @@ $('#edit-profile-btn').addEventListener('click', () => {
       authSignUpBtn.dataset.bound = '1';
       authSignUpBtn.addEventListener('click', async () => {
         const email = ($('#auth-email') && $('#auth-email').value || '').trim();
-        const password = ($('#auth-password') && $('#auth-password').value || '');
-        if (!email || !password) return setAuthError('Email and password required.');
-        if (password.length < 6) return setAuthError('Password needs at least 6 characters.');
+        if (!email) return setAuthError('Email first.');
         setAuthError('');
         authSignUpBtn.disabled = true;
         try {
-          const data = await authSignUp(email, password);
-          if (data && data.session) {
-            closeAuthGate();
-            await pullMemories();
-            renderMedia();
-            renderLastFire();
-          } else {
-            setAuthError('Account started. If nothing happens, check email — or ask leadership to turn off email confirm in Supabase Auth. Then Sign In.');
-          }
+          await authMagicLink(email);
+          setAuthError('Link sent.');
+          setTimeout(function () { try { closeAuthGate(); } catch (e2) {} }, 900);
         } catch (e) {
-          setAuthError((e && e.message) || 'Could not create account.');
+          setAuthError((e && e.message) || 'Could not send the link.');
         } finally {
           authSignUpBtn.disabled = false;
         }
@@ -6412,11 +6577,10 @@ $('#edit-profile-btn').addEventListener('click', () => {
         closeAuthGate();
       });
     }
-    // Enter in password field = Sign In (fewer taps)
-    const authPw = $('#auth-password');
-    if (authPw && authPw.dataset.bound !== '1') {
-      authPw.dataset.bound = '1';
-      authPw.addEventListener('keydown', (e) => {
+    const authEmail = $('#auth-email');
+    if (authEmail && authEmail.dataset.enterBound !== '1') {
+      authEmail.dataset.enterBound = '1';
+      authEmail.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && authSignInBtn) authSignInBtn.click();
       });
     }
@@ -7818,6 +7982,17 @@ $('#thunder-input').addEventListener('keydown', (e) => {
         if (!requireLeader()) return;
         openModal('admin-room-modal');
         loadFounderRoom();
+        try { syncPatioToggle(); } catch (e) {}
+      });
+    }
+    const patioToggle = document.getElementById('patio-toggle-btn');
+    if (patioToggle && patioToggle.dataset.bound !== '1') {
+      patioToggle.dataset.bound = '1';
+      patioToggle.addEventListener('click', function () {
+        if (!requireLeader()) return;
+        patioOverride = isPatioLive() ? false : true;
+        try { syncPatioToggle(); } catch (e) {}
+        try { renderHere(); } catch (e) {}
       });
     }
     const adminSmsClub = $('#admin-sms-club-btn');
@@ -9128,7 +9303,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
 
   // ---------- PRODUCT TOUR — 7-slide (restored 20260818) ----------
-  const TB_TOUR_VERSION = 41;
+  const TB_TOUR_VERSION = 42;
   function tourStorageKey() { return 'thunderTourV' + TB_TOUR_VERSION; }
   function isTourComplete() {
     try {
@@ -9150,8 +9325,8 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   const TB_TOUR_STEPS = [
     {
       id: 'welcome',
-      headline: 'MEET THUNDER',
-      sub: 'YOUR GUIDE IN THE ROOM',
+      headline: 'FOLLOW ME',
+      sub: 'I\u2019LL SHOW YOU THE ROOM',
       body: 'I\u2019m Thunder. I\u2019ve got your back. Let me show you around.',
       nextLabel: 'LET\u2019S GO'
     },
@@ -9560,6 +9735,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     __tourIdx = 0;
     showTour();
   }
+  try { window.startTour = startTour; } catch (e) {}
 
   function tourNext() {
     if (!__tourActive) return;
@@ -9788,6 +9964,22 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       if (hat && hat.dataset.bound !== '1') {
         hat.dataset.bound = '1';
         hat.addEventListener('click', function () { drawRaffle('hat'); });
+      }
+      const raffleLive = document.getElementById('raffle-live');
+      if (raffleLive && raffleLive.dataset.bound !== '1') {
+        raffleLive.dataset.bound = '1';
+        raffleLive.addEventListener('click', function (e) {
+          if (e.target && e.target.id === 'raffle-live-close') return;
+          if (raffleLive.classList.contains('is-landed')) closeRaffleLive();
+        });
+      }
+      const raffleClose = document.getElementById('raffle-live-close');
+      if (raffleClose && raffleClose.dataset.bound !== '1') {
+        raffleClose.dataset.bound = '1';
+        raffleClose.addEventListener('click', function (e) {
+          e.stopPropagation();
+          closeRaffleLive();
+        });
       }
     })();
     (function bindAxumCoffee() {

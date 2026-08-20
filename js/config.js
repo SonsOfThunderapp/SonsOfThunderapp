@@ -1,10 +1,17 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260820-seat1',
+  APP_BUILD: '20260820-email1',
   /* SONS OF THUNDER — ROOM CUT 1.0 (locked 2026-08-20)
      Member-facing: Home poster, splash→Home, Thunder quiet, real brothers/memories,
-     leadership infrastructure. Freeze (hide, do not delete): raffle, Axum, FOMO count, I'm Here. */
+     Patio raffle is leader-activated (THE ROOM → OPEN THE PATIO).
+     Freeze (hide, do not delete): FOMO in-count. */
   ROOM_CUT: '1.0',
+  /* RAFFLE WIN POSTER locked 2026-08-20 — IMG_7854 / assets/raffle-win-lock.jpg
+     THE WIN + giant WINNER + gold ticket (name + HE'S GOT IT) + Thunder host bottom + cast around.
+     No fake TICKETS/PLAY/LEADERBOARD nav. Official bolt-heads only. */
+  /* VISUAL PROOF PROTOCOL locked 2026-08-20 — VISUAL-PROOF-PROTOCOL.md
+     Eyes approve. Show the visual in-chat. No description-as-proof. Design ≠ runtime. */
+  VISUAL_PROOF_PROTOCOL: true,
   /* PRE-SHIP HUNTER locked 2026-08-20. Run before every credit. Phone is never first prototype. */
   PRE_SHIP_HUNTER: true,
   /* AUTHORITATIVE LINEAGE — do not package from mixed branches */
@@ -90,6 +97,7 @@ window.TB_CONFIG = {
     livingHome: true, // gathering-day phases + personal name (never guess)
     theCodeRedGlow: true, // THE CODE = brand red #E30600 fill + red breathe glow — never yellow chip
     splashLogoPhoneCenter: true, // splash mark dead-center of the phone viewport
+    emailOnlyAuth: true, // every sign-up/sign-in = email magic link. No password. Same LOCK YOUR SEAT sheet.
   },
 
 

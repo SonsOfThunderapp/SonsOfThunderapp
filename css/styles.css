@@ -720,7 +720,7 @@ h1.code-title-glow {
   padding-bottom: var(--safe-bottom);
   background: #0a0a0a; border-top: 1px solid #1a1a1a;
   display: flex; justify-content: space-around; align-items: center;
-  z-index: 40000 !important;
+  z-index: 300 !important;
   pointer-events: auto !important;
   transform: none !important;
   opacity: 1 !important;
@@ -2521,6 +2521,10 @@ h1.code-title-glow {
   padding: 0;
   font-size: 13px;
 }
+#auth-gate #auth-password,
+#auth-gate #auth-signup-btn,
+#auth-gate #auth-forgot-btn,
+#auth-gate #auth-hint,
 .auth-gate-imin .auth-sub,
 .auth-gate-imin #auth-password,
 .auth-gate-imin #auth-hint,
@@ -4363,7 +4367,26 @@ h1.code-title-glow,
   -webkit-tap-highlight-color: transparent;
 }
 #view-brothers .btn-auth-entry,
-#auth-entry-btn {
+#auth-entry-btn.btn-auth-entry {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin: 0 0 16px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(254, 241, 5, 0.35);
+  background: #111;
+  color: #FEF105;
+  font-family: var(--font-display, "Bebas Neue", Impact, sans-serif);
+  font-size: 18px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+#view-brothers .btn-auth-entry.hidden,
+#auth-entry-btn.hidden {
   display: none !important;
 }
 #view-brothers .btn-brothers-seat,
@@ -6152,14 +6175,15 @@ img.about-logo,
   text-align: center;
   font-size: 11px;
   letter-spacing: 0.22em;
-  color: #9a9a9a;
+  color: #FEF105;
   margin: 4px 0 6px;
   font-weight: 700;
+  animation: brotherNamePulse var(--tb-breathe);
 }
 .tb-tour-boards .tb-tour-headline {
   text-align: center;
   font-family: var(--font-display);
-  font-size: clamp(28px, 8vw, 40px);
+  font-size: clamp(26px, 7vw, 36px);
   color: #fff !important;
   letter-spacing: 0.04em;
   line-height: 0.95;
@@ -6170,11 +6194,11 @@ img.about-logo,
 .tb-tour-boards .tb-tour-sub {
   text-align: center;
   font-family: var(--font-display);
-  font-size: clamp(22px, 6.5vw, 32px);
-  color: #FEF105;
-  letter-spacing: 0.03em;
+  font-size: clamp(16px, 4.8vw, 22px);
+  color: #bdbdbd;
+  letter-spacing: 0.04em;
   line-height: 1;
-  margin: 4px 0 12px;
+  margin: 6px 0 10px;
 }
 .tb-tour-hero {
   display: flex;
@@ -6208,9 +6232,9 @@ img.about-logo,
   animation: tbLiveThunderIdle var(--tb-breathe);
 }
 .tb-phone {
-  display: none;
-  width: min(78%, 280px);
-  margin: 0 auto 12px;
+  display: block;
+  width: min(86%, 300px);
+  margin: 0 auto 10px;
   background: #111;
   border: 2px solid #2a2a2a;
   border-radius: 22px;
@@ -6867,23 +6891,26 @@ h1, h2, h3,
 }
 .tb-tour-close { z-index: 90; }
 
-/* Slide 1 layout: Thunder above the words. Never cover the bubble. */
+/* Slide 1: logo is the star. Thunder is the guide. Never cover the mark. */
 .tb-tour-stage[data-board="0"] .tb-tour-hero {
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   gap: 10px;
-  perspective: 520px;
-  perspective-origin: 50% 30%;
+  perspective: none;
+  margin: 4px 0 8px;
 }
 .tb-tour-stage[data-board="0"] #tb-tour-host.tb-guide-thunder {
-  order: -1;
-  width: min(52vw, 200px) !important;
+  order: 0;
+  width: 88px !important;
+  max-width: 88px;
   z-index: 2 !important;
-  margin: 4px 0 0;
+  margin: 0;
+  flex: 0 0 88px;
 }
 .tb-tour-stage[data-board="0"] .tb-guide-bubble {
-  width: 100%;
-  max-width: 100%;
+  width: auto;
+  flex: 1;
+  max-width: none;
   z-index: 10 !important;
   position: relative;
 }
@@ -8119,12 +8146,6 @@ body.tb-room-cut #reminder-btn,
 body.tb-room-cut #text-leader-btn,
 body.tb-room-cut #home-member-cta,
 body.tb-room-cut #in-count,
-body.tb-room-cut #here-btn,
-body.tb-room-cut #here-status,
-body.tb-room-cut #raffle-board,
-body.tb-room-cut #axum-chip,
-body.tb-room-cut #axum-drop,
-body.tb-room-cut #axum-card,
 body.tb-room-cut #cal-confirm-sheet,
 body.tb-room-cut #drop-shot-btn,
 body.tb-room-cut #auth-sub,
@@ -8350,5 +8371,425 @@ h1.about-title.code-title.code-title-glow {
   }
 }
 
+/* LIVE RAFFLE — locked poster IMG_7854 / assets/raffle-win-lock.jpg
+   THE WIN + WINNER + ornate ticket (name + HE'S GOT IT) + host bottom + cast.
+   No fake TICKETS/PLAY/LEADERBOARD nav. */
+.raffle-live {
+  position: fixed;
+  inset: 0;
+  z-index: 9800;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 16px 28px;
+  overflow: hidden;
+  animation: raffleFlashIn 0.38s ease-out;
+}
+.raffle-live::before {
+  content: "";
+  position: absolute;
+  inset: 12% 8% 28%;
+  background: radial-gradient(ellipse at center, rgba(254,241,5,0.16) 0%, transparent 68%);
+  pointer-events: none;
+  z-index: 0;
+}
+.raffle-live.hidden { display: none !important; animation: none; }
+.raffle-live-close {
+  position: absolute;
+  top: calc(10px + var(--safe-top, 0px));
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  font-size: 22px;
+  line-height: 36px;
+  z-index: 6;
+  cursor: pointer;
+}
+.raffle-live-inner {
+  text-align: center;
+  width: min(90vw, 340px);
+  position: relative;
+  z-index: 3;
+  padding-top: 8px;
+  padding-bottom: 132px;
+}
+.raffle-live-kicker {
+  font-family: var(--font-display, "Bebas Neue", Impact, sans-serif);
+  font-size: 13px;
+  letter-spacing: 0.42em;
+  color: #FEF105;
+  opacity: 0.85;
+  margin-bottom: 4px;
+}
+.raffle-live:not(.is-landed) .raffle-live-kicker { opacity: 0; }
+.raffle-live-prize {
+  font-family: var(--font-display, "Bebas Neue", Impact, sans-serif);
+  font-size: 64px;
+  line-height: 0.9;
+  letter-spacing: 0.04em;
+  color: #FEF105;
+  text-shadow:
+    0 0 18px rgba(254,241,5,0.75),
+    0 0 42px rgba(254,241,5,0.35);
+  margin: 0 0 16px;
+}
+.raffle-live-window {
+  position: relative;
+  border: 3px solid #E8B923;
+  border-radius: 6px;
+  padding: 22px 16px 18px;
+  background: #0a0a0a;
+  box-shadow:
+    0 0 0 1px #FEF105,
+    0 0 24px rgba(254,241,5,0.28),
+    inset 0 0 0 1px rgba(254,241,5,0.25);
+  min-height: 108px;
+}
+.raffle-live-name {
+  font-family: var(--font-display, "Bebas Neue", Impact, sans-serif);
+  font-size: 48px;
+  letter-spacing: 0.04em;
+  color: #fff;
+  line-height: 1;
+  word-break: break-word;
+}
+.raffle-live-sub {
+  margin-top: 10px;
+  color: #888;
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+.raffle-live.is-landed .raffle-live-sub {
+  color: #FEF105;
+  letter-spacing: 0.28em;
+}
+.raffle-live.is-landed .raffle-live-sub::before,
+.raffle-live.is-landed .raffle-live-sub::after {
+  content: "—";
+  padding: 0 8px;
+  opacity: 0.7;
+}
+@keyframes raffleFlashIn {
+  0% { opacity: 0; background: rgba(254,241,5,0.22); }
+  35% { opacity: 1; }
+  100% { opacity: 1; background: #000; }
+}
+.raffle-live.is-landed { animation: raffleWinFlash 0.5s ease-out; }
+@keyframes raffleWinFlash {
+  0% { background: #3a3100; }
+  100% { background: #000; }
+}
+@keyframes raffleTicketSlam {
+  0% { transform: scale(0.82); }
+  48% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+.raffle-live.is-landed .raffle-live-name {
+  color: #FEF105;
+  text-shadow:
+    0 0 14px rgba(254,241,5,0.9),
+    0 0 36px rgba(254,241,5,0.5);
+}
+@keyframes raffleNameSlam {
+  0% { transform: scale(0.42); opacity: 0.35; }
+  55% { transform: scale(1.16); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.raffle-live.is-landed .raffle-live-prize {
+  animation: raffleWinLabel 0.55s ease-out both, raffleWinnerParty 1.8s ease-in-out 0.55s infinite;
+}
+@keyframes raffleWinnerParty {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.04); filter: brightness(1.18); }
+}
+.raffle-live.is-landed .raffle-live-kicker {
+  animation: brotherNamePulse var(--tb-breathe);
+}
+.raffle-live.is-landed .raffle-live-window {
+  animation: raffleTicketSlam 0.55s cubic-bezier(0.18, 1.4, 0.28, 1) both, raffleTicketBreathe 2.2s ease-in-out 0.55s infinite;
+}
+@keyframes raffleTicketBreathe {
+  0%, 100% { box-shadow: 0 0 0 1px #FEF105, 0 0 24px rgba(254,241,5,0.28), inset 0 0 0 1px rgba(254,241,5,0.25); }
+  50% { box-shadow: 0 0 0 1px #FEF105, 0 0 36px rgba(254,241,5,0.5), inset 0 0 0 1px rgba(254,241,5,0.45); }
+}
+.raffle-live.is-landed .raffle-live-name {
+  animation: raffleNameSlam 0.7s cubic-bezier(0.18, 1.55, 0.28, 1) both, raffleNameParty 1.6s ease-in-out 0.7s infinite;
+}
+@keyframes raffleNameParty {
+  0%, 100% { text-shadow: 0 0 14px rgba(254,241,5,0.9), 0 0 36px rgba(254,241,5,0.5); }
+  50% { text-shadow: 0 0 22px rgba(254,241,5,1), 0 0 48px rgba(254,241,5,0.7); }
+}
+.raffle-live.is-landed .raffle-live-host {
+  animation: raffleHostNod 1.15s ease-in-out 1 both, raffleHostParty 2.2s ease-in-out 1.15s infinite;
+}
+@keyframes raffleHostParty {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  40% { transform: translateY(-8px) rotate(-4deg); }
+  70% { transform: translateY(-3px) rotate(5deg); }
+}
+@keyframes raffleWinLabel {
+  0% { transform: scale(0.7); opacity: 0.4; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+body.tb-raffle-live #thunder-fab {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden;
+}
+.raffle-live-host {
+  position: absolute;
+  bottom: 4%;
+  left: 50%;
+  width: 132px;
+  height: 132px;
+  margin-left: -66px;
+  object-fit: contain;
+  z-index: 4;
+  pointer-events: none;
+  animation: raffleHostEnter 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  filter: drop-shadow(0 0 16px rgba(254,241,5,0.35));
+}
+@keyframes raffleHostEnter {
+  0% { transform: translate(38vw, 12vh) scale(0.42); opacity: 0.25; }
+  62% { transform: translate(-4px, -8px) scale(1.08); opacity: 1; }
+  100% { transform: translate(0, 0) scale(1); opacity: 1; }
+}
+@keyframes raffleHostNod {
+  0% { transform: rotate(0deg) translateY(0) scale(1); }
+  32% { transform: rotate(16deg) translateY(10px) scale(1.08); }
+  68% { transform: rotate(-6deg) translateY(-4px) scale(1.04); }
+  100% { transform: rotate(0deg) translateY(0) scale(1); }
+}
+.raffle-cast {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+.raffle-cast-face {
+  position: absolute;
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  opacity: 0;
+  animation: raffleCastIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  filter: drop-shadow(0 0 8px rgba(254,241,5,0.25));
+}
+.raffle-cast-face[data-slot="laugh"] { left: 2%; top: 28%; animation-delay: 0.18s; }
+.raffle-cast-face[data-slot="cigar"] { left: 1%; top: 48%; animation-delay: 0.26s; }
+.raffle-cast-face[data-slot="hat"] { left: 6%; bottom: 22%; animation-delay: 0.12s; }
+.raffle-cast-face[data-slot="beard"] { right: 2%; top: 26%; animation-delay: 0.22s; }
+.raffle-cast-face[data-slot="grin"] { right: 1%; top: 48%; animation-delay: 0.34s; }
+.raffle-cast-face[data-slot="wink"] { right: 6%; bottom: 22%; animation-delay: 0.4s; }
+@keyframes raffleCastIn {
+  from { opacity: 0; transform: scale(0.4) translateY(18px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.raffle-live.is-landed .raffle-cast-face[data-slot="laugh"] { animation: raffleCelebrateLaugh 0.55s ease-in-out infinite; }
+.raffle-live.is-landed .raffle-cast-face[data-slot="cigar"] { animation: raffleCelebrateCigar 1.35s ease-in-out infinite; }
+.raffle-live.is-landed .raffle-cast-face[data-slot="hat"] { animation: raffleCelebrateHat 0.95s ease-in-out infinite; }
+.raffle-live.is-landed .raffle-cast-face[data-slot="beard"] { animation: raffleCelebrateBeard 1.15s ease-in-out infinite; }
+.raffle-live.is-landed .raffle-cast-face[data-slot="grin"] { animation: raffleCelebrateGrin 0.75s ease-in-out infinite; }
+.raffle-live.is-landed .raffle-cast-face[data-slot="wink"] { animation: raffleCelebrateWink 1.2s ease-in-out infinite; }
+@keyframes raffleCelebrateLaugh {
+  0%, 100% { transform: rotate(-12deg) scale(1) translateY(0); }
+  50% { transform: rotate(14deg) scale(1.12) translateY(-6px); }
+}
+@keyframes raffleCelebrateCigar {
+  0%, 100% { transform: rotate(-8deg) translateY(0); }
+  50% { transform: rotate(10deg) translateY(-10px); }
+}
+@keyframes raffleCelebrateHat {
+  0%, 100% { transform: rotate(-16deg) translateY(0); }
+  50% { transform: rotate(12deg) translateY(-8px); }
+}
+@keyframes raffleCelebrateBeard {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-12px) rotate(6deg); }
+}
+@keyframes raffleCelebrateGrin {
+  0%, 100% { transform: scale(1) rotate(-4deg); }
+  50% { transform: scale(1.18) rotate(8deg); }
+}
+@keyframes raffleCelebrateWink {
+  0%, 45%, 55%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.92) rotate(-8deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .raffle-live-host, .raffle-cast-face,
+  .raffle-live.is-landed .raffle-cast-face[data-slot="laugh"],
+  .raffle-live.is-landed .raffle-cast-face[data-slot="cigar"],
+  .raffle-live.is-landed .raffle-cast-face[data-slot="hat"],
+  .raffle-live.is-landed .raffle-cast-face[data-slot="beard"],
+  .raffle-live.is-landed .raffle-cast-face[data-slot="grin"],
+  .raffle-live.is-landed .raffle-cast-face[data-slot="wink"],
+  .raffle-live.is-landed .raffle-live-window,
+  .raffle-live.is-landed .raffle-live-name,
+  .raffle-live.is-landed .raffle-live-prize {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  body.tb-raffle-live #thunder-fab { opacity: 0 !important; }
+}
 
 
+/* TOUR CROP FIX 20260820-tourfit1
+   Root cause: .bottom-nav z-index 40000 sat ON TOP of the tour (12000),
+   plus Thunder at 200px * 1.22 scale blew the card past the Safari viewport.
+   Slide 1 must fit: progress, titles, Thunder, bubble, LET'S GO — no crop. */
+body.tb-tour-open .bottom-nav,
+body.tb-tour-open .thunder-fab,
+body.tb-tour-open #thunder-fab {
+  visibility: hidden !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
+}
+body.tb-tour-open #splash {
+  display: none !important;
+}
+.tb-tour.tb-tour-slides,
+#tb-tour.tb-tour {
+  z-index: 50000 !important;
+  inset: 0 !important;
+  height: 100svh !important;
+  max-height: 100svh !important;
+  padding: max(8px, env(safe-area-inset-top, 8px)) 10px max(8px, env(safe-area-inset-bottom, 8px)) !important;
+  align-items: stretch !important;
+  justify-content: center !important;
+  background: #000 !important;
+  box-sizing: border-box;
+}
+.tb-tour-boards .tb-tour-stage,
+.tb-tour-stage {
+  width: 100% !important;
+  max-width: 430px !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  margin: 0 auto;
+  border-radius: 18px !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-sizing: border-box;
+}
+.tb-tour-boards .tb-tour-headline,
+.tb-tour-boards .tb-tour-sub,
+.tb-tour-boards .tb-tour-progress {
+  opacity: 1 !important;
+  flex-shrink: 0;
+}
+.tb-tour-boards .tb-tour-headline {
+  font-size: clamp(22px, 6.4vw, 32px) !important;
+}
+.tb-tour-boards .tb-tour-sub {
+  font-size: clamp(16px, 5vw, 24px) !important;
+  margin: 2px 0 8px !important;
+}
+.tb-tour-hero {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: visible;
+}
+.tb-tour-actions {
+  flex-shrink: 0 !important;
+  position: relative !important;
+  bottom: auto !important;
+  margin-top: auto !important;
+  background: #000 !important;
+  z-index: 20 !important;
+  padding: 8px 12px 12px !important;
+}
+.tb-tour-dots { flex-shrink: 0; }
+
+/* Slide 1: Thunder fits above the bubble. No 200px giant. */
+.tb-tour-stage[data-board="0"] .tb-phone {
+  display: none !important;
+}
+.tb-tour-stage[data-board="0"] .tb-tour-hero {
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+}
+.tb-tour-stage[data-board="0"] #tb-tour-host.tb-guide-thunder,
+.tb-tour-stage[data-board="0"] #tb-tour-host.tb-guide-thunder.tb-host-alive {
+  width: min(34vw, 128px) !important;
+  max-width: 128px !important;
+  max-height: 26vh !important;
+  height: auto !important;
+}
+.tb-tour-stage[data-board="0"] .tb-guide-bubble {
+  width: calc(100% - 8px) !important;
+  max-width: 340px !important;
+  flex-shrink: 0;
+}
+@keyframes tbHostZoomTip {
+  0%   { transform: scale(0.4) rotateX(0deg) rotateZ(0deg); opacity: 0.25; }
+  30%  { transform: scale(1) rotateX(0deg) rotateZ(0deg); opacity: 1; }
+  50%  { transform: scale(1.06) rotateX(-18deg) rotateZ(-4deg); }
+  78%  { transform: scale(1.06) rotateX(-18deg) rotateZ(-4deg); }
+  100% { transform: scale(1) rotateX(0deg) rotateZ(0deg); }
+}
+@keyframes tbHostFloatNotice {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-8px) scale(1.03); }
+}
+
+/* LAYER LAW 20260820-layers1
+   Nav was z-index 40000 and sat on top of tour, Ask Thunder, raffle,
+   auth, memories, brother detail, announcements, Axum, install, calendar.
+   Stack: content < nav 300 < FAB 350 < sheets 5000+ < tour 50000. */
+.bottom-nav { z-index: 300 !important; }
+.thunder-fab, #thunder-fab { z-index: 350 !important; }
+.modal { z-index: 5000 !important; }
+.thunder-modal { z-index: 5200 !important; }
+.axum-drop, .axum-card { z-index: 5100 !important; }
+.memory-viewer { z-index: 5300 !important; }
+.brother-detail { z-index: 5400 !important; }
+.info-detail { z-index: 5500 !important; }
+.auth-gate { z-index: 5600 !important; }
+.cal-confirm-sheet { z-index: 5700 !important; }
+.ios-install-overlay { z-index: 5800 !important; }
+.welcome { z-index: 5900 !important; }
+.raffle-live { z-index: 20000 !important; }
+.tb-tour.tb-tour-slides, #tb-tour.tb-tour { z-index: 50000 !important; }
+
+body.tb-tour-open .bottom-nav,
+body.tb-ask-open .bottom-nav,
+body.tb-raffle-live .bottom-nav,
+body:has(#tb-tour:not(.hidden)) .bottom-nav,
+body:has(#thunder-modal:not(.hidden)) .bottom-nav,
+body:has(#raffle-live:not(.hidden)) .bottom-nav,
+body:has(#auth-gate:not(.hidden)) .bottom-nav,
+body:has(.memory-viewer:not(.hidden)) .bottom-nav,
+body:has(.brother-detail:not(.hidden)) .bottom-nav,
+body:has(.info-detail:not(.hidden)) .bottom-nav,
+body:has(#install-modal:not(.hidden)) .bottom-nav,
+body:has(#axum-drop:not(.hidden)) .bottom-nav,
+body:has(#axum-card:not(.hidden)) .bottom-nav,
+body:has(.welcome:not(.hidden)) .bottom-nav,
+body:has(.cal-confirm-sheet:not(.hidden)) .bottom-nav,
+body:has(.ios-install-overlay:not(.hidden)) .bottom-nav,
+body:has(#splash:not(.splash-done):not(.hidden)) .bottom-nav {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Tour hosts never blow the Safari viewport on any slide */
+.tb-tour-boards #tb-tour-host.tb-guide-thunder,
+.tb-tour-boards #tb-tour-host.tb-guide-thunder.tb-host-alive,
+.tb-tour-stage[data-board="5"] #tb-tour-host.tb-guide-thunder,
+.tb-tour-stage[data-board="5"] #tb-tour-host.tb-host-bond {
+  max-height: 28vh !important;
+  max-width: min(42vw, 148px) !important;
+  width: min(42vw, 148px) !important;
+}

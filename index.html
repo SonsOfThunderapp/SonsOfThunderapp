@@ -33,10 +33,10 @@
   
   <!-- Web App Manifest -->
   <link rel="manifest" href="manifest.json" />
-  <link rel="preload" as="image" href="assets/logo@2x.png?v=20260820-seat1" />
+  <link rel="preload" as="image" href="assets/logo@2x.png?v=20260820-email1" />
   <link rel="preload" as="image" href="assets/thunder-cool-fab@2x.png?v=20260819-nogold2" />
   
-  <link rel="stylesheet" href="css/styles.css?v=20260820-seat1" />
+  <link rel="stylesheet" href="css/styles.css?v=20260820-email1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -46,14 +46,14 @@
   <div id="splash" class="splash" aria-hidden="true">
     <div class="splash-inner">
       <div class="splash-logo-wrap">
-        <img src="assets/logo@2x.png?v=20260820-seat1"
-             srcset="assets/logo@2x.png?v=20260820-seat1 1200w, assets/logo@3x.png?v=20260820-seat1 1800w"
+        <img src="assets/logo@2x.png?v=20260820-email1"
+             srcset="assets/logo@2x.png?v=20260820-email1 1200w, assets/logo@3x.png?v=20260820-email1 1800w"
              sizes="min(82vw, 340px)"
              alt="Sons of Thunder"
              class="splash-mark splash-logo"
              width="1200"
              height="831" />
-        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-seat1" alt="" aria-hidden="true" width="1200" height="831" />
+        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-email1" alt="" aria-hidden="true" width="1200" height="831" />
       </div>
       <p class="splash-line hidden" aria-hidden="true">THUNDER DOESN’T DULL</p>
     </div>
@@ -65,8 +65,8 @@
     <header id="main-header" class="header">
       <div class="logo-wrap">
         <img
-          src="assets/logo@2x.png?v=20260820-seat1"
-          srcset="assets/logo@2x.png?v=20260820-seat1 1200w, assets/logo@3x.png?v=20260820-seat1 1800w"
+          src="assets/logo@2x.png?v=20260820-email1"
+          srcset="assets/logo@2x.png?v=20260820-email1 1200w, assets/logo@3x.png?v=20260820-email1 1800w"
           sizes="(max-width: 480px) 72vw, 320px"
           alt="Sons of Thunder"
           class="logo"
@@ -75,7 +75,7 @@
           height="831"
           decoding="async"
         />
-        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-seat1" alt="" aria-hidden="true" width="1200" height="831" />
+        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-email1" alt="" aria-hidden="true" width="1200" height="831" />
       </div>
     </header>
 
@@ -149,13 +149,16 @@
         <div class="container">
           <div class="section-header">
             <h1 id="brothers-section-title">Brothers</h1>
-            <button type="button" id="edit-profile-btn" class="btn-brothers-seat">YOUR SEAT</button>
+            <button type="button" id="edit-profile-btn" class="btn-brothers-seat hidden">EDIT PROFILE</button>
           </div>
           <div id="auth-session-bar" class="auth-session-bar auth-session-bar-brothers hidden">
             <span class="auth-who" id="auth-who"></span>
             <button type="button" id="auth-signout-btn">Sign out</button>
           </div>
-          <button type="button" id="auth-entry-btn" class="btn-auth-entry hidden" hidden aria-hidden="true">SIGN IN</button>
+          <button type="button" id="auth-entry-btn" class="btn-auth-entry">
+            SIGN IN
+            <span class="btn-auth-entry-sub">Email unlocks the whole experience</span>
+          </button>
           <div id="brothers-grid" class="brothers-grid"></div>
         </div>
       </section>
@@ -398,24 +401,14 @@
     <div class="tb-tour-stage" role="dialog" aria-modal="true" aria-labelledby="tb-tour-headline" data-board="0">
       <button type="button" class="tb-tour-close" id="tb-tour-close" aria-label="Close tour">×</button>
       <p class="tb-tour-progress" id="tb-tour-progress">1 OF 6</p>
-      <h2 id="tb-tour-headline" class="tb-tour-headline">WELCOME TO</h2>
-      <p id="tb-tour-sub" class="tb-tour-sub">SONS OF THUNDER</p>
-      <div class="tb-tour-hero">
-        <img id="tb-tour-host" class="tb-guide-thunder"
-             src="assets/thunder-tour-host.png?v=20260819-nogold2"
-             srcset="assets/thunder-tour-host.png?v=20260819-nogold2 400w, assets/thunder-tour-host@2x.png?v=20260819-nogold2 800w"
-             sizes="(max-width: 480px) 38vw, 148px"
-             alt="" />
-      </div>
+      <h2 id="tb-tour-headline" class="tb-tour-headline">FOLLOW ME</h2>
+      <p id="tb-tour-sub" class="tb-tour-sub">I’LL SHOW YOU THE ROOM</p>
       <div class="tb-phone" id="tb-tour-phone">
-        <div class="tb-guide-bubble">
-          <p id="tb-tour-body" class="tb-tour-body"></p>
-        </div>
         <div class="tb-tour-slide-frame" id="tb-tour-live">
           <div class="tb-live-slide is-on" data-slide="0">
             <div class="tb-live-logo-wrap">
-              <img class="tb-live-logo" src="assets/logo@2x.png?v=20260820-seat1" alt="Sons of Thunder" width="1200" height="831" />
-              <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-seat1" alt="" aria-hidden="true" width="1200" height="831" />
+              <img class="tb-live-logo" src="assets/logo@2x.png?v=20260820-email1" alt="Sons of Thunder" width="1200" height="831" />
+              <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-email1" alt="" aria-hidden="true" width="1200" height="831" />
             </div>
           </div>
           <div class="tb-live-slide" data-slide="1">
@@ -442,9 +435,9 @@
           <div class="tb-live-slide" data-slide="3">
             <div class="tb-live-label">MEMORIES</div>
             <div class="tb-live-mem-row tb-live-mem-real">
-              <img class="tb-live-mem tb-live-mem-shot" src="assets/tour-memories/real-patio.jpg?v=20260820-seat1" alt="" />
-              <img class="tb-live-mem tb-live-mem-shot" src="assets/tour-memories/real-bowl.jpg?v=20260820-seat1" alt="" />
-              <img class="tb-live-mem tb-live-mem-shot" src="assets/tour-memories/real-tree.jpg?v=20260820-seat1" alt="" />
+              <img class="tb-live-mem tb-live-mem-shot" src="assets/tour-memories/real-patio.jpg?v=20260820-email1" alt="" />
+              <img class="tb-live-mem tb-live-mem-shot" src="assets/tour-memories/real-bowl.jpg?v=20260820-email1" alt="" />
+              <img class="tb-live-mem tb-live-mem-shot" src="assets/tour-memories/real-tree.jpg?v=20260820-email1" alt="" />
             </div>
             <div class="tb-live-drop">DROP A SHOT</div>
           </div>
@@ -458,6 +451,16 @@
             <p class="tb-live-muted">Tap when you’re ready. I don’t listen until you do.</p>
             <p class="tb-live-allset">YOU’RE READY, BROTHER.</p>
           </div>
+        </div>
+      </div>
+      <div class="tb-tour-hero">
+        <img id="tb-tour-host" class="tb-guide-thunder"
+             src="assets/thunder-tour-host.png?v=20260819-nogold2"
+             srcset="assets/thunder-tour-host.png?v=20260819-nogold2 400w, assets/thunder-tour-host@2x.png?v=20260819-nogold2 800w"
+             sizes="96px"
+             alt="" />
+        <div class="tb-guide-bubble">
+          <p id="tb-tour-body" class="tb-tour-body"></p>
         </div>
       </div>
       <div class="tb-tour-dots" id="tb-tour-dots" aria-hidden="true"></div>
@@ -625,6 +628,21 @@
     <div class="memory-viewer-caption" id="memory-viewer-caption"></div>
   </div>
 
+  <!-- LIVE RAFFLE — locked win poster IMG_7854. THE WIN / WINNER / ticket / host / cast. -->
+  <div id="raffle-live" class="raffle-live hidden" role="dialog" aria-modal="true" aria-hidden="true">
+    <button type="button" id="raffle-live-close" class="raffle-live-close" aria-label="Close">×</button>
+    <div class="raffle-cast" id="raffle-cast" aria-hidden="true"></div>
+    <div class="raffle-live-inner">
+      <div class="raffle-live-kicker" id="raffle-live-kicker">THE WIN</div>
+      <div class="raffle-live-prize" id="raffle-live-prize">WINNER</div>
+      <div class="raffle-live-window">
+        <div class="raffle-live-name" id="raffle-live-name">—</div>
+        <div class="raffle-live-sub" id="raffle-live-sub">Drawing…</div>
+      </div>
+    </div>
+    <img id="raffle-live-host" class="raffle-live-host" src="assets/thunder-cool-fab.png?v=20260820-email1" alt="" width="160" height="160" decoding="async" />
+  </div>
+
   <!-- AXUM FIRST-SIGN-IN COFFEE -->
   <div id="axum-drop" class="axum-drop hidden" role="dialog" aria-modal="true">
     <button type="button" class="axum-drop-backdrop" id="axum-drop-backdrop" aria-label="Close"></button>
@@ -656,8 +674,8 @@
     <div class="auth-card">
       <h2 id="auth-title">LOCK YOUR SEAT</h2>
       <p class="auth-sub hidden" id="auth-sub"></p>
-      <input type="email" id="auth-email" placeholder="Email" autocomplete="email" />
-      <input type="password" id="auth-password" placeholder="Password" autocomplete="current-password" />
+      <input type="email" id="auth-email" placeholder="Email" autocomplete="email" inputmode="email" />
+      <input type="password" id="auth-password" class="hidden" hidden tabindex="-1" autocomplete="off" aria-hidden="true" />
       <p class="auth-error" id="auth-error" aria-live="polite"></p>
       <div class="auth-actions">
         <button type="button" id="auth-signin-btn" class="btn-primary">LOCK MY SEAT</button>
@@ -666,8 +684,7 @@
         <p class="auth-hint hidden" id="auth-hint"></p>
       </div>
       <div class="auth-link-row">
-        <button type="button" id="auth-forgot-btn">Forgot password</button>
-        ·
+        <button type="button" id="auth-forgot-btn" class="hidden" hidden>Forgot password</button>
         <button type="button" id="auth-cancel-btn">Cancel</button>
       </div>
     </div>
@@ -738,6 +755,8 @@
         <p class="card-label" id="room-label">FOUNDER</p>
         <div id="room-stats" class="room-stats">Loading the room…</div>
         <div class="room-draws">
+          <button type="button" id="patio-toggle-btn" class="btn-rsvp">OPEN THE PATIO</button>
+          <p class="leader-push-hint" id="patio-toggle-hint">Opens I’M HERE on Home. Men who check in are in the beer and hat raffle.</p>
           <button type="button" id="draw-beer-btn" class="btn-rsvp">DRAW BEER</button>
           <button type="button" id="draw-hat-btn" class="btn-secondary" style="width:100%;margin-top:8px;">DRAW HAT</button>
         </div>
@@ -840,8 +859,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <input type="file" id="memory-cam" class="memory-cam-input" accept="image/*" capture="environment" tabindex="-1" aria-hidden="true" />
   <input type="file" id="memory-lib" class="memory-cam-input" accept="image/*" tabindex="-1" aria-hidden="true" />
-  <script src="js/config.js?v=20260820-seat1"></script>
+  <script src="js/config.js?v=20260820-email1"></script>
   <script src="js/qrcode.min.js?v=20260816LOCKED6"></script>
-  <script src="js/app.js?v=20260820-seat1"></script>
+  <script src="js/app.js?v=20260820-email1"></script>
 </body>
 </html>
