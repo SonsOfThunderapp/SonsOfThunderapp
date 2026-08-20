@@ -1,6 +1,25 @@
 # Thunder Board Decisions Log
 
+## 2026-08-20 — ROOM CUT 1.0 (locked)
+
+### Decision
+Member-facing product: the app supports the brotherhood; it doesn’t compete with it.
+
+1. Home poster: logo → next gathering date/time → I’M IN. Announcements only when real.
+2. First run: splash → Home. Tour only from More → TAKE THE TOUR.
+3. Thunder present, quiet. Ask on tap. No unsolicited bubbles. Mute remains.
+4. Brothers / Memories: real people and real shots only. Dignified empty states.
+5. Leadership is infrastructure. Hidden from member nav (7 taps on header logo). PIN tools unchanged.
+
+FREEZE — hide, do not delete: raffle, Axum, FOMO count, I’M HERE.
+
+`TB_CONFIG.ROOM_CUT = '1.0'`
+
+### Revisit
+Not until Obie names the next version. Do not pile features onto 1.0.
+
 ## 2026-08-20 — SPOTLIGHT LAW (locked)
+
 
 ### Decision
 The highlighted thing is the star. Everything else is shadow.

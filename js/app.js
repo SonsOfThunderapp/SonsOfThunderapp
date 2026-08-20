@@ -732,11 +732,16 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     }
   }
 
+  function roomCut() {
+    try { return !!(window.TB_CONFIG && window.TB_CONFIG.ROOM_CUT); } catch (e) { return false; }
+  }
+
   function currentUser() {
     return (sbSession && sbSession.user) || null;
   }
 
   function fireSignedInWelcome() {
+    if (roomCut()) return;
     if (load('signedInWelcomeSent')) return;
     try { save('signedInWelcomeSent', 1); } catch (e) {}
     const title = 'You’re in the room.';
@@ -841,6 +846,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   function renderAxumChip() {
     const chip = document.getElementById('axum-chip');
     if (!chip) return;
+    if (roomCut()) { chip.classList.add('hidden'); return; }
     const c = axumCoffeeState();
     if (c && c.code && !c.redeemedAt) {
       chip.classList.remove('hidden');
@@ -895,6 +901,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   }
 
   function openAxumDrop() {
+    if (roomCut()) return;
     const c = axumCoffeeState();
     if (!c || !c.code || c.redeemedAt) return;
     const drop = document.getElementById('axum-drop');
@@ -904,6 +911,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   }
 
   function maybeShowAxumCoffee() {
+    if (roomCut()) { renderAxumChip(); return; }
     const c = axumCoffeeState();
     if (!c || !c.code) {
       renderAxumChip();
@@ -2368,11 +2376,14 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   function renderAnnouncements() {
     const el = $('#announcements');
     if (!el) return;
+    const title = $('#announcements-title');
     if (!announcements.length) {
-      el.innerHTML = '<div class="empty-state" style="padding:16px 0;color:#666;">No announcements yet.</div>';
+      el.innerHTML = '';
+      if (title) title.classList.add('hidden');
       updateAllNewBadges();
       return;
     }
+    if (title) title.classList.remove('hidden');
     el.innerHTML = announcements.map((a, i) => {
       const isNew = isAnnouncementNew(a);
       return `
@@ -4379,8 +4390,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       el.innerHTML =
         '<button type="button" class="empty-state empty-memories empty-memories-cta" id="empty-memories-cta" aria-label="Drop a shot">' +
         '<div class="empty-memories-plus" aria-hidden="true">+</div>' +
-        '<div class="empty-memories-title">No shots yet.</div>' +
-        '<div class="empty-memories-sub">Drop one from the camera.<br>Shared album: Sign In under Brothers.</div>' +
+        '<div class="empty-memories-title">Drop a shot when the night starts.</div>' +
+        '<div class="empty-memories-sub"></div>' +
         '</button>';
       const cta = $('#empty-memories-cta');
       if (cta) {
@@ -4397,8 +4408,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       el.innerHTML =
         '<button type="button" class="empty-state empty-memories empty-memories-cta" id="empty-memories-cta" aria-label="Drop a shot">' +
         '<div class="empty-memories-plus" aria-hidden="true">+</div>' +
-        '<div class="empty-memories-title">No shots yet.</div>' +
-        '<div class="empty-memories-sub">Drop one from the camera.<br>Build the history.</div>' +
+        '<div class="empty-memories-title">Drop a shot when the night starts.</div>' +
+        '<div class="empty-memories-sub"></div>' +
         '</button>';
       const cta = $('#empty-memories-cta');
       if (cta) {
@@ -4452,6 +4463,15 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     const st = document.getElementById('here-status');
     const board = document.getElementById('raffle-board');
     const night = isGatheringDay();
+    if (roomCut()) {
+      if (btn) btn.classList.add('hidden');
+      if (st) st.classList.add('hidden');
+      if (board) board.classList.add('hidden');
+      const drop = document.getElementById('drop-shot-btn');
+      if (drop) drop.classList.add('hidden');
+      try { syncDropShotAuth(); } catch (e) {}
+      return;
+    }
     if (btn) {
       if (night && !iShowedUp()) btn.classList.remove('hidden');
       else btn.classList.add('hidden');
@@ -4965,6 +4985,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   function renderInCount() {
     const el = document.getElementById('in-count');
     if (!el) return;
+    if (roomCut()) { el.classList.add('hidden'); return; }
     const n = (sharedRsvps || []).length;
     if (n < 1) {
       el.classList.add('hidden');
@@ -6977,6 +6998,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
       fabHideBubble();
     }
     function fabSay(text, ms) {
+      if (roomCut()) return;
       if (fabMuted()) return;
       const b = document.getElementById('fab-bubble');
       if (!b) return;
@@ -7155,10 +7177,13 @@ $('#edit-profile-btn').addEventListener('click', () => {
       fabStartMotion();
       if (!__fabOpenedAt) __fabOpenedAt = Date.now();
       function lineTick() {
+        if (roomCut()) return;
         if (!fabBusy()) fabBubbleBeat();
         __fabLineTimer = setTimeout(lineTick, 150000);
       }
-      __fabLineTimer = setTimeout(lineTick, 40000);
+      if (!roomCut()) {
+        __fabLineTimer = setTimeout(lineTick, 40000);
+      }
       function beatTick() {
         if (fabBusy()) {
           __fabBeatTimer = setTimeout(beatTick, 8000);
@@ -8385,9 +8410,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       finished = true;
       // Splash → tour with nothing in between (no home/welcome flash)
       try {
-        if (typeof isTourComplete === 'function' && !isTourComplete()) {
-          startTour({ force: false });
-        } else if (typeof fromPatio === 'function' && fromPatio()) {
+        if (typeof fromPatio === 'function' && fromPatio()) {
           try { offerHomeScreen('alerts'); } catch (e2) {}
         }
       } catch (e) {}
@@ -9439,7 +9462,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   }
 
   function isTourMandatory() {
-    return !isTourComplete();
+    return false;
   }
 
   function syncTourExitUI() {
@@ -9506,15 +9529,29 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     renderTourSlide();
   }
 
+  function bindLeaderGhost() {
+    const zone = document.querySelector('.admin-zone');
+    if (!zone) return;
+    zone.classList.add('tb-leader-ghost');
+    let taps = 0;
+    let tmr = null;
+    const logo = document.getElementById('header-logo');
+    if (logo && logo.dataset.leaderGhost !== '1') {
+      logo.dataset.leaderGhost = '1';
+      logo.addEventListener('click', function () {
+        taps += 1;
+        if (tmr) clearTimeout(tmr);
+        tmr = setTimeout(function () { taps = 0; }, 2400);
+        if (taps >= 7) {
+          taps = 0;
+          zone.classList.remove('tb-leader-ghost');
+        }
+      });
+    }
+  }
+
   function maybeStartProductTour() {
-    /* First-run is chained off splash finish. Only start here if splash
-       already ran this session (so a refresh still gets the tour, with no delay). */
-    try {
-      if (isTourComplete() || __tourActive) return;
-      var splashDone = false;
-      try { splashDone = sessionStorage.getItem('tb_splash_done') === '1'; } catch (e) {}
-      if (splashDone) startTour({ force: false });
-    } catch (e) {}
+    return;
   }
 
   function bindTourControls() {
@@ -9566,6 +9603,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       skipTour();
     }, true);
     const replay = document.getElementById('replay-tour-btn') || document.getElementById('take-tour-btn');
+    if (replay) replay.textContent = 'TAKE THE TOUR';
     if (replay && !replay.dataset.tbBound) {
       replay.dataset.tbBound = '1';
       replay.addEventListener('click', function () { startTour({ force: true, replay: true }); });
@@ -9576,6 +9614,8 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   // ---------- INIT ----------
   async function init() {
     runSplash();
+    try { if (roomCut()) document.body.classList.add('tb-room-cut'); } catch (e) {}
+    try { bindLeaderGhost(); } catch (e) {}
     try {
       const live = document.getElementById('install-live-link');
       if (live) live.textContent = publicOrigin().replace(/^https?:\/\//, '');

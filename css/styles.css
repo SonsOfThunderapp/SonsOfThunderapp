@@ -8073,6 +8073,24 @@ label.btn-rsvp, label.btn-drop-shot {
   text-shadow: none !important;
   filter: none !important;
 }
+body.tb-room-cut .home-a2hs,
+body.tb-room-cut .home-mission,
+body.tb-room-cut .home-personal,
+body.tb-room-cut .rsvp-prompt,
+body.tb-room-cut #reminder-btn,
+body.tb-room-cut #text-leader-btn,
+body.tb-room-cut #home-member-cta,
+body.tb-room-cut #in-count,
+body.tb-room-cut #here-btn,
+body.tb-room-cut #here-status,
+body.tb-room-cut #raffle-board,
+body.tb-room-cut #axum-chip,
+body.tb-room-cut #axum-drop,
+body.tb-room-cut #axum-card,
+body.tb-room-cut #drop-shot-btn {
+  display: none !important;
+}
+.tb-leader-ghost { display: none !important; }
 @media (prefers-reduced-motion: reduce) {
   .info-detail-label,
   .announcement-card-label {
