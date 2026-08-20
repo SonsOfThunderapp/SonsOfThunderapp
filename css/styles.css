@@ -2514,6 +2514,35 @@ h1.code-title-glow {
   padding: 0;
   font-size: 13px;
 }
+.auth-gate-imin .auth-sub,
+.auth-gate-imin #auth-password,
+.auth-gate-imin #auth-hint,
+.auth-gate-imin #auth-signup-btn,
+.auth-gate-imin #auth-forgot-btn {
+  display: none !important;
+}
+.auth-gate-imin .auth-link-row {
+  color: transparent;
+}
+.auth-gate-imin .auth-link-row button {
+  color: #777;
+  font-weight: 500;
+}
+.auth-gate-imin #auth-magic-btn {
+  background: none !important;
+  border: none !important;
+  color: #888 !important;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 8px 0;
+  box-shadow: none !important;
+}
+.auth-gate-imin #auth-title {
+  color: #fff !important;
+  animation: none !important;
+  text-shadow: none !important;
+  margin-bottom: 18px;
+}
 .auth-session-bar {
   display: flex;
   align-items: center;

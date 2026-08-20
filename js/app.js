@@ -1003,24 +1003,31 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
 
   function openImInSignIn() {
     if (isSignedIn() || !supabaseEnabled()) return false;
+    const gate = document.getElementById('auth-gate');
     const title = document.getElementById('auth-title');
     const sub = document.getElementById('auth-sub');
     const hint = document.getElementById('auth-hint');
     const signBtn = document.getElementById('auth-signin-btn');
     const magic = document.getElementById('auth-magic-btn');
     const invite = document.getElementById('auth-signup-btn');
-    if (title) title.textContent = "YOU'RE IN. PUT A NAME ON IT.";
-    if (sub) sub.textContent = 'So the brothers get the ping with your name — not “A brother.”';
-    if (hint) hint.textContent = 'Email leadership set up. Or get a link. One time.';
+    const pass = document.getElementById('auth-password');
+    const forgot = document.getElementById('auth-forgot-btn');
+    if (gate) gate.classList.add('auth-gate-imin');
+    if (title) title.textContent = 'LOCK YOUR SEAT';
+    if (sub) { sub.textContent = ''; sub.classList.add('hidden'); }
+    if (hint) hint.classList.add('hidden');
     if (signBtn) signBtn.textContent = 'LOCK MY SEAT';
     if (magic) magic.classList.remove('hidden');
     if (invite) invite.classList.add('hidden');
+    if (pass) pass.classList.add('hidden');
+    if (forgot) forgot.classList.add('hidden');
     try {
       const em = document.getElementById('auth-email');
       const me = (brothers || []).find(function (b) { return b && b.id === myProfileId; });
       if (em && me && me.email && !em.value) em.value = me.email;
     } catch (e) {}
-    openAuthGate((sub && sub.textContent) || '');
+    openAuthGate('');
+    if (sub) { sub.textContent = ''; sub.classList.add('hidden'); }
     return true;
   }
 
@@ -1040,8 +1047,10 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   function openAuthGate(reason) {
     const gate = $('#auth-gate');
     const sub = $('#auth-sub');
-    if (sub) {
-      sub.textContent = reason || 'Sign in for shared roster, memories, and leadership publish. Browse the rest without an account. New accounts are invite-only — ask a leader.';
+    const imin = !!(gate && gate.classList.contains('auth-gate-imin'));
+    if (sub && !imin) {
+      sub.textContent = reason || 'Sign in for shared roster and memories.';
+      sub.classList.remove('hidden');
     }
     setAuthError('');
     if (gate) {
@@ -1057,7 +1066,20 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
 
   function closeAuthGate() {
     const gate = $('#auth-gate');
-    if (gate) gate.classList.add('hidden');
+    if (gate) {
+      gate.classList.add('hidden');
+      gate.classList.remove('auth-gate-imin');
+    }
+    const sub = document.getElementById('auth-sub');
+    const hint = document.getElementById('auth-hint');
+    const pass = document.getElementById('auth-password');
+    const forgot = document.getElementById('auth-forgot-btn');
+    const invite = document.getElementById('auth-signup-btn');
+    if (sub) sub.classList.remove('hidden');
+    if (hint) hint.classList.remove('hidden');
+    if (pass) pass.classList.remove('hidden');
+    if (forgot) forgot.classList.remove('hidden');
+    if (invite) invite.classList.remove('hidden');
     setAuthError('');
     releaseFocusAndZoom();
     if (typeof unlockBodyIfClear === 'function') unlockBodyIfClear();
@@ -6185,6 +6207,21 @@ $('#edit-profile-btn').addEventListener('click', () => {
       authSignInBtn.dataset.bound = '1';
       authSignInBtn.addEventListener('click', async () => {
         const email = ($('#auth-email') && $('#auth-email').value || '').trim();
+        const imin = !!(document.getElementById('auth-gate') && document.getElementById('auth-gate').classList.contains('auth-gate-imin'));
+        if (imin) {
+          if (!email) return setAuthError('Email first.');
+          setAuthError('');
+          authSignInBtn.disabled = true;
+          try {
+            await authMagicLink(email);
+            setAuthError('Link sent. Open it — you’re on the seat.');
+          } catch (e) {
+            setAuthError((e && e.message) || 'Could not send the link.');
+          } finally {
+            authSignInBtn.disabled = false;
+          }
+          return;
+        }
         const password = ($('#auth-password') && $('#auth-password').value || '');
         if (!email || !password) return setAuthError('Email and password required.');
         setAuthError('');
