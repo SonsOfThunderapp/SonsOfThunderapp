@@ -335,46 +335,44 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     return true;
   }
 
-  /**
-   * Hand the gathering to the OS calendar from the I'm In tap (user gesture).
-   * PWA cannot write Calendar silently — one Add tap is the floor.
-   * Prefer Share (Calendar in the sheet). No _blank. No Google tab.
-   */
-  async function offerCalendarNow() {
-    lockInAppReminder();
-    try {
-      const next = getNextMeetingMonday();
-      const ics = buildGatheringIcs(next);
-      const file = new File([ics], 'sons-of-thunder-gathering.ics', { type: 'text/calendar;charset=utf-8' });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: 'Sons of Thunder' });
-        return true;
-      }
-      if (__calBlobUrl) {
-        try { URL.revokeObjectURL(__calBlobUrl); } catch (e) {}
-        __calBlobUrl = null;
-      }
-      const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-      __calBlobUrl = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = __calBlobUrl;
-      a.download = 'sons-of-thunder-gathering.ics';
-      a.rel = 'noopener';
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(function () {
-        try { a.remove(); } catch (e) {}
-        try { URL.revokeObjectURL(__calBlobUrl); __calBlobUrl = null; } catch (e) {}
-      }, 4000);
-      return true;
-    } catch (e) {
-      console.warn('Calendar offer', e);
-      return false;
+  function paintInAppCalendar() {
+    const next = getNextMeetingMonday();
+    const monthEl = document.getElementById('tb-cal-month');
+    const grid = document.getElementById('tb-cal-grid');
+    const whenEl = document.getElementById('tb-cal-when');
+    const locEl = document.getElementById('tb-cal-loc');
+    if (!grid) return;
+    const y = next.getFullYear();
+    const m = next.getMonth();
+    if (monthEl) {
+      monthEl.textContent = next.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }).toUpperCase();
     }
+    const startDow = new Date(y, m, 1).getDay();
+    const daysIn = new Date(y, m + 1, 0).getDate();
+    const meetD = next.getDate();
+    let html = '';
+    for (let i = 0; i < startDow; i++) html += '<span class="tb-cal-cell is-empty"></span>';
+    for (let d = 1; d <= daysIn; d++) {
+      html += '<span class="tb-cal-cell' + (d === meetD ? ' is-gathering' : '') + '">' + d + '</span>';
+    }
+    grid.innerHTML = html;
+    if (whenEl) {
+      whenEl.textContent = next.toLocaleDateString('en-US', {
+        weekday: 'long', month: 'short', day: 'numeric'
+      }) + ' · ' + meetingTime();
+    }
+    if (locEl) locEl.textContent = venueName();
+  }
+
+  function offerCalendarNow() {
+    lockInAppReminder();
+    paintInAppCalendar();
+    openCalConfirmSheet();
+    try { renderRsvp(); } catch (e) {}
+    return true;
   }
   function launchGatheringCalendar() {
-    offerCalendarNow();
-    return true;
+    return offerCalendarNow();
   }
 
   function openCalConfirmSheet() {

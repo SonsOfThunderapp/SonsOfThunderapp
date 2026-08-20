@@ -18,7 +18,7 @@
   
   <!-- Web App Manifest -->
   <link rel="manifest" href="manifest.json" />
-  <link rel="preload" as="image" href="assets/logo@2x.png?v=20260820-calnow" />
+  <link rel="preload" as="image" href="assets/logo@2x.png?v=20260820-incal" />
   <link rel="preload" as="image" href="assets/thunder-cool-fab@2x.png?v=20260819-nogold2" />
   
   <link rel="stylesheet" href="css/styles.css?v=20260819-nogold2" />
@@ -31,14 +31,14 @@
   <div id="splash" class="splash" aria-hidden="true">
     <div class="splash-inner">
       <div class="splash-logo-wrap">
-        <img src="assets/logo@2x.png?v=20260820-calnow"
-             srcset="assets/logo@2x.png?v=20260820-calnow 1200w, assets/logo@3x.png?v=20260820-calnow 1800w"
+        <img src="assets/logo@2x.png?v=20260820-incal"
+             srcset="assets/logo@2x.png?v=20260820-incal 1200w, assets/logo@3x.png?v=20260820-incal 1800w"
              sizes="min(82vw, 340px)"
              alt="Sons of Thunder"
              class="splash-mark splash-logo"
              width="1200"
              height="831" />
-        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-calnow" alt="" aria-hidden="true" width="1200" height="831" />
+        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-incal" alt="" aria-hidden="true" width="1200" height="831" />
       </div>
       <p class="splash-line hidden" aria-hidden="true">THUNDER DOESN’T DULL</p>
     </div>
@@ -50,8 +50,8 @@
     <header id="main-header" class="header">
       <div class="logo-wrap">
         <img
-          src="assets/logo@2x.png?v=20260820-calnow"
-          srcset="assets/logo@2x.png?v=20260820-calnow 1200w, assets/logo@3x.png?v=20260820-calnow 1800w"
+          src="assets/logo@2x.png?v=20260820-incal"
+          srcset="assets/logo@2x.png?v=20260820-incal 1200w, assets/logo@3x.png?v=20260820-incal 1800w"
           sizes="(max-width: 480px) 72vw, 320px"
           alt="Sons of Thunder"
           class="logo"
@@ -60,7 +60,7 @@
           height="831"
           decoding="async"
         />
-        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-calnow" alt="" aria-hidden="true" width="1200" height="831" />
+        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-incal" alt="" aria-hidden="true" width="1200" height="831" />
       </div>
     </header>
 
@@ -338,10 +338,17 @@
   <div id="cal-confirm-sheet" class="cal-confirm-sheet hidden" role="dialog" aria-modal="true" aria-labelledby="cal-confirm-title" aria-hidden="true">
     <div class="cal-confirm-panel">
       <button type="button" class="cal-confirm-close" id="cal-confirm-close" aria-label="Close">×</button>
+      <div class="card-label" id="cal-confirm-label">CALENDAR</div>
       <h2 id="cal-confirm-title" class="cal-confirm-title">YOU’RE IN</h2>
-      <p class="cal-confirm-body">Your seat is locked on this phone.<br>Want a reminder here too?</p>
-      <button type="button" class="cal-confirm-primary" id="cal-confirm-add">SET REMINDER</button>
-      <button type="button" class="cal-confirm-secondary" id="cal-confirm-later">NOT NOW</button>
+      <div class="tb-cal" id="tb-inapp-cal">
+        <div class="tb-cal-month" id="tb-cal-month">—</div>
+        <div class="tb-cal-dows" aria-hidden="true"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
+        <div class="tb-cal-grid" id="tb-cal-grid"></div>
+      </div>
+      <p class="tb-cal-when" id="tb-cal-when"></p>
+      <p class="tb-cal-loc" id="tb-cal-loc"></p>
+      <p class="tb-cal-alarms">Ping this phone: 7 days · 1 day · 2 hours</p>
+      <button type="button" class="cal-confirm-primary" id="cal-confirm-add">GOT IT</button>
       <p class="cal-confirm-hint">Stays in the app.</p>
     </div>
   </div>
@@ -368,8 +375,8 @@
         <div class="tb-tour-slide-frame" id="tb-tour-live">
           <div class="tb-live-slide is-on" data-slide="0">
             <div class="tb-live-logo-wrap">
-              <img class="tb-live-logo" src="assets/logo@2x.png?v=20260820-calnow" alt="Sons of Thunder" width="1200" height="831" />
-              <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-calnow" alt="" aria-hidden="true" width="1200" height="831" />
+              <img class="tb-live-logo" src="assets/logo@2x.png?v=20260820-incal" alt="Sons of Thunder" width="1200" height="831" />
+              <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-incal" alt="" aria-hidden="true" width="1200" height="831" />
             </div>
           </div>
           <div class="tb-live-slide" data-slide="1">

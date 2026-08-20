@@ -7293,3 +7293,88 @@ body.tb-tour-mandatory .tb-tour-skip {
   pointer-events: none !important;
   visibility: hidden !important;
 }
+
+/* In-app calendar — lives in Thunder Board, not Apple Calendar */
+.cal-confirm-title {
+  animation: none !important;
+  text-shadow: none !important;
+  color: #fff !important;
+}
+#cal-confirm-label {
+  text-align: center;
+  margin-bottom: 6px;
+}
+.tb-cal {
+  margin: 8px 0 12px;
+  background: #0a0a0a;
+  border: 1px solid #222;
+  border-radius: 12px;
+  padding: 12px 10px 10px;
+}
+.tb-cal-month {
+  text-align: center;
+  font-family: var(--font-display, inherit);
+  letter-spacing: 0.16em;
+  font-size: 13px;
+  color: #FEF105;
+  margin-bottom: 10px;
+}
+.tb-cal-dows {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: #666;
+  margin-bottom: 6px;
+}
+.tb-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px 0;
+  text-align: center;
+}
+.tb-cal-cell {
+  height: 36px;
+  line-height: 36px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #cfcfcf;
+}
+.tb-cal-cell.is-empty { visibility: hidden; }
+.tb-cal-cell.is-gathering {
+  color: #000;
+  background: #FEF105;
+  border-radius: 50%;
+  width: 36px;
+  margin: 0 auto;
+  font-weight: 800;
+  animation: tbCalDay var(--tb-breathe) ease-in-out infinite;
+}
+@keyframes tbCalDay {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(254,241,5,0.2); }
+  50% { box-shadow: 0 0 16px 2px rgba(254,241,5,0.55); }
+}
+.tb-cal-when {
+  text-align: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  margin: 0 0 4px;
+}
+.tb-cal-loc {
+  text-align: center;
+  color: #888;
+  font-size: 13px;
+  margin: 0 0 6px;
+}
+.tb-cal-alarms {
+  text-align: center;
+  color: #666;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  margin: 0 0 14px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tb-cal-cell.is-gathering { animation: none; }
+}
