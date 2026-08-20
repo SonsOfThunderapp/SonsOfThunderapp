@@ -6268,3 +6268,17 @@ body.tb-ask-open .header .logo {
   position: relative;
   z-index: 4;
 }
+
+.tb-live-bros-grid .tb-live-bro {
+  background: transparent;
+  border: none;
+  padding: 0;
+  justify-content: center;
+}
+.tb-live-face {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 0 6px rgba(254,241,5,0.35));
+}
