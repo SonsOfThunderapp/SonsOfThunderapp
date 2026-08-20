@@ -6785,7 +6785,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
 
   // ---------- PRODUCT TOUR — 7-slide (restored 20260818) ----------
-  const TB_TOUR_VERSION = 16;
+  const TB_TOUR_VERSION = 17;
   function tourStorageKey() { return 'thunderTourV' + TB_TOUR_VERSION; }
   function isTourComplete() {
     try {
@@ -6806,37 +6806,37 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   const TB_TOUR_STEPS = [
     {
       id: 'welcome',
-      headline: 'WELCOME TO',
-      sub: 'SONS OF THUNDER',
-      body: 'I\u2019m Thunder\u2014your guide. This is your brotherhood hub. Let\u2019s walk through the essentials.',
+      headline: 'MEET THUNDER',
+      sub: 'YOUR GUIDE IN THE ROOM',
+      body: 'I\u2019m Thunder. I\u2019ve got your back. Let me show you around.',
       nextLabel: 'LET\u2019S GO'
     },
     {
       id: 'locked-in',
       headline: 'LOCKED IN',
       sub: 'NEVER MISS WHAT MATTERS',
-      body: 'Tap I\u2019M IN for the next gathering and get reminded so you don\u2019t miss it.',
+      body: 'Tap I\u2019M IN. We save your seat and remind you so you don\u2019t miss it.',
       nextLabel: 'NEXT'
     },
     {
       id: 'brothers',
       headline: 'BROTHERS',
-      sub: 'REAL CONNECTIONS',
-      body: 'See who\u2019s in, update your profile, and strengthen the bond.',
+      sub: 'YOU\u2019RE NOT ALONE',
+      body: 'These are your brothers. Different faces. Same storm.',
       nextLabel: 'NEXT'
     },
     {
       id: 'memories',
       headline: 'MEMORIES',
       sub: 'CAPTURE. SHARE. REMEMBER.',
-      body: 'Add photos from gatherings and missions. The memories we make keep our story alive.',
+      body: 'The nights we keep. Drop a photo. Build the history.',
       nextLabel: 'NEXT'
     },
     {
       id: 'code',
       headline: 'THE CODE',
       sub: 'LIVE IT. EVERY DAY.',
-      body: 'The Code is our standard. It\u2019s who we are and how we show up\u2014for ourselves and each other.',
+      body: 'This is how we show up \u2014 for ourselves and each other.',
       nextLabel: 'NEXT'
     },
     {
@@ -6847,11 +6847,11 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       nextLabel: 'NEXT'
     },
     {
-      id: 'whats-next',
-      headline: 'WHAT\u2019S NEXT',
-      sub: 'STAY AHEAD. STAY READY.',
-      body: 'See what\u2019s coming up so you can plan, invite, and be there.',
-      nextLabel: 'DONE'
+      id: 'ask-thunder',
+      headline: 'ASK THUNDER',
+      sub: 'HE\u2019S GOT YOUR BACK',
+      body: 'Questions? I\u2019m in the corner. Tap me when you\u2019re ready. You\u2019re set, brother.',
+      nextLabel: 'LET\u2019S GO'
     }
   ];
 

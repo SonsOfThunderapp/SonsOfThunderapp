@@ -6364,3 +6364,62 @@ body.tb-ask-open .header .logo {
     animation: none !important;
   }
 }
+
+/* Tour wow v17 — host + function beats only */
+.tb-tour-boards .tb-tour-next {
+  background: #FEF105 !important;
+  color: #000 !important;
+  box-shadow: 0 0 18px rgba(254,241,5,0.35);
+  letter-spacing: 0.12em;
+}
+.tb-live-slide.is-on .tb-live-face {
+  animation: tbFaceIn 0.45s cubic-bezier(0.22,1,0.36,1) both;
+}
+.tb-live-bro:nth-child(1) .tb-live-face { animation-delay: 0.04s; }
+.tb-live-bro:nth-child(2) .tb-live-face { animation-delay: 0.08s; }
+.tb-live-bro:nth-child(3) .tb-live-face { animation-delay: 0.12s; }
+.tb-live-bro:nth-child(4) .tb-live-face { animation-delay: 0.16s; }
+.tb-live-bro:nth-child(5) .tb-live-face { animation-delay: 0.20s; }
+.tb-live-bro:nth-child(6) .tb-live-face { animation-delay: 0.24s; }
+.tb-live-bro:nth-child(7) .tb-live-face { animation-delay: 0.28s; }
+.tb-live-bro:nth-child(8) .tb-live-face { animation-delay: 0.32s; }
+.tb-live-bro:nth-child(9) .tb-live-face { animation-delay: 0.36s; }
+@keyframes tbFaceIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.86); }
+  to { opacity: 1; transform: none; }
+}
+.tb-live-slide.is-on .tb-live-code-line {
+  animation: tbFaceIn 0.4s ease both;
+}
+.tb-live-code-line:nth-child(2) { animation-delay: 0.05s; }
+.tb-live-code-line:nth-child(3) { animation-delay: 0.12s; }
+.tb-live-code-line:nth-child(4) { animation-delay: 0.19s; }
+.tb-live-code-line:nth-child(5) { animation-delay: 0.26s; }
+.tb-live-code-line:nth-child(6) { animation-delay: 0.33s; }
+.tb-live-mem-shot {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  background: #111;
+  border-radius: 8px;
+  padding: 2px;
+}
+.tb-live-ask {
+  margin: 8px 0 10px;
+  background: #FEF105;
+  color: #000;
+  text-align: center;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  padding: 14px 10px;
+  border-radius: 12px;
+  box-shadow: 0 0 16px rgba(254,241,5,0.35);
+}
+.tb-tour-boards .tb-live-logo {
+  width: min(86%, 240px) !important;
+  margin: 8px auto;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tb-live-slide.is-on .tb-live-face,
+  .tb-live-slide.is-on .tb-live-code-line { animation: none !important; }
+}
