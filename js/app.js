@@ -6979,6 +6979,8 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       try {
         if (typeof isTourComplete === 'function' && !isTourComplete()) {
           startTour({ force: false });
+        } else if (typeof fromPatio === 'function' && fromPatio()) {
+          try { offerHomeScreen('alerts'); } catch (e2) {}
         }
       } catch (e) {}
       el.classList.add('splash-out');
@@ -7046,6 +7048,32 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     );
   }
 
+  function markPatioFromUrl() {
+    try {
+      const q = new URLSearchParams(location.search || '');
+      if (q.get('src') === 'qr' || q.get('src') === 'board' || q.get('qr') === '1') {
+        sessionStorage.setItem('tb_patio', '1');
+      }
+      if (/^\/tap/i.test(location.pathname || '')) {
+        sessionStorage.setItem('tb_patio', '1');
+      }
+    } catch (e) {}
+  }
+  function fromPatio() {
+    try { return sessionStorage.getItem('tb_patio') === '1'; } catch (e) { return false; }
+  }
+  function runPatioAlive() {
+    markPatioFromUrl();
+    if (!fromPatio()) return;
+    if (isStandalonePwa()) return;
+    if (typeof isInAppBrowser === 'function' && isInAppBrowser()) {
+      try { openInAppInstallOverlay(); } catch (e) {}
+      return;
+    }
+    if (typeof isTourComplete === 'function' && isTourComplete()) {
+      setTimeout(function () { try { offerHomeScreen('alerts'); } catch (e) {} }, 700);
+    }
+  }
   function a2hsHushed() {
     try { return Date.now() < Number(load('a2hsQuietUntil') || 0); } catch (e) { return false; }
   }
@@ -8067,6 +8095,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   // ---------- INIT ----------
   async function init() {
     runSplash();
+    try { markPatioFromUrl(); runPatioAlive(); } catch (e) {}
     try { bindTourControls(); } catch (e) {}
     try { maybeStartProductTour(); } catch (e) {}
     bootstrapSeenState();
