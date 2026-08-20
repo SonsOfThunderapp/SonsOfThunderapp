@@ -6235,7 +6235,33 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       });
     }
 
-    const adminPushBtn = $('#admin-push-btn');
+    const adminSmsClub = $('#admin-sms-club-btn');
+    if (adminSmsClub) {
+      adminSmsClub.addEventListener('click', () => {
+        if (!requireLeader()) return;
+        const nums = [];
+        const seen = {};
+        (brothers || []).forEach(function (b) {
+          const d = digitsOnly(b && b.phone);
+          const e164 = (d.length === 10) ? ('1' + d) : d;
+          if (e164.length < 10 || seen[e164]) return;
+          seen[e164] = true;
+          nums.push(e164);
+        });
+        if (!nums.length) {
+          alert('No phones on the roster yet. Brothers add a number on their profile.');
+          return;
+        }
+        const body = encodeURIComponent('Sons of Thunder — ');
+        const list = nums.join(',');
+        try { navigator.clipboard && navigator.clipboard.writeText(nums.join('\n')); } catch (e) {}
+        const ios = typeof isIos === 'function' && isIos();
+        const href = ios
+          ? ('sms:/open?addresses=' + list + '&body=' + body)
+          : ('sms:' + list + '?body=' + body);
+        window.location.href = href;
+      });
+    }
     if (adminPushBtn) {
       adminPushBtn.addEventListener('click', () => {
         const st = $('#admin-push-status');
