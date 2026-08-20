@@ -7063,17 +7063,17 @@ body.tb-ask-open .logo-wrap { width: min(28vw, 110px) !important; }
 .tb-tour-stage[data-board="2"] .tb-live-bros-full .tb-live-face {
   width: 58px !important;
   height: 58px !important;
-  animation: tbFaceIdle 4.4s ease-in-out infinite !important;
-  transform-origin: 50% 80%;
+  animation: none !important;
+  transform-origin: 50% 70%;
+  transform: perspective(220px)
+    rotateX(var(--bro-x, 0deg))
+    rotateY(var(--bro-y, 0deg))
+    rotate(var(--bro-z, 0deg))
+    translateY(var(--bro-t, 0px));
+  transition: transform 0.55s ease;
 }
-@keyframes tbFaceIdle {
-  0%, 100% { transform: translateY(0) scale(1); filter: brightness(1); }
-  50% { transform: translateY(-3px) scale(1.05); filter: brightness(1.1); }
-}
-.tb-live-bros-full .tb-live-bro:nth-child(4n+1) .tb-live-face { animation-delay: 0s !important; animation-duration: 4.2s !important; }
-.tb-live-bros-full .tb-live-bro:nth-child(4n+2) .tb-live-face { animation-delay: 0.8s !important; animation-duration: 4.8s !important; }
-.tb-live-bros-full .tb-live-bro:nth-child(4n+3) .tb-live-face { animation-delay: 1.5s !important; animation-duration: 5.1s !important; }
-.tb-live-bros-full .tb-live-bro:nth-child(4n+4) .tb-live-face { animation-delay: 2.2s !important; animation-duration: 4.5s !important; }
+.tb-live-bros-full .tb-live-bro { perspective: 220px; }
+@keyframes tbFaceIdle { 0%, 100% { transform: none; } }
 @media (prefers-reduced-motion: reduce) {
   .tb-tour-stage[data-board="2"] .tb-live-bros-full .tb-live-face { animation: none !important; }
 }

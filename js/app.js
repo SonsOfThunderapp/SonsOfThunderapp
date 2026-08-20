@@ -6937,7 +6937,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
 
   // ---------- PRODUCT TOUR — 7-slide (restored 20260818) ----------
-  const TB_TOUR_VERSION = 34;
+  const TB_TOUR_VERSION = 35;
   function tourStorageKey() { return 'thunderTourV' + TB_TOUR_VERSION; }
   function isTourComplete() {
     try {
@@ -7110,6 +7110,120 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     __tourTypeTimer = setTimeout(tick, 180);
   }
 
+  /* Brothers grid — 5 mechanics, personality changes speed/amp/timing. No float. */
+  const BRO_STYLE = {
+    soldier: { amp: 0.65, speed: 0.8 },
+    hippie:  { amp: 1.15, speed: 1.45 },
+    dad:     { amp: 0.9,  speed: 1.05 },
+    tough:   { amp: 0.75, speed: 0.9 },
+    cool:    { amp: 0.7,  speed: 1.15 },
+    goof:    { amp: 1.1,  speed: 0.75 }
+  };
+  let __broIdleTimers = [];
+  function broSet(el, x, y, z, t, ms) {
+    el.style.transitionDuration = (ms || 500) + 'ms';
+    el.style.setProperty('--bro-x', (x || 0) + 'deg');
+    el.style.setProperty('--bro-y', (y || 0) + 'deg');
+    el.style.setProperty('--bro-z', (z || 0) + 'deg');
+    el.style.setProperty('--bro-t', (t || 0) + 'px');
+  }
+  function broRest(el, ms) { broSet(el, 0, 0, 0, 0, ms); }
+  function broAfter(ms, fn) {
+    const t = setTimeout(fn, ms);
+    __broIdleTimers.push(t);
+    return t;
+  }
+  function stopBroPersonaIdle() {
+    __broIdleTimers.forEach(function (t) { try { clearTimeout(t); } catch (e) {} });
+    __broIdleTimers = [];
+    document.querySelectorAll('.tb-live-bros-full .tb-live-face').forEach(function (el) {
+      broRest(el, 300);
+    });
+  }
+  function startBroPersonaIdle() {
+    stopBroPersonaIdle();
+    if (tourReducedMotion()) return;
+    document.querySelectorAll('.tb-live-bros-full .tb-live-face').forEach(function (el, i) {
+      const persona = el.getAttribute('data-persona') || 'dad';
+      const st = BRO_STYLE[persona] || BRO_STYLE.dad;
+      const A = st.amp;
+      const S = st.speed;
+      const born = Date.now();
+      function mechLook() {
+        if (persona === 'soldier') {
+          broSet(el, 0, -10 * A, 0, 0, 380 * S);
+          broAfter(420 * S, function () { broSet(el, 0, 10 * A, 0, 0, 480 * S); });
+          broAfter(980 * S, function () { broRest(el, 360 * S); });
+        } else if (persona === 'hippie') {
+          broSet(el, 2 * A, -8 * A, 4 * A, 0, 900 * S);
+          broAfter(1100 * S, function () { broSet(el, 0, 9 * A, -3 * A, 0, 1100 * S); });
+          broAfter(2400 * S, function () { broRest(el, 800 * S); });
+        } else if (persona === 'cool') {
+          broSet(el, 7 * A, 0, 0, -1, 500 * S);
+          broAfter(900 * S, function () { broRest(el, 500 * S); });
+        } else if (persona === 'goof') {
+          broSet(el, 0, -14 * A, 0, 0, 180);
+          broAfter(260, function () { broRest(el, 140); });
+          broAfter(480, function () { broSet(el, 0, -14 * A, 0, 0, 160); });
+          broAfter(720, function () { broRest(el, 200); });
+        } else if (persona === 'tough') {
+          broSet(el, 3 * A, 4 * A, 0, 0, 400 * S);
+          broAfter(700 * S, function () { broRest(el, 400 * S); });
+        } else {
+          broSet(el, 0, 9 * A, 0, 0, 220);
+          broAfter(380, function () { broRest(el, 260); });
+        }
+      }
+      function mechShift() {
+        if (persona === 'soldier') broSet(el, 0, 0, 0, -1.5 * A, 180);
+        else if (persona === 'hippie') broSet(el, 0, 0, 6 * A, 1 * A, 800 * S);
+        else if (persona === 'cool' || persona === 'tough') broSet(el, -5 * A, 0, 0, 0, 400 * S);
+        else broSet(el, 0, 0, 3 * A, 1 * A, 500);
+        broAfter((persona === 'hippie' ? 1400 : 700) * S, function () { broRest(el, 400 * S); });
+      }
+      function mechReset() {
+        if (persona === 'soldier') { broSet(el, 0, 0, 0, -2, 140); broAfter(220, function () { broRest(el, 160); }); }
+        else if (persona === 'tough') { broSet(el, 0, 0, -8 * A, 0, 220); broAfter(480, function () { broRest(el, 220); }); }
+        else if (persona === 'hippie') { broSet(el, 0, 0, 5 * A, 0, 700); broAfter(800, function () { broSet(el, 0, 0, -4 * A, 0, 700); }); broAfter(1600, function () { broRest(el, 700); }); }
+        else { broSet(el, 0, 0, 7 * A, 0, 280); broAfter(400, function () { broSet(el, 0, 0, -5 * A, 0, 280); }); broAfter(760, function () { broRest(el, 280); }); }
+      }
+      function mechRare() {
+        if (persona === 'cool') {
+          broSet(el, 10 * A, 0, 0, -2, 600);
+          broAfter(1400, function () { broRest(el, 500); });
+        } else if (persona === 'soldier') {
+          mechLook();
+          broAfter(1200 * S, function () { broSet(el, 0, 0, 0, -2, 160); });
+          broAfter(1500 * S, function () { broRest(el, 160); });
+        } else if (persona === 'goof') mechLook();
+        else if (persona === 'dad') {
+          broSet(el, 0, 8 * A, 0, 0, 200);
+          broAfter(600, function () { broSet(el, 0, 0, 4 * A, 0, 300); });
+          broAfter(1100, function () { broRest(el, 300); });
+        } else if (persona === 'tough') {
+          broSet(el, 0, 0, -10 * A, 0, 200);
+          broAfter(500, function () { broRest(el, 220); });
+        } else {
+          broSet(el, 4 * A, 0, 5 * A, 1, 900 * S);
+          broAfter(1600 * S, function () { broRest(el, 800 * S); });
+        }
+      }
+      function loop() {
+        if (__tourIdx !== 2) return;
+        const quiet = Date.now() - born;
+        const r = Math.random();
+        if (quiet > 8000 && r < 0.18) mechRare();
+        else if (r < 0.28) mechLook();
+        else if (r < 0.55) mechShift();
+        else if (r < 0.78) mechReset();
+        else mechLook();
+        const gap = (2800 + Math.random() * 4200) * S + i * 180;
+        broAfter(gap, loop);
+      }
+      broAfter(600 + i * 220 + Math.random() * 800, loop);
+    });
+  }
+
   function renderTourSlide() {
     const step = TB_TOUR_STEPS[__tourIdx];
     if (!step) return;
@@ -7146,6 +7260,8 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     // Thunder speaking — type the body line
     typeTourBody(step.body || '', body);
     applyTourHostExpression(__tourIdx);
+    if (__tourIdx === 2) startBroPersonaIdle();
+    else stopBroPersonaIdle();
     if (progress) progress.textContent = (__tourIdx + 1) + ' OF ' + TB_TOUR_STEPS.length;
     if (next) next.textContent = step.nextLabel || (__tourIdx >= TB_TOUR_STEPS.length - 1 ? 'DONE' : 'NEXT');
     if (back) back.disabled = __tourIdx <= 0;
@@ -7170,6 +7286,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   function hideTour() {
     stopTourTypewriter();
     stopTourHostMotion();
+    stopBroPersonaIdle();
     const root = document.getElementById('tb-tour');
     if (root) {
       root.classList.add('hidden');
