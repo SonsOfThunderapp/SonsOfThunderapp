@@ -6954,3 +6954,57 @@ h1, h2, h3,
   padding: 6px 4px 4px !important;
 }
 .tb-tour-stage[data-board="2"] .tb-live-phone-foot { display: none !important; }
+
+/* Brother faces sit on black — no gray cards, no white matte */
+.tb-live-bros-grid .tb-live-bro {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+.tb-live-face {
+  background: transparent !important;
+  mix-blend-mode: normal;
+}
+
+/* Life-blood bolt: overlay is bolt-only PNG so drop-shadow follows the zig-zag — never a box */
+.logo-wrap,
+.splash-logo-wrap,
+.tb-live-logo-wrap {
+  position: relative !important;
+}
+.tb-logo-bolt-life {
+  position: absolute !important;
+  left: 32.4% !important;
+  top: 2.8% !important;
+  width: 31.3% !important;
+  height: 83.6% !important;
+  object-fit: contain !important;
+  pointer-events: none !important;
+  z-index: 4 !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  animation: headerBoltGlow var(--tb-breathe) !important;
+  will-change: filter;
+}
+@keyframes headerBoltGlow {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 4px rgba(254, 241, 5, 0.4))
+      drop-shadow(0 0 10px rgba(254, 241, 5, 0.2));
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 10px rgba(254, 241, 5, 1))
+      drop-shadow(0 0 22px rgba(254, 241, 5, 0.65))
+      drop-shadow(0 0 8px rgba(255, 160, 0, 0.45));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tb-logo-bolt-life {
+    animation: none !important;
+    filter: drop-shadow(0 0 8px rgba(254, 241, 5, 0.55));
+  }
+}
