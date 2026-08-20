@@ -5796,10 +5796,11 @@ $('#edit-profile-btn').addEventListener('click', () => {
       return true;
     }
     function stopThunderBackstageIdle() {
-      [__fabBeatTimer, __fabMidTimer, __fabSigTimer, __fabHoldTimer].forEach(function (t) {
+      [__fabBeatTimer, __fabMidTimer, __fabSigTimer, __fabHoldTimer, __fabLineTimer].forEach(function (t) {
         if (t) try { clearTimeout(t); } catch (e) {}
       });
-      __fabBeatTimer = __fabMidTimer = __fabSigTimer = __fabHoldTimer = null;
+      __fabBeatTimer = __fabMidTimer = __fabSigTimer = __fabHoldTimer = __fabLineTimer = null;
+      fabHideBubble();
       fabStopMotion();
       const img = fabImg();
       if (img) img.classList.remove('tb-host-alive', 'tb-fab-alive', 'tb-fab-look');
@@ -5819,6 +5820,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
     ];
     let __fabBubbleIdx = 0;
     let __fabBubbleTimer = null;
+    let __fabLineTimer = null;
     function fabHideBubble() {
       const b = document.getElementById('fab-bubble');
       if (b) {
@@ -5841,10 +5843,10 @@ $('#edit-profile-btn').addEventListener('click', () => {
       b.classList.remove('is-on');
       void b.offsetWidth;
       b.classList.add('is-on');
-      try { fabGo(-4, -3, -10, 1); } catch (e) {}
+      try { fabGo(0, -6, 6, 1.02); } catch (e) {}
       fabAfter(1400, fabRestSmooth);
       if (__fabBubbleTimer) try { clearTimeout(__fabBubbleTimer); } catch (e) {}
-      __fabBubbleTimer = setTimeout(fabHideBubble, ms || 8000);
+      __fabBubbleTimer = setTimeout(fabHideBubble, ms || 5500);
     }
     function fabTwirl() {
       const img = fabImg();
@@ -5978,7 +5980,6 @@ $('#edit-profile-btn').addEventListener('click', () => {
       const pool = ['glance', 'nod', 'shift', 'drift', 'bob', 'lean', 'look'].filter(function (x) {
         return x !== __fabLastMicro;
       });
-      if (Math.random() < 0.1) pool.push('bubble');
       const pick = pool[Math.floor(Math.random() * pool.length)];
       __fabLastMicro = pick;
       if (pick === 'glance') fabGlance();
@@ -5987,8 +5988,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
       else if (pick === 'drift') fabDrift();
       else if (pick === 'bob') fabBob();
       else if (pick === 'lean') fabLean();
-      else if (pick === 'look') fabLookAround();
-      else fabBubbleBeat();
+      else fabLookAround();
     }
     function startThunderBackstageIdle() {
       stopThunderBackstageIdle();
@@ -6000,6 +6000,11 @@ $('#edit-profile-btn').addEventListener('click', () => {
       img.classList.add('tb-fab-alive');
       fabStartMotion();
       if (!__fabOpenedAt) __fabOpenedAt = Date.now();
+      function lineTick() {
+        if (!fabBusy()) fabBubbleBeat();
+        __fabLineTimer = setTimeout(lineTick, 7000);
+      }
+      __fabLineTimer = setTimeout(lineTick, 2500);
       function beatTick() {
         if (fabBusy()) {
           __fabBeatTimer = setTimeout(beatTick, 8000);
