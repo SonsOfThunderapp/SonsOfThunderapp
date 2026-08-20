@@ -5846,7 +5846,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
       try { fabGo(0, -6, 6, 1.02); } catch (e) {}
       fabAfter(1400, fabRestSmooth);
       if (__fabBubbleTimer) try { clearTimeout(__fabBubbleTimer); } catch (e) {}
-      __fabBubbleTimer = setTimeout(fabHideBubble, ms || 5500);
+      __fabBubbleTimer = setTimeout(fabHideBubble, ms || 8000);
     }
     function fabTwirl() {
       const img = fabImg();
@@ -6002,9 +6002,9 @@ $('#edit-profile-btn').addEventListener('click', () => {
       if (!__fabOpenedAt) __fabOpenedAt = Date.now();
       function lineTick() {
         if (!fabBusy()) fabBubbleBeat();
-        __fabLineTimer = setTimeout(lineTick, 7000);
+        __fabLineTimer = setTimeout(lineTick, 28000);
       }
-      __fabLineTimer = setTimeout(lineTick, 2500);
+      __fabLineTimer = setTimeout(lineTick, 12000);
       function beatTick() {
         if (fabBusy()) {
           __fabBeatTimer = setTimeout(beatTick, 8000);
