@@ -6680,3 +6680,17 @@ h1, h2, h3,
     text-shadow: none !important;
   }
 }
+
+/* Ask Thunder — die-cut tuxedo, no rectangle */
+.thunder-ask-hero {
+  background: transparent !important;
+  overflow: visible !important;
+}
+.thunder-ask-hero-img {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  mix-blend-mode: normal;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.55)) drop-shadow(0 0 14px rgba(254,241,5,0.22)) !important;
+}
