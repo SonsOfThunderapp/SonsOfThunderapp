@@ -4628,6 +4628,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   }
 
   async function checkInHere() {
+    if (roomCut()) return;
     if (!isSignedIn()) {
       try { openImInSignIn(); } catch (e) { startMemberSignIn(); }
       return;
@@ -8576,6 +8577,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     if (card) try { card.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
   }
   function offerHomeScreen(reason) {
+    if (roomCut()) return false;
     if (isStandalonePwa()) { hideHomeA2hs(); return false; }
     if (document.body.classList.contains('tb-tour-open')) return false;
     if (a2hsHushed() && reason !== 'alerts' && reason !== 'imin') return false;

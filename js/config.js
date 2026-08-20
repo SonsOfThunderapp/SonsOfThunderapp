@@ -1,10 +1,12 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260820-navfix1',
+  APP_BUILD: '20260820-hunter1',
   /* SONS OF THUNDER — ROOM CUT 1.0 (locked 2026-08-20)
      Member-facing: Home poster, splash→Home, Thunder quiet, real brothers/memories,
      leadership infrastructure. Freeze (hide, do not delete): raffle, Axum, FOMO count, I'm Here. */
   ROOM_CUT: '1.0',
+  /* PRE-SHIP HUNTER locked 2026-08-20. Run before every credit. Phone is never first prototype. */
+  PRE_SHIP_HUNTER: true,
   /* AUTHORITATIVE LINEAGE — do not package from mixed branches */
   SOURCE_PARENT: '20260818-p0-recovery1',
   REJECTED_ARCHIVES: ['20260818-whatsnext1', '20260818-header-safe1'],

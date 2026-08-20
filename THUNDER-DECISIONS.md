@@ -1,6 +1,24 @@
 # Thunder Board Decisions Log
 
+## 2026-08-20 — PRE-SHIP HUNTER (locked)
+
+### Decision
+Catch traps before Obie. Do not credit a build until the hunter PASSES.
+Hunt like a stranger at Crooked Can with 8 seconds and a thumb.
+
+Trap check must be zero: overlays, ghost copy, frozen Room Cut paint, page jump, splash→Home, I’m In sheet, labels vs titles, Spotlight Law.
+
+Method: grep HTML defaults AND JS. List fixed overlays vs `.bottom-nav`. Simulate cold launch / I’m In / cancel / magic-link / tab jump / Take the Tour / empty states.
+
+Output: punch list. Overlay → how it fires → kill or hide. PASS/FAIL. No new features.
+
+`TB_CONFIG.PRE_SHIP_HUNTER = true`
+
+### Revisit
+Never. This is how every ship starts.
+
 ## 2026-08-20 — ROOM CUT 1.0 (locked)
+
 
 ### Decision
 Member-facing product: the app supports the brotherhood; it doesn’t compete with it.
