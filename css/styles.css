@@ -6916,8 +6916,8 @@ h1, h2, h3,
   height: 72px !important;
 }
 .thunder-fab-img.tb-fab-glint {
-  filter: brightness(1.18) drop-shadow(0 0 8px rgba(254,241,5,0.35));
-  transition: filter 0.2s ease;
+  filter: none !important;
+  transition: none;
 }
 
 /* Special-agent inspect: glasses down, scan the room, 3 seconds */
@@ -7548,4 +7548,14 @@ body.tb-tour-mandatory .tb-tour-skip {
 }
 @media (prefers-reduced-motion: reduce) {
   .thunder-fab-img.tb-fab-twirl { animation: none !important; }
+}
+
+.thunder-fab-aura { display: none !important; animation: none !important; }
+#view-home .next-meeting { padding-right: 92px; }
+.thunder-fab-img,
+.thunder-fab-img.tb-fab-alive,
+.thunder-fab-img.tb-fab-look,
+.thunder-fab-img.tb-fab-act,
+.thunder-fab-img.tb-fab-inspect {
+  filter: none !important;
 }
