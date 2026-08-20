@@ -325,14 +325,43 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
 
   let __calBlobUrl = null;
 
+  function setCalAlarmsLine(msg) {
+    const el = document.getElementById('tb-cal-alarms');
+    if (el && msg) el.textContent = msg;
+  }
+
   function lockInAppReminder() {
     try { save('reminderSet', true); } catch (e) {}
-    try {
-      requestNotifyPermission().then(function (perm) {
-        if (perm === 'granted') checkAndFireMeetingNotifications();
-      });
-    } catch (e) {}
+    try { save('reminderMeeting', meetingKey()); } catch (e) {}
+    armGatheringPings();
     return true;
+  }
+
+  async function armGatheringPings() {
+    try { save('reminderSet', true); } catch (e) {}
+    try { save('reminderMeeting', meetingKey()); } catch (e) {}
+    let perm = 'default';
+    try { perm = await requestNotifyPermission(); } catch (e) {}
+    if (perm !== 'granted') {
+      setCalAlarmsLine('Allow alerts — that’s how the 7-day ping lands.');
+      return false;
+    }
+    try { checkAndFireMeetingNotifications(); } catch (e) {}
+    if (typeof isIos === 'function' && isIos() && typeof isStandalonePwa === 'function' && !isStandalonePwa()) {
+      setCalAlarmsLine('Put the Board on your Home Screen so the 7-day ping can reach you.');
+    }
+    if (typeof enableGatheringAlerts === 'function') {
+      try {
+        const ok = await enableGatheringAlerts();
+        try { if (typeof refreshAlertsToggleUI === 'function') refreshAlertsToggleUI(); } catch (e) {}
+        if (ok) {
+          setCalAlarmsLine('Locked. We’ll ping this phone: 7 days · 1 day · 2 hours.');
+          return true;
+        }
+      } catch (e) {}
+    }
+    setCalAlarmsLine('Reminder on this phone. Gathering Alerts = ping even if the app is closed.');
+    return false;
   }
 
   function paintInAppCalendar() {
