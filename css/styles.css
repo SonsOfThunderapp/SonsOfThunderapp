@@ -7185,25 +7185,26 @@ body.tb-ask-open .header .logo {
   object-fit: contain !important;
   object-position: center top !important;
   pointer-events: none !important;
-  z-index: 3 !important;
+  z-index: 5 !important;
   display: block !important;
-  mix-blend-mode: screen;
-  opacity: 0.7;
+  visibility: visible !important;
+  mix-blend-mode: normal;
+  opacity: 1 !important;
   animation: logoBoltBreath var(--tb-breathe) !important;
-  will-change: filter, opacity;
+  will-change: filter;
 }
 @keyframes logoBoltBreath {
   0%, 100% {
-    opacity: 0.55;
-    filter: drop-shadow(0 0 3px rgba(254,241,5,0.28));
+    filter:
+      drop-shadow(0 0 5px rgba(254,241,5,0.45))
+      drop-shadow(0 0 10px rgba(254,241,5,0.2));
   }
   50% {
-    opacity: 0.85;
     filter:
-      drop-shadow(0 0 6px rgba(254,241,5,0.5))
-      drop-shadow(0 0 12px rgba(254,241,5,0.22));
+      drop-shadow(0 0 10px rgba(254,241,5,0.85))
+      drop-shadow(0 0 20px rgba(254,241,5,0.4));
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .logo-bolt-life { animation: none !important; opacity: 0.7; }
+  .logo-bolt-life { animation: none !important; filter: drop-shadow(0 0 8px rgba(254,241,5,0.5)); }
 }
