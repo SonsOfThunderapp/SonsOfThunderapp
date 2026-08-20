@@ -2425,6 +2425,48 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
 
   // ---------- INFO DETAIL (tap-to-expand cards) ----------
   
+  async function inviteOpenChair() {
+    const url = (window.location.origin || '') + '/';
+    const payload = {
+      title: 'Sons of Thunder',
+      text: 'There’s an open chair at the table. Thunder doesn’t dull.',
+      url: url
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(payload);
+        try { honorFirst('share'); } catch (e) {}
+        return;
+      }
+    } catch (e) {
+      if (e && e.name === 'AbortError') return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      showInstallToast('Link copied. Send it to a brother.');
+      try { honorFirst('share'); } catch (e) {}
+    } catch (e2) {
+      showInstallToast('Share the app link with a brother.');
+    }
+  }
+
+  function honorFirst(kind) {
+    const key = 'tb_first_' + kind;
+    try { if (localStorage.getItem(key)) return; } catch (e) { return; }
+    const lines = {
+      imin: 'First lock. The table knows your name.',
+      share: 'First brother reached. That’s the round table.'
+    };
+    const line = lines[kind];
+    if (!line) return;
+    try { localStorage.setItem(key, '1'); } catch (e) {}
+    setTimeout(function () {
+      try {
+        if (typeof window.tbFabSay === 'function') window.tbFabSay(line, 8000);
+      } catch (e) {}
+    }, 1400);
+  }
+
   /* LOCKED: ~3s reward on profile / memory save — reads TB_CONFIG.SAVE_REWARD */
   function rewardSaveSuccess(kind) {
     try {
@@ -3574,6 +3616,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     try {
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file], title, text });
+        try { honorFirst('share'); } catch (e) {}
         return true;
       }
     } catch (e) {
@@ -3992,6 +4035,13 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
           <div class="brother-slot-title">Your seat</div>
           <div class="brother-slot-sub">Tap to add your profile</div>
         </div>
+      </button>
+      <button type="button" class="brother-card brother-chair" id="brother-open-chair" aria-label="Invite a brother">
+        <div class="brother-chair-seat" aria-hidden="true"></div>
+        <div class="brother-info">
+          <div class="brother-chair-title">OPEN CHAIR</div>
+          <div class="brother-slot-sub">Bring a brother</div>
+        </div>
       </button>`;
     grid.innerHTML = cardsHtml + inviteHtml;
     grid.querySelectorAll('.brother-card[data-brother-index]').forEach(card => {
@@ -4007,6 +4057,14 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         if (typeof tbGlowHit === 'function') tbGlowHit(slot, 'yellow');
         try { tbFeedback.selection(); } catch (e) {}
         openProfileEditor();
+      });
+    }
+    const chair = $('#brother-open-chair');
+    if (chair) {
+      chair.addEventListener('click', function () {
+        if (typeof tbGlowHit === 'function') tbGlowHit(chair, 'yellow');
+        try { tbFeedback.selection(); } catch (e) {}
+        inviteOpenChair();
       });
     }
     updateAllNewBadges();
@@ -5715,6 +5773,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       // I'm In = seat + alerts consent + optional name lock-in.
       try { utilizeImInBackground(); } catch (e) {}
       try { renderRsvp(); } catch (e) {}
+      try { honorFirst('imin'); } catch (e) {}
       if (!isSignedIn() && supabaseEnabled()) {
         setTimeout(function () {
           try { openImInSignIn(); } catch (e) {}
@@ -6825,12 +6884,14 @@ $('#edit-profile-btn').addEventListener('click', () => {
       b.classList.remove('is-on');
       void b.offsetWidth;
       b.classList.add('is-on');
+      try { window.tbFabSay = fabSay; } catch (e) {}
       try { tbFeedback.selection(); } catch (e) {}
       try { fabGo(0, -6, 6, 1.02); } catch (e) {}
       fabAfter(1400, fabRestSmooth);
       if (__fabBubbleTimer) try { clearTimeout(__fabBubbleTimer); } catch (e) {}
       __fabBubbleTimer = setTimeout(fabHideBubble, ms || 8000);
     }
+    window.tbFabSay = fabSay;
     function fabTwirl() {
       const img = fabImg();
       if (!img) return;

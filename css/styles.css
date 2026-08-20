@@ -1221,6 +1221,42 @@ h1.code-title-glow {
   color: #8a8a8a;
   line-height: 1.35;
 }
+.brother-chair {
+  background: #070707 !important;
+  border: 1.5px dashed #3a3a3a !important;
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+.brother-chair-seat {
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at 50% 60%, #141414 0%, #070707 70%);
+}
+.brother-chair-seat::before {
+  content: "";
+  width: 38%;
+  height: 28%;
+  border: 2px solid #555;
+  border-bottom-width: 7px;
+  border-radius: 8px 8px 3px 3px;
+  box-shadow: 0 14px 0 -6px #3a3a3a;
+}
+.brother-chair-title {
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: #888;
+  margin-bottom: 4px;
+}
+.brother-chair:active {
+  border-color: #FEF105 !important;
+  transform: scale(0.98);
+}
 .leader-tools { margin-top: 4px; }
 .leader-tools.hidden { display: none; }
 .admin-zone input, .admin-zone textarea,
