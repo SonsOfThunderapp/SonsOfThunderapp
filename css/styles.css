@@ -7403,3 +7403,45 @@ body.tb-tour-mandatory .tb-tour-skip {
   border-color: #E30600;
   color: #fff;
 }
+
+.home-a2hs {
+  margin: 8px 0 14px;
+  padding: 12px 12px 10px;
+  background: #111;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+}
+.home-a2hs.hidden { display: none !important; }
+.home-a2hs-copy {
+  margin: 0 0 10px;
+  color: #ddd;
+  font-size: 13px;
+  line-height: 1.35;
+  text-align: center;
+}
+.home-a2hs-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.home-a2hs-put {
+  background: #E30600;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 8px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  font-size: 12px;
+}
+.home-a2hs-later {
+  background: transparent;
+  color: #888;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 12px 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  font-size: 12px;
+}
+.cal-a2hs-btn { margin-top: 8px; }

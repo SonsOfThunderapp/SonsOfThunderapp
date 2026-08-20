@@ -30,7 +30,7 @@
   
   <!-- Web App Manifest -->
   <link rel="manifest" href="manifest.json" />
-  <link rel="preload" as="image" href="assets/logo@2x.png?v=20260820-drop7" />
+  <link rel="preload" as="image" href="assets/logo@2x.png?v=20260820-a2hs10" />
   <link rel="preload" as="image" href="assets/thunder-cool-fab@2x.png?v=20260819-nogold2" />
   
   <link rel="stylesheet" href="css/styles.css?v=20260819-nogold2" />
@@ -43,14 +43,14 @@
   <div id="splash" class="splash" aria-hidden="true">
     <div class="splash-inner">
       <div class="splash-logo-wrap">
-        <img src="assets/logo@2x.png?v=20260820-drop7"
-             srcset="assets/logo@2x.png?v=20260820-drop7 1200w, assets/logo@3x.png?v=20260820-drop7 1800w"
+        <img src="assets/logo@2x.png?v=20260820-a2hs10"
+             srcset="assets/logo@2x.png?v=20260820-a2hs10 1200w, assets/logo@3x.png?v=20260820-a2hs10 1800w"
              sizes="min(82vw, 340px)"
              alt="Sons of Thunder"
              class="splash-mark splash-logo"
              width="1200"
              height="831" />
-        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-drop7" alt="" aria-hidden="true" width="1200" height="831" />
+        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-a2hs10" alt="" aria-hidden="true" width="1200" height="831" />
       </div>
       <p class="splash-line hidden" aria-hidden="true">THUNDER DOESN’T DULL</p>
     </div>
@@ -62,8 +62,8 @@
     <header id="main-header" class="header">
       <div class="logo-wrap">
         <img
-          src="assets/logo@2x.png?v=20260820-drop7"
-          srcset="assets/logo@2x.png?v=20260820-drop7 1200w, assets/logo@3x.png?v=20260820-drop7 1800w"
+          src="assets/logo@2x.png?v=20260820-a2hs10"
+          srcset="assets/logo@2x.png?v=20260820-a2hs10 1200w, assets/logo@3x.png?v=20260820-a2hs10 1800w"
           sizes="(max-width: 480px) 72vw, 320px"
           alt="Sons of Thunder"
           class="logo"
@@ -72,7 +72,7 @@
           height="831"
           decoding="async"
         />
-        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-drop7" alt="" aria-hidden="true" width="1200" height="831" />
+        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-a2hs10" alt="" aria-hidden="true" width="1200" height="831" />
       </div>
     </header>
 
@@ -82,6 +82,13 @@
         <div class="container">
           <p class="identity-line">Thunder doesn’t dull</p>
           <p id="home-personal" class="home-personal hidden" aria-live="polite"></p>
+          <div id="home-a2hs" class="home-a2hs hidden" role="region" aria-label="Add to Home Screen">
+            <p class="home-a2hs-copy">Put Thunder on your Home Screen. That’s how the 7-day ping lands.</p>
+            <div class="home-a2hs-actions">
+              <button type="button" class="home-a2hs-put" id="home-a2hs-put">PUT IT ON</button>
+              <button type="button" class="home-a2hs-later" id="home-a2hs-later">NOT NOW</button>
+            </div>
+          </div>
 
           <div class="next-meeting card">
             <div class="card-label" id="meeting-phase-label">NEXT GATHERING</div>
@@ -363,8 +370,9 @@
       <p class="tb-cal-loc" id="tb-cal-loc"></p>
       <p class="tb-cal-alarms" id="tb-cal-alarms">We’ll ping this phone: 7 days · 1 day · 2 hours</p>
       <button type="button" class="cal-confirm-primary" id="cal-confirm-native">ADD TO PHONE CALENDAR</button>
+      <button type="button" class="cal-confirm-primary cal-a2hs-btn hidden" id="cal-confirm-a2hs">PUT ON HOME SCREEN</button>
       <button type="button" class="cal-confirm-secondary" id="cal-confirm-add">GOT IT</button>
-      <p class="cal-confirm-hint">Phone calendar holds the 7-day alarm. GOT IT stays here.</p>
+      <p class="cal-confirm-hint" id="cal-confirm-hint">Phone calendar holds the 7-day alarm. GOT IT stays here.</p>
     </div>
   </div>
 
@@ -390,8 +398,8 @@
         <div class="tb-tour-slide-frame" id="tb-tour-live">
           <div class="tb-live-slide is-on" data-slide="0">
             <div class="tb-live-logo-wrap">
-              <img class="tb-live-logo" src="assets/logo@2x.png?v=20260820-drop7" alt="Sons of Thunder" width="1200" height="831" />
-              <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-drop7" alt="" aria-hidden="true" width="1200" height="831" />
+              <img class="tb-live-logo" src="assets/logo@2x.png?v=20260820-a2hs10" alt="Sons of Thunder" width="1200" height="831" />
+              <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-a2hs10" alt="" aria-hidden="true" width="1200" height="831" />
             </div>
           </div>
           <div class="tb-live-slide" data-slide="1">

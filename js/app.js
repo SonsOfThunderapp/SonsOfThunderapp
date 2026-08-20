@@ -391,6 +391,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       }) + ' · ' + meetingTime();
     }
     if (locEl) locEl.textContent = venueName();
+    try { paintCalA2hs(); } catch (e) {}
   }
 
   function offerCalendarNow() {
@@ -4824,6 +4825,14 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
           try { addToNativeCalendar(); } catch (e) {}
         });
       }
+      const a2hsCal = document.getElementById('cal-confirm-a2hs');
+      if (a2hsCal && !a2hsCal.dataset.tbBound) {
+        a2hsCal.dataset.tbBound = '1';
+        a2hsCal.addEventListener('click', () => {
+          try { closeCalConfirmSheet(); } catch (e) {}
+          try { launchAddToHomeScreen(); } catch (e) {}
+        });
+      }
       if (add && !add.dataset.tbBound) {
         add.dataset.tbBound = '1';
         add.addEventListener('click', () => {
@@ -4832,6 +4841,9 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
           const rb = document.getElementById('reminder-btn');
           if (rb) { rb.classList.add('set'); rb.textContent = 'REMINDER ON'; }
           closeCalConfirmSheet();
+          try {
+            if (!isStandalonePwa()) showHomeA2hs();
+          } catch (e) {}
         });
       }
       if (later && !later.dataset.tbBound) {
@@ -7034,6 +7046,67 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     );
   }
 
+  function a2hsHushed() {
+    try { return Date.now() < Number(load('a2hsQuietUntil') || 0); } catch (e) { return false; }
+  }
+  function hushA2hs(days) {
+    try { save('a2hsQuietUntil', Date.now() + (days || 7) * 86400000); } catch (e) {}
+  }
+  function hideHomeA2hs() {
+    const el = document.getElementById('home-a2hs');
+    if (el) el.classList.add('hidden');
+  }
+  function showHomeA2hs() {
+    if (isStandalonePwa()) { hideHomeA2hs(); return; }
+    const el = document.getElementById('home-a2hs');
+    if (el) el.classList.remove('hidden');
+  }
+  function paintCalA2hs() {
+    const btn = document.getElementById('cal-confirm-a2hs');
+    const hint = document.getElementById('cal-confirm-hint');
+    const need = !isStandalonePwa();
+    if (btn) btn.classList.toggle('hidden', !need);
+    if (need && hint) hint.textContent = 'Home Screen = 7-day ping on a locked iPhone.';
+  }
+  function launchAddToHomeScreen() {
+    if (isStandalonePwa()) return;
+    if (typeof isInAppBrowser === 'function' && isInAppBrowser()) {
+      try { openInAppInstallOverlay(); } catch (e) {}
+      return;
+    }
+    const def = window.__tbDeferredInstall;
+    if (def && typeof def.prompt === 'function') {
+      try { def.prompt(); } catch (e) {}
+      return;
+    }
+    if (isIos()) {
+      try { openIosInstallOverlay(); } catch (e) {}
+      return;
+    }
+    try { showView('about'); } catch (e) {}
+    const card = document.getElementById('install-help-card');
+    if (card) try { card.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+  }
+  function offerHomeScreen(reason) {
+    if (isStandalonePwa()) { hideHomeA2hs(); return false; }
+    if (document.body.classList.contains('tb-tour-open')) return false;
+    if (a2hsHushed() && reason !== 'alerts' && reason !== 'imin') return false;
+    try {
+      if (sessionStorage.getItem('tb_a2hs_shown') === '1' && reason !== 'alerts' && reason !== 'imin') return false;
+    } catch (e) {}
+    if (reason === 'imin') {
+      paintCalA2hs();
+      return true;
+    }
+    try { sessionStorage.setItem('tb_a2hs_shown', '1'); } catch (e) {}
+    if (reason === 'visit' || reason === 'gathering') {
+      showHomeA2hs();
+      return true;
+    }
+    launchAddToHomeScreen();
+    return true;
+  }
+
   function isIos() {
     return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -7239,6 +7312,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     }
     if (isIos() && !isStandalonePwa()) {
       setAlertsHint('iPhone: Add to Home Screen first, then open from the icon and turn alerts on.');
+      try { offerHomeScreen('alerts'); } catch (e) {}
       return false;
     }
 
@@ -7893,6 +7967,9 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   function completeTour() {
     setTourState({ done: true, completed: true, at: Date.now() });
     hideTour();
+    setTimeout(function () {
+      try { offerHomeScreen('tour'); } catch (e) {}
+    }, 900);
   }
 
   function startTour(opts) {
@@ -7998,6 +8075,29 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     setupNotificationSystem();
     setupGatheringAlerts();
     try { applyDeepLink(location.href); } catch (e) {}
+    try {
+      const n = Number(load('tbVisits') || 0) + 1;
+      save('tbVisits', n);
+      if (!isStandalonePwa() && isTourComplete()) {
+        const d = daysUntil(getNextMeetingMonday());
+        if (n >= 2 || d === 0 || d === 1) offerHomeScreen(d === 0 || d === 1 ? 'gathering' : 'visit');
+      } else {
+        hideHomeA2hs();
+      }
+    } catch (e) {}
+    const a2hsPut = document.getElementById('home-a2hs-put');
+    const a2hsLater = document.getElementById('home-a2hs-later');
+    if (a2hsPut && !a2hsPut.dataset.tbBound) {
+      a2hsPut.dataset.tbBound = '1';
+      a2hsPut.addEventListener('click', function () { launchAddToHomeScreen(); });
+    }
+    if (a2hsLater && !a2hsLater.dataset.tbBound) {
+      a2hsLater.dataset.tbBound = '1';
+      a2hsLater.addEventListener('click', function () {
+        hushA2hs(7);
+        hideHomeA2hs();
+      });
+    }
     try {
       if (navigator.serviceWorker) {
         navigator.serviceWorker.addEventListener('message', function (ev) {
