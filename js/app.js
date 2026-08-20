@@ -4555,6 +4555,9 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         return;
       }
       try { pushRsvp(!!rsvp); } catch (e) {}
+      if (rsvp) {
+        try { notifyImInBroadcast(); } catch (e) {}
+      }
 
       if (!rsvp) {
         // Calm un-commit — no reverse lightning
@@ -7014,6 +7017,31 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     save('gatheringAlertsOn', false);
     setAlertsHint('Alerts off.');
     return true;
+  }
+
+  async function notifyImInBroadcast() {
+    if (!supabaseEnabled() || !isSignedIn()) return;
+    const sb = getSb && getSb();
+    if (!sb || !sb.auth || !sb.auth.getSession) return;
+    try {
+      const { data } = await sb.auth.getSession();
+      const accessToken = (data && data.session && data.session.access_token) || '';
+      if (!accessToken) return;
+      const first = (typeof knownFirstName === 'function' && knownFirstName()) || 'A brother';
+      fetch('/.netlify/functions/push-im-in', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + accessToken
+        },
+        body: JSON.stringify({
+          name: first,
+          meeting_key: meetingKey()
+        })
+      }).catch(function () {});
+    } catch (e) {
+      console.warn('im-in push', e);
+    }
   }
 
   let __tbBroadcastInFlight = false;
