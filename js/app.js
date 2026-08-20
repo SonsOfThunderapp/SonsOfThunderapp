@@ -4965,6 +4965,11 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       const wasIn = !!rsvp;
       const turningOn = !wasIn;
 
+      /* I'm In = consent. Same tap as the OS alert prompt. No extra screen. */
+      if (turningOn) {
+        try { requestNotifyPermission(); } catch (e) {}
+      }
+
       // Contact haptic only (no tb-press class on RSVP — that transform:!important
       // fights commit-strike). Use selection pulse + optional confirm later.
       try {
@@ -4993,8 +4998,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       }
       try { pushRsvp(!!rsvp); } catch (e) {}
       if (rsvp) {
-        Promise.resolve()
-          .then(function () { return quietPushSubscribe(); })
+        quietPushSubscribe()
           .then(function () { return notifyImInBroadcast(); })
           .catch(function () {});
       }
@@ -7855,16 +7859,15 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
   async function quietPushSubscribe() {
     try {
-      if (typeof isIos === 'function' && isIos() && typeof isStandalonePwa === 'function' && !isStandalonePwa()) {
-        return false;
-      }
       const vapid = (cfg().VAPID_PUBLIC_KEY || '').trim();
-      if (!vapid || !('serviceWorker' in navigator) || !('PushManager' in window)) return false;
-      if (!('Notification' in window) || Notification.permission === 'denied') return false;
-      const perm = await requestNotifyPermission();
-      if (perm !== 'granted') return false;
+      if (!vapid || !('serviceWorker' in navigator) || !('PushManager' in window)) return null;
+      if (!('Notification' in window) || Notification.permission === 'denied') return null;
+      const perm = Notification.permission === 'granted'
+        ? 'granted'
+        : await requestNotifyPermission();
+      if (perm !== 'granted') return null;
       const reg = await ensureServiceWorker();
-      if (!reg) return false;
+      if (!reg) return null;
       let sub = await reg.pushManager.getSubscription();
       if (!sub) {
         sub = await reg.pushManager.subscribe({
@@ -7878,30 +7881,32 @@ $('#thunder-input').addEventListener('keydown', (e) => {
         body: JSON.stringify({ subscription: sub.toJSON() })
       });
       save('gatheringAlertsOn', true);
-      return true;
+      try { window.__tbPushEndpoint = sub.endpoint; } catch (e) {}
+      return sub;
     } catch (e) {
-      return false;
+      return null;
     }
   }
 
   async function notifyImInBroadcast() {
-    if (!supabaseEnabled() || !isSignedIn()) return;
-    const sb = getSb && getSb();
-    if (!sb || !sb.auth || !sb.auth.getSession) return;
     try {
-      const { data } = await sb.auth.getSession();
-      const accessToken = (data && data.session && data.session.access_token) || '';
-      if (!accessToken) return;
-      const first = (typeof knownFirstName === 'function' && knownFirstName()) || 'A brother';
+      const first = (typeof knownFirstName === 'function' && knownFirstName()) || '';
+      const headers = { 'Content-Type': 'application/json' };
+      try {
+        const sb = getSb && getSb();
+        if (sb && sb.auth && sb.auth.getSession) {
+          const { data } = await sb.auth.getSession();
+          const accessToken = (data && data.session && data.session.access_token) || '';
+          if (accessToken) headers.Authorization = 'Bearer ' + accessToken;
+        }
+      } catch (e) {}
       fetch('/.netlify/functions/push-im-in', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: 'Bearer ' + accessToken
-        },
+        headers: headers,
         body: JSON.stringify({
           name: first,
-          meeting_key: meetingKey()
+          meeting_key: meetingKey(),
+          endpoint: window.__tbPushEndpoint || ''
         })
       }).catch(function () {});
     } catch (e) {
