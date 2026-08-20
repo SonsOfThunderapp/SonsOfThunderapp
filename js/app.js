@@ -7880,6 +7880,10 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       host.className = 'tb-guide-thunder tb-host-alive tb-host-bond';
       host.src = tux;
       host.removeAttribute('srcset');
+      if (!tourReducedMotion()) {
+        void host.offsetWidth;
+        host.classList.add('tb-host-bond-pop');
+      }
     } else {
       host.className = 'tb-guide-thunder tb-host-alive tb-host-' + mood;
       if (host.getAttribute('src') !== bolt) {
@@ -8086,7 +8090,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       el.classList.toggle('is-on', on);
     });
     const live = document.getElementById('tb-tour-live');
-    if (live && !tourReducedMotion()) {
+    if (live && !tourReducedMotion() && __tourIdx !== 5) {
       live.classList.remove('tb-tour-slide-in');
       void live.offsetWidth;
       live.classList.add('tb-tour-slide-in');
@@ -8114,6 +8118,12 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       __tourBubbleDelay = setTimeout(function () {
         typeTourBody(step.body || '', body);
       }, 1100);
+    } else if (__tourIdx === 5) {
+      stopBroPersonaIdle();
+      if (body) body.textContent = '';
+      __tourBubbleDelay = setTimeout(function () {
+        typeTourBody(step.body || '', body);
+      }, 720);
     } else {
       stopBroPersonaIdle();
       typeTourBody(step.body || '', body);
@@ -8204,6 +8214,16 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     if (!__tourActive) return;
     if (__tourIdx >= TB_TOUR_STEPS.length - 1) {
       completeTour();
+      return;
+    }
+    if (__tourIdx === 4 && !tourReducedMotion()) {
+      const stage = document.querySelector('#tb-tour .tb-tour-stage');
+      if (stage) stage.classList.add('tb-finale-leave');
+      setTimeout(function () {
+        if (stage) stage.classList.remove('tb-finale-leave');
+        __tourIdx = 5;
+        renderTourSlide();
+      }, 360);
       return;
     }
     __tourIdx += 1;
