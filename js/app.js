@@ -6785,7 +6785,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
 
   // ---------- PRODUCT TOUR — 7-slide (restored 20260818) ----------
-  const TB_TOUR_VERSION = 27;
+  const TB_TOUR_VERSION = 28;
   function tourStorageKey() { return 'thunderTourV' + TB_TOUR_VERSION; }
   function isTourComplete() {
     try {
@@ -6888,8 +6888,8 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     const mood = moods[idx] || 'arrive';
     host.className = 'tb-guide-thunder tb-host-alive tb-host-' + mood;
     if (tourReducedMotion()) return;
-    /* Slide 1 = CSS spin+float. Slide 3 = quiet float. Don't jitter either. */
-    if (idx === 0 || idx === 1 || idx === 2) return;
+    /* CSS owns host motion per board. No fidget shake. */
+    return;
     host.classList.add('tb-host-enter');
     __hostFidgetTimer = setTimeout(function () {
       host.classList.remove('tb-host-enter');
