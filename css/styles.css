@@ -7445,3 +7445,43 @@ body.tb-tour-mandatory .tb-tour-skip {
   font-size: 12px;
 }
 .cal-a2hs-btn { margin-top: 8px; }
+
+.room-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 8px 0 14px;
+}
+.room-stat {
+  background: #111;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 14px 10px;
+  text-align: center;
+}
+.room-stat b {
+  display: block;
+  font-size: 28px;
+  color: #FEF105;
+  font-weight: 800;
+}
+.room-stat span {
+  display: block;
+  margin-top: 4px;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: #888;
+}
+.room-origin {
+  text-align: center;
+  color: #666;
+  font-size: 12px;
+  margin: 0 0 10px;
+}
+.room-in, .room-bday {
+  color: #ccc;
+  font-size: 14px;
+  line-height: 1.4;
+  margin: 8px 0 0;
+}
+.cal-a2hs-btn { margin-top: 8px; }

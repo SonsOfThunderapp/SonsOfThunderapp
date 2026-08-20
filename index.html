@@ -30,7 +30,7 @@
   
   <!-- Web App Manifest -->
   <link rel="manifest" href="manifest.json" />
-  <link rel="preload" as="image" href="assets/logo@2x.png?v=20260820-imin10" />
+  <link rel="preload" as="image" href="assets/logo@2x.png?v=20260820-ops3" />
   <link rel="preload" as="image" href="assets/thunder-cool-fab@2x.png?v=20260819-nogold2" />
   
   <link rel="stylesheet" href="css/styles.css?v=20260819-nogold2" />
@@ -43,14 +43,14 @@
   <div id="splash" class="splash" aria-hidden="true">
     <div class="splash-inner">
       <div class="splash-logo-wrap">
-        <img src="assets/logo@2x.png?v=20260820-imin10"
-             srcset="assets/logo@2x.png?v=20260820-imin10 1200w, assets/logo@3x.png?v=20260820-imin10 1800w"
+        <img src="assets/logo@2x.png?v=20260820-ops3"
+             srcset="assets/logo@2x.png?v=20260820-ops3 1200w, assets/logo@3x.png?v=20260820-ops3 1800w"
              sizes="min(82vw, 340px)"
              alt="Sons of Thunder"
              class="splash-mark splash-logo"
              width="1200"
              height="831" />
-        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-imin10" alt="" aria-hidden="true" width="1200" height="831" />
+        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-ops3" alt="" aria-hidden="true" width="1200" height="831" />
       </div>
       <p class="splash-line hidden" aria-hidden="true">THUNDER DOESN’T DULL</p>
     </div>
@@ -62,8 +62,8 @@
     <header id="main-header" class="header">
       <div class="logo-wrap">
         <img
-          src="assets/logo@2x.png?v=20260820-imin10"
-          srcset="assets/logo@2x.png?v=20260820-imin10 1200w, assets/logo@3x.png?v=20260820-imin10 1800w"
+          src="assets/logo@2x.png?v=20260820-ops3"
+          srcset="assets/logo@2x.png?v=20260820-ops3 1200w, assets/logo@3x.png?v=20260820-ops3 1800w"
           sizes="(max-width: 480px) 72vw, 320px"
           alt="Sons of Thunder"
           class="logo"
@@ -72,7 +72,7 @@
           height="831"
           decoding="async"
         />
-        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-imin10" alt="" aria-hidden="true" width="1200" height="831" />
+        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-ops3" alt="" aria-hidden="true" width="1200" height="831" />
       </div>
     </header>
 
@@ -269,6 +269,8 @@
             <div class="admin-zone admin-zone-bottom">
               <button id="leader-unlock-btn" class="btn-secondary btn-leadership" style="width:100%;margin-top:0;">Leadership</button>
               <div id="leader-tools" class="leader-tools hidden">
+                <button id="admin-room-btn" class="btn-rsvp" style="width:100%;margin-top:12px;">THE ROOM</button>
+                <p class="leader-push-hint">Who’s in. Alerts. Birthdays. Phones.</p>
                 <button id="admin-announcements-btn" class="btn-secondary" style="width:100%;margin-top:10px;">Edit Announcements</button>
                 <button id="admin-lastfire-btn" class="btn-secondary" style="width:100%;margin-top:10px;">Edit Last Fire</button>
                 <button id="admin-events-btn" class="btn-secondary" style="width:100%;margin-top:10px;">Edit Events / Mission</button>
@@ -276,7 +278,7 @@
                 <button id="admin-push-btn" class="btn-rsvp" style="width:100%;margin-top:12px;">SEND ALERT TO EVERYONE</button>
                 <p class="leader-push-hint">Only brothers who turned on Gathering Alerts. Keep it short.</p>
                 <button id="admin-sms-club-btn" class="btn-secondary" style="width:100%;margin-top:10px;">TEXT THE CLUB</button>
-                <p class="leader-push-hint">Opens Messages with every brother who put a phone on his profile. You hit Send.</p>
+                <p class="leader-push-hint">Sends from the club number. Falls back to Messages if Twilio isn’t set.</p>
                 <button id="leader-lock-btn" class="btn-secondary" style="width:100%;margin-top:10px;opacity:0.7;">Lock</button>
               </div>
             </div>
@@ -398,8 +400,8 @@
         <div class="tb-tour-slide-frame" id="tb-tour-live">
           <div class="tb-live-slide is-on" data-slide="0">
             <div class="tb-live-logo-wrap">
-              <img class="tb-live-logo" src="assets/logo@2x.png?v=20260820-imin10" alt="Sons of Thunder" width="1200" height="831" />
-              <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-imin10" alt="" aria-hidden="true" width="1200" height="831" />
+              <img class="tb-live-logo" src="assets/logo@2x.png?v=20260820-ops3" alt="Sons of Thunder" width="1200" height="831" />
+              <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-ops3" alt="" aria-hidden="true" width="1200" height="831" />
             </div>
           </div>
           <div class="tb-live-slide" data-slide="1">
@@ -700,6 +702,37 @@
   </div>
 
     <!-- Admin Announcements Modal -->
+  <div id="admin-room-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>The Room</h2>
+        <button class="modal-close" data-close="admin-room-modal" type="button">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="card-label" id="room-label">FOUNDER</p>
+        <div id="room-stats" class="room-stats">Loading the room…</div>
+        <button data-close="admin-room-modal" type="button" class="btn-secondary" style="width:100%;margin-top:14px;">CLOSE</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="admin-sms-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Text the Club</h2>
+        <button class="modal-close" data-close="admin-sms-modal" type="button">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="admin-push-note">One line. From the club. Not your personal number.</p>
+        <textarea id="admin-sms-body" placeholder="Monday. 6:30. Crooked Can. Be there." maxlength="160" rows="3"></textarea>
+        <button id="admin-sms-send" class="btn-rsvp" type="button" style="width:100%;margin-top:12px;">SEND FROM THE CLUB</button>
+        <p class="admin-push-status" id="admin-sms-status" aria-live="polite"></p>
+        <button data-close="admin-sms-modal" type="button" class="btn-secondary" style="width:100%;margin-top:10px;">CANCEL</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Announcements Modal -->
   <div id="admin-ann-modal" class="modal hidden">
     <div class="modal-content" style="max-height:90vh;overflow-y:auto;">
       <div class="modal-header">

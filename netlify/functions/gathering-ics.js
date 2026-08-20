@@ -2,8 +2,10 @@
  * Live gathering.ics — next Monday (holiday-aware) + VALARM 7d / 1d / 2h.
  * Subscribe via webcal://…/gathering.ics so native Calendar owns the alarms.
  */
-exports.handler = async () => {
-  const ics = buildIcs(nextGathering(new Date()));
+exports.handler = async (event) => {
+  const host = (event.headers && (event.headers.host || event.headers.Host)) || 'sonsofthunder.netlify.app';
+  const origin = 'https://' + host.replace(/^https?:\/\//, '');
+  const ics = buildIcs(nextGathering(new Date()), origin);
   return {
     statusCode: 200,
     headers: {
@@ -57,11 +59,12 @@ function nextGathering(from) {
   }
   return candidate;
 }
-function buildIcs(meet) {
+function buildIcs(meet, origin) {
   const start = new Date(meet);
   start.setHours(18, 30, 0, 0);
   const end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
-  const uid = 'thunder-gathering@sonsofthunder.netlify.app';
+  const uid = 'thunder-gathering@' + String(origin || 'https://sonsofthunder.netlify.app').replace(/^https?:\/\//, '');
+  const url = (origin || 'https://sonsofthunder.netlify.app') + '/';
   return [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
@@ -77,7 +80,7 @@ function buildIcs(meet) {
     'SUMMARY:Sons of Thunder — Next Gathering',
     'DESCRIPTION:Sons of Thunder monthly gathering. Crooked Can Brewery Patio\\, Winter Garden. 6:30 PM.',
     'LOCATION:Crooked Can Brewery Patio, Winter Garden',
-    'URL:https://sonsofthunder.netlify.app/',
+    'URL:' + url,
     'BEGIN:VALARM',
     'TRIGGER:-P7D',
     'ACTION:DISPLAY',

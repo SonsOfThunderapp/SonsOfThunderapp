@@ -3,6 +3,19 @@
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => document.querySelectorAll(s);
 
+  function publicOrigin() {
+    try {
+      if (window.TB_CONFIG && window.TB_CONFIG.PUBLIC_ORIGIN) return String(window.TB_CONFIG.PUBLIC_ORIGIN).replace(/\/$/, '');
+    } catch (e) {}
+    try {
+      if (location && location.origin && /^https?:/.test(location.origin)) return location.origin;
+    } catch (e2) {}
+    return publicOrigin();
+  }
+  function publicUrl(path) {
+    return publicOrigin() + (path || '/');
+  }
+
   // Escape user text before any innerHTML use
   function esc(str) {
     if (str == null) return '';
@@ -282,7 +295,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     const desc = [
       'Sons of Thunder monthly gathering. Show up.',
       'Check Thunder Board for the latest gathering details.',
-      'https://sonsofthunder.netlify.app/'
+      publicUrl('/')
     ].join('\\n');
     const lines = [
       'BEGIN:VCALENDAR',
@@ -298,7 +311,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       'SUMMARY:' + icsEscape(title),
       'DESCRIPTION:' + icsEscape(desc),
       'LOCATION:' + icsEscape(loc),
-      'URL:https://sonsofthunder.netlify.app/',
+      'URL:' + publicUrl('/'),
       // 7 days before
       'BEGIN:VALARM',
       'TRIGGER:-P7D',
@@ -912,7 +925,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     if (!sb) throw new Error('Supabase is not configured.');
     const redirectTo = (typeof window !== 'undefined' && window.location && window.location.origin)
       ? (window.location.origin + '/')
-      : 'https://sonsofthunder.netlify.app/';
+      : publicUrl('/');
     const { data, error } = await sb.auth.signUp({
       email,
       password,
@@ -2997,6 +3010,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       { id: 'admin-events-modal', close: () => closeModal('admin-events-modal') },
       { id: 'admin-code-modal', close: () => closeModal('admin-code-modal') },
       { id: 'admin-push-modal', close: () => closeModal('admin-push-modal') },
+      { id: 'admin-room-modal', close: () => closeModal('admin-room-modal') },
+      { id: 'admin-sms-modal', close: () => closeModal('admin-sms-modal') },
       { id: 'admin-lastfire-modal', close: () => closeModal('admin-lastfire-modal') },
       { id: 'auth-gate', close: () => { try { closeAuthGate(); } catch (e) {} } },
       { id: 'ios-install-overlay', close: () => {
@@ -3165,7 +3180,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     ];
     if (phone) lines.push('TEL;TYPE=CELL:' + phone);
     lines.push('ORG:Sons of Thunder');
-    lines.push('URL:https://sonsofthunder.netlify.app/');
+    lines.push('URL:' + publicUrl('/'));
     if (bio && !forQr) lines.push('NOTE:' + bio.replace(/,/g, '\\,'));
     lines.push('END:VCARD');
     return lines.join('\r\n');
@@ -3959,6 +3974,71 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     } catch (e) {
       console.warn('rsvps pull failed', e);
       return false;
+    }
+  }
+
+  function openDeviceSmsClub(message) {
+    const nums = [];
+    const seen = {};
+    (brothers || []).forEach(function (b) {
+      const d = digitsOnly(b && b.phone);
+      const e164 = (d.length === 10) ? ('1' + d) : d;
+      if (e164.length < 10 || seen[e164]) return;
+      seen[e164] = true;
+      nums.push(e164);
+    });
+    if (!nums.length) {
+      alert('No phones on the roster yet.');
+      return;
+    }
+    const body = encodeURIComponent(message || 'Sons of Thunder — ');
+    const list = nums.join(',');
+    const ios = typeof isIos === 'function' && isIos();
+    window.location.href = ios
+      ? ('sms:/open?addresses=' + list + '&body=' + body)
+      : ('sms:' + list + '?body=' + body);
+  }
+
+  async function loadFounderRoom() {
+    const el = document.getElementById('room-stats');
+    if (!el) return;
+    el.innerHTML = 'Loading the room…';
+    try {
+      const sb = getSb && getSb();
+      let accessToken = '';
+      if (sb && sb.auth && sb.auth.getSession) {
+        const { data } = await sb.auth.getSession();
+        accessToken = (data && data.session && data.session.access_token) || '';
+      }
+      if (!accessToken) {
+        el.textContent = 'Sign in on Brothers (leader account).';
+        return;
+      }
+      const res = await fetch('/.netlify/functions/leader-room', {
+        method: 'GET',
+        headers: { Authorization: 'Bearer ' + accessToken }
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        el.textContent = data.error || 'Couldn’t load the room.';
+        return;
+      }
+      const bday = (data.birthdays || []).map(function (b) {
+        return esc(b.name) + ' · ' + esc(b.birthday);
+      }).join('<br>');
+      const inLine = (data.inNames || []).map(esc).join(', ');
+      el.innerHTML =
+        '<div class="room-grid">' +
+          '<div class="room-stat"><b>' + (data.lockedIn || 0) + '</b><span>LOCKED IN</span></div>' +
+          '<div class="room-stat"><b>' + (data.roster || 0) + '</b><span>ROSTER</span></div>' +
+          '<div class="room-stat"><b>' + (data.alerts || 0) + '</b><span>ALERTS ON</span></div>' +
+          '<div class="room-stat"><b>' + (data.phones || 0) + '</b><span>PHONES</span></div>' +
+        '</div>' +
+        '<p class="room-origin">' + esc(publicOrigin().replace(/^https?:\/\//, '')) + '</p>' +
+        (inLine ? '<p class="room-in">' + inLine + '</p>' : '<p class="room-in">Nobody locked in yet.</p>') +
+        (bday ? '<p class="room-bday"><span class="card-label">BIRTHDAYS</span><br>' + bday + '</p>' : '');
+    } catch (e) {
+      el.textContent = 'Couldn’t load the room.';
     }
   }
 
@@ -6177,7 +6257,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
     if (inviteShareBtn && !inviteShareBtn.dataset.tbInviteBound) {
       inviteShareBtn.dataset.tbInviteBound = '1';
       inviteShareBtn.addEventListener('click', async () => {
-        const url = 'https://sonsofthunder.netlify.app/';
+        const url = publicUrl('/');
         const payload = {
           title: 'Thunder Board',
           text: 'Sons of Thunder — Thunder doesn’t dull. Put this on your Home Screen.',
@@ -6220,7 +6300,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
     const liveLink = $('#install-live-link');
     if (liveLink) {
       liveLink.addEventListener('click', () => {
-        const url = 'https://sonsofthunder.netlify.app/';
+        const url = publicUrl('/');
         try {
           if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(url).catch(() => {});
@@ -6287,7 +6367,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
     if (inappGotit) inappGotit.addEventListener('click', closeInAppInstallOverlay);
     if (inappCopy) {
       inappCopy.addEventListener('click', async () => {
-        const url = 'https://sonsofthunder.netlify.app/';
+        const url = publicUrl('/');
         try {
           await navigator.clipboard.writeText(url);
           showInstallToast('Link copied — paste in Safari');
@@ -6368,33 +6448,72 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       });
     }
 
+    const adminRoomBtn = $('#admin-room-btn');
+    if (adminRoomBtn) {
+      adminRoomBtn.addEventListener('click', () => {
+        if (!requireLeader()) return;
+        openModal('admin-room-modal');
+        loadFounderRoom();
+      });
+    }
     const adminSmsClub = $('#admin-sms-club-btn');
     if (adminSmsClub) {
       adminSmsClub.addEventListener('click', () => {
         if (!requireLeader()) return;
-        const nums = [];
-        const seen = {};
-        (brothers || []).forEach(function (b) {
-          const d = digitsOnly(b && b.phone);
-          const e164 = (d.length === 10) ? ('1' + d) : d;
-          if (e164.length < 10 || seen[e164]) return;
-          seen[e164] = true;
-          nums.push(e164);
-        });
-        if (!nums.length) {
-          alert('No phones on the roster yet. Brothers add a number on their profile.');
-          return;
-        }
-        const body = encodeURIComponent('Sons of Thunder — ');
-        const list = nums.join(',');
-        try { navigator.clipboard && navigator.clipboard.writeText(nums.join('\n')); } catch (e) {}
-        const ios = typeof isIos === 'function' && isIos();
-        const href = ios
-          ? ('sms:/open?addresses=' + list + '&body=' + body)
-          : ('sms:' + list + '?body=' + body);
-        window.location.href = href;
+        const st = $('#admin-sms-status');
+        if (st) st.textContent = '';
+        openModal('admin-sms-modal');
       });
     }
+    const adminSmsSend = $('#admin-sms-send');
+    if (adminSmsSend) {
+      adminSmsSend.addEventListener('click', async () => {
+        if (!requireLeader()) return;
+        const message = (($('#admin-sms-body') && $('#admin-sms-body').value) || '').trim();
+        const st = $('#admin-sms-status');
+        if (!message) {
+          if (st) st.textContent = 'Write the line first.';
+          return;
+        }
+        if (!isSignedIn || !isSignedIn()) {
+          if (st) st.textContent = 'Sign in on Brothers first (leader account).';
+          return;
+        }
+        adminSmsSend.disabled = true;
+        if (st) st.textContent = 'Sending…';
+        try {
+          const sb = getSb && getSb();
+          let accessToken = '';
+          if (sb && sb.auth && sb.auth.getSession) {
+            const { data } = await sb.auth.getSession();
+            accessToken = (data && data.session && data.session.access_token) || '';
+          }
+          const res = await fetch('/.netlify/functions/sms-club', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + accessToken },
+            body: JSON.stringify({ message })
+          });
+          const data = await res.json().catch(() => ({}));
+          if (res.status === 503 && data.fallback) {
+            if (st) st.textContent = 'Twilio not on Netlify yet. Opening Messages…';
+            openDeviceSmsClub(message);
+            return;
+          }
+          if (!res.ok) {
+            if (st) st.textContent = (data && data.error) || 'Send failed.';
+            return;
+          }
+          if (st) st.textContent = 'Sent to ' + (data.sent || 0) + ' phone' + ((data.sent === 1) ? '.' : 's.');
+          try { tbToast('Club text sent · ' + (data.sent || 0)); } catch (e) {}
+        } catch (e) {
+          if (st) st.textContent = 'Couldn’t send. Opening Messages…';
+          openDeviceSmsClub(message);
+        } finally {
+          adminSmsSend.disabled = false;
+        }
+      });
+    }
+    const adminPushBtn = $('#admin-push-btn');
     if (adminPushBtn) {
       adminPushBtn.addEventListener('click', () => {
         const st = $('#admin-push-status');
@@ -8129,6 +8248,10 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   // ---------- INIT ----------
   async function init() {
     runSplash();
+    try {
+      const live = document.getElementById('install-live-link');
+      if (live) live.textContent = publicOrigin().replace(/^https?:\/\//, '');
+    } catch (e) {}
     try { markPatioFromUrl(); runPatioAlive(); } catch (e) {}
     try { bindTourControls(); } catch (e) {}
     try { maybeStartProductTour(); } catch (e) {}
