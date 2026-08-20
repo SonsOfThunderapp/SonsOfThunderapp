@@ -7975,30 +7975,32 @@ label.btn-rsvp, label.btn-drop-shot {
   overflow: hidden;
 }
 
-/* Tour bubble sits ON the feature (phone mock), not beside Thunder. */
+/* SPOTLIGHT LAW: feature in front. Bubble never covers it. Rest is shadow. */
 .tb-tour-boards .tb-phone {
   display: block !important;
   position: relative !important;
+  z-index: 6;
+  filter: none;
+  opacity: 1;
+}
+.tb-tour-boards .tb-tour-headline,
+.tb-tour-boards .tb-tour-sub,
+.tb-tour-boards .tb-tour-progress {
+  opacity: 0.42;
+}
+.tb-tour-boards .tb-tour-slide-frame,
+.tb-tour-boards .tb-live-slide.is-on {
+  position: relative;
+  z-index: 7;
 }
 .tb-tour-boards .tb-phone .tb-guide-bubble {
-  position: absolute !important;
-  left: 8px !important;
-  right: 8px !important;
-  top: 8px !important;
-  z-index: 12 !important;
-  pointer-events: none !important;
-  flex: none !important;
-  min-width: 0 !important;
-  margin: 0 !important;
-}
-/* Slide 1: bubble sits ABOVE the wordmark — never on OF THUNDER. */
-.tb-tour-stage[data-board="0"] .tb-phone .tb-guide-bubble {
   position: relative !important;
   left: auto !important;
   right: auto !important;
   top: auto !important;
+  z-index: 4 !important;
   margin: 0 0 12px !important;
-  z-index: 3 !important;
+  pointer-events: none !important;
 }
 .tb-tour-boards .tb-tour-hero {
   justify-content: center;
