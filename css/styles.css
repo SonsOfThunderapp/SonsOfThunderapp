@@ -6694,3 +6694,34 @@ h1, h2, h3,
   mix-blend-mode: normal;
   filter: drop-shadow(0 10px 20px rgba(0,0,0,0.55)) drop-shadow(0 0 14px rgba(254,241,5,0.22)) !important;
 }
+
+/* Thunder always the top layer in the tour — nod must never clip through a frame */
+.tb-tour-boards .tb-tour-stage {
+  overflow: visible !important;
+}
+.tb-tour-boards .tb-tour-hero {
+  overflow: visible !important;
+  position: relative;
+  z-index: 12;
+}
+.tb-tour-boards .tb-guide-bubble {
+  position: relative;
+  z-index: 1;
+}
+#tb-tour-host,
+.tb-tour-boards #tb-tour-host.tb-guide-thunder {
+  position: relative !important;
+  z-index: 80 !important;
+  isolation: isolate;
+}
+.tb-tour-boards .tb-phone {
+  position: relative;
+  z-index: 2;
+}
+.tb-tour-boards .tb-tour-headline,
+.tb-tour-boards .tb-tour-sub,
+.tb-tour-boards .tb-tour-progress {
+  position: relative;
+  z-index: 3;
+}
+.tb-tour-close { z-index: 90; }
