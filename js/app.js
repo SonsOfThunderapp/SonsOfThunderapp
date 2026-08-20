@@ -6785,7 +6785,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
 
   // ---------- PRODUCT TOUR — 7-slide (restored 20260818) ----------
-  const TB_TOUR_VERSION = 28;
+  const TB_TOUR_VERSION = 29;
   function tourStorageKey() { return 'thunderTourV' + TB_TOUR_VERSION; }
   function isTourComplete() {
     try {
@@ -6886,7 +6886,19 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     stopTourHostMotion();
     const moods = ['arrive', 'lockin', 'brotherhood', 'watch', 'think', 'listen', 'appreciate'];
     const mood = moods[idx] || 'arrive';
-    host.className = 'tb-guide-thunder tb-host-alive tb-host-' + mood;
+    const bolt = 'assets/thunder-tour-host.png?v=20260819-s47';
+    const tux = 'assets/thunder-bond-hero.png?v=20260819-tux2';
+    if (idx === 6) {
+      host.className = 'tb-guide-thunder tb-host-alive tb-host-bond';
+      host.src = tux;
+      host.removeAttribute('srcset');
+    } else {
+      host.className = 'tb-guide-thunder tb-host-alive tb-host-' + mood;
+      if (host.getAttribute('src') !== bolt) {
+        host.src = bolt;
+        host.setAttribute('srcset', bolt + ' 400w, assets/thunder-tour-host@2x.png?v=20260819-s47 800w');
+      }
+    }
     if (tourReducedMotion()) return;
     /* CSS owns host motion per board. No fidget shake. */
     return;
