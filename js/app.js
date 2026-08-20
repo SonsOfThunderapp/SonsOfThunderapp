@@ -5200,6 +5200,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
       else if (kind === 'salute') fabPlayFrame('salute', 1600);
       else fabPlayFrame('watch', 2000);
     }
+    function fabGlance() {
       const img = fabImg();
       if (!img || fabBusy()) return;
       const target = document.querySelector('.btn-rsvp, #rsvp-btn, .announcement-card, .next-meeting');
