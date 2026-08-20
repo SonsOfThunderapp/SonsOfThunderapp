@@ -3146,7 +3146,17 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     const FOLLOW = opts.follow != null ? opts.follow : 0.55;
     const DOWN = opts.onDownDist != null ? opts.onDownDist : 64;
 
-    let sx = 0, sy = 0, st = 0, lx = 0, lt = 0, tracking = false, axis = null;
+    let sx = 0, sy = 0, st = 0, lx = 0, lt = 0, tracking = false, axis = null, felt = false;
+
+    function swallowClick() {
+      const eat = function (ev) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        document.removeEventListener('click', eat, true);
+      };
+      document.addEventListener('click', eat, true);
+      setTimeout(function () { document.removeEventListener('click', eat, true); }, 480);
+    }
 
     function moveEl() {
       return (typeof opts.getEl === 'function' ? opts.getEl() : null) || root;
@@ -3168,6 +3178,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       if (moving && moving.classList && moving.classList.contains('is-zoomed')) { tracking = false; return; }
       tracking = true;
       axis = null;
+      felt = false;
       sx = lx = e.touches[0].clientX;
       sy = e.touches[0].clientY;
       st = lt = Date.now();
@@ -3185,8 +3196,11 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       lx = x; lt = Date.now();
       const dx = x - sx;
       const dy = y - sy;
-      if (axis == null && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) {
-        axis = Math.abs(dx) > Math.abs(dy) * 0.9 ? 'x' : 'y';
+      if (axis == null && (Math.abs(dx) > 6 || Math.abs(dy) > 6)) {
+        axis = Math.abs(dx) >= Math.abs(dy) * 0.72 ? 'x' : 'y';
+      }
+      if (axis === 'x' && e.cancelable) {
+        try { e.preventDefault(); } catch (e2) {}
       }
       if (prefersReducedMotion()) return;
       const el = moveEl();
@@ -3211,10 +3225,14 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       else tx = Math.max(-MAX, Math.min(MAX, dx * FOLLOW));
       el.style.opacity = '';
       el.style.transform = 'translate3d(' + tx + 'px,0,0)';
+      if (!felt && Math.abs(dx) > 16) {
+        felt = true;
+        try { tbFeedback.selection(); } catch (e2) {}
+      }
       if (typeof opts.onDrag === 'function') {
         try { opts.onDrag(tx, dx); } catch (e2) {}
       }
-    }, { passive: true });
+    }, { passive: false });
 
     root.addEventListener('touchend', (e) => {
       if (!tracking) return;
@@ -3258,7 +3276,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       }
 
       if (dx < 0 && canNext() && typeof opts.onNext === 'function') {
-        try { tbFeedback.selection(); } catch (e) {}
+        try { swallowClick(); } catch (e) {}
+        try { tbFeedback.confirm(); } catch (e) {}
         if (el && !prefersReducedMotion()) {
           el.style.transition = 'transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.14s ease';
           el.style.transform = 'translate3d(-18%,0,0)';
@@ -3271,7 +3290,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         return;
       }
       if (dx > 0 && canPrev() && typeof opts.onPrev === 'function') {
-        try { tbFeedback.selection(); } catch (e) {}
+        try { swallowClick(); } catch (e) {}
+        try { tbFeedback.confirm(); } catch (e) {}
         if (el && !prefersReducedMotion()) {
           el.style.transition = 'transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.14s ease';
           el.style.transform = 'translate3d(18%,0,0)';
@@ -5228,7 +5248,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     if (target.closest('#auth-gate')) return true;
     if (target.closest('.modal')) return true;
     if (target.closest('#thunder-fab, .thunder-panel, .thunder-chat')) return true;
-    if (target.closest('button, a, input, textarea, select, label, video')) return true;
+    if (target.closest('input, textarea, select, video')) return true;
     return false;
   }
 
@@ -5243,11 +5263,12 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
 
     bindElasticSwipe(root, {
       getEl: activeViewEl,
-      dist: 36,
-      velocity: 0.32,
-      maxDrag: 160,
-      edgeMax: 36,
-      follow: 0.82,
+      dist: 28,
+      velocity: 0.18,
+      maxDrag: 220,
+      edgeMax: 48,
+      follow: 0.94,
+      ratio: 0.85,
       canPrev: () => TAB_ORDER.indexOf(currentViewName) > 0,
       canNext: () => {
         const i = TAB_ORDER.indexOf(currentViewName);
@@ -5264,10 +5285,10 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       onDrag: function (tx, dx) {
         $$('.nav-item').forEach(function (n) { n.classList.remove('nav-peek'); });
         const i = TAB_ORDER.indexOf(currentViewName);
-        if (dx < -32 && i < TAB_ORDER.length - 1) {
+        if (dx < -14 && i < TAB_ORDER.length - 1) {
           const n = document.querySelector('.nav-item[data-view="' + TAB_ORDER[i + 1] + '"]');
           if (n) n.classList.add('nav-peek');
-        } else if (dx > 32 && i > 0) {
+        } else if (dx > 14 && i > 0) {
           const n = document.querySelector('.nav-item[data-view="' + TAB_ORDER[i - 1] + '"]');
           if (n) n.classList.add('nav-peek');
         }
