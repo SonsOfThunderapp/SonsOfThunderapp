@@ -6506,15 +6506,16 @@ body.tb-tour-open #main-header { visibility: hidden !important; pointer-events: 
 .tb-tour-stage[data-board="0"] #tb-tour-host.tb-guide-thunder.tb-host-alive {
   width: min(46vw, 168px) !important;
   animation:
-    tbHostZoomTip 1.4s cubic-bezier(0.22, 1, 0.36, 1) 1 forwards,
-    tbHostFloat 2.6s ease-in-out 1.45s infinite !important;
+    tbHostZoomTip 3.1s cubic-bezier(0.25, 0.12, 0.25, 1) 1 forwards,
+    tbHostFloat 2.8s ease-in-out 3.15s infinite !important;
   transform-origin: 50% 70%;
 }
 @keyframes tbHostZoomTip {
-  0%   { transform: scale(0.28) rotate(0deg); opacity: 0.25; }
-  48%  { transform: scale(1.08) rotate(0deg); opacity: 1; }
-  70%  { transform: scale(1) rotate(-18deg); }
-  100% { transform: scale(1) rotate(0deg); }
+  0%   { transform: scale(0.28) rotate(0deg) translateY(0); opacity: 0.25; }
+  28%  { transform: scale(1.06) rotate(0deg) translateY(0); opacity: 1; }
+  48%  { transform: scale(1) rotate(-22deg) translateY(8px); }
+  68%  { transform: scale(1) rotate(-22deg) translateY(8px); }
+  100% { transform: scale(1) rotate(0deg) translateY(0); }
 }
 @keyframes tbHostFloat {
   0%, 100% { transform: translateY(0); }
