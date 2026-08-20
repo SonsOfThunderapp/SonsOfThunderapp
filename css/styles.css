@@ -6122,7 +6122,7 @@ img.about-logo,
 .tb-live-bros-grid {
   display: grid !important;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  gap: 4px;
   flex-direction: unset !important;
 }
 .tb-live-bros-grid .tb-live-bro { justify-content: center; padding: 10px 0; }
@@ -6276,11 +6276,11 @@ body.tb-ask-open .header .logo {
   justify-content: center;
 }
  .tb-live-face {
-  width: 44px;
-  height: 44px;
+  width: 72px;
+  height: 72px;
   object-fit: contain;
   display: block;
-  filter: drop-shadow(0 0 6px rgba(254,241,5,0.35));
+  filter: drop-shadow(0 0 10px rgba(254,241,5,0.55));
 }
 
 /* Tour host idle — #tb-tour-host only. Breath + irregular one-shots. Not a metronome. */
@@ -6494,4 +6494,10 @@ body.tb-tour-open #main-header { visibility: hidden !important; pointer-events: 
 .tb-live-imin-only .tb-live-loc {
   color: #888 !important;
   margin: 0 0 12px !important;
+}
+
+.tb-live-bros-grid .tb-live-face {
+  width: 72px !important;
+  height: 72px !important;
+  filter: drop-shadow(0 0 12px rgba(254,241,5,0.6)) !important;
 }
