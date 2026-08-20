@@ -6276,11 +6276,11 @@ body.tb-ask-open .header .logo {
   justify-content: center;
 }
  .tb-live-face {
-  width: 72px;
-  height: 72px;
+  width: 78px;
+  height: 78px;
   object-fit: contain;
   display: block;
-  filter: drop-shadow(0 0 10px rgba(254,241,5,0.55));
+  filter: none;
 }
 
 /* Tour host idle — #tb-tour-host only. Breath + irregular one-shots. Not a metronome. */
@@ -6497,26 +6497,29 @@ body.tb-tour-open #main-header { visibility: hidden !important; pointer-events: 
 }
 
 .tb-live-bros-grid .tb-live-face {
-  width: 72px !important;
-  height: 72px !important;
-  filter: drop-shadow(0 0 12px rgba(254,241,5,0.6)) !important;
+  width: 78px !important;
+  height: 78px !important;
+  filter: none !important;
 }
 
-/* Slide 1 (board 0) — ONE-SHOT entrance, then quiet breath. Not the crazy loop. */
+/* Slide 1 — little spin, then a noticeable float. Smooth. */
 .tb-tour-stage[data-board="0"] #tb-tour-host.tb-guide-thunder.tb-host-alive {
   width: min(46vw, 168px) !important;
   animation:
-    tbHostIntro 1.15s cubic-bezier(0.22, 1, 0.36, 1) 1 forwards,
-    tbHostBreath 5.8s ease-in-out 1.2s infinite !important;
-  transform-origin: 50% 80%;
+    tbHostSpinIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) 1 forwards,
+    tbHostFloat 2.6s ease-in-out 0.95s infinite !important;
+  transform-origin: 50% 55%;
 }
-@keyframes tbHostIntro {
-  0%   { transform: translateX(28px) rotate(12deg) scale(0.88); opacity: 0.4; filter: brightness(0.7); }
-  55%  { transform: translateX(-6px) rotate(-10deg) scale(1.08); opacity: 1; filter: brightness(1.25) drop-shadow(0 0 18px rgba(254,241,5,0.7)); }
-  100% { transform: translateX(0) rotate(0deg) scale(1); opacity: 1; filter: drop-shadow(0 0 10px rgba(254,241,5,0.4)) brightness(1); }
+@keyframes tbHostSpinIn {
+  0%   { transform: rotate(-30deg) scale(0.9); opacity: 0.55; }
+  100% { transform: rotate(360deg) scale(1); opacity: 1; }
+}
+@keyframes tbHostFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
 }
 
-/* Slide 3 (board 2) — brothers spotlight; guide smaller + crazy (spin + zap, not a hop) */
+/* Slide 3 — small guide, gentle float only. Faces sharp, no glitter. Room for NEXT. */
 .tb-tour-stage[data-board="2"] .tb-tour-hero {
   margin-bottom: 2px;
 }
@@ -6526,35 +6529,55 @@ body.tb-tour-open #main-header { visibility: hidden !important; pointer-events: 
 .tb-tour-stage[data-board="2"] #tb-tour-host.tb-guide-thunder {
   width: min(22vw, 72px) !important;
   max-width: 72px !important;
-  transform-origin: 50% 55%;
+  transform-origin: 50% 80%;
 }
 .tb-tour-stage[data-board="2"] #tb-tour-host.tb-guide-thunder.tb-host-alive {
-  animation: tbHostCrazy 2.1s cubic-bezier(0.22, 1, 0.36, 1) infinite !important;
-  filter: drop-shadow(0 0 14px rgba(254,241,5,0.75));
-}
-@keyframes tbHostCrazy {
-  0%   { transform: rotate(0deg) scale(1); filter: brightness(1) drop-shadow(0 0 8px rgba(254,241,5,0.4)); }
-  20%  { transform: rotate(-8deg) scale(1.05); }
-  40%  { transform: rotate(360deg) scale(1.12); filter: brightness(1.45) drop-shadow(0 0 24px rgba(254,241,5,1)); }
-  58%  { transform: rotate(352deg) scale(1.08); }
-  72%  { transform: rotate(360deg) scale(1.02); filter: brightness(1.15); }
-  100% { transform: rotate(360deg) scale(1); filter: brightness(1) drop-shadow(0 0 8px rgba(254,241,5,0.4)); }
+  animation: tbHostFloat 3.2s ease-in-out infinite !important;
+  filter: drop-shadow(0 0 8px rgba(254,241,5,0.35));
 }
 .tb-tour-stage[data-board="2"] .tb-phone {
-  width: min(94%, 340px) !important;
-  padding: 10px 8px 8px !important;
+  width: min(90%, 300px) !important;
+  padding: 8px 8px 6px !important;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 .tb-tour-stage[data-board="2"] .tb-live-bros-grid {
-  gap: 2px !important;
+  gap: 0 !important;
 }
 .tb-tour-stage[data-board="2"] .tb-live-bros-grid .tb-live-face {
-  width: 96px !important;
-  height: 96px !important;
-  filter: drop-shadow(0 0 14px rgba(254,241,5,0.7)) !important;
+  width: 78px !important;
+  height: 78px !important;
+  filter: none !important;
 }
 @media (prefers-reduced-motion: reduce) {
   .tb-tour-stage[data-board="0"] #tb-tour-host.tb-guide-thunder.tb-host-alive,
   .tb-tour-stage[data-board="2"] #tb-tour-host.tb-guide-thunder.tb-host-alive {
     animation: none !important;
   }
+}
+
+.tb-tour.tb-tour-slides {
+  align-items: stretch !important;
+  padding: max(52px, env(safe-area-inset-top)) 10px max(18px, env(safe-area-inset-bottom)) !important;
+}
+.tb-tour-boards .tb-tour-stage {
+  max-height: 100% !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+.tb-tour-boards .tb-tour-actions {
+  flex-shrink: 0 !important;
+  position: sticky;
+  bottom: 0;
+  background: #000;
+  z-index: 6;
+  padding-bottom: 10px !important;
+}
+.tb-tour-boards .tb-tour-slide-frame {
+  max-height: none !important;
+  overflow: visible !important;
+}
+.tb-live-face,
+.tb-live-bros-grid .tb-live-face {
+  filter: none !important;
 }
