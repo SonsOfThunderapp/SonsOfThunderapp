@@ -1552,7 +1552,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     const target = url || '/?view=home';
     const opts = {
       body: body || '',
-      icon: 'assets/icon-192-v2.png',
+      icon: 'assets/icon-192-v3.png',
       badge: 'assets/icon-official.png',
       tag: tag || 'thunder-gathering',
       renotify: false,

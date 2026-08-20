@@ -52,7 +52,7 @@ self.addEventListener('push', (event) => {
   const gathering = /^thunder-(gathering|d7|d1|h2|morning|7d|1d|2h)/.test(tag) || tag.indexOf('thunder-d') === 0;
   const options = {
     body: data.body || '',
-    icon: '/assets/icon-192-v2.png',
+    icon: '/assets/icon-192-v3.png',
     badge: '/assets/icon-official.png',
     data: { url: data.url || '/?view=home' },
     tag: tag,
