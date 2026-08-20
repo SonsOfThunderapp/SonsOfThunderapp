@@ -7136,3 +7136,36 @@ body.tb-ask-open .logo-wrap { width: min(28vw, 110px) !important; }
   padding: 0 !important;
   flex-shrink: 0 !important;
 }
+
+/* Authorized complete mark everywhere. Isolated overlay off. */
+.logo-bolt-isolated { display: none !important; }
+#header-logo,
+.splash-logo,
+.tb-live-logo {
+  animation: logoMarkLife var(--tb-breathe) !important;
+  will-change: filter;
+}
+@keyframes logoMarkLife {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 3px rgba(254,241,5,0.3))
+      drop-shadow(0 0 8px rgba(254,241,5,0.12));
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 8px rgba(254,241,5,0.75))
+      drop-shadow(0 0 18px rgba(254,241,5,0.35));
+  }
+}
+/* Ask Thunder — tiny header, Bond gets the room */
+body.tb-ask-open .logo-wrap {
+  width: min(22vw, 84px) !important;
+}
+body.tb-ask-open #header-logo,
+body.tb-ask-open .header .logo {
+  width: min(22vw, 84px) !important;
+  max-width: min(22vw, 84px) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  #header-logo, .splash-logo, .tb-live-logo { animation: none !important; }
+}
