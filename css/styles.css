@@ -2531,11 +2531,21 @@ h1.code-title-glow {
 .auth-gate-imin #auth-magic-btn {
   background: none !important;
   border: none !important;
-  color: #888 !important;
-  font-weight: 500;
+  color: #FEF105 !important;
+  font-weight: 600;
   font-size: 14px;
   padding: 8px 0;
   box-shadow: none !important;
+  animation: brotherNamePulse var(--tb-breathe) !important;
+  text-shadow:
+    0 0 8px rgba(254, 241, 5, 0.55),
+    0 0 16px rgba(254, 241, 5, 0.25) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .auth-gate-imin #auth-magic-btn {
+    animation: none !important;
+    text-shadow: none !important;
+  }
 }
 .auth-gate-imin #auth-title {
   color: #fff !important;

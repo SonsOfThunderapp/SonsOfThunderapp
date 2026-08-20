@@ -1019,7 +1019,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     if (signBtn) signBtn.textContent = 'LOCK MY SEAT';
     if (magic) {
       magic.classList.remove('hidden');
-      magic.textContent = 'Email for member benefits';
+      magic.textContent = 'Email unlocks the whole experience';
     }
     if (invite) invite.classList.add('hidden');
     if (pass) pass.classList.add('hidden');
@@ -1084,7 +1084,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     if (pass) pass.classList.remove('hidden');
     if (forgot) forgot.classList.remove('hidden');
     if (invite) invite.classList.remove('hidden');
-    if (magic) magic.textContent = 'Email me a link';
+    if (magic) magic.textContent = 'Email unlocks the whole experience';
     setAuthError('');
     releaseFocusAndZoom();
     if (typeof unlockBodyIfClear === 'function') unlockBodyIfClear();
