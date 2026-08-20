@@ -2016,6 +2016,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
      Never claim the phone vibrated on iOS. */
   const tbFeedback = (function () {
     const last = Object.create(null);
+    let audioCtx = null;
+    let audioReady = false;
     function sensoryCfg() {
       try { return (window.TB_CONFIG && window.TB_CONFIG.SENSORY) || {}; } catch (e) { return {}; }
     }
@@ -2037,7 +2039,6 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     function pulse(pattern) {
       if (!canVibrate()) return;
       try {
-        // Optional-call safe: WebKit has no vibrate — never throw
         if (typeof navigator.vibrate === 'function') {
           navigator.vibrate(0);
           navigator.vibrate(pattern);
@@ -2049,14 +2050,77 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
       } catch (e) { return false; }
     }
+    function getAudio() {
+      const S = sensoryCfg();
+      if (S.soundEnabled === false) return null;
+      if (reduced()) return null;
+      try {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return null;
+        if (!audioCtx) audioCtx = new AC();
+        if (audioCtx.state === 'suspended') audioCtx.resume().catch(function () {});
+        audioReady = true;
+        return audioCtx;
+      } catch (e) { return null; }
+    }
+    function tone(freq, dur, type, gain, slide) {
+      const ctx = getAudio();
+      if (!ctx) return;
+      try {
+        const t0 = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.type = type || 'sine';
+        osc.frequency.setValueAtTime(freq, t0);
+        if (slide) osc.frequency.exponentialRampToValueAtTime(Math.max(20, slide), t0 + dur);
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.exponentialRampToValueAtTime(gain || 0.07, t0 + 0.008);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+        osc.connect(g);
+        g.connect(ctx.destination);
+        osc.start(t0);
+        osc.stop(t0 + dur + 0.02);
+      } catch (e) {}
+    }
+    function noiseBurst(dur, gain) {
+      const ctx = getAudio();
+      if (!ctx) return;
+      try {
+        const n = Math.floor(ctx.sampleRate * dur);
+        const buf = ctx.createBuffer(1, n, ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < n; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / n);
+        const src = ctx.createBufferSource();
+        src.buffer = buf;
+        const bp = ctx.createBiquadFilter();
+        bp.type = 'bandpass';
+        bp.frequency.value = 180;
+        bp.Q.value = 0.7;
+        const g = ctx.createGain();
+        const t0 = ctx.currentTime;
+        g.gain.setValueAtTime(gain || 0.04, t0);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+        src.connect(bp);
+        bp.connect(g);
+        g.connect(ctx.destination);
+        src.start(t0);
+        src.stop(t0 + dur + 0.02);
+      } catch (e) {}
+    }
+    try {
+      document.addEventListener('touchstart', function () { getAudio(); }, { once: true, passive: true });
+      document.addEventListener('click', function () { getAudio(); }, { once: true });
+    } catch (e) {}
     return {
       /** Splash-only. Strongest. Visual already owned by CSS; optional 40ms buzz. */
       thunderImpact: function () {
         if (debounced('thunderImpact')) return;
-        if (reduced()) return; // no jolt/buzz under reduced motion
+        if (reduced()) return;
         const S = sensoryCfg();
         const ms = typeof S.thunderImpactMs === 'number' ? S.thunderImpactMs : 40;
-        pulse(ms);
+        pulse([ms, 50, 18]);
+        tone(52, 0.12, 'sine', 0.08, 36);
+        setTimeout(function () { noiseBurst(0.05, 0.035); }, 40);
       },
       /** Signature wake: short THUD … crack-crack. Android only if vibrate exists. */
       thunderWake: function (level) {
@@ -2064,9 +2128,12 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         if (reduced()) return;
         if (level === 'soft') {
           pulse([12, 40, 18]);
+          tone(62, 0.07, 'sine', 0.05, 40);
           return;
         }
         pulse([28, 55, 14, 40, 18]);
+        tone(48, 0.14, 'sine', 0.09, 32);
+        setTimeout(function () { noiseBurst(0.06, 0.04); }, 55);
       },
       /** Primary CTAs: I'm In, Save, Add Memory, Share, Text a Leader */
       press: function (el) {
@@ -2082,7 +2149,9 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       confirm: function () {
         if (debounced('confirm')) return;
         const S = sensoryCfg();
-        pulse(typeof S.confirmMs === 'number' ? S.confirmMs : 25);
+        pulse([12, 36, 22]);
+        tone(70, 0.09, 'sine', 0.07, 44);
+        noiseBurst(0.04, 0.03);
       },
       /** Failed save / missing field / upload error */
       warningOrError: function (el) {
@@ -2096,6 +2165,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         const S = sensoryCfg();
         const pat = Array.isArray(S.warningPattern) ? S.warningPattern : [25, 60, 35];
         pulse(pat);
+        tone(160, 0.11, 'triangle', 0.045, 90);
       },
       /** Discrete selects: chips, toggles, swipe commit */
       selection: function () {

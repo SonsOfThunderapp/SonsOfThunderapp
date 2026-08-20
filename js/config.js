@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260820-incal',
+  APP_BUILD: '20260820-feel',
   /* AUTHORITATIVE LINEAGE — do not package from mixed branches */
   SOURCE_PARENT: '20260818-p0-recovery1',
   REJECTED_ARCHIVES: ['20260818-whatsnext1', '20260818-header-safe1'],
@@ -101,7 +101,8 @@ window.TB_CONFIG = {
     confirmMs: 25,
     warningPattern: [25, 60, 35],
     selectionMs: 8,
-    debounceMs: 100
+    debounceMs: 100,
+    soundEnabled: true
   },
   SAVE_REWARD: {
     durationMs: 3000,
