@@ -6282,3 +6282,59 @@ body.tb-ask-open .header .logo {
   display: block;
   filter: drop-shadow(0 0 6px rgba(254,241,5,0.35));
 }
+
+/* Tour host idle — #tb-tour-host only. Breath + irregular one-shots. Not a metronome. */
+.tb-guide-thunder.tb-host-alive {
+  transform-origin: 50% 85%;
+  animation: tbHostBreath 5.7s ease-in-out infinite !important;
+  will-change: transform, filter;
+}
+@keyframes tbHostBreath {
+  0%, 100% { transform: translateY(0) rotate(var(--host-rot, 0deg)); }
+  50% { transform: translateY(-2px) rotate(var(--host-rot, 0deg)); }
+}
+.tb-host-arrive { --host-rot: 0deg; }
+.tb-host-lockin { --host-rot: 1.4deg; }
+.tb-host-brotherhood { --host-rot: 1.1deg; }
+.tb-host-watch { --host-rot: 1.2deg; }
+.tb-host-think { --host-rot: -1.2deg; }
+.tb-host-listen { --host-rot: 1.6deg; }
+.tb-host-appreciate { --host-rot: 0deg; }
+.tb-guide-thunder.tb-host-enter {
+  animation: tbHostEnter 0.42s cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+@keyframes tbHostEnter {
+  from { opacity: 0.65; transform: translateY(8px) rotate(var(--host-rot, 0deg)); }
+  to { opacity: 1; transform: translateY(0) rotate(var(--host-rot, 0deg)); }
+}
+.tb-guide-thunder.tb-host-fidget {
+  animation: tbHostFidget 0.52s ease !important;
+}
+@keyframes tbHostFidget {
+  0% { transform: translateY(0) rotate(var(--host-rot, 0deg)); }
+  35% { transform: translateY(-2px) rotate(calc(var(--host-rot, 0deg) - 1.3deg)); }
+  100% { transform: translateY(0) rotate(var(--host-rot, 0deg)); }
+}
+.tb-guide-thunder.tb-host-sway {
+  animation: tbHostSway 1.4s ease-in-out !important;
+}
+@keyframes tbHostSway {
+  0%, 100% { transform: translateY(0) rotate(var(--host-rot, 0deg)); }
+  50% { transform: translateY(-1px) rotate(calc(var(--host-rot, 0deg) + 1.5deg)); }
+}
+.tb-guide-thunder.tb-host-glint {
+  filter: brightness(1.22) drop-shadow(0 0 10px rgba(254,241,5,0.55)) !important;
+  transition: filter 0.2s ease;
+}
+.tb-host-appreciate.tb-host-alive {
+  animation-duration: 6.4s !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tb-guide-thunder.tb-host-alive,
+  .tb-guide-thunder.tb-host-enter,
+  .tb-guide-thunder.tb-host-fidget,
+  .tb-guide-thunder.tb-host-sway {
+    animation: none !important;
+    filter: none !important;
+  }
+}

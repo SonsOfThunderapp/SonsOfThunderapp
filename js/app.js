@@ -6814,6 +6814,50 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
   let __tourTypeTimer = null;
   let __tourTypeToken = 0;
+  let __hostFidgetTimer = null;
+  let __hostGlintTimer = null;
+  let __hostSwayTimer = null;
+
+  function stopTourHostMotion() {
+    [__hostFidgetTimer, __hostGlintTimer, __hostSwayTimer].forEach(function (t) {
+      if (t) try { clearTimeout(t); } catch (e) {}
+    });
+    __hostFidgetTimer = __hostGlintTimer = __hostSwayTimer = null;
+    const host = document.getElementById('tb-tour-host');
+    if (host) {
+      host.classList.remove('tb-host-enter', 'tb-host-fidget', 'tb-host-glint', 'tb-host-sway');
+    }
+  }
+
+  /* Tour host idle — host only. Irregular. Never a metronome. */
+  function applyTourHostExpression(idx) {
+    const host = document.getElementById('tb-tour-host');
+    if (!host) return;
+    stopTourHostMotion();
+    const moods = ['arrive', 'lockin', 'brotherhood', 'watch', 'think', 'listen', 'appreciate'];
+    const mood = moods[idx] || 'arrive';
+    host.className = 'tb-guide-thunder tb-host-alive tb-host-' + mood;
+    if (tourReducedMotion()) return;
+    host.classList.add('tb-host-enter');
+    __hostFidgetTimer = setTimeout(function () {
+      host.classList.remove('tb-host-enter');
+      host.classList.add('tb-host-fidget');
+      setTimeout(function () { host.classList.remove('tb-host-fidget'); }, 520);
+    }, 720 + Math.random() * 900);
+    function glintTick() {
+      if (!document.body.classList.contains('tb-tour-open')) return;
+      host.classList.add('tb-host-glint');
+      setTimeout(function () { host.classList.remove('tb-host-glint'); }, 260);
+      __hostGlintTimer = setTimeout(glintTick, 4800 + Math.random() * 7200);
+    }
+    __hostGlintTimer = setTimeout(glintTick, 1800 + Math.random() * 2400);
+    if (idx !== moods.length - 1) {
+      __hostSwayTimer = setTimeout(function () {
+        host.classList.add('tb-host-sway');
+        setTimeout(function () { host.classList.remove('tb-host-sway'); }, 1400);
+      }, 4200 + Math.random() * 2200);
+    }
+  }
 
   function stopTourTypewriter() {
     if (__tourTypeTimer) {
@@ -6892,6 +6936,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     }
     // Thunder speaking — type the body line
     typeTourBody(step.body || '', body);
+    applyTourHostExpression(__tourIdx);
     if (progress) progress.textContent = (__tourIdx + 1) + ' OF ' + TB_TOUR_STEPS.length;
     if (next) next.textContent = step.nextLabel || (__tourIdx >= TB_TOUR_STEPS.length - 1 ? 'DONE' : 'NEXT');
     if (back) back.disabled = __tourIdx <= 0;
@@ -6915,6 +6960,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
   function hideTour() {
     stopTourTypewriter();
+    stopTourHostMotion();
     const root = document.getElementById('tb-tour');
     if (root) {
       root.classList.add('hidden');
