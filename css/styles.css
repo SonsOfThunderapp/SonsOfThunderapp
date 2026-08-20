@@ -6423,3 +6423,31 @@ body.tb-ask-open .header .logo {
   .tb-live-slide.is-on .tb-live-face,
   .tb-live-slide.is-on .tb-live-code-line { animation: none !important; }
 }
+
+/* Director hires: crisp marks, smoother arrive, GPU-composite */
+#header-logo,
+.splash-logo,
+.tb-guide-thunder,
+.thunder-fab-img,
+.thunder-ask-hero-img,
+.tb-live-logo,
+.tb-live-face {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  image-rendering: auto;
+}
+.view.view-enter {
+  animation: viewEnter 0.34s cubic-bezier(0.22, 1, 0.36, 1) both !important;
+}
+@keyframes viewEnter {
+  from { opacity: 0; transform: translate3d(0, 8px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+.view.view-swipe-in {
+  animation: viewSwipeIn 0.2s cubic-bezier(0.22, 1, 0.36, 1) !important;
+}
+.card, .next-meeting, .announcement-card {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
