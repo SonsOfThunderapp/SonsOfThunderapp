@@ -1017,7 +1017,10 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     if (sub) { sub.textContent = ''; sub.classList.add('hidden'); }
     if (hint) hint.classList.add('hidden');
     if (signBtn) signBtn.textContent = 'LOCK MY SEAT';
-    if (magic) magic.classList.remove('hidden');
+    if (magic) {
+      magic.classList.remove('hidden');
+      magic.textContent = 'Email for member benefits';
+    }
     if (invite) invite.classList.add('hidden');
     if (pass) pass.classList.add('hidden');
     if (forgot) forgot.classList.add('hidden');
@@ -1075,11 +1078,13 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     const pass = document.getElementById('auth-password');
     const forgot = document.getElementById('auth-forgot-btn');
     const invite = document.getElementById('auth-signup-btn');
+    const magic = document.getElementById('auth-magic-btn');
     if (sub) sub.classList.remove('hidden');
     if (hint) hint.classList.remove('hidden');
     if (pass) pass.classList.remove('hidden');
     if (forgot) forgot.classList.remove('hidden');
     if (invite) invite.classList.remove('hidden');
+    if (magic) magic.textContent = 'Email me a link';
     setAuthError('');
     releaseFocusAndZoom();
     if (typeof unlockBodyIfClear === 'function') unlockBodyIfClear();
