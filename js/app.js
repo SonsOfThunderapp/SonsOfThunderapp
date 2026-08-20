@@ -5901,7 +5901,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
     }
     function fabBeat() {
       if (fabBusy()) return;
-      const pool = ['watch', 'salute', 'inspect', 'glance', 'nod', 'shift'].filter(function (x) {
+      const pool = ['salute', 'inspect', 'glance', 'nod', 'shift'].filter(function (x) {
         return x !== __fabLastMicro;
       });
       if (Math.random() < 0.2) pool.push('bubble');
