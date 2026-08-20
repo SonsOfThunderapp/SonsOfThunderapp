@@ -7285,3 +7285,11 @@ h1.about-title.code-title.code-title-glow {
       0 0 10px rgba(227, 6, 0, 0.5);
   }
 }
+
+/* First-run tour: no skip, no X, no swipe-away */
+body.tb-tour-mandatory .tb-tour-close,
+body.tb-tour-mandatory .tb-tour-skip {
+  display: none !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}

@@ -2545,6 +2545,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       if (!el) return;
       // Vertical dismiss preview when onDown is wired (sheet follows finger)
       if (opts.onDown && axis === 'y' && dy > 0) {
+        if (typeof opts.canDown === 'function' && !opts.canDown()) return;
         el.classList.add('elastic-dragging');
         const ty = Math.min(240, dy * 0.88);
         const op = Math.max(0.28, 1 - ty / 280);
@@ -2580,9 +2581,10 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       const dt = Math.max(1, (lt || Date.now()) - st);
       const vx = absX / dt;
 
+      const canDown = typeof opts.canDown === 'function' ? opts.canDown() : true;
       const vy = absY / dt;
-      const flickDown = !!(opts.onDown && dy > 0 && vy >= 0.38 && absY > 24 && absY > absX * 0.85);
-      const pullDown = !!(opts.onDown && dy >= DOWN && absY > absX);
+      const flickDown = !!(opts.onDown && canDown && dy > 0 && vy >= 0.38 && absY > 24 && absY > absX * 0.85);
+      const pullDown = !!(opts.onDown && canDown && dy >= DOWN && absY > absX);
       if (flickDown || pullDown) {
         try { tbFeedback.selection(); } catch (e) {}
         if (el && !prefersReducedMotion()) {
@@ -7530,6 +7532,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     root.classList.remove('hidden');
     root.setAttribute('aria-hidden', 'false');
     document.body.classList.add('tb-tour-open');
+    syncTourExitUI();
     renderTourSlide();
   }
 
@@ -7543,10 +7546,31 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       root.setAttribute('aria-hidden', 'true');
     }
     document.body.classList.remove('tb-tour-open');
+    document.body.classList.remove('tb-tour-mandatory');
     __tourActive = false;
   }
 
+  function isTourMandatory() {
+    return !isTourComplete();
+  }
+
+  function syncTourExitUI() {
+    const lock = !!(__tourActive && isTourMandatory());
+    document.body.classList.toggle('tb-tour-mandatory', lock);
+    const skip = document.getElementById('tb-tour-skip');
+    const closeBtn = document.getElementById('tb-tour-close');
+    if (skip) {
+      skip.classList.toggle('hidden', lock);
+      skip.setAttribute('aria-hidden', lock ? 'true' : 'false');
+    }
+    if (closeBtn) {
+      closeBtn.classList.toggle('hidden', lock);
+      closeBtn.setAttribute('aria-hidden', lock ? 'true' : 'false');
+    }
+  }
+
   function skipTour() {
+    if (isTourMandatory()) return;
     setTourState({ done: true, skipped: true, at: Date.now() });
     hideTour();
   }
@@ -7616,6 +7640,30 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       closeBtn.dataset.tbBound = '1';
       closeBtn.addEventListener('click', function () { skipTour(); });
     }
+    const tourRoot = document.getElementById('tb-tour');
+    if (tourRoot && tourRoot.dataset.swipeClose !== '1') {
+      tourRoot.dataset.swipeClose = '1';
+      bindElasticSwipe(tourRoot, {
+        getEl: function () { return tourRoot.querySelector('.tb-tour-stage') || tourRoot; },
+        onDown: function () { skipTour(); },
+        canDown: function () { return !isTourMandatory(); },
+        onDownDist: 52,
+        follow: 0.88,
+        blocked: function (t) {
+          return !!(t && t.closest && t.closest('button, a, input, textarea, video'));
+        }
+      });
+    }
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape') return;
+      if (!document.body.classList.contains('tb-tour-open')) return;
+      if (isTourMandatory()) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      skipTour();
+    }, true);
     const replay = document.getElementById('replay-tour-btn') || document.getElementById('take-tour-btn');
     if (replay && !replay.dataset.tbBound) {
       replay.dataset.tbBound = '1';
