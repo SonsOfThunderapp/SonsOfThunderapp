@@ -5090,6 +5090,53 @@ $('#edit-profile-btn').addEventListener('click', () => {
     })();
     try { window.ThunderVoice = ThunderVoice; } catch (e) {}
 
+    let __fabGlintTimer = null;
+    let __fabFidgetTimer = null;
+    let __fabSwayTimer = null;
+    function stopThunderBackstageIdle() {
+      [__fabGlintTimer, __fabFidgetTimer, __fabSwayTimer].forEach(function (t) {
+        if (t) try { clearTimeout(t); } catch (e) {}
+      });
+      __fabGlintTimer = __fabFidgetTimer = __fabSwayTimer = null;
+      const img = document.querySelector('#thunder-fab .thunder-fab-img');
+      if (img) img.classList.remove('tb-host-alive', 'tb-host-arrive', 'tb-host-glint', 'tb-host-fidget', 'tb-host-sway');
+    }
+    function startThunderBackstageIdle() {
+      stopThunderBackstageIdle();
+      const img = document.querySelector('#thunder-fab .thunder-fab-img');
+      if (!img) return;
+      img.classList.add('tb-host-alive', 'tb-host-arrive');
+      try {
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      } catch (e) {}
+      function glintTick() {
+        if (document.body.classList.contains('tb-ask-open') || document.body.classList.contains('tb-tour-open')) {
+          __fabGlintTimer = setTimeout(glintTick, 4000);
+          return;
+        }
+        img.classList.add('tb-host-glint');
+        setTimeout(function () { img.classList.remove('tb-host-glint'); }, 260);
+        __fabGlintTimer = setTimeout(glintTick, 5200 + Math.random() * 7800);
+      }
+      __fabGlintTimer = setTimeout(glintTick, 2400 + Math.random() * 2200);
+      function fidgetTick() {
+        if (!document.body.classList.contains('tb-ask-open')) {
+          img.classList.add('tb-host-fidget');
+          setTimeout(function () { img.classList.remove('tb-host-fidget'); }, 520);
+        }
+        __fabFidgetTimer = setTimeout(fidgetTick, 7000 + Math.random() * 9000);
+      }
+      __fabFidgetTimer = setTimeout(fidgetTick, 3800 + Math.random() * 2400);
+      function swayTick() {
+        if (!document.body.classList.contains('tb-ask-open')) {
+          img.classList.add('tb-host-sway');
+          setTimeout(function () { img.classList.remove('tb-host-sway'); }, 1400);
+        }
+        __fabSwayTimer = setTimeout(swayTick, 9000 + Math.random() * 8000);
+      }
+      __fabSwayTimer = setTimeout(swayTick, 5600 + Math.random() * 3000);
+    }
+    try { startThunderBackstageIdle(); } catch (e) {}
 
     // Thunder FAB — THUNDER WAKE then open (full once/session, soft after)
     $('#thunder-fab').addEventListener('click', () => {
@@ -5130,6 +5177,9 @@ $('#edit-profile-btn').addEventListener('click', () => {
         if (thunderModal.classList.contains('hidden')) {
           stopThunderVoice();
           try { document.body.classList.remove('tb-ask-open'); } catch (e) {}
+          try { startThunderBackstageIdle(); } catch (e) {}
+        } else {
+          try { stopThunderBackstageIdle(); } catch (e) {}
         }
       });
       obs.observe(thunderModal, { attributes: true, attributeFilter: ['class'] });

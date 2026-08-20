@@ -6338,3 +6338,29 @@ body.tb-ask-open .header .logo {
     filter: none !important;
   }
 }
+
+/* Backstage Thunder (FAB) — a little larger, same living idle as tour host */
+.thunder-fab {
+  width: 74px !important;
+  height: 74px !important;
+}
+.thunder-fab-img {
+  width: 68px !important;
+  height: 68px !important;
+  animation: none !important;
+}
+.thunder-fab-img.tb-host-alive {
+  transform-origin: 50% 80%;
+  animation: tbHostBreath 5.9s ease-in-out infinite !important;
+}
+.thunder-fab-aura {
+  animation: none !important;
+  inset: -6px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .thunder-fab-img.tb-host-alive,
+  .thunder-fab-img.tb-host-fidget,
+  .thunder-fab-img.tb-host-sway {
+    animation: none !important;
+  }
+}
