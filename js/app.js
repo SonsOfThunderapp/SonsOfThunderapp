@@ -6779,6 +6779,9 @@ $('#edit-profile-btn').addEventListener('click', () => {
       'The word “deadline” was a Civil War prison line. Cross it, you’re done.'
     ];
     let __fabDeck = [];
+    let __fabFeatureDeck = [];
+    let __fabFactDeck = [];
+    let __fabFeatureCount = 0;
     function fabShuffle(arr) {
       const a = arr.slice();
       for (let i = a.length - 1; i > 0; i--) {
@@ -6788,10 +6791,15 @@ $('#edit-profile-btn').addEventListener('click', () => {
       return a;
     }
     function fabNextLine() {
-      if (!__fabDeck.length) {
-        __fabDeck = fabShuffle([].concat(FAB_ENCOURAGE, FEATURE_SELL, FAB_FACTS));
+      const longStay = !!(__fabOpenedAt && (Date.now() - __fabOpenedAt >= 8 * 60 * 1000));
+      const opening = __fabFeatureCount < 4 && !longStay;
+      if (opening) {
+        if (!__fabFeatureDeck.length) __fabFeatureDeck = fabShuffle(FEATURE_SELL);
+        __fabFeatureCount += 1;
+        return __fabFeatureDeck.pop();
       }
-      return __fabDeck.pop();
+      if (!__fabFactDeck.length) __fabFactDeck = fabShuffle([].concat(FAB_FACTS, FAB_ENCOURAGE));
+      return __fabFactDeck.pop();
     }
     let __fabBubbleTimer = null;
     let __fabLineTimer = null;
