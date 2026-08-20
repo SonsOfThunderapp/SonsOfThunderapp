@@ -7636,8 +7636,20 @@ body.tb-tour-mandatory .tb-tour-skip {
   padding: 14px 12px;
   border-radius: 10px;
 }
-.tb-tour-stage[data-board="3"] .tb-live-mem-row,
-.tb-tour-stage[data-board="3"] .tb-live-mem,
+.tb-tour-stage[data-board="3"] .tb-live-mem-row {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+  margin: 10px 4px 0;
+}
+.tb-tour-stage[data-board="3"] .tb-live-mem-shot {
+  display: block !important;
+  width: 100% !important;
+  height: 88px !important;
+  object-fit: cover !important;
+  border-radius: 10px !important;
+  background: #111 !important;
+}
 .tb-tour-stage[data-board="3"] .tb-live-phone-foot {
   display: none !important;
 }
