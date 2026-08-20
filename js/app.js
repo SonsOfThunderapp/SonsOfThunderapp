@@ -5284,6 +5284,32 @@ $('#edit-profile-btn').addEventListener('click', () => {
       }
       __fabSigTimer = setTimeout(sigTick, 48000);
     }
+    (function startLogoBoltLife() {
+      try {
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      } catch (e) {}
+      function bolts() { return document.querySelectorAll('.logo-bolt-life'); }
+      function strike() {
+        bolts().forEach(function (el) {
+          el.classList.remove('tb-bolt-strike');
+          void el.offsetWidth;
+          el.classList.add('tb-bolt-strike');
+          setTimeout(function () { el.classList.remove('tb-bolt-strike'); }, 1200);
+        });
+      }
+      function glint() {
+        bolts().forEach(function (el) {
+          el.classList.add('tb-bolt-glint');
+          setTimeout(function () { el.classList.remove('tb-bolt-glint'); }, 180);
+        });
+      }
+      function loop() {
+        if (Math.random() < 0.55) strike();
+        else glint();
+        setTimeout(loop, 12000 + Math.random() * 10000);
+      }
+      setTimeout(loop, 8000 + Math.random() * 4000);
+    })();
     try { startThunderBackstageIdle(); } catch (e) {}
     document.addEventListener('pointerdown', function () {
       __fabQuietSince = Date.now();
