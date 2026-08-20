@@ -1026,6 +1026,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   async function authMagicLink(email) {
     const sb = getSb();
     if (!sb) throw new Error('Supabase is not configured.');
+    const ok = await inviteAllowed(email);
+    if (!ok) throw new Error('Ask a leader for an invite.');
     const redirectTo = (window.location && window.location.origin) ? (window.location.origin + '/') : '/';
     const { error } = await sb.auth.signInWithOtp({
       email: email,
@@ -1139,6 +1141,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         if (event === 'SIGNED_IN') {
           try { fireSignedInWelcome(); } catch (e) {}
           try { issueAxumCoffee(); } catch (e) {}
+          try { claimBrotherOnSignIn(); } catch (e) {}
+          try { markInviteUsed(); } catch (e) {}
         }
         pullMemories().then(() => {
           renderMedia();
@@ -1183,6 +1187,51 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     }, 400);
   }
 
+  async function claimBrotherOnSignIn() {
+    if (!supabaseEnabled() || !isSignedIn()) return;
+    const uid = currentUser() && currentUser().id;
+    if (!uid) return;
+    const sb = getSb();
+    if (!sb) return;
+    try {
+      const { data } = await sb.from('brothers').select('id,name').eq('owner_id', uid).limit(1);
+      if (data && data[0] && data[0].id) {
+        myProfileId = data[0].id;
+        save('myProfileId', myProfileId);
+        return;
+      }
+    } catch (e) {}
+    try {
+      const id = (typeof ensureBrotherId === 'function') ? ensureBrotherId() : myProfileId;
+      if (!id) return;
+      await sb.from('brothers').update({ owner_id: uid }).eq('id', id);
+    } catch (e) {}
+  }
+
+  async function markInviteUsed() {
+    if (!supabaseEnabled() || !isSignedIn()) return;
+    const user = currentUser();
+    const email = user && user.email;
+    if (!email) return;
+    try {
+      await getSb().from('invites').update({
+        used_at: new Date().toISOString(),
+        used_by: user.id
+      }).eq('email', email.toLowerCase().trim());
+    } catch (e) {}
+  }
+
+  async function inviteAllowed(email) {
+    if (!supabaseEnabled() || !email) return true;
+    try {
+      const { data, error } = await getSb().rpc('invite_ok', { e: String(email).trim() });
+      if (error) return true;
+      return !!data;
+    } catch (e) {
+      return true;
+    }
+  }
+
   async function authSignIn(email, password) {
     const sb = getSb();
     if (!sb) throw new Error('Supabase is not configured.');
@@ -1196,6 +1245,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   async function authSignUp(email, password) {
     const sb = getSb();
     if (!sb) throw new Error('Supabase is not configured.');
+    const ok = await inviteAllowed(email);
+    if (!ok) throw new Error('Ask a leader for an invite.');
     const redirectTo = (typeof window !== 'undefined' && window.location && window.location.origin)
       ? (window.location.origin + '/')
       : publicUrl('/');
@@ -1257,7 +1308,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     const sb = getSb();
     const { data: rows, error } = await sb
       .from('memories')
-      .select('id,user_id,storage_path,caption,uploader_name,created_at')
+      .select('id,user_id,storage_path,caption,uploader_name,created_at,meeting_key')
       .order('created_at', { ascending: false })
       .limit(60);
     if (error) throw new Error(error.message || 'Could not load memories.');
@@ -1285,7 +1336,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         caption: r.caption || '',
         uploader_name: r.uploader_name || '',
         date: r.created_at || new Date().toISOString(),
-        user_id: r.user_id || null
+        user_id: r.user_id || null,
+        meeting_key: r.meeting_key || ''
       });
     }
     media = mapped;
@@ -1320,13 +1372,14 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       user_id: user.id,
       storage_path: storagePath,
       caption: item.caption || '',
-      uploader_name: item.uploader_name || myDisplayName() || (user.email || '').split('@')[0] || ''
+      uploader_name: item.uploader_name || myDisplayName() || (user.email || '').split('@')[0] || '',
+      meeting_key: (typeof meetingKey === 'function' ? meetingKey() : '')
     };
 
     const { data: saved, error: insErr } = await sb
       .from('memories')
       .insert(row)
-      .select('id,user_id,storage_path,caption,uploader_name,created_at')
+      .select('id,user_id,storage_path,caption,uploader_name,created_at,meeting_key')
       .single();
 
     if (insErr) {
@@ -4272,6 +4325,45 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     } catch (e) {}
   }
 
+  async function pullLastFire() {
+    if (!supabaseEnabled()) return false;
+    const sb = getSb();
+    if (!sb) return false;
+    try {
+      const { data, error } = await sb.from('last_fire').select('caption,photo,updated_at').eq('id', 'current').maybeSingle();
+      if (error || !data) return false;
+      if (!String(data.caption || '').trim() && !String(data.photo || '').trim()) return false;
+      lastFire = {
+        caption: data.caption || '',
+        photo: data.photo || '',
+        updatedAt: data.updated_at ? Date.parse(data.updated_at) : Date.now()
+      };
+      save('lastFire', lastFire);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  async function pushLastFire() {
+    if (!supabaseEnabled() || !isSignedIn() || !lastFire) return false;
+    const sb = getSb();
+    if (!sb) return false;
+    try {
+      const uid = currentUser() && currentUser().id;
+      const { error } = await sb.from('last_fire').upsert({
+        id: 'current',
+        caption: lastFire.caption || '',
+        photo: lastFire.photo || '',
+        updated_at: new Date().toISOString(),
+        updated_by: uid || null
+      });
+      return !error;
+    } catch (e) {
+      return false;
+    }
+  }
+
   async function pullRsvps() {
     if (!supabaseEnabled()) return false;
     const sb = getSb();
@@ -4279,13 +4371,18 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     try {
       const { data, error } = await sb
         .from('rsvps')
-        .select('brother_id,meeting_key,in_at')
+        .select('brother_id,meeting_key,in_at,showed_up')
         .eq('meeting_key', meetingKey());
       if (error) {
-        console.warn('rsvps pull', error);
-        return false;
+        const retry = await sb.from('rsvps').select('brother_id,meeting_key,in_at').eq('meeting_key', meetingKey());
+        if (retry.error) {
+          console.warn('rsvps pull', retry.error);
+          return false;
+        }
+        sharedRsvps = Array.isArray(retry.data) ? retry.data : [];
+      } else {
+        sharedRsvps = Array.isArray(data) ? data : [];
       }
-      sharedRsvps = Array.isArray(data) ? data : [];
       const nextIds = sharedRsvps.map(function (r) { return r && r.brother_id; }).filter(Boolean);
       try { renderInCount(); } catch (e) {}
       if (prevRsvpIds) {
@@ -4364,12 +4461,15 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         const bits = [];
         if (p.in) bits.push('LOCKED IN' + (p.inAt ? ' · ' + when(p.inAt) : ''));
         else bits.push('Not in');
+        if (p.showed) bits.push('SHOWED');
         if (p.phone) bits.push('phone');
         if (p.birthday) bits.push(p.birthday);
         if (p.updatedAt && !p.in) bits.push(when(p.updatedAt));
-        return '<div class="room-person' + (p.in ? ' is-in' : '') + '">' +
+        return '<div class="room-person' + (p.in ? ' is-in' : '') + (p.showed ? ' is-showed' : '') + '" data-bid="' + esc(p.id) + '">' +
           '<div class="room-person-name">' + esc(p.name) + '</div>' +
-          '<div class="room-person-meta">' + esc(bits.join(' · ')) + '</div></div>';
+          '<div class="room-person-meta">' + esc(bits.join(' · ')) + '</div>' +
+          (p.in && !p.showed ? '<button type="button" class="room-showed" data-showed="' + esc(p.id) + '">SHOWED UP</button>' : '') +
+          '</div>';
       }).join('');
       const mems = (data.memories || []).map(function (m) {
         return '<div class="room-mem">' + esc(m.name) + (m.at ? ' · ' + when(m.at) : '') +
@@ -4386,8 +4486,33 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         (people ? '<div class="room-list">' + people + '</div>' : '<p class="room-in">Nobody on the roster yet.</p>') +
         (bday ? '<p class="room-bday"><span class="card-label">BIRTHDAYS</span><br>' + bday + '</p>' : '') +
         (mems ? '<p class="room-bday"><span class="card-label">MEMORIES</span></p><div class="room-mems">' + mems + '</div>' : '');
+      el.querySelectorAll('[data-showed]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          const id = btn.getAttribute('data-showed');
+          if (id) markShowedUp(id, btn);
+        });
+      });
     } catch (e) {
       el.textContent = 'Couldn’t load the room.';
+    }
+  }
+
+  async function markShowedUp(brotherId, btn) {
+    if (!supabaseEnabled() || !isSignedIn() || !brotherId) return;
+    try {
+      const sb = getSb();
+      const { error } = await sb.from('rsvps').update({
+        showed_up: true,
+        showed_at: new Date().toISOString()
+      }).eq('brother_id', brotherId).eq('meeting_key', meetingKey());
+      if (error) throw error;
+      if (btn) {
+        btn.textContent = 'SHOWED';
+        btn.disabled = true;
+      }
+      try { loadFounderRoom(); } catch (e) {}
+    } catch (e) {
+      alert('Could not mark showed up.');
     }
   }
 
@@ -7199,6 +7324,11 @@ $('#thunder-input').addEventListener('keydown', (e) => {
         if (!trimmed) {
           lastFire = null;
           save('lastFire', null);
+          try {
+            lastFire = { caption: '', photo: '', updatedAt: Date.now() };
+            pushLastFire();
+            lastFire = null;
+          } catch (e) {}
           renderLastFire();
           updateAllNewBadges();
           alert('Last Fire cleared.');
@@ -7227,9 +7357,10 @@ $('#thunder-input').addEventListener('keydown', (e) => {
             }
             lastFire = { caption: trimmed, photo: photo || '', updatedAt: Date.now() };
             save('lastFire', lastFire);
+            try { pushLastFire(); } catch (e) {}
             renderLastFire();
             updateAllNewBadges();
-            alert('Last Fire saved on this phone.');
+            alert('Last Fire saved for the room.');
           };
           input.click();
         } else {
@@ -7239,9 +7370,10 @@ $('#thunder-input').addEventListener('keydown', (e) => {
             updatedAt: Date.now()
           };
           save('lastFire', lastFire);
+          try { pushLastFire(); } catch (e) {}
           renderLastFire();
           updateAllNewBadges();
-          alert('Last Fire saved on this phone.');
+          alert('Last Fire saved for the room.');
         }
       });
     }
@@ -8136,7 +8268,15 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
     const res = await fetch('/.netlify/functions/push-subscribe', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: await (async function () {
+        const h = { 'Content-Type': 'application/json' };
+        try {
+          const { data } = await getSb().auth.getSession();
+          const t = data && data.session && data.session.access_token;
+          if (t) h.Authorization = 'Bearer ' + t;
+        } catch (e) {}
+        return h;
+      })(),
       body: JSON.stringify({ subscription: sub.toJSON() })
     });
     if (!res.ok) {
@@ -8198,7 +8338,15 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       }
       await fetch('/.netlify/functions/push-subscribe', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await (async function () {
+          const h = { 'Content-Type': 'application/json' };
+          try {
+            const { data } = await getSb().auth.getSession();
+            const t = data && data.session && data.session.access_token;
+            if (t) h.Authorization = 'Bearer ' + t;
+          } catch (e) {}
+          return h;
+        })(),
         body: JSON.stringify({ subscription: sub.toJSON() })
       });
       save('gatheringAlertsOn', true);
@@ -9030,7 +9178,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     })();
     try {
       await initAuth();
-      try { await pullAxumCoffee(); } catch (e) {}
+      try { await pullLastFire(); if (typeof renderLastFire === 'function') renderLastFire(); } catch (e) {}
       try { maybeShowAxumCoffee(); } catch (e) {}
       // Shared announcements + gathering board + brothers (read without sign-in)
       try {

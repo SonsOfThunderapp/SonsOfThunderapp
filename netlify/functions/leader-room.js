@@ -12,9 +12,9 @@ exports.handler = async (event) => {
     broRes = await fetch(sbUrl + '/rest/v1/brothers?select=id,name,phone,updated_at,owner_id&order=name.asc', { headers });
   }
   const [rsvpRes, subRes, memRes] = await Promise.all([
-    fetch(sbUrl + '/rest/v1/rsvps?meeting_key=eq.' + encodeURIComponent(key) + '&select=brother_id,in_at&order=in_at.desc', { headers }),
-    fetch(sbUrl + '/rest/v1/push_subscriptions?select=endpoint,updated_at', { headers }),
-    fetch(sbUrl + '/rest/v1/memories?select=uploader_name,created_at,caption&order=created_at.desc&limit=12', { headers })
+    fetch(sbUrl + '/rest/v1/rsvps?meeting_key=eq.' + encodeURIComponent(key) + '&select=brother_id,in_at,showed_up&order=in_at.desc', { headers }),
+    fetch(sbUrl + '/rest/v1/push_subscriptions?select=endpoint,updated_at,user_id', { headers }),
+    fetch(sbUrl + '/rest/v1/memories?select=uploader_name,created_at,caption,meeting_key&order=created_at.desc&limit=12', { headers })
   ]);
 
   const brothers = broRes.ok ? await broRes.json() : [];
@@ -23,8 +23,12 @@ exports.handler = async (event) => {
   const memories = memRes.ok ? await memRes.json() : [];
 
   const inMap = {};
+  const showMap = {};
   (rsvps || []).forEach(function (r) {
-    if (r.brother_id) inMap[r.brother_id] = r.in_at || true;
+    if (r.brother_id) {
+      inMap[r.brother_id] = r.in_at || true;
+      if (r.showed_up) showMap[r.brother_id] = true;
+    }
   });
   const today = mmdd(new Date());
   const people = [];
@@ -41,6 +45,7 @@ exports.handler = async (event) => {
       name: b.name || 'Brother',
       in: !!inMap[b.id],
       inAt: inMap[b.id] && inMap[b.id] !== true ? inMap[b.id] : null,
+      showed: !!showMap[b.id],
       phone: hasPhone,
       birthday: bd || '',
       updatedAt: b.updated_at || null

@@ -24,6 +24,20 @@ exports.handler = async (event) => {
       subscription: sub,
       updated_at: new Date().toISOString()
     };
+    const authHeader = event.headers.authorization || event.headers.Authorization || '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+    const anonKey = process.env.SUPABASE_ANON_KEY || key;
+    if (token) {
+      try {
+        const userRes = await fetch(url.replace(/\/$/, '') + '/auth/v1/user', {
+          headers: { Authorization: 'Bearer ' + token, apikey: anonKey }
+        });
+        if (userRes.ok) {
+          const user = await userRes.json();
+          if (user && user.id) row.user_id = user.id;
+        }
+      } catch (e) {}
+    }
 
     const res = await fetch(
       `${url.replace(/\/$/, '')}/rest/v1/push_subscriptions?on_conflict=endpoint`,
@@ -55,7 +69,7 @@ exports.handler = async (event) => {
 function cors() {
   return {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Access-Control-Allow-Methods': 'POST, OPTIONS'
   };
 }
