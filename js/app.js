@@ -4355,11 +4355,60 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       try { startMemberSignIn(); } catch (e) {}
       return;
     }
-    try { openModal('media-modal'); } catch (e) {}
-    setTimeout(function () {
-      const cam = document.getElementById('media-file-cam');
-      if (cam) try { cam.click(); } catch (e) {}
-    }, 200);
+    const cam = document.getElementById('memory-cam') || document.getElementById('media-file-cam');
+    if (!cam) return;
+    try { cam.value = ''; } catch (e) {}
+    cam.click();
+  }
+
+  async function ingestMemoryFile(file) {
+    if (!file) return;
+    if (supabaseEnabled() && !isSignedIn()) {
+      try { openAuthGate('Sign in to add a memory the whole brotherhood can see.'); } catch (e) {}
+      return;
+    }
+    if (!String(file.type || '').startsWith('image')) {
+      alert('Photo only from the camera.');
+      return;
+    }
+    if (file.size > 12 * 1024 * 1024) {
+      alert('File is too large. Try another shot.');
+      return;
+    }
+    try { showInstallToast('Uploading…'); } catch (e) {}
+    try {
+      const dataUrl = await new Promise(function (resolve, reject) {
+        const reader = new FileReader();
+        reader.onload = function (ev) { resolve(ev.target.result); };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      let payload = dataUrl;
+      try {
+        if (String(dataUrl).startsWith('data:image')) {
+          payload = await compressImageDataUrl(dataUrl, 1200, 0.72);
+        }
+      } catch (e) {}
+      const item = {
+        data: payload,
+        blob: dataUrlToBlob(payload),
+        filename: file.name || 'patio.jpg',
+        type: 'image',
+        caption: '',
+        date: new Date().toISOString(),
+        uploader_name: (typeof myDisplayName === 'function' && myDisplayName()) || ''
+      };
+      if (!supabaseEnabled()) throw new Error('Shared memories are not configured on this app yet.');
+      const saved = await pushMemory(item);
+      media.unshift(saved);
+      renderMedia();
+      renderLastFire();
+      try { showView('events'); } catch (e) {}
+      try { rewardSaveSuccess('memory'); } catch (e) {}
+    } catch (err) {
+      console.error(err);
+      alert('Could not save memory. ' + ((err && err.message) || 'Try again.'));
+    }
   }
 
   async function pullRaffle() {
@@ -5702,7 +5751,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
         alert('Shared memories are not configured yet. Add Supabase URL and anon key.');
         return;
       }
-      openModal('media-modal');
+      openDropShot();
     });
 
     $$('[data-close]').forEach(btn => {
@@ -5851,13 +5900,17 @@ $('#edit-profile-btn').addEventListener('click', () => {
       camInput.dataset.tbBound = '1';
       camInput.addEventListener('change', function () {
         const src = camInput.files && camInput.files[0];
-        const dest = $('#media-file');
-        if (!src || !dest || typeof DataTransfer === 'undefined') return;
-        try {
-          const dt = new DataTransfer();
-          dt.items.add(src);
-          dest.files = dt.files;
-        } catch (e) {}
+        if (src) ingestMemoryFile(src);
+        try { camInput.value = ''; } catch (e) {}
+      });
+    }
+    const liveCam = document.getElementById('memory-cam');
+    if (liveCam && liveCam.dataset.tbBound !== '1') {
+      liveCam.dataset.tbBound = '1';
+      liveCam.addEventListener('change', function () {
+        const src = liveCam.files && liveCam.files[0];
+        if (src) ingestMemoryFile(src);
+        try { liveCam.value = ''; } catch (e) {}
       });
     }
     $('#save-media').addEventListener('click', () => {

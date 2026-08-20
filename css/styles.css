@@ -7840,10 +7840,11 @@ body.tb-tour-mandatory .tb-tour-skip {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
-.last-fire-strip img {
-  width: 112px;
-  height: 112px;
-  object-fit: cover;
-  border-radius: 8px;
-  flex: 0 0 auto;
+.memory-cam-input {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 1px;
+  height: 1px;
+  opacity: 0.01;
 }
