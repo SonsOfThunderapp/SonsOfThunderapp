@@ -5941,7 +5941,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
       const pool = ['glance', 'nod', 'shift', 'drift', 'bob', 'lean', 'look'].filter(function (x) {
         return x !== __fabLastMicro;
       });
-      if (Math.random() < 0.16) pool.push('bubble');
+      if (Math.random() < 0.12) pool.push('bubble');
       const pick = pool[Math.floor(Math.random() * pool.length)];
       __fabLastMicro = pick;
       if (pick === 'glance') fabGlance();
@@ -5952,6 +5952,18 @@ $('#edit-profile-btn').addEventListener('click', () => {
       else if (pick === 'lean') fabLean();
       else if (pick === 'look') fabLookAround();
       else fabBubbleBeat();
+      /* Second beat — he doesn’t park. */
+      if (Math.random() < 0.55) {
+        setTimeout(function () {
+          if (fabBusy()) return;
+          const follow = ['nod', 'glance', 'bob', 'lean'].filter(function (x) { return x !== pick; });
+          const p2 = follow[Math.floor(Math.random() * follow.length)];
+          if (p2 === 'nod') fabMicroNod();
+          else if (p2 === 'glance') fabGlance();
+          else if (p2 === 'bob') fabBob();
+          else fabLean();
+        }, 1600);
+      }
     }
     function startThunderBackstageIdle() {
       stopThunderBackstageIdle();
@@ -5983,9 +5995,9 @@ $('#edit-profile-btn').addEventListener('click', () => {
           return;
         }
         fabBeat();
-        __fabBeatTimer = setTimeout(beatTick, 9000);
+        __fabBeatTimer = setTimeout(beatTick, 4200);
       }
-      __fabBeatTimer = setTimeout(beatTick, first ? 5000 : 9000);
+      __fabBeatTimer = setTimeout(beatTick, first ? 1800 : 4200);
     }
     try { startThunderBackstageIdle(); } catch (e) {}
     window.addEventListener('resize', function () { try { parkFabByImin(); } catch (e) {} });
