@@ -7690,3 +7690,106 @@ body.tb-tour-mandatory .tb-tour-skip {
 @property --fab-x { syntax: "<length>"; inherits: false; initial-value: 0px; }
 @property --fab-y { syntax: "<length>"; inherits: false; initial-value: 0px; }
 @property --fab-s { syntax: "<number>"; inherits: false; initial-value: 1; }
+
+.axum-chip {
+  display: block;
+  width: 100%;
+  margin: 10px 0 0;
+  background: #111;
+  color: #FEF105;
+  border: 1px solid #FEF105;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.axum-chip.hidden { display: none !important; }
+.axum-drop, .axum-card {
+  position: fixed;
+  inset: 0;
+  z-index: 240;
+}
+.axum-drop-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(0,0,0,0.72);
+}
+.axum-drop-sheet {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: calc(18px + var(--safe-bottom, 0px));
+  background: #0a0a0a;
+  border: 1.5px solid #FEF105;
+  border-radius: 16px;
+  padding: 22px 18px 16px;
+  text-align: center;
+}
+.axum-drop-thunder { width: 72px; height: 72px; margin: 0 auto 8px; display: block; }
+.axum-drop-kicker, .axum-card-kicker {
+  color: #FEF105;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+}
+.axum-drop-title, .axum-card-title {
+  color: #FEF105;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin-top: 6px;
+}
+.axum-drop-sub, .axum-card-place { color: #fff; font-weight: 800; letter-spacing: 0.14em; margin-top: 4px; }
+.axum-drop-line { color: #999; font-size: 13px; margin: 10px 0 14px; }
+.axum-drop-addr { color: #777; font-size: 12px; margin-top: 10px; letter-spacing: 0.08em; }
+.axum-card {
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 22px 28px;
+  text-align: center;
+}
+.axum-card.hidden, .axum-drop.hidden { display: none !important; }
+.axum-card-close {
+  position: absolute;
+  top: calc(10px + var(--safe-top, 0px));
+  right: 14px;
+  background: none;
+  border: 0;
+  color: #fff;
+  font-size: 32px;
+  line-height: 1;
+}
+.axum-card-city { color: #888; font-size: 12px; letter-spacing: 0.16em; margin-top: 4px; }
+.axum-code {
+  color: #FEF105;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.28em;
+  margin-top: 4px;
+}
+.axum-name { color: #fff; font-weight: 800; letter-spacing: 0.18em; margin-top: 10px; }
+.axum-hint { color: #aaa; font-size: 13px; margin: 8px 0 16px; }
+.axum-fine { color: #666; font-size: 11px; margin-top: 12px; }
+.axum-card.is-used .axum-qr { opacity: 0.25; filter: grayscale(1); }
+.axum-card.is-used .axum-code { text-decoration: line-through; color: #666; }
+.axum-card.is-used::after {
+  content: "USED";
+  position: absolute;
+  top: 42%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-18deg);
+  color: #E30600;
+  border: 3px solid #E30600;
+  padding: 6px 16px;
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  pointer-events: none;
+}
+.axum-card .btn-rsvp { width: min(100%, 340px); }

@@ -741,9 +741,204 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     if (load('signedInWelcomeSent')) return;
     try { save('signedInWelcomeSent', 1); } catch (e) {}
     const title = 'You’re in the room.';
-    const body = 'I’m In carries your name. Memories follow you. Thunder’s in the corner.';
+    const body = 'Free coffee at Axum. I’m In carries your name.';
     try { fireLocalNotification(title, body, 'thunder-signedin', '/?view=home'); } catch (e) {}
-    try { showInstallToast("YOU'RE IN THE ROOM", { success: true }); } catch (e) {}
+  }
+
+  function axumCoffeeState() {
+    return load('axumCoffee') || null;
+  }
+
+  function saveAxumCoffee(c) {
+    save('axumCoffee', c);
+    return c;
+  }
+
+  function makeAxumCode() {
+    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let s = '';
+    for (let i = 0; i < 4; i++) s += alphabet[Math.floor(Math.random() * alphabet.length)];
+    let initial = 'T';
+    try {
+      const n = (typeof knownFirstName === 'function' && knownFirstName()) || '';
+      if (n) initial = n.charAt(0).toUpperCase();
+    } catch (e) {}
+    return initial + '-' + s;
+  }
+
+  function issueAxumCoffee() {
+    const existing = axumCoffeeState();
+    if (existing && existing.code) return existing;
+    const uid = currentUser() && currentUser().id;
+    const name = (typeof knownFirstName === 'function' && knownFirstName()) || '';
+    const row = {
+      code: makeAxumCode(),
+      name: name,
+      userId: uid || '',
+      issuedAt: Date.now(),
+      redeemedAt: null,
+      shownDrop: false
+    };
+    saveAxumCoffee(row);
+    if (supabaseEnabled() && isSignedIn()) {
+      const sb = getSb();
+      if (sb) {
+        sb.from('axum_coffee').insert({
+          user_id: uid,
+          code: row.code,
+          name: row.name
+        }).then(function (res) {
+          if (res && res.error && String(res.error.message || '').indexOf('duplicate') === -1) {
+            console.warn('axum issue', res.error);
+          }
+        }).catch(function () {});
+      }
+    }
+    return row;
+  }
+
+  async function pullAxumCoffee() {
+    if (!supabaseEnabled() || !isSignedIn()) return axumCoffeeState();
+    const sb = getSb();
+    const uid = currentUser() && currentUser().id;
+    if (!sb || !uid) return axumCoffeeState();
+    try {
+      const { data, error } = await sb.from('axum_coffee').select('code,name,issued_at,redeemed_at').eq('user_id', uid).maybeSingle();
+      if (error || !data) return axumCoffeeState();
+      const local = axumCoffeeState() || {};
+      const merged = {
+        code: data.code || local.code,
+        name: data.name || local.name || '',
+        userId: uid,
+        issuedAt: data.issued_at ? Date.parse(data.issued_at) : (local.issuedAt || Date.now()),
+        redeemedAt: data.redeemed_at ? Date.parse(data.redeemed_at) : (local.redeemedAt || null),
+        shownDrop: !!local.shownDrop
+      };
+      saveAxumCoffee(merged);
+      return merged;
+    } catch (e) {
+      return axumCoffeeState();
+    }
+  }
+
+  function paintAxumQr(code) {
+    const target = document.getElementById('axum-qr');
+    if (!target) return;
+    target.innerHTML = '';
+    if (!code || typeof QRCode === 'undefined') return;
+    try {
+      target.style.cssText = 'width:200px;height:200px;background:#fff;margin:18px auto 10px;';
+      new QRCode(target, {
+        text: 'SOT-AXUM-' + code,
+        width: 200,
+        height: 200,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    } catch (e) {}
+  }
+
+  function renderAxumChip() {
+    const chip = document.getElementById('axum-chip');
+    if (!chip) return;
+    const c = axumCoffeeState();
+    if (c && c.code && !c.redeemedAt) {
+      chip.classList.remove('hidden');
+      chip.textContent = 'FREE AXUM COFFEE';
+    } else {
+      chip.classList.add('hidden');
+    }
+  }
+
+  function closeAxumDrop() {
+    const el = document.getElementById('axum-drop');
+    if (el) el.classList.add('hidden');
+    document.body.classList.remove('tb-axum-open');
+  }
+
+  function closeAxumCard() {
+    const el = document.getElementById('axum-card');
+    if (el) el.classList.add('hidden');
+    document.body.classList.remove('tb-axum-open');
+    renderAxumChip();
+  }
+
+  function openAxumCard() {
+    const c = axumCoffeeState();
+    if (!c || !c.code) return;
+    closeAxumDrop();
+    const card = document.getElementById('axum-card');
+    if (!card) return;
+    const redeemed = !!c.redeemedAt;
+    card.classList.toggle('is-used', redeemed);
+    const kicker = document.getElementById('axum-card-kicker');
+    const codeEl = document.getElementById('axum-code');
+    const nameEl = document.getElementById('axum-name');
+    const hint = document.getElementById('axum-hint');
+    const btn = document.getElementById('axum-redeem-btn');
+    if (kicker) kicker.textContent = redeemed ? 'USED' : 'FIRST SIGN-IN';
+    if (codeEl) codeEl.textContent = c.code;
+    if (nameEl) nameEl.textContent = (c.name || (typeof knownFirstName === 'function' && knownFirstName()) || '').toUpperCase();
+    if (hint) {
+      hint.textContent = redeemed
+        ? ("You're in the room. Coffee's on us — once.")
+        : 'Show this. Tap REDEEM in front of them.';
+    }
+    if (btn) {
+      btn.classList.toggle('hidden', redeemed);
+      btn.textContent = 'REDEEM AT AXUM';
+      btn.dataset.armed = '0';
+    }
+    paintAxumQr(c.code);
+    card.classList.remove('hidden');
+    document.body.classList.add('tb-axum-open');
+  }
+
+  function openAxumDrop() {
+    const c = axumCoffeeState();
+    if (!c || !c.code || c.redeemedAt) return;
+    const drop = document.getElementById('axum-drop');
+    if (!drop) return;
+    drop.classList.remove('hidden');
+    document.body.classList.add('tb-axum-open');
+  }
+
+  function maybeShowAxumCoffee() {
+    const c = axumCoffeeState();
+    if (!c || !c.code) {
+      renderAxumChip();
+      return;
+    }
+    if (c.redeemedAt) {
+      renderAxumChip();
+      return;
+    }
+    if (!c.shownDrop) {
+      c.shownDrop = true;
+      saveAxumCoffee(c);
+      openAxumDrop();
+    }
+    renderAxumChip();
+  }
+
+  async function redeemAxumCoffee() {
+    const c = axumCoffeeState();
+    if (!c || !c.code || c.redeemedAt) return false;
+    c.redeemedAt = Date.now();
+    saveAxumCoffee(c);
+    if (supabaseEnabled() && isSignedIn()) {
+      try {
+        const sb = getSb();
+        const uid = currentUser() && currentUser().id;
+        if (sb && uid) {
+          await sb.from('axum_coffee').update({ redeemed_at: new Date().toISOString() }).eq('user_id', uid).is('redeemed_at', null);
+        }
+      } catch (e) {}
+    }
+    openAxumCard();
+    try { tbFeedback.confirm(); } catch (e) {}
+    return true;
   }
 
   function isSignedIn() {
@@ -943,6 +1138,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         try { flushPendingRsvp(); } catch (e) {}
         if (event === 'SIGNED_IN') {
           try { fireSignedInWelcome(); } catch (e) {}
+          try { issueAxumCoffee(); } catch (e) {}
         }
         pullMemories().then(() => {
           renderMedia();
@@ -8798,8 +8994,44 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     showView('home');
     /* loadIronFeed retired — RSS cut 2026-08-18 */
     bindActivityTags();
+    (function bindAxumCoffee() {
+      const chip = document.getElementById('axum-chip');
+      const showBtn = document.getElementById('axum-show-btn');
+      const closeCard = document.getElementById('axum-card-close');
+      const backdrop = document.getElementById('axum-drop-backdrop');
+      const redeem = document.getElementById('axum-redeem-btn');
+      if (chip && chip.dataset.bound !== '1') {
+        chip.dataset.bound = '1';
+        chip.addEventListener('click', function () { openAxumCard(); });
+      }
+      if (showBtn && showBtn.dataset.bound !== '1') {
+        showBtn.dataset.bound = '1';
+        showBtn.addEventListener('click', function () { openAxumCard(); });
+      }
+      if (closeCard && closeCard.dataset.bound !== '1') {
+        closeCard.dataset.bound = '1';
+        closeCard.addEventListener('click', closeAxumCard);
+      }
+      if (backdrop && backdrop.dataset.bound !== '1') {
+        backdrop.dataset.bound = '1';
+        backdrop.addEventListener('click', closeAxumDrop);
+      }
+      if (redeem && redeem.dataset.bound !== '1') {
+        redeem.dataset.bound = '1';
+        redeem.addEventListener('click', function () {
+          if (redeem.dataset.armed !== '1') {
+            redeem.dataset.armed = '1';
+            redeem.textContent = 'CONFIRM — THIS DIES';
+            return;
+          }
+          redeemAxumCoffee();
+        });
+      }
+    })();
     try {
       await initAuth();
+      try { await pullAxumCoffee(); } catch (e) {}
+      try { maybeShowAxumCoffee(); } catch (e) {}
       // Shared announcements + gathering board + brothers (read without sign-in)
       try {
         await pullAnnouncements();

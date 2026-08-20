@@ -33,10 +33,10 @@
   
   <!-- Web App Manifest -->
   <link rel="manifest" href="manifest.json" />
-  <link rel="preload" as="image" href="assets/logo@2x.png?v=20260820-welcome1" />
+  <link rel="preload" as="image" href="assets/logo@2x.png?v=20260820-axum1" />
   <link rel="preload" as="image" href="assets/thunder-cool-fab@2x.png?v=20260819-nogold2" />
   
-  <link rel="stylesheet" href="css/styles.css?v=20260820-welcome1" />
+  <link rel="stylesheet" href="css/styles.css?v=20260820-axum1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -46,14 +46,14 @@
   <div id="splash" class="splash" aria-hidden="true">
     <div class="splash-inner">
       <div class="splash-logo-wrap">
-        <img src="assets/logo@2x.png?v=20260820-welcome1"
-             srcset="assets/logo@2x.png?v=20260820-welcome1 1200w, assets/logo@3x.png?v=20260820-welcome1 1800w"
+        <img src="assets/logo@2x.png?v=20260820-axum1"
+             srcset="assets/logo@2x.png?v=20260820-axum1 1200w, assets/logo@3x.png?v=20260820-axum1 1800w"
              sizes="min(82vw, 340px)"
              alt="Sons of Thunder"
              class="splash-mark splash-logo"
              width="1200"
              height="831" />
-        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-welcome1" alt="" aria-hidden="true" width="1200" height="831" />
+        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-axum1" alt="" aria-hidden="true" width="1200" height="831" />
       </div>
       <p class="splash-line hidden" aria-hidden="true">THUNDER DOESN’T DULL</p>
     </div>
@@ -65,8 +65,8 @@
     <header id="main-header" class="header">
       <div class="logo-wrap">
         <img
-          src="assets/logo@2x.png?v=20260820-welcome1"
-          srcset="assets/logo@2x.png?v=20260820-welcome1 1200w, assets/logo@3x.png?v=20260820-welcome1 1800w"
+          src="assets/logo@2x.png?v=20260820-axum1"
+          srcset="assets/logo@2x.png?v=20260820-axum1 1200w, assets/logo@3x.png?v=20260820-axum1 1800w"
           sizes="(max-width: 480px) 72vw, 320px"
           alt="Sons of Thunder"
           class="logo"
@@ -75,7 +75,7 @@
           height="831"
           decoding="async"
         />
-        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-welcome1" alt="" aria-hidden="true" width="1200" height="831" />
+        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-axum1" alt="" aria-hidden="true" width="1200" height="831" />
       </div>
     </header>
 
@@ -107,6 +107,7 @@
               <div id="in-count-names" class="in-count-names"></div>
             </div>
             <!-- Who's In removed: local-only roster read as group presence. Personal LOCKED IN stays. -->
+            <button type="button" id="axum-chip" class="axum-chip hidden">FREE AXUM COFFEE</button>
             <button id="reminder-btn" class="btn-reminder btn-reminder-compact">SET REMINDER</button>
             <div id="reminder-status" class="reminder-status hidden"></div>
             <button type="button" id="text-leader-btn" class="btn-text-leader">HAVE A QUESTION? TEXT A LEADER</button>
@@ -406,8 +407,8 @@
         <div class="tb-tour-slide-frame" id="tb-tour-live">
           <div class="tb-live-slide is-on" data-slide="0">
             <div class="tb-live-logo-wrap">
-              <img class="tb-live-logo" src="assets/logo@2x.png?v=20260820-welcome1" alt="Sons of Thunder" width="1200" height="831" />
-              <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-welcome1" alt="" aria-hidden="true" width="1200" height="831" />
+              <img class="tb-live-logo" src="assets/logo@2x.png?v=20260820-axum1" alt="Sons of Thunder" width="1200" height="831" />
+              <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260820-axum1" alt="" aria-hidden="true" width="1200" height="831" />
             </div>
           </div>
           <div class="tb-live-slide" data-slide="1">
@@ -448,9 +449,9 @@
           <div class="tb-live-slide" data-slide="3">
             <div class="tb-live-label">RECENT MEMORIES</div>
             <div class="tb-live-mem-row">
-              <img class="tb-live-mem tb-live-mem-shot" src="assets/tour-memories/mem-patio.jpg?v=20260820-welcome1" alt="" />
-              <img class="tb-live-mem tb-live-mem-shot" src="assets/tour-memories/mem-fire.jpg?v=20260820-welcome1" alt="" />
-              <img class="tb-live-mem tb-live-mem-shot" src="assets/tour-memories/mem-lake.jpg?v=20260820-welcome1" alt="" />
+              <img class="tb-live-mem tb-live-mem-shot" src="assets/tour-memories/mem-patio.jpg?v=20260820-axum1" alt="" />
+              <img class="tb-live-mem tb-live-mem-shot" src="assets/tour-memories/mem-fire.jpg?v=20260820-axum1" alt="" />
+              <img class="tb-live-mem tb-live-mem-shot" src="assets/tour-memories/mem-lake.jpg?v=20260820-axum1" alt="" />
               <div class="tb-live-mem tb-live-mem-add">+</div>
             </div>
             <div class="tb-live-phone-foot">View All Memories</div>
@@ -632,7 +633,33 @@
     <div class="memory-viewer-caption" id="memory-viewer-caption"></div>
   </div>
 
-  <!-- AUTH MODAL (email / password — minimal) -->
+  <!-- AXUM FIRST-SIGN-IN COFFEE -->
+  <div id="axum-drop" class="axum-drop hidden" role="dialog" aria-modal="true">
+    <button type="button" class="axum-drop-backdrop" id="axum-drop-backdrop" aria-label="Close"></button>
+    <div class="axum-drop-sheet">
+      <img src="assets/thunder-cool-fab.png" alt="" class="axum-drop-thunder" width="72" height="72" />
+      <div class="axum-drop-kicker">FIRST SIGN-IN</div>
+      <div class="axum-drop-title">FREE COFFEE</div>
+      <div class="axum-drop-sub">AXUM · WINTER GARDEN</div>
+      <p class="axum-drop-line">One cup. One time. Then it’s gone.</p>
+      <button type="button" id="axum-show-btn" class="btn-rsvp">SHOW AT THE COUNTER</button>
+      <p class="axum-drop-addr">146 W Plant St</p>
+    </div>
+  </div>
+  <div id="axum-card" class="axum-card hidden" role="dialog" aria-modal="true">
+    <button type="button" class="axum-card-close" id="axum-card-close" aria-label="Close">×</button>
+    <div class="axum-card-kicker" id="axum-card-kicker">FIRST SIGN-IN</div>
+    <div class="axum-card-title">FREE COFFEE</div>
+    <div class="axum-card-place">AXUM COFFEE</div>
+    <div class="axum-card-city">DOWNTOWN WINTER GARDEN</div>
+    <div id="axum-qr" class="axum-qr"></div>
+    <div class="axum-code" id="axum-code">—</div>
+    <div class="axum-name" id="axum-name"></div>
+    <p class="axum-hint" id="axum-hint">Show this. Tap REDEEM in front of them.</p>
+    <button type="button" id="axum-redeem-btn" class="btn-rsvp">REDEEM AT AXUM</button>
+    <p class="axum-fine">One brother. One cup. Then it’s gone.</p>
+  </div>
+
   <div id="auth-gate" class="auth-gate hidden" role="dialog" aria-modal="true" aria-labelledby="auth-title">
     <div class="auth-card">
       <h2 id="auth-title">THUNDER BOARD</h2>
@@ -815,8 +842,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/config.js?v=20260820-welcome1"></script>
+  <script src="js/config.js?v=20260820-axum1"></script>
   <script src="js/qrcode.min.js?v=20260816LOCKED6"></script>
-  <script src="js/app.js?v=20260820-welcome1"></script>
+  <script src="js/app.js?v=20260820-axum1"></script>
 </body>
 </html>
