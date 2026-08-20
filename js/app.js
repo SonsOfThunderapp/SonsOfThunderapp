@@ -4027,7 +4027,27 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       const bday = (data.birthdays || []).map(function (b) {
         return esc(b.name) + ' · ' + esc(b.birthday);
       }).join('<br>');
-      const inLine = (data.inNames || []).map(esc).join(', ');
+      function when(iso) {
+        if (!iso) return '';
+        try {
+          return new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+        } catch (e) { return ''; }
+      }
+      const people = (data.people || []).map(function (p) {
+        const bits = [];
+        if (p.in) bits.push('LOCKED IN' + (p.inAt ? ' · ' + when(p.inAt) : ''));
+        else bits.push('Not in');
+        if (p.phone) bits.push('phone');
+        if (p.birthday) bits.push(p.birthday);
+        if (p.updatedAt && !p.in) bits.push(when(p.updatedAt));
+        return '<div class="room-person' + (p.in ? ' is-in' : '') + '">' +
+          '<div class="room-person-name">' + esc(p.name) + '</div>' +
+          '<div class="room-person-meta">' + esc(bits.join(' · ')) + '</div></div>';
+      }).join('');
+      const mems = (data.memories || []).map(function (m) {
+        return '<div class="room-mem">' + esc(m.name) + (m.at ? ' · ' + when(m.at) : '') +
+          (m.caption ? ' — ' + esc(m.caption) : '') + '</div>';
+      }).join('');
       el.innerHTML =
         '<div class="room-grid">' +
           '<div class="room-stat"><b>' + (data.lockedIn || 0) + '</b><span>LOCKED IN</span></div>' +
@@ -4035,9 +4055,10 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
           '<div class="room-stat"><b>' + (data.alerts || 0) + '</b><span>ALERTS ON</span></div>' +
           '<div class="room-stat"><b>' + (data.phones || 0) + '</b><span>PHONES</span></div>' +
         '</div>' +
-        '<p class="room-origin">' + esc(publicOrigin().replace(/^https?:\/\//, '')) + '</p>' +
-        (inLine ? '<p class="room-in">' + inLine + '</p>' : '<p class="room-in">Nobody locked in yet.</p>') +
-        (bday ? '<p class="room-bday"><span class="card-label">BIRTHDAYS</span><br>' + bday + '</p>' : '');
+        '<p class="room-origin">' + esc(publicOrigin().replace(/^https?:\/\//, '')) + (data.meeting_key ? ' · ' + esc(data.meeting_key) : '') + '</p>' +
+        (people ? '<div class="room-list">' + people + '</div>' : '<p class="room-in">Nobody on the roster yet.</p>') +
+        (bday ? '<p class="room-bday"><span class="card-label">BIRTHDAYS</span><br>' + bday + '</p>' : '') +
+        (mems ? '<p class="room-bday"><span class="card-label">MEMORIES</span></p><div class="room-mems">' + mems + '</div>' : '');
     } catch (e) {
       el.textContent = 'Couldn’t load the room.';
     }

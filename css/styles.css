@@ -7485,3 +7485,24 @@ body.tb-tour-mandatory .tb-tour-skip {
   margin: 8px 0 0;
 }
 .cal-a2hs-btn { margin-top: 8px; }
+
+#admin-room-modal .modal-content { max-height: 90vh; overflow-y: auto; }
+.room-list { margin-top: 8px; }
+.room-person {
+  padding: 10px 0;
+  border-bottom: 1px solid #1c1c1c;
+}
+.room-person.is-in .room-person-name { color: #FEF105; }
+.room-person-name {
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 14px;
+}
+.room-person-meta {
+  color: #888;
+  font-size: 12px;
+  margin-top: 2px;
+}
+.room-mems { margin: 6px 0 12px; }
+.room-mem { color: #bbb; font-size: 13px; padding: 4px 0; }

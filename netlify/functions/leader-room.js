@@ -7,37 +7,65 @@ exports.handler = async (event) => {
   const key = meetingKey(new Date());
   const headers = { apikey: serviceKey, Authorization: 'Bearer ' + serviceKey };
 
-  const [broRes, rsvpRes, subRes] = await Promise.all([
-    fetch(sbUrl + '/rest/v1/brothers?select=id,name,phone,birthday', { headers }),
-    fetch(sbUrl + '/rest/v1/rsvps?meeting_key=eq.' + encodeURIComponent(key) + '&select=brother_id', { headers }),
-    fetch(sbUrl + '/rest/v1/push_subscriptions?select=endpoint', { headers })
+  let broRes = await fetch(sbUrl + '/rest/v1/brothers?select=id,name,phone,birthday,updated_at,owner_id&order=name.asc', { headers });
+  if (!broRes.ok) {
+    broRes = await fetch(sbUrl + '/rest/v1/brothers?select=id,name,phone,updated_at,owner_id&order=name.asc', { headers });
+  }
+  const [rsvpRes, subRes, memRes] = await Promise.all([
+    fetch(sbUrl + '/rest/v1/rsvps?meeting_key=eq.' + encodeURIComponent(key) + '&select=brother_id,in_at&order=in_at.desc', { headers }),
+    fetch(sbUrl + '/rest/v1/push_subscriptions?select=endpoint,updated_at', { headers }),
+    fetch(sbUrl + '/rest/v1/memories?select=uploader_name,created_at,caption&order=created_at.desc&limit=12', { headers })
   ]);
 
   const brothers = broRes.ok ? await broRes.json() : [];
   const rsvps = rsvpRes.ok ? await rsvpRes.json() : [];
   const subs = subRes.ok ? await subRes.json() : [];
-  const inIds = {};
-  (rsvps || []).forEach(function (r) { if (r.brother_id) inIds[r.brother_id] = true; });
-  const inNames = [];
-  let phones = 0;
-  const bdays = [];
+  const memories = memRes.ok ? await memRes.json() : [];
+
+  const inMap = {};
+  (rsvps || []).forEach(function (r) {
+    if (r.brother_id) inMap[r.brother_id] = r.in_at || true;
+  });
   const today = mmdd(new Date());
+  const people = [];
+  const bdays = [];
+  let phones = 0;
   (brothers || []).forEach(function (b) {
-    if (inIds[b.id] && b.name) inNames.push(b.name);
     const d = String(b.phone || '').replace(/\D/g, '');
-    if (d.length >= 10) phones += 1;
+    const hasPhone = d.length >= 10;
+    if (hasPhone) phones += 1;
     const bd = String(b.birthday || '').trim();
     if (bd && birthdaySoon(bd, today)) bdays.push({ name: b.name || 'Brother', birthday: bd });
+    people.push({
+      id: b.id,
+      name: b.name || 'Brother',
+      in: !!inMap[b.id],
+      inAt: inMap[b.id] && inMap[b.id] !== true ? inMap[b.id] : null,
+      phone: hasPhone,
+      birthday: bd || '',
+      updatedAt: b.updated_at || null
+    });
+  });
+  people.sort(function (a, b) {
+    if (a.in !== b.in) return a.in ? -1 : 1;
+    return String(a.name).localeCompare(String(b.name));
   });
 
   return json(200, {
     meeting_key: key,
-    roster: (brothers || []).length,
+    roster: people.length,
     lockedIn: (rsvps || []).length,
-    inNames: inNames.slice(0, 40),
     alerts: (subs || []).length,
     phones: phones,
-    birthdays: bdays.slice(0, 12)
+    birthdays: bdays.slice(0, 12),
+    people: people,
+    memories: (memories || []).map(function (m) {
+      return {
+        name: m.uploader_name || 'Brother',
+        at: m.created_at || null,
+        caption: m.caption || ''
+      };
+    })
   });
 };
 
