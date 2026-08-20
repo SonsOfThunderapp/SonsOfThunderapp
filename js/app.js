@@ -2414,6 +2414,9 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   }
 
   function elasticSnapHome(el) {
+    try {
+      document.querySelectorAll('.nav-item.nav-peek').forEach(function (n) { n.classList.remove('nav-peek'); });
+    } catch (e) {}
     if (!el) return;
     el.classList.remove('elastic-dragging');
     el.classList.add('elastic-settling');
@@ -2446,6 +2449,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     const VELOCITY = opts.velocity != null ? opts.velocity : 0.42;
     const MAX = opts.maxDrag != null ? opts.maxDrag : 72;
     const EDGE = opts.edgeMax != null ? opts.edgeMax : 28;
+    const FOLLOW = opts.follow != null ? opts.follow : 0.55;
 
     let sx = 0, sy = 0, st = 0, lx = 0, lt = 0, tracking = false, axis = null;
 
@@ -2506,9 +2510,12 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       let tx = dx;
       if (dx > 0 && !canPrev()) tx = Math.min(EDGE, dx * 0.28);
       else if (dx < 0 && !canNext()) tx = Math.max(-EDGE, dx * 0.28);
-      else tx = Math.max(-MAX, Math.min(MAX, dx * 0.55));
+      else tx = Math.max(-MAX, Math.min(MAX, dx * FOLLOW));
       el.style.opacity = '';
       el.style.transform = 'translate3d(' + tx + 'px,0,0)';
+      if (typeof opts.onDrag === 'function') {
+        try { opts.onDrag(tx, dx); } catch (e2) {}
+      }
     }, { passive: true });
 
     root.addEventListener('touchend', (e) => {
@@ -2550,11 +2557,11 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
 
       if (dx < 0 && canNext() && typeof opts.onNext === 'function') {
         try { tbFeedback.selection(); } catch (e) {}
-        // brief finish bump then clear + action
         if (el && !prefersReducedMotion()) {
-          el.style.transition = 'transform 0.14s ease-out';
-          el.style.transform = 'translate3d(-28px,0,0)';
-          setTimeout(() => { elasticClear(el); opts.onNext(); }, 130);
+          el.style.transition = 'transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.14s ease';
+          el.style.transform = 'translate3d(-18%,0,0)';
+          el.style.opacity = '0.35';
+          setTimeout(() => { elasticClear(el); opts.onNext(); }, 140);
         } else {
           elasticClear(el);
           opts.onNext();
@@ -2564,9 +2571,10 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       if (dx > 0 && canPrev() && typeof opts.onPrev === 'function') {
         try { tbFeedback.selection(); } catch (e) {}
         if (el && !prefersReducedMotion()) {
-          el.style.transition = 'transform 0.14s ease-out';
-          el.style.transform = 'translate3d(28px,0,0)';
-          setTimeout(() => { elasticClear(el); opts.onPrev(); }, 130);
+          el.style.transition = 'transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.14s ease';
+          el.style.transform = 'translate3d(18%,0,0)';
+          el.style.opacity = '0.35';
+          setTimeout(() => { elasticClear(el); opts.onPrev(); }, 140);
         } else {
           elasticClear(el);
           opts.onPrev();
@@ -3738,8 +3746,11 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       view.classList.add('active');
       view.classList.remove('view-enter');
       if (fromSwipe) {
-        view.classList.add('view-swipe-in');
-        setTimeout(() => view.classList.remove('view-swipe-in'), 180);
+        const dir = (opts && opts.swipeDir) || 'next';
+        view.classList.add(dir === 'prev' ? 'view-swipe-in-prev' : 'view-swipe-in-next');
+        setTimeout(() => {
+          view.classList.remove('view-swipe-in-prev', 'view-swipe-in-next', 'view-swipe-in');
+        }, 240);
       } else if (!(opts && opts.silent) && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
         // Level 4: one-shot arrive on tab tap — not on swipe, not on silent
         void view.offsetWidth;
@@ -3749,6 +3760,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     }
     if (nav) {
       nav.classList.add('active');
+      $$('.nav-item').forEach(n => n.classList.remove('nav-peek'));
       if (typeof tbGlowHit === 'function') tbGlowHit(nav, 'yellow');
     }
     currentViewName = name;
@@ -3793,6 +3805,11 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
 
     bindElasticSwipe(root, {
       getEl: activeViewEl,
+      dist: 36,
+      velocity: 0.32,
+      maxDrag: 160,
+      edgeMax: 36,
+      follow: 0.82,
       canPrev: () => TAB_ORDER.indexOf(currentViewName) > 0,
       canNext: () => {
         const i = TAB_ORDER.indexOf(currentViewName);
@@ -3800,11 +3817,22 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       },
       onPrev: () => {
         const i = TAB_ORDER.indexOf(currentViewName);
-        if (i > 0) showView(TAB_ORDER[i - 1], { fromSwipe: true });
+        if (i > 0) showView(TAB_ORDER[i - 1], { fromSwipe: true, swipeDir: 'prev' });
       },
       onNext: () => {
         const i = TAB_ORDER.indexOf(currentViewName);
-        if (i >= 0 && i < TAB_ORDER.length - 1) showView(TAB_ORDER[i + 1], { fromSwipe: true });
+        if (i >= 0 && i < TAB_ORDER.length - 1) showView(TAB_ORDER[i + 1], { fromSwipe: true, swipeDir: 'next' });
+      },
+      onDrag: function (tx, dx) {
+        $$('.nav-item').forEach(function (n) { n.classList.remove('nav-peek'); });
+        const i = TAB_ORDER.indexOf(currentViewName);
+        if (dx < -32 && i < TAB_ORDER.length - 1) {
+          const n = document.querySelector('.nav-item[data-view="' + TAB_ORDER[i + 1] + '"]');
+          if (n) n.classList.add('nav-peek');
+        } else if (dx > 32 && i > 0) {
+          const n = document.querySelector('.nav-item[data-view="' + TAB_ORDER[i - 1] + '"]');
+          if (n) n.classList.add('nav-peek');
+        }
       },
       blocked: (t) => isOverlayBlockingSwipe() || swipeStartBlocked(t)
     });

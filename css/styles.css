@@ -124,9 +124,27 @@ html, body {
 .view.view-swipe-in {
   animation: viewSwipeIn 0.16s ease-out;
 }
+.view.view-swipe-in-next {
+  animation: viewSwipeNext 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.view.view-swipe-in-prev {
+  animation: viewSwipePrev 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
 @keyframes viewSwipeIn {
   from { opacity: 0.55; }
   to { opacity: 1; }
+}
+@keyframes viewSwipeNext {
+  from { opacity: 0.4; transform: translate3d(22%, 0, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes viewSwipePrev {
+  from { opacity: 0.4; transform: translate3d(-22%, 0, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+.nav-item.nav-peek {
+  color: #FEF105 !important;
+  text-shadow: 0 0 10px rgba(254,241,5,0.55);
 }
 
 
@@ -7211,4 +7229,9 @@ body.tb-ask-open .header .logo {
 }
 @media (prefers-reduced-motion: reduce) {
   .logo-bolt-life { animation: none !important; filter: drop-shadow(0 0 8px rgba(254,241,5,0.5)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .view.view-swipe-in-next,
+  .view.view-swipe-in-prev { animation: none !important; }
 }
