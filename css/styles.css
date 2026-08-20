@@ -6275,9 +6275,9 @@ body.tb-ask-open .header .logo {
   padding: 0;
   justify-content: center;
 }
-.tb-live-face {
-  width: 52px;
-  height: 52px;
+ .tb-live-face {
+  width: 44px;
+  height: 44px;
   object-fit: contain;
   display: block;
   filter: drop-shadow(0 0 6px rgba(254,241,5,0.35));
