@@ -4308,8 +4308,105 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     }
   }
 
-  let sharedRsvps = [];
-  let prevRsvpIds = null;
+  let raffleDraws = [];
+
+  function isGatheringDay() {
+    try { return daysUntil(getNextMeetingMonday()) === 0; } catch (e) { return false; }
+  }
+
+  function iShowedUp() {
+    const id = myProfileId || (currentUser() && currentUser().id);
+    if (!id) return false;
+    return (sharedRsvps || []).some(function (r) { return r && r.brother_id === id && r.showed_up; });
+  }
+
+  function renderHere() {
+    const btn = document.getElementById('here-btn');
+    const st = document.getElementById('here-status');
+    const board = document.getElementById('raffle-board');
+    const night = isGatheringDay();
+    if (btn) {
+      if (night && !iShowedUp()) btn.classList.remove('hidden');
+      else btn.classList.add('hidden');
+    }
+    if (st) {
+      if (night && iShowedUp()) st.classList.remove('hidden');
+      else st.classList.add('hidden');
+    }
+    if (board) {
+      const lines = (raffleDraws || []).map(function (d) {
+        const prize = d.prize === 'hat' ? 'HAT' : 'BEER';
+        return prize + ' · ' + String(d.winner_name || 'Brother').toUpperCase();
+      });
+      if (lines.length) {
+        board.textContent = lines.join('   ·   ');
+        board.classList.remove('hidden');
+      } else board.classList.add('hidden');
+    }
+  }
+
+  async function pullRaffle() {
+    if (!supabaseEnabled()) return;
+    try {
+      const { data, error } = await getSb().from('raffle_draws').select('prize,winner_name,meeting_key').eq('meeting_key', meetingKey());
+      if (error) return;
+      raffleDraws = Array.isArray(data) ? data : [];
+      renderHere();
+    } catch (e) {}
+  }
+
+  async function checkInHere() {
+    if (!isSignedIn()) {
+      try { openImInSignIn(); } catch (e) { startMemberSignIn(); }
+      return;
+    }
+    const id = (typeof ensureBrotherId === 'function' ? ensureBrotherId() : myProfileId) || (currentUser() && currentUser().id);
+    if (!id) return;
+    try { await pushRsvp(true); } catch (e) {}
+    try {
+      const sb = getSb();
+      const { error } = await sb.from('rsvps').upsert({
+        brother_id: id,
+        meeting_key: meetingKey(),
+        in_at: new Date().toISOString(),
+        showed_up: true,
+        showed_at: new Date().toISOString()
+      }, { onConflict: 'brother_id,meeting_key' });
+      if (error) throw error;
+    } catch (e) {
+      alert('Could not check you in. Sign in and try again.');
+      return;
+    }
+    try { await pullRsvps(); } catch (e) {}
+    renderHere();
+    try { showInstallToast("YOU'RE IN THE RAFFLE. PIZZA'S ON.", { success: true }); } catch (e) {}
+    try { tbFeedback.confirm(); } catch (e) {}
+  }
+
+  async function drawRaffle(prize) {
+    const pool = (window.__tbRoomPeople || []).filter(function (p) { return p && p.showed; });
+    if (!pool.length) {
+      alert('Nobody checked in yet.');
+      return;
+    }
+    const pick = pool[Math.floor(Math.random() * pool.length)];
+    try {
+      const sb = getSb();
+      const { error } = await sb.from('raffle_draws').upsert({
+        meeting_key: meetingKey(),
+        prize: prize,
+        winner_id: pick.id,
+        winner_name: pick.name || 'Brother',
+        drawn_at: new Date().toISOString()
+      }, { onConflict: 'meeting_key,prize' });
+      if (error) throw error;
+    } catch (e) {
+      alert('Could not lock the draw. Run the raffle SQL.');
+      return;
+    }
+    try { await pullRaffle(); } catch (e) {}
+    alert((prize === 'hat' ? 'HAT' : 'BEER') + ' · ' + (pick.name || 'Brother').toUpperCase());
+  }
 
   function firstNameForId(id) {
     const b = (brothers || []).find(function (x) { return x && x.id === id; });
@@ -4385,6 +4482,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       }
       const nextIds = sharedRsvps.map(function (r) { return r && r.brother_id; }).filter(Boolean);
       try { renderInCount(); } catch (e) {}
+      try { renderHere(); } catch (e) {}
       if (prevRsvpIds) {
         nextIds.forEach(function (id) {
           if (prevRsvpIds.indexOf(id) !== -1) return;
@@ -4457,6 +4555,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
           return new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
         } catch (e) { return ''; }
       }
+      window.__tbRoomPeople = data.people || [];
       const people = (data.people || []).map(function (p) {
         const bits = [];
         if (p.in) bits.push('LOCKED IN' + (p.inAt ? ' · ' + when(p.inAt) : ''));
@@ -4691,7 +4790,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     try { updateOsBadge(); } catch (e) {}
     try { parkFabByImin(); } catch (e) {}
     try { renderInCount(); } catch (e) {}
-    const btn = $('#rsvp-btn');
+    try { renderHere(); } catch (e) {}
     const status = $('#rsvp-status');
     const prompt = $('#rsvp-prompt');
     if (!btn) return;
@@ -9142,6 +9241,23 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     showView('home');
     /* loadIronFeed retired — RSS cut 2026-08-18 */
     bindActivityTags();
+    (function bindPatio() {
+      const here = document.getElementById('here-btn');
+      if (here && here.dataset.bound !== '1') {
+        here.dataset.bound = '1';
+        here.addEventListener('click', function () { checkInHere(); });
+      }
+      const beer = document.getElementById('draw-beer-btn');
+      const hat = document.getElementById('draw-hat-btn');
+      if (beer && beer.dataset.bound !== '1') {
+        beer.dataset.bound = '1';
+        beer.addEventListener('click', function () { drawRaffle('beer'); });
+      }
+      if (hat && hat.dataset.bound !== '1') {
+        hat.dataset.bound = '1';
+        hat.addEventListener('click', function () { drawRaffle('hat'); });
+      }
+    })();
     (function bindAxumCoffee() {
       const chip = document.getElementById('axum-chip');
       const showBtn = document.getElementById('axum-show-btn');
@@ -9178,7 +9294,11 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     })();
     try {
       await initAuth();
-      try { await pullLastFire(); if (typeof renderLastFire === 'function') renderLastFire(); } catch (e) {}
+      try { await pullRaffle(); } catch (e) {}
+      try { renderHere(); } catch (e) {}
+      try {
+        if (/[?&]checkin=1/.test(location.search || '')) checkInHere();
+      } catch (e) {}
       try { maybeShowAxumCoffee(); } catch (e) {}
       // Shared announcements + gathering board + brothers (read without sign-in)
       try {
