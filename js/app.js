@@ -410,7 +410,6 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   function offerCalendarNow() {
     lockInAppReminder();
     paintInAppCalendar();
-    openCalConfirmSheet();
     try { renderRsvp(); } catch (e) {}
     return true;
   }
@@ -1139,6 +1138,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       if (session) {
         closeAuthGate();
         try { flushPendingRsvp(); } catch (e) {}
+        try { flushPendingShot(); } catch (e) {}
+        try { offerCalendarNow(); } catch (e) {}
         if (event === 'SIGNED_IN') {
           try { fireSignedInWelcome(); } catch (e) {}
           try { issueAxumCoffee(); } catch (e) {}
@@ -3606,7 +3607,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
 
   async function shareContact(brother) {
     if (!brother || !digitsOnly(brother.phone)) {
-      alert('No phone on this profile yet.\n\nEdit My Profile and add a number to share.');
+      try { showInstallToast('Add a number, then share.'); } catch (e) {}
+      try { openProfileEditor(); } catch (e) {}
       return false;
     }
     const file = vcardFile(brother);
@@ -3754,7 +3756,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
 
   function showContactQR(brother) {
     if (!brother || !digitsOnly(brother.phone)) {
-      alert('No phone on this profile yet.\n\nEdit My Profile and add a number first.');
+      try { showInstallToast('Add a number, then share.'); } catch (e) {}
+      try { openProfileEditor(); } catch (e) {}
       return;
     }
     const vcard = buildVCard(brother, { forQr: true });
@@ -4447,6 +4450,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
 
   function openDropShot() {
     if (!isSignedIn()) {
+      try { save('pendingShot', { at: Date.now() }); } catch (e) {}
       try { startMemberSignIn(); } catch (e) {}
       return;
     }
@@ -4454,6 +4458,22 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     if (!cam) return;
     try { cam.value = ''; } catch (e) {}
     cam.click();
+  }
+
+  function flushPendingShot() {
+    let p = null;
+    try { p = load('pendingShot'); } catch (e) {}
+    if (!p) return;
+    try { save('pendingShot', null); } catch (e) {}
+    if (!isSignedIn()) return;
+    try { showView('events'); } catch (e) {}
+    try { showInstallToast('Tap DROP A SHOT. Camera’s ready.'); } catch (e) {}
+    const lab = document.getElementById('memories-drop-btn');
+    if (lab) {
+      try { lab.classList.remove('hidden'); } catch (e) {}
+      try { if (typeof tbGlowHit === 'function') tbGlowHit(lab, 'red'); } catch (e) {}
+    }
+    try { syncDropShotAuth(); } catch (e) {}
   }
 
   async function ingestMemoryFile(file) {
@@ -9552,7 +9572,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       const memSign = document.getElementById('memories-signin-shot');
       if (memSign && memSign.dataset.bound !== '1') {
         memSign.dataset.bound = '1';
-        memSign.addEventListener('click', function () { startMemberSignIn(); });
+        memSign.addEventListener('click', function () { openDropShot(); });
       }
       const memLib = document.getElementById('memories-library-btn');
       if (memLib && memLib.dataset.bound !== '1') {
