@@ -8091,6 +8091,30 @@ body.tb-room-cut #drop-shot-btn {
   display: none !important;
 }
 .tb-leader-ghost { display: none !important; }
+
+/* Modal labels ONLY — pulse + glow. Titles stay white. */
+#info-detail-label,
+.info-detail-label,
+#cal-confirm-label,
+.cal-confirm-label {
+  color: #FEF105 !important;
+  -webkit-text-fill-color: #FEF105 !important;
+  animation: brotherNamePulse var(--tb-breathe) !important;
+  text-shadow:
+    0 0 8px rgba(254, 241, 5, 0.85),
+    0 0 18px rgba(254, 241, 5, 0.45),
+    0 0 28px rgba(254, 241, 5, 0.22) !important;
+  filter: none !important;
+  opacity: 1 !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  #info-detail-label,
+  .info-detail-label,
+  #cal-confirm-label {
+    animation: none !important;
+    text-shadow: none !important;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .info-detail-label,
   .announcement-card-label {
