@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260820-jump2',
+  APP_BUILD: '20260820-seat1',
   /* SONS OF THUNDER — ROOM CUT 1.0 (locked 2026-08-20)
      Member-facing: Home poster, splash→Home, Thunder quiet, real brothers/memories,
      leadership infrastructure. Freeze (hide, do not delete): raffle, Axum, FOMO count, I'm Here. */
@@ -88,7 +88,8 @@ window.TB_CONFIG = {
     saveRewardOnProfileAndMemory: true,
     oneBreathingUnit: true, // all ambient pulses --tb-breathe 4s delay 0
     livingHome: true, // gathering-day phases + personal name (never guess)
-    thunderActions: true // AI surfaces chips; human executes
+    theCodeRedGlow: true, // THE CODE = brand red #E30600 fill + red breathe glow — never yellow chip
+    splashLogoPhoneCenter: true, // splash mark dead-center of the phone viewport
   },
 
 

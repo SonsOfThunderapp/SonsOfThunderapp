@@ -56,7 +56,31 @@
   }
 
   // ---------- DATA ----------
-  const DEFAULT_BROTHERS = [];
+  /* Locked founder seat — Obie's profile. Never wipe this seed on an empty roster.
+     If Supabase/local already has an Obie row, we do not duplicate it. */
+  const FOUNDER_OBIE = {
+    id: 'founder-obie',
+    name: 'OBIE',
+    bio: 'Jesus follower, Radio ninja & Family circus ringmaster. Life isn’t occasion, and we MUST rise to it.',
+    photo: '',
+    phone: '',
+    birthday: '',
+    skills: '',
+    available: true,
+    updatedAt: 0
+  };
+  const DEFAULT_BROTHERS = [FOUNDER_OBIE];
+  function hasObieSeat(list) {
+    return (list || []).some(function (b) {
+      return b && /^obie$/i.test(String(b.name || '').trim());
+    });
+  }
+  function ensureFounderSeat() {
+    if (!Array.isArray(brothers)) brothers = [];
+    if (hasObieSeat(brothers)) return;
+    brothers = [Object.assign({}, FOUNDER_OBIE)].concat(brothers);
+    try { save('brothers', brothers); } catch (e) {}
+  }
 function isTodayBirthday(bday) {
   if (!bday || typeof bday !== 'string') return false;
   const cleaned = bday.trim().replace(/[^0-9-]/g, '');
@@ -239,7 +263,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     });
   }
 
-  let brothers = load('brothers') || DEFAULT_BROTHERS;
+  let brothers = load('brothers') || DEFAULT_BROTHERS.slice();
+  try { if (!hasObieSeat(brothers)) ensureFounderSeat(); } catch (e) {}
   // Shared memories live in Supabase when configured — not localStorage primary
   let media = [];
   let rsvp = load('rsvp') || false;
@@ -1112,15 +1137,26 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     else document.body.style.overflow = '';
   }
 
+  function syncBrothersSeatBtn() {
+    const btn = document.getElementById('edit-profile-btn');
+    if (!btn) return;
+    const me = (brothers || []).find(function (b) { return b && b.id === myProfileId && (b.name || '').trim(); });
+    btn.textContent = me ? 'EDIT PROFILE' : 'YOUR SEAT';
+  }
+
   function updateAuthSessionBar() {
     try { syncDropShotAuth(); } catch (e) {}
+    try { syncBrothersSeatBtn(); } catch (e) {}
     const bar = $('#auth-session-bar');
     const who = $('#auth-who');
     const entry = $('#auth-entry-btn');
     const homeCta = document.getElementById('home-member-cta');
+    if (entry) {
+      entry.classList.add('hidden');
+      entry.setAttribute('hidden', 'hidden');
+    }
     if (!supabaseEnabled()) {
       if (bar) bar.classList.add('hidden');
-      if (entry) entry.classList.add('hidden');
       if (homeCta) homeCta.classList.add('hidden');
       return;
     }
@@ -1128,11 +1164,9 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       const email = (currentUser().email || 'Brother').trim();
       if (who) who.textContent = email;
       if (bar) bar.classList.remove('hidden');
-      if (entry) entry.classList.add('hidden');
       if (homeCta) homeCta.classList.add('hidden');
     } else {
       if (bar) bar.classList.add('hidden');
-      if (entry) entry.classList.remove('hidden');
       if (homeCta) homeCta.classList.remove('hidden');
     }
   }
@@ -1625,6 +1659,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       const remoteIds = new Set(remote.map(b => b.id));
       const localOnly = (brothers || []).filter(b => b && b.id && !remoteIds.has(b.id));
       brothers = remote.concat(localOnly);
+      try { ensureFounderSeat(); } catch (e) {}
       save('brothers', brothers);
       return true;
     } catch (e) {
@@ -5315,48 +5350,33 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   }
 
   function setupTabSwipe() {
-    const root = $('#views') || $('#app') || document.body;
-    if (!root || root.dataset.tabSwipeBound === '1') return;
-    root.dataset.tabSwipeBound = '1';
-
-    function activeViewEl() {
-      return document.querySelector('.view.active') || $('#views') || root;
-    }
-
-    bindElasticSwipe(root, {
-      getEl: activeViewEl,
-      dist: 28,
-      velocity: 0.18,
-      maxDrag: 220,
-      edgeMax: 48,
-      follow: 0.94,
-      ratio: 0.85,
-      canPrev: () => TAB_ORDER.indexOf(currentViewName) > 0,
-      canNext: () => {
-        const i = TAB_ORDER.indexOf(currentViewName);
-        return i >= 0 && i < TAB_ORDER.length - 1;
-      },
-      onPrev: () => {
-        const i = TAB_ORDER.indexOf(currentViewName);
-        if (i > 0) showView(TAB_ORDER[i - 1], { fromSwipe: true, swipeDir: 'prev' });
-      },
-      onNext: () => {
-        const i = TAB_ORDER.indexOf(currentViewName);
-        if (i >= 0 && i < TAB_ORDER.length - 1) showView(TAB_ORDER[i + 1], { fromSwipe: true, swipeDir: 'next' });
-      },
-      onDrag: function (tx, dx) {
-        $$('.nav-item').forEach(function (n) { n.classList.remove('nav-peek'); });
-        const i = TAB_ORDER.indexOf(currentViewName);
-        if (dx < -14 && i < TAB_ORDER.length - 1) {
-          const n = document.querySelector('.nav-item[data-view="' + TAB_ORDER[i + 1] + '"]');
-          if (n) n.classList.add('nav-peek');
-        } else if (dx > 14 && i > 0) {
-          const n = document.querySelector('.nav-item[data-view="' + TAB_ORDER[i - 1] + '"]');
-          if (n) n.classList.add('nav-peek');
-        }
-      },
-      blocked: (t) => isOverlayBlockingSwipe() || swipeStartBlocked(t)
-    });
+    const root = $('#views') || document.body;
+    if (!root || root.dataset.tabSwipeFlick === '1') return;
+    root.dataset.tabSwipeFlick = '1';
+    let sx = 0, sy = 0, tracking = false;
+    root.addEventListener('touchstart', function (e) {
+      if (!e.touches || e.touches.length !== 1) { tracking = false; return; }
+      if (swipeStartBlocked(e.target)) { tracking = false; return; }
+      tracking = true;
+      sx = e.touches[0].clientX;
+      sy = e.touches[0].clientY;
+    }, { passive: true });
+    root.addEventListener('touchend', function (e) {
+      if (!tracking) return;
+      tracking = false;
+      const t = e.changedTouches && e.changedTouches[0];
+      if (!t) return;
+      const dx = t.clientX - sx;
+      const dy = t.clientY - sy;
+      if (Math.abs(dx) < 72) return;
+      if (Math.abs(dx) < Math.abs(dy) * 1.6) return;
+      const i = TAB_ORDER.indexOf(currentViewName);
+      if (dx < 0 && i >= 0 && i < TAB_ORDER.length - 1) {
+        showView(TAB_ORDER[i + 1], { fromSwipe: true, swipeDir: 'next' });
+      } else if (dx > 0 && i > 0) {
+        showView(TAB_ORDER[i - 1], { fromSwipe: true, swipeDir: 'prev' });
+      }
+    }, { passive: true });
   }
 
   // ---------- MODALS ----------
@@ -5833,7 +5853,6 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         showView(btn.dataset.view);
       };
       btn.addEventListener('click', go);
-      btn.addEventListener('touchend', go, { passive: false });
     });
     setupTabSwipe();
 
@@ -6110,6 +6129,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
           save('brothersSeenAt', brothersSeenAt);
         }
         updateMyQrButtonVisibility();
+        try { syncBrothersSeatBtn(); } catch (e) {}
         renderBrothers();
         closeModal('profile-modal');
         pendingPhotoData = null;
@@ -6129,15 +6149,8 @@ $('#edit-profile-btn').addEventListener('click', () => {
           }, 300);
         } else if (entry._sharedPush === 'sign_in_required') {
           setTimeout(() => {
-            try {
-              const t = document.getElementById('install-toast');
-              if (t) {
-                t.textContent = 'Sign in to share your profile with the roster.';
-                t.classList.remove('hidden');
-                setTimeout(() => t.classList.add('hidden'), 3200);
-              }
-            } catch (e) {}
-          }, 300);
+            try { startMemberSignIn(); } catch (e) {}
+          }, 400);
         } else if (entry._sharedPush && entry._sharedPush !== 'ok') {
           setTimeout(() => {
             try {
@@ -7120,16 +7133,16 @@ $('#edit-profile-btn').addEventListener('click', () => {
       const img = fabImg();
       if (!img) return;
       if (fabBusy()) return;
-      const k = 0.042;
+      const k = 0.049;
       __fabPose.x = fabLerp(__fabPose.x, __fabTarget.x, k);
       __fabPose.y = fabLerp(__fabPose.y, __fabTarget.y, k);
       __fabPose.r = fabLerp(__fabPose.r, __fabTarget.r, k);
       __fabPose.s = fabLerp(__fabPose.s, __fabTarget.s, k);
       const t = (Date.now() - __fabT0) / 1000;
-      const bx = Math.sin(t * 0.58) * 2.4 + Math.sin(t * 0.27) * 1.1;
-      const by = Math.sin(t * 0.71 + 0.9) * -5.2 + Math.sin(t * 0.37) * -1.3;
-      const br = Math.sin(t * 0.46 + 0.3) * 1.5;
-      const bs = 1 + Math.sin(t * 0.66) * 0.016;
+      const bx = Math.sin(t * 0.65) * 3.1 + Math.sin(t * 0.29) * 1.45;
+      const by = Math.sin(t * 0.78 + 0.9) * -6.7 + Math.sin(t * 0.39) * -1.75;
+      const br = Math.sin(t * 0.51 + 0.3) * 2.05;
+      const bs = 1 + Math.sin(t * 0.72) * 0.022;
       img.style.animation = 'none';
       img.style.transformOrigin = '50% 82%';
       img.style.transform = 'translate(' + (__fabPose.x + bx).toFixed(2) + 'px,' +
@@ -7151,45 +7164,45 @@ $('#edit-profile-btn').addEventListener('click', () => {
     }
     function fabGlance() {
       if (fabBusy()) return;
-      fabGo(0, -2, (Math.random() < 0.5 ? -1 : 1) * (6 + Math.random() * 2.5), 1);
-      fabAfter(2800, fabRestSmooth);
+      fabGo(0, -2.5, (Math.random() < 0.5 ? -1 : 1) * (7.5 + Math.random() * 2.6), 1);
+      fabAfter(2700, fabRestSmooth);
     }
     function fabLookAround() {
       if (fabBusy()) return;
-      fabGo(-1, -2, -6.5, 1);
-      fabAfter(2400, function () {
-        fabGo(1, -2, 6.5, 1);
-        fabAfter(2400, fabRestSmooth);
+      fabGo(-1.5, -2.5, -7.8, 1);
+      fabAfter(2300, function () {
+        fabGo(1.5, -2.5, 7.8, 1);
+        fabAfter(2300, fabRestSmooth);
       });
     }
     function fabShift() {
       if (fabBusy()) return;
-      fabGo((Math.random() < 0.5 ? -1 : 1) * 5, -1, (Math.random() < 0.5 ? -1 : 1) * 4, 1);
-      fabAfter(3200, fabRestSmooth);
+      fabGo((Math.random() < 0.5 ? -1 : 1) * 6.5, -1.5, (Math.random() < 0.5 ? -1 : 1) * 5, 1);
+      fabAfter(3100, fabRestSmooth);
     }
     function fabMicroNod() {
       if (fabBusy()) return;
-      fabGo(0, 3, -7, 1.01);
-      fabAfter(1600, function () {
-        fabGo(0, -1, 0, 1);
-        fabAfter(1400, fabRestSmooth);
+      fabGo(0, 4, -8.5, 1.02);
+      fabAfter(1550, function () {
+        fabGo(0, -1.5, 1, 1);
+        fabAfter(1300, fabRestSmooth);
       });
     }
     function fabDrift() {
       if (fabBusy()) return;
-      fabGo((Math.random() < 0.5 ? -1 : 1) * 6, -4, 2, 1);
-      fabAfter(3600, fabRestSmooth);
+      fabGo((Math.random() < 0.5 ? -1 : 1) * 7, -5, 2.5, 1);
+      fabAfter(3400, fabRestSmooth);
     }
     function fabBob() {
       if (fabBusy()) return;
-      fabGo(0, -7, 0, 1.03);
-      fabAfter(3000, fabRestSmooth);
+      fabGo(0, -9, 0, 1.04);
+      fabAfter(2800, fabRestSmooth);
     }
     function fabLean() {
       if (fabBusy()) return;
       const side = Math.random() < 0.5 ? -1 : 1;
-      fabGo(side * 5, -2, side * 6, 1);
-      fabAfter(3400, fabRestSmooth);
+      fabGo(side * 6, -2.5, side * 7.5, 1);
+      fabAfter(3200, fabRestSmooth);
     }
     function fabBubbleBeat() {
       if (fabMuted()) return;
@@ -7234,9 +7247,9 @@ $('#edit-profile-btn').addEventListener('click', () => {
           return;
         }
         fabBeat();
-        __fabBeatTimer = setTimeout(beatTick, 6500 + Math.floor(Math.random() * 5000));
+        __fabBeatTimer = setTimeout(beatTick, 5300 + Math.floor(Math.random() * 4400));
       }
-      __fabBeatTimer = setTimeout(beatTick, 2500);
+      __fabBeatTimer = setTimeout(beatTick, 1900);
     }
     try { startThunderBackstageIdle(); } catch (e) {}
     window.addEventListener('resize', function () { try { parkFabByImin(); } catch (e) {} });
