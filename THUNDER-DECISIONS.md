@@ -376,3 +376,8 @@ Permanent set: `assets/tour-faces/` + index `assets/tour-faces/BROTHERHOOD.json`
 24 personalities of one Thunder. Use anywhere a *group of brothers* needs life (tour grid, empty states, celebrations) — never as a second mascot.
 Tuxedo remains Ask Thunder page only.
 Do not restyle glasses white. Do not humanize the skull.
+
+## 2026-08-19 — Label pulse is CARDINAL
+Anywhere a **label** exists (ANNOUNCEMENT, NEXT GATHERING, MISSION, LAST FIRE, THE NEXT MISSION, tour kickers), it glows and pulses.
+**Titles** and **body/description** never pulse. They stand still.
+Not labels: form field-label, file-label, QR wordmark, close-chip, brother names, dates.
