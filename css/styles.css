@@ -6388,20 +6388,17 @@ body.tb-ask-open .header .logo {
   --fab-s: 1;
   --fab-x: 0px;
   --fab-y: 0px;
-  animation: tbFabBreath 2.4s ease-in-out infinite !important;
+  animation: tbFabBreath 7.2s ease-in-out infinite !important;
 }
 @keyframes tbFabBreath {
   0%, 100% {
     transform: translate(var(--fab-x, 0px), var(--fab-y, 0px)) rotate(var(--fab-r, 0deg)) scale(var(--fab-s, 1));
   }
-  25% {
-    transform: translate(calc(var(--fab-x, 0px) + 12px), calc(var(--fab-y, 0px) - 22px)) rotate(calc(var(--fab-r, 0deg) + 8deg)) scale(calc(var(--fab-s, 1) * 1.08));
+  35% {
+    transform: translate(calc(var(--fab-x, 0px) + 4px), calc(var(--fab-y, 0px) - 7px)) rotate(calc(var(--fab-r, 0deg) + 2deg)) scale(calc(var(--fab-s, 1) * 1.02));
   }
-  50% {
-    transform: translate(calc(var(--fab-x, 0px) - 14px), calc(var(--fab-y, 0px) - 10px)) rotate(calc(var(--fab-r, 0deg) - 9deg)) scale(calc(var(--fab-s, 1) * 1.04));
-  }
-  75% {
-    transform: translate(calc(var(--fab-x, 0px) + 9px), calc(var(--fab-y, 0px) - 18px)) rotate(calc(var(--fab-r, 0deg) + 6deg)) scale(calc(var(--fab-s, 1) * 1.07));
+  70% {
+    transform: translate(calc(var(--fab-x, 0px) - 3px), calc(var(--fab-y, 0px) - 4px)) rotate(calc(var(--fab-r, 0deg) - 1.5deg)) scale(calc(var(--fab-s, 1) * 1.01));
   }
 }
 .thunder-fab-img.tb-fab-look {
@@ -7621,8 +7618,14 @@ body.tb-tour-mandatory .tb-tour-skip {
 }
 
 #thunder-fab .thunder-fab-img.tb-fab-alive {
-  animation: tbFabBreath 2.4s ease-in-out infinite !important;
+  animation: tbFabBreath 7.2s ease-in-out infinite !important;
+  transition: --fab-r 1.6s ease-in-out, --fab-x 1.6s ease-in-out, --fab-y 1.6s ease-in-out, --fab-s 1.6s ease-in-out;
 }
 #thunder-fab .thunder-fab-img.tb-fab-twirl {
   animation: tbFabTwirl 1.4s ease-in-out !important;
 }
+
+@property --fab-r { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@property --fab-x { syntax: "<length>"; inherits: false; initial-value: 0px; }
+@property --fab-y { syntax: "<length>"; inherits: false; initial-value: 0px; }
+@property --fab-s { syntax: "<number>"; inherits: false; initial-value: 1; }

@@ -5868,68 +5868,57 @@ $('#edit-profile-btn').addEventListener('click', () => {
     function fabGlance() {
       const img = fabImg();
       if (!img || fabBusy()) return;
-      const target = document.getElementById('rsvp-btn') || document.querySelector('.next-meeting');
-      let rot = (Math.random() < 0.5 ? -1 : 1) * (10 + Math.random() * 6);
-      if (target && document.getElementById('thunder-fab')) {
-        const a = document.getElementById('thunder-fab').getBoundingClientRect();
-        const b = target.getBoundingClientRect();
-        const dx = (b.left + b.width / 2) - (a.left + a.width / 2);
-        rot = dx < 0 ? -(12 + Math.random() * 4) : (12 + Math.random() * 4);
-      }
+      const rot = (Math.random() < 0.5 ? -1 : 1) * (6 + Math.random() * 3);
       img.style.setProperty('--fab-r', rot.toFixed(2) + 'deg');
-      img.classList.add('tb-fab-look');
-      setTimeout(function () {
-        img.style.setProperty('--fab-r', '0deg');
-        img.classList.remove('tb-fab-look');
-      }, 2400);
+      setTimeout(function () { img.style.setProperty('--fab-r', '0deg'); }, 3200);
     }
     function fabLookAround() {
       const img = fabImg();
       if (!img || fabBusy()) return;
-      img.style.setProperty('--fab-r', '-14deg');
-      setTimeout(function () { img.style.setProperty('--fab-r', '14deg'); }, 1400);
-      setTimeout(function () { img.style.setProperty('--fab-r', '0deg'); }, 3000);
+      img.style.setProperty('--fab-r', '-7deg');
+      setTimeout(function () { img.style.setProperty('--fab-r', '7deg'); }, 2200);
+      setTimeout(function () { img.style.setProperty('--fab-r', '0deg'); }, 4600);
     }
     function fabShift() {
       const img = fabImg();
       if (!img || fabBusy()) return;
-      const rot = (Math.random() < 0.5 ? -1 : 1) * (8 + Math.random() * 5);
+      const rot = (Math.random() < 0.5 ? -1 : 1) * (4 + Math.random() * 3);
       img.style.setProperty('--fab-r', rot.toFixed(2) + 'deg');
-      setTimeout(function () { img.style.setProperty('--fab-r', '0deg'); }, 2400);
+      setTimeout(function () { img.style.setProperty('--fab-r', '0deg'); }, 3600);
     }
     function fabMicroNod() {
       const img = fabImg();
       if (!img || fabBusy()) return;
-      img.style.setProperty('--fab-r', '-16deg');
-      setTimeout(function () { img.style.setProperty('--fab-r', '0deg'); }, 1800);
+      img.style.setProperty('--fab-r', '-8deg');
+      setTimeout(function () { img.style.setProperty('--fab-r', '0deg'); }, 2800);
     }
     function fabDrift() {
       const img = fabImg();
       if (!img || fabBusy()) return;
-      const x = (Math.random() < 0.5 ? -1 : 1) * (10 + Math.random() * 8);
+      const x = (Math.random() < 0.5 ? -1 : 1) * (5 + Math.random() * 4);
       img.style.setProperty('--fab-x', x.toFixed(1) + 'px');
-      setTimeout(function () { img.style.setProperty('--fab-x', '0px'); }, 2800);
+      setTimeout(function () { img.style.setProperty('--fab-x', '0px'); }, 4000);
     }
     function fabBob() {
       const img = fabImg();
       if (!img || fabBusy()) return;
-      img.style.setProperty('--fab-y', '-14px');
-      img.style.setProperty('--fab-s', '1.07');
+      img.style.setProperty('--fab-y', '-8px');
+      img.style.setProperty('--fab-s', '1.03');
       setTimeout(function () {
         img.style.setProperty('--fab-y', '0px');
         img.style.setProperty('--fab-s', '1');
-      }, 2600);
+      }, 3400);
     }
     function fabLean() {
       const img = fabImg();
       if (!img || fabBusy()) return;
-      const rot = (Math.random() < 0.5 ? -1 : 1) * (9 + Math.random() * 5);
+      const rot = (Math.random() < 0.5 ? -1 : 1) * (5 + Math.random() * 3);
       img.style.setProperty('--fab-r', rot.toFixed(2) + 'deg');
-      img.style.setProperty('--fab-x', (rot > 0 ? 8 : -8) + 'px');
+      img.style.setProperty('--fab-x', (rot > 0 ? 4 : -4) + 'px');
       setTimeout(function () {
         img.style.setProperty('--fab-r', '0deg');
         img.style.setProperty('--fab-x', '0px');
-      }, 2600);
+      }, 3800);
     }
     function fabBubbleBeat() {
       const line = FAB_BUBBLES[__fabBubbleIdx % FAB_BUBBLES.length];
@@ -5941,7 +5930,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
       const pool = ['glance', 'nod', 'shift', 'drift', 'bob', 'lean', 'look'].filter(function (x) {
         return x !== __fabLastMicro;
       });
-      if (Math.random() < 0.12) pool.push('bubble');
+      if (Math.random() < 0.1) pool.push('bubble');
       const pick = pool[Math.floor(Math.random() * pool.length)];
       __fabLastMicro = pick;
       if (pick === 'glance') fabGlance();
@@ -5952,18 +5941,6 @@ $('#edit-profile-btn').addEventListener('click', () => {
       else if (pick === 'lean') fabLean();
       else if (pick === 'look') fabLookAround();
       else fabBubbleBeat();
-      /* Second beat — he doesn’t park. */
-      if (Math.random() < 0.55) {
-        setTimeout(function () {
-          if (fabBusy()) return;
-          const follow = ['nod', 'glance', 'bob', 'lean'].filter(function (x) { return x !== pick; });
-          const p2 = follow[Math.floor(Math.random() * follow.length)];
-          if (p2 === 'nod') fabMicroNod();
-          else if (p2 === 'glance') fabGlance();
-          else if (p2 === 'bob') fabBob();
-          else fabLean();
-        }, 1600);
-      }
     }
     function startThunderBackstageIdle() {
       stopThunderBackstageIdle();
@@ -5976,13 +5953,13 @@ $('#edit-profile-btn').addEventListener('click', () => {
       if (!__fabOpenedAt) __fabOpenedAt = Date.now();
       function beatTick() {
         if (fabBusy()) {
-          __fabBeatTimer = setTimeout(beatTick, 2800);
+          __fabBeatTimer = setTimeout(beatTick, 8000);
           return;
         }
         fabBeat();
-        __fabBeatTimer = setTimeout(beatTick, 2800);
+        __fabBeatTimer = setTimeout(beatTick, 8000);
       }
-      __fabBeatTimer = setTimeout(beatTick, 600);
+      __fabBeatTimer = setTimeout(beatTick, 2500);
     }
     try { startThunderBackstageIdle(); } catch (e) {}
     window.addEventListener('resize', function () { try { parkFabByImin(); } catch (e) {} });
