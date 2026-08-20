@@ -6937,3 +6937,20 @@ h1, h2, h3,
 @media (prefers-reduced-motion: reduce) {
   .thunder-fab-img.tb-fab-enter { animation: none !important; }
 }
+
+/* Brothers grid — full locked library (hats, facial hair, gear) */
+.tb-live-bros-full {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 0 !important;
+}
+.tb-tour-stage[data-board="2"] .tb-live-bros-full .tb-live-face {
+  width: 54px !important;
+  height: 54px !important;
+  filter: none !important;
+}
+.tb-tour-stage[data-board="2"] .tb-phone {
+  width: min(96%, 340px) !important;
+  padding: 6px 4px 4px !important;
+}
+.tb-tour-stage[data-board="2"] .tb-live-phone-foot { display: none !important; }
