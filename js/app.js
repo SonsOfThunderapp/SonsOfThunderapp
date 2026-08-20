@@ -9005,7 +9005,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     bodyEl.classList.add('tb-tour-typing');
     let i = 0;
     /* ~70 chars/sec — snappy, still a speak. Reduced-motion dumps full text above. */
-    const ms = 14;
+    const ms = 24;
     try { tbFeedback.selection(); } catch (e) {}
     function tick() {
       if (token !== __tourTypeToken) return;
@@ -9018,7 +9018,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
         __tourTypeTimer = null;
       }
     }
-    __tourTypeTimer = setTimeout(tick, 50);
+    __tourTypeTimer = setTimeout(tick, 110);
   }
 
   /* Brothers grid — 5 mechanics, personality changes speed/amp/timing. No float. */

@@ -7900,6 +7900,29 @@ label.btn-rsvp, label.btn-drop-shot {
   overflow: hidden;
 }
 
+/* Tour bubble sits ON the feature (phone mock), not beside Thunder. */
+.tb-tour-boards .tb-phone {
+  display: block !important;
+  position: relative !important;
+}
+.tb-tour-boards .tb-phone .tb-guide-bubble {
+  position: absolute !important;
+  left: 8px !important;
+  right: 8px !important;
+  top: 8px !important;
+  z-index: 12 !important;
+  pointer-events: none !important;
+  flex: none !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+}
+.tb-tour-boards .tb-tour-hero {
+  justify-content: center;
+}
+.fab-bubble {
+  pointer-events: none !important;
+}
+
 /* CARDINAL: modal titles white + still. Labels yellow + pulse. */
 .info-detail-label,
 .announcement-card-label {
