@@ -5821,7 +5821,15 @@ $('#edit-profile-btn').addEventListener('click', () => {
     let __fabBubbleTimer = null;
     function fabHideBubble() {
       const b = document.getElementById('fab-bubble');
-      if (b) { b.classList.add('hidden'); b.textContent = ''; }
+      if (b) {
+        b.classList.remove('is-on');
+        setTimeout(function () {
+          if (!b.classList.contains('is-on')) {
+            b.classList.add('hidden');
+            b.textContent = '';
+          }
+        }, 380);
+      }
       if (__fabBubbleTimer) try { clearTimeout(__fabBubbleTimer); } catch (e) {}
       __fabBubbleTimer = null;
     }
@@ -5830,6 +5838,11 @@ $('#edit-profile-btn').addEventListener('click', () => {
       if (!b) return;
       b.textContent = text;
       b.classList.remove('hidden');
+      b.classList.remove('is-on');
+      void b.offsetWidth;
+      b.classList.add('is-on');
+      try { fabGo(-4, -3, -10, 1); } catch (e) {}
+      fabAfter(1400, fabRestSmooth);
       if (__fabBubbleTimer) try { clearTimeout(__fabBubbleTimer); } catch (e) {}
       __fabBubbleTimer = setTimeout(fabHideBubble, ms || 8000);
     }
