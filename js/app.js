@@ -6785,7 +6785,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
 
   // ---------- PRODUCT TOUR — 7-slide (restored 20260818) ----------
-  const TB_TOUR_VERSION = 26;
+  const TB_TOUR_VERSION = 27;
   function tourStorageKey() { return 'thunderTourV' + TB_TOUR_VERSION; }
   function isTourComplete() {
     try {
@@ -6889,7 +6889,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     host.className = 'tb-guide-thunder tb-host-alive tb-host-' + mood;
     if (tourReducedMotion()) return;
     /* Slide 1 = CSS spin+float. Slide 3 = quiet float. Don't jitter either. */
-    if (idx === 0 || idx === 2) return;
+    if (idx === 0 || idx === 1 || idx === 2) return;
     host.classList.add('tb-host-enter');
     __hostFidgetTimer = setTimeout(function () {
       host.classList.remove('tb-host-enter');
