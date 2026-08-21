@@ -27,6 +27,7 @@
   from = "/gathering.ics"
   to = "/.netlify/functions/gathering-ics"
   status = 200
+  force = true
 
 [[redirects]]
   from = "/tap"

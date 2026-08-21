@@ -473,7 +473,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   }
   function addToNativeCalendar() {
     const host = location.host || 'sonsofthunder.netlify.app';
-    const icsPath = '/gathering.ics';
+    const icsPath = '/.netlify/functions/gathering-ics';
     const httpsUrl = location.origin + icsPath;
     try {
       if (typeof isIos === 'function' && isIos()) {
@@ -1454,13 +1454,13 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   }
 
   async function inviteAllowed(email) {
-    if (!supabaseEnabled() || !email) return true;
+    if (!supabaseEnabled() || !email) return false;
     try {
       const { data, error } = await getSb().rpc('invite_ok', { e: String(email).trim() });
-      if (error) return true;
+      if (error) return false;
       return !!data;
     } catch (e) {
-      return true;
+      return false;
     }
   }
 
@@ -1763,9 +1763,13 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     const sb = getSb();
     if (!sb) return false;
     try {
+      const signed = !!(typeof isSignedIn === 'function' && isSignedIn());
+      const cols = signed
+        ? 'id,name,bio,photo_url,skills,available,updated_at,birthday,phone'
+        : 'id,name,bio,photo_url,skills,available,updated_at,birthday';
       const { data, error } = await sb
         .from('brothers')
-        .select('id,name,bio,photo_url,phone,skills,available,updated_at,birthday')
+        .select(cols)
         .order('updated_at', { ascending: false });
       if (error) {
         console.warn('brothers pull', error);
@@ -1783,7 +1787,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
           id: row.id,
           name: row.name || (local && local.name) || '',
           bio: row.bio || (local && local.bio) || '',
-          phone: row.phone || (local && local.phone) || '',
+          phone: signed ? (row.phone || (local && local.phone) || '') : '',
           birthday: row.birthday || (local && local.birthday) || '',
           photo,
           skills: row.skills || (local && local.skills) || '',
@@ -5227,7 +5231,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     try {
       if (navigator.serviceWorker && navigator.serviceWorker.ready) navigator.serviceWorker.ready.catch(function () {});
     } catch (e) {}
-    try { fetch('/gathering.ics', { cache: 'reload' }).catch(function () {}); } catch (e) {}
+    try { fetch('/.netlify/functions/gathering-ics', { cache: 'reload' }).catch(function () {}); } catch (e) {}
     try { if (typeof pullRsvps === 'function') pullRsvps(); } catch (e) {}
     try { if (typeof pullAnnouncements === 'function') pullAnnouncements(); } catch (e) {}
     try { if (typeof syncSelfToRoster === 'function') syncSelfToRoster(true); } catch (e) {}

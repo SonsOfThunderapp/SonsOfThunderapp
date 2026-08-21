@@ -369,3 +369,20 @@ begin
   exception when duplicate_object then null;
   end;
 end $$;
+
+-- Anon may read the directory. Anon may not read the contact column.
+-- Authenticated still reads the full row. Apply in SQL editor if this file was already run.
+revoke select on table public.brothers from anon;
+grant select (
+  id,
+  name,
+  bio,
+  photo_url,
+  skills,
+  available,
+  updated_at,
+  birthday,
+  owner_id
+) on table public.brothers to anon;
+grant select on table public.brothers to authenticated;
+

@@ -8070,14 +8070,23 @@ label.btn-rsvp, label.btn-drop-shot {
   cursor: pointer;
 }
 
-/* Splash mark: dead-center of the phone. Not upper-third, not safe-area padded. */
-.splash {
+/* Splash mark: dead-center of the phone on first paint. Must HIDE when done.
+   Later .splash { display:flex !important } was beating .splash-done { display:none }. */
+.splash:not(.splash-done):not(.hidden) {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   padding: 0 !important;
   padding-top: 0 !important;
   inset: 0 !important;
+}
+.splash.splash-done,
+.splash.hidden,
+#splash.splash-done {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
 }
 .splash-inner {
   display: flex !important;
@@ -9019,4 +9028,39 @@ body.tb-view-about #thunder-fab,
 body.tb-view-about #fab-bubble {
   display: none !important;
 }
+
+/* 1) Splash hide always wins */
+.splash.splash-done,
+.splash.hidden,
+#splash.splash-done {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+}
+
+/* 4) Full bio. Sticky wordmark cannot punch through the sheet. */
+.brother-detail-bio {
+  max-height: none !important;
+  overflow: visible !important;
+  -webkit-line-clamp: unset !important;
+}
+body:has(.brother-detail:not(.hidden)) #main-header {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* 6) Sticky mark stays in its bar. Home cards read clean. */
+#main-header.header,
+#main-header {
+  overflow: hidden !important;
+  background: #000 !important;
+}
+#view-home,
+#view-home .feed,
+#view-home .announcement-card {
+  position: relative;
+  z-index: 1;
+}
+
 
