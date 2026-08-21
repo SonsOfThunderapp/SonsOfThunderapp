@@ -204,3 +204,22 @@ alter table public.push_dispatch enable row level security;
 -- insert into public.app_members (user_id, role, active)
 -- values ('PASTE-YOUR-AUTH-UUID-HERE', 'admin', true)
 -- on conflict (user_id) do update set role = 'admin', active = true;
+
+-- PHONE VAULT (20260821-chief1)
+-- Anon directory read without the contact column. Authenticated still gets phone.
+-- Repo push does not change live Supabase — run this file (or sql/phone-vault.sql) in SQL Editor.
+revoke select on table public.brothers from anon;
+revoke select (phone) on table public.brothers from anon;
+revoke select (phone) on table public.brothers from public;
+grant select (
+  id,
+  name,
+  bio,
+  photo_url,
+  skills,
+  available,
+  updated_at,
+  birthday,
+  owner_id
+) on table public.brothers to anon;
+grant select on table public.brothers to authenticated;
