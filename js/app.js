@@ -5560,6 +5560,9 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     }
     currentViewName = name;
     try {
+      document.body.classList.toggle('tb-view-about', name === 'about');
+    } catch (e) {}
+    try {
       const app = document.getElementById('app');
       if (app) {
         app.classList.remove('tb-underlay-depth');
@@ -7744,13 +7747,8 @@ $('#edit-profile-btn').addEventListener('click', () => {
 
       if (state === 'INSTALLED') {
         markInstalledSuccessOnce();
-        // Installed: only "get a brother" — no install tutorial nag
-        installCard.classList.remove('hidden');
-        if (installShareBtn) installShareBtn.textContent = 'SHARE';
-        if (title) title.textContent = 'GET A BROTHER ON THUNDER';
-        if (sub) sub.textContent = 'Send the link · one tap';
-        if (tip) tip.textContent = 'They open it → put Thunder on their phone.';
-        if (howBtn) howBtn.classList.add('hidden');
+        /* Installed: invite card already shares. Don't paint a second SHARE. */
+        installCard.classList.add('hidden');
         return;
       }
 

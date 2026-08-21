@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260821-morecenter1',
+  APP_BUILD: '20260821-moreopt1',
   /* First-run tour is OPTIONAL. Thunder backstage invites once:
      "New here? Tap me. I'll show you the room." Tap Thunder or the bubble → tour.
      Ignore once = no nag. More → TAKE THE TOUR always remains. */

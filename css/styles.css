@@ -9014,3 +9014,9 @@ body:has(#imin-a2hs-sheet:not(.hidden)) .bottom-nav {
   margin-right: auto;
 }
 
+/* More is the tool room. Thunder stays off TAKE THE TOUR. */
+body.tb-view-about #thunder-fab,
+body.tb-view-about #fab-bubble {
+  display: none !important;
+}
+
