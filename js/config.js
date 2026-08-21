@@ -7,6 +7,7 @@ window.TB_CONFIG = {
      After every finished piece: commit → push origin main.
      Netlify auto-publishes sonsofthunder.netlify.app. Grok "Publish App" is not the brothers' site. */
   ONE_PUSH_DEPLOY: true,
+  /* WAR ROOM locked 2026-08-21 — WAR-ROOM.md. Eight chairs. Assassin last. */
   /* QR LAW locked 2026-08-20 — EVERY code in the app (profile, contact modal, Axum).
      Local integer modules. ECC H. Quiet zone 4 modules. Black on white.
      No remote QR API. No fuzzy strokes. Short payload (profile = FN + TEL only).

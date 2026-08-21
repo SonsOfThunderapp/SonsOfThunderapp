@@ -1,5 +1,7 @@
 # GROK-START-HERE — Thunder Board
 
+**`WAR-ROOM.md` is how you work.** Eight chairs. Assassin last. No blind coding. No “done” without evidence.
+
 **`VISUAL-PROOF-PROTOCOL.md` is permanent law.** Human-eye approval required. If the work is visual, SHOW THE VISUAL in the same turn. Description / code / path / "I generated it" is not proof. Design proof ≠ runtime proof.
 
 **Before modifying Thunder Board, read this file, then the permanent constitution, then the current production source.**
