@@ -1097,7 +1097,38 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     return signal;
   }
 
-  function openImInSignIn() {
+  function stashSeatFromGate() {
+    const email = (($('#auth-email') && $('#auth-email').value) || '').trim();
+    const phone = (($('#auth-phone') && $('#auth-phone').value) || '').trim();
+    try {
+      save('pendingSeat', {
+        email: email,
+        phone: phone,
+        at: Date.now(),
+        key: (typeof meetingKey === 'function' && meetingKey()) || ''
+      });
+    } catch (e) {}
+    return { email: email, phone: phone };
+  }
+
+  async function flushPendingSeat() {
+    const p = load('pendingSeat');
+    if (!p || !p.phone) return;
+    if (!isSignedIn()) return;
+    try {
+      const id = (typeof ensureBrotherId === 'function') ? ensureBrotherId() : myProfileId;
+      if (!id) return;
+      const entry = (brothers || []).find(function (b) { return b && b.id === id; }) || { id: id };
+      entry.phone = p.phone;
+      if (p.email && !entry.email) entry.email = p.email;
+      const i = (brothers || []).findIndex(function (b) { return b && b.id === id; });
+      if (i >= 0) brothers[i] = Object.assign({}, brothers[i], entry);
+      else brothers.push(entry);
+      try { save('brothers', brothers); } catch (e) {}
+      if (typeof pushBrother === 'function') await pushBrother(entry);
+      save('pendingSeat', null);
+    } catch (e) {}
+  }
     const gate = document.getElementById('auth-gate');
     const title = document.getElementById('auth-title');
     const sub = document.getElementById('auth-sub');
@@ -1124,8 +1155,10 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     if (forgot) forgot.classList.add('hidden');
     try {
       const em = document.getElementById('auth-email');
+      const ph = document.getElementById('auth-phone');
       const me = (brothers || []).find(function (b) { return b && b.id === myProfileId; });
       if (em && me && me.email && !em.value) em.value = me.email;
+      if (ph && me && me.phone && !ph.value) ph.value = me.phone;
     } catch (e) {}
     openAuthGate('');
     if (sub) { sub.textContent = ''; sub.classList.add('hidden'); }
@@ -1318,7 +1351,11 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
               try { maybeShowAxumCoffee(); } catch (e2) {}
             });
           } catch (e) {}
-          try { claimBrotherOnSignIn(); } catch (e) {}
+            try {
+            Promise.resolve(claimBrotherOnSignIn()).then(function () {
+              try { flushPendingSeat(); } catch (e2) {}
+            });
+          } catch (e) {}
           try { markInviteUsed(); } catch (e) {}
           try {
             const me = (brothers || []).find(function (b) { return b && b.id === myProfileId && (b.name || '').trim(); });
@@ -6525,6 +6562,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
       authSignInBtn.addEventListener('click', async () => {
         const email = ($('#auth-email') && $('#auth-email').value || '').trim();
         if (!email) return setAuthError('Email first.');
+        stashSeatFromGate();
         setAuthError('');
         authSignInBtn.disabled = true;
         try {
@@ -6543,6 +6581,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
       authSignUpBtn.addEventListener('click', async () => {
         const email = ($('#auth-email') && $('#auth-email').value || '').trim();
         if (!email) return setAuthError('Email first.');
+        stashSeatFromGate();
         setAuthError('');
         authSignUpBtn.disabled = true;
         try {
@@ -6561,6 +6600,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
       authMagicBtn.addEventListener('click', async () => {
         const email = ($('#auth-email') && $('#auth-email').value || '').trim();
         if (!email) return setAuthError('Email first. We’ll send the link.');
+        stashSeatFromGate();
         setAuthError('');
         authMagicBtn.disabled = true;
         try {
@@ -6595,6 +6635,13 @@ $('#edit-profile-btn').addEventListener('click', () => {
       });
     }
     const authEmail = $('#auth-email');
+    const authPhone = $('#auth-phone');
+    if (authPhone && authPhone.dataset.enterBound !== '1') {
+      authPhone.dataset.enterBound = '1';
+      authPhone.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && authSignInBtn) authSignInBtn.click();
+      });
+    }
     if (authEmail && authEmail.dataset.enterBound !== '1') {
       authEmail.dataset.enterBound = '1';
       authEmail.addEventListener('keydown', (e) => {
