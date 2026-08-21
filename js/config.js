@@ -1,6 +1,8 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260820-popout1',
+  APP_BUILD: '20260821-iminlock1',
+  /* I'M IN vault locked 2026-08-21 — live-coal rest, bolt strike, yellow settle,
+     Thunder nod then drift. Sign-in / A2HS wait until the lock lands. */
   /* ONE-PUSH DEPLOY locked 2026-08-21
      After every finished piece: commit → push origin main.
      Netlify auto-publishes sonsofthunder.netlify.app. Grok "Publish App" is not the brothers' site. */

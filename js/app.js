@@ -1926,15 +1926,18 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     return Math.round((target - now) / 86400000);
   }
 
-  function parkFabByImin() {
+  function parkFabByImin(force) {
     const fab = document.getElementById('thunder-fab');
     const btn = document.getElementById('rsvp-btn');
     if (!fab) return;
     const home = currentViewName === 'home';
-    let gathering = false;
-    try { gathering = daysUntil(getNextMeetingMonday()) === 0; } catch (e) {}
+    let week = false;
+    try {
+      const d = daysUntil(getNextMeetingMonday());
+      week = d >= 0 && d <= 7;
+    } catch (e) {}
     const busy = document.body.classList.contains('tb-ask-open') || document.body.classList.contains('tb-tour-open');
-    if (!home || !gathering || !btn || busy) {
+    if (!home || !week || !btn || busy || (!force && rsvp)) {
       fab.classList.remove('tb-fab-by-imin');
       fab.style.left = '';
       fab.style.top = '';
@@ -3061,36 +3064,28 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       },
       /** Level 3 signature — I'm In lock (caller must confirm save succeeded first) */
       lockedIn: function (el, card) {
-        /* Signature path — ONE animation on the button.
-           Do NOT stack lock-pulse + commit-strike (both set `animation` → last wins, other dies).
-           Do NOT tbGlowHit the same node (also sets `animation`).
-           Clear tb-press first — its transform:!important kills scale keyframes. */
+        /* Vault close — bolt through the button, then yellow. No card box-glow. */
         try { tbFeedback.confirm(); } catch (e) {}
+        try { if (window.tbFeedback) tbFeedback.thunderImpact(); } catch (e) {}
         if (el && !reduced()) {
           try {
-            el.classList.remove('tb-press', 'lock-pulse', 'commit-strike', 'tfx-ios-boost', 'tb-glow-hit', 'tb-glow-hit-yellow');
+            el.classList.remove('tb-press', 'lock-pulse', 'commit-strike', 'tfx-ios-boost', 'tb-glow-hit', 'tb-glow-hit-yellow', 'imin-strike', 'imin-afterglow');
             void el.offsetWidth;
           } catch (e) {}
-          // Single signature motion only
-          el.classList.add('commit-strike');
-          try {
-            if (typeof navigator === 'undefined' || typeof navigator.vibrate !== 'function') {
-              el.classList.add('tfx-ios-boost');
-            }
-          } catch (e) {}
-          setTimeout(() => {
-            try { el.classList.remove('commit-strike', 'tfx-ios-boost'); } catch (e) {}
-          }, 900);
+          el.classList.add('imin-strike');
+          setTimeout(function () {
+            try { el.classList.remove('imin-strike'); } catch (e) {}
+          }, 480);
+          setTimeout(function () {
+            try {
+              el.classList.add('imin-afterglow');
+              setTimeout(function () { try { el.classList.remove('imin-afterglow'); } catch (e2) {} }, 1100);
+            } catch (e) {}
+          }, 400);
         }
+        try { if (typeof window.tbFabImInLock === 'function') window.tbFabImInLock(); } catch (e) {}
         if (card && !reduced()) {
-          try {
-            card.classList.remove('tb-glow-hit', 'tb-glow-hit-yellow');
-            void card.offsetWidth;
-          } catch (e) {}
-          card.classList.add('commit-flash', 'commit-energized');
-          // Glow on CARD only — not on the button fighting commit-strike
-          visualGlow(card, 'yellow');
-          setTimeout(() => { try { card.classList.remove('commit-flash'); } catch (e) {} }, 750);
+          try { card.classList.add('commit-energized'); } catch (e) {}
         }
       },
       /** Level 2/3 — real success only (memory, profile, alerts) */
@@ -6070,7 +6065,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       if (!ok) {
         rsvp = wasIn;
         if (btn) {
-          btn.classList.remove('confirmed', 'is-locking', 'commit-strike');
+          btn.classList.remove('confirmed', 'is-locking', 'commit-strike', 'imin-strike', 'imin-afterglow');
           btn.textContent = "I'M IN";
           btn.dataset.busy = '0';
         }
@@ -6098,8 +6093,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         return;
       }
 
-      // Success path: ThunderFX.lockedIn → settle → calendar handoff
-      renderRsvp();
+      // Success path: strike on red → yellow vault → then the next sheet
       const meetCard = document.querySelector('.next-meeting');
       try {
         if (window.ThunderFX) ThunderFX.lockedIn(btn, meetCard);
@@ -6109,26 +6103,30 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       } catch (e) {
         try { tbFeedback.confirm(); } catch (e2) {}
       }
+      setTimeout(function () {
+        try { renderRsvp(); } catch (e) {}
+        if (btn) {
+          try { btn.classList.add('imin-afterglow'); } catch (e) {}
+        }
+      }, prefersReducedMotion() ? 0 : 420);
       if (btn) {
         setTimeout(() => {
           try {
-            btn.classList.remove('is-locking');
+            btn.classList.remove('is-locking', 'imin-strike');
             btn.dataset.busy = '0';
           } catch (e) {}
         }, 900);
       }
 
-      // I'm In = seat + alerts consent + optional name lock-in.
       try { utilizeImInBackground(); } catch (e) {}
-      try { renderRsvp(); } catch (e) {}
       try { honorFirst('imin'); } catch (e) {}
       if (!isSignedIn() && supabaseEnabled()) {
         window.__tbA2hsAfterAuth = true;
         setTimeout(function () {
           try { openImInSignIn(); } catch (e) {}
-        }, 700);
+        }, prefersReducedMotion() ? 400 : 1650);
       } else {
-        setTimeout(function () { try { maybeOfferImInA2hs(); } catch (e) {} }, 1100);
+        setTimeout(function () { try { maybeOfferImInA2hs(); } catch (e) {} }, prefersReducedMotion() ? 500 : 1650);
       }
     });
 
@@ -7242,14 +7240,17 @@ $('#edit-profile-btn').addEventListener('click', () => {
       img.classList.add('tb-fab-twirl');
       setTimeout(function () { img.classList.remove('tb-fab-twirl'); }, 1500);
     }
-    function parkFabByImin() {
+    function parkFabByImin(force) {
       const fab = document.getElementById('thunder-fab');
       const btn = document.getElementById('rsvp-btn');
       if (!fab) return;
       const home = currentViewName === 'home';
-      let gathering = false;
-      try { gathering = daysUntil(getNextMeetingMonday()) === 0; } catch (e) {}
-      if (!home || !gathering || !btn || fabBusy()) {
+      let week = false;
+      try {
+        const d = daysUntil(getNextMeetingMonday());
+        week = d >= 0 && d <= 7;
+      } catch (e) {}
+      if (!home || !week || !btn || fabBusy() || (!force && rsvp)) {
         fab.classList.remove('tb-fab-by-imin');
         fab.style.left = '';
         fab.style.top = '';
@@ -7356,6 +7357,11 @@ $('#edit-profile-btn').addEventListener('click', () => {
       fabGo(side * 6, -2.5, side * 7.5, 1);
       fabAfter(3200, fabRestSmooth);
     }
+    window.tbFabImInLock = function () {
+      try { parkFabByImin(true); } catch (e) {}
+      try { fabMicroNod(); } catch (e) {}
+      setTimeout(function () { try { parkFabByImin(); } catch (e) {} }, 2400);
+    };
     function fabBubbleBeat() {
       if (fabMuted()) return;
       fabSay(fabNextLine(), 8000);
