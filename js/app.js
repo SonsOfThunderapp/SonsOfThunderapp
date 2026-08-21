@@ -7939,13 +7939,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
       if (document.visibilityState === 'visible') unlockBodyIfClear();
     });
 
-    // REFRESH APP — force fresh HTML/JS/CSS (More page, under Gathering Alerts)
-    const refreshBtn = $('#refresh-app-btn');
-    if (refreshBtn) {
-      refreshBtn.addEventListener('click', async () => {
-        forceRefreshApp();
-      });
-    }
+    // Auto-wipe handles new deploys. No leader refresh button.
 
 $('#thunder-input').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') handleThunderSend();
@@ -9319,11 +9313,34 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       try { checkStaleBuild(); } catch (e) {}
     });
     setTimeout(function () { try { checkStaleBuild(); } catch (e) {} }, 2500);
+    if (!window.__tbBuildWatch) {
+      window.__tbBuildWatch = setInterval(function () {
+        if (document.visibilityState !== 'visible') return;
+        try { pingServiceWorkerUpdate(); } catch (e) {}
+        try { checkStaleBuild(); } catch (e) {}
+      }, 45000);
+    }
+    try {
+      if ('serviceWorker' in navigator && !window.__tbSwCtrlBound) {
+        window.__tbSwCtrlBound = true;
+        navigator.serviceWorker.addEventListener('controllerchange', function () {
+          try { checkStaleBuild(); } catch (e) {}
+        });
+      }
+    } catch (e) {}
   }
 
   async function checkStaleBuild() {
     try {
-      if (cacheClearBlocked()) return;
+      if (cacheClearBlocked()) {
+        if (!window.__tbStaleRetry) {
+          window.__tbStaleRetry = setTimeout(function () {
+            window.__tbStaleRetry = null;
+            try { checkStaleBuild(); } catch (e) {}
+          }, 8000);
+        }
+        return;
+      }
       const r = await fetch('build.json?_=' + Date.now(), { cache: 'no-store' });
       if (!r.ok) return;
       const j = await r.json();
