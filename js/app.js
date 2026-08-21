@@ -7260,6 +7260,17 @@ $('#edit-profile-btn').addEventListener('click', () => {
       b.addEventListener('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
+        if (b.dataset.tourInvite === '1' || window.__tbTourInvite) {
+          b.dataset.tourInvite = '';
+          window.__tbTourInvite = false;
+          fabHideBubble();
+          try { save('tb_tour_offered', 1); } catch (err) {}
+          try {
+            if (typeof startTour === 'function') startTour({ replay: true });
+            else if (window.startTour) window.startTour({ replay: true });
+          } catch (err) {}
+          return;
+        }
         fabMuteSession();
       });
     })();
@@ -7422,6 +7433,30 @@ $('#edit-profile-btn').addEventListener('click', () => {
       img.classList.add('tb-fab-alive');
       fabStartMotion();
       if (!__fabOpenedAt) __fabOpenedAt = Date.now();
+      function offerBackstageTour() {
+        try {
+          if (typeof isTourComplete === 'function' && isTourComplete()) return;
+          if (load('tb_tour_offered')) return;
+          if (fabBusy()) return;
+        } catch (e) { return; }
+        const b = document.getElementById('fab-bubble');
+        if (!b) return;
+        window.__tbTourInvite = true;
+        b.dataset.tourInvite = '1';
+        b.textContent = "New here? Tap me. I'll show you the room.";
+        b.classList.remove('hidden');
+        void b.offsetWidth;
+        b.classList.add('is-on');
+        try { tbFeedback.selection(); } catch (e) {}
+        if (__fabBubbleTimer) try { clearTimeout(__fabBubbleTimer); } catch (e) {}
+        __fabBubbleTimer = setTimeout(function () {
+          try { save('tb_tour_offered', 1); } catch (e) {}
+          window.__tbTourInvite = false;
+          if (b) b.dataset.tourInvite = '';
+          fabHideBubble();
+        }, 10000);
+      }
+      setTimeout(function () { try { offerBackstageTour(); } catch (e) {} }, 3500);
       function lineTick() {
         if (roomCut()) return;
         if (!fabBusy()) fabBubbleBeat();
@@ -7450,6 +7485,19 @@ $('#edit-profile-btn').addEventListener('click', () => {
         e.preventDefault();
         e.stopImmediatePropagation();
         if (document.body.classList.contains('tb-ask-open')) return;
+        if (window.__tbTourInvite) {
+          window.__tbTourInvite = false;
+          fabHideBubble();
+          try { save('tb_tour_offered', 1); } catch (err) {}
+          const b = document.getElementById('fab-bubble');
+          if (b) b.dataset.tourInvite = '';
+          try { tbFeedback.press(fabBtn); } catch (err) {}
+          try {
+            if (typeof startTour === 'function') startTour({ replay: true });
+            else if (window.startTour) window.startTour({ replay: true });
+          } catch (err) {}
+          return;
+        }
         fabHideBubble();
         try { tbFeedback.press(fabBtn); } catch (err) {}
         try {
@@ -9827,7 +9875,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   }
 
   function isTourMandatory() {
-    return false;
+    return false; // First-run is optional. Thunder invites once from backstage.
   }
 
   function syncTourExitUI() {
