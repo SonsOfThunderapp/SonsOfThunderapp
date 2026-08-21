@@ -1,6 +1,23 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260820-email1',
+  APP_BUILD: '20260820-popout1',
+  /* ONE-PUSH DEPLOY locked 2026-08-21
+     After every finished piece: commit → push origin main.
+     Netlify auto-publishes sonsofthunder.netlify.app. Grok "Publish App" is not the brothers' site. */
+  ONE_PUSH_DEPLOY: true,
+  /* QR LAW locked 2026-08-20 — EVERY code in the app (profile, contact modal, Axum).
+     Local integer modules. ECC H. Quiet zone 4 modules. Black on white.
+     No remote QR API. No fuzzy strokes. Short payload (profile = FN + TEL only).
+     Contact QR may keep bolt-for-qr center. paintThunderQr() is the only painter. */
+  QR_LAW: {
+    engine: 'paintThunderQr',
+    ecc: 'H',
+    quietModules: 4,
+    colorDark: '#000000',
+    colorLight: '#ffffff',
+    remoteApi: false,
+    profilePayload: 'FN+TEL'
+  },
   /* SONS OF THUNDER — ROOM CUT 1.0 (locked 2026-08-20)
      Member-facing: Home poster, splash→Home, Thunder quiet, real brothers/memories,
      Patio raffle is leader-activated (THE ROOM → OPEN THE PATIO).

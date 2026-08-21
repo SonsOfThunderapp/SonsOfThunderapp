@@ -4,7 +4,21 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil((async () => {
+    try {
+      const keys = await caches.keys();
+      await Promise.all(keys.filter(function (k) { return k !== 'tb-share'; }).map(function (k) {
+        return caches.delete(k);
+      }));
+    } catch (e) {}
+    await self.clients.claim();
+    try {
+      const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      clients.forEach(function (c) {
+        try { c.postMessage({ type: 'tb-sw-updated' }); } catch (e) {}
+      });
+    } catch (e) {}
+  })());
 });
 
 self.addEventListener('fetch', (event) => {

@@ -901,18 +901,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     const target = document.getElementById('axum-qr');
     if (!target) return;
     target.innerHTML = '';
-    if (!code || typeof QRCode === 'undefined') return;
-    try {
-      target.style.cssText = 'width:200px;height:200px;background:#fff;margin:18px auto 10px;';
-      new QRCode(target, {
-        text: 'SOT-AXUM-' + code,
-        width: 200,
-        height: 200,
-        colorDark: '#000000',
-        colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.M
-      });
-    } catch (e) {}
+    if (!code) return;
+    paintThunderQr(target, 'SOT-AXUM-' + String(code), 200);
   }
 
   function renderAxumChip() {
@@ -1176,6 +1166,10 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     releaseFocusAndZoom();
     if (typeof unlockBodyIfClear === 'function') unlockBodyIfClear();
     else document.body.style.overflow = '';
+    if (window.__tbA2hsAfterAuth) {
+      window.__tbA2hsAfterAuth = false;
+      setTimeout(function () { try { maybeOfferImInA2hs(); } catch (e) {} }, 450);
+    }
   }
 
   function syncBrothersSeatBtn() {
@@ -3613,6 +3607,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         if (el) { el.classList.add('hidden'); el.setAttribute('aria-hidden', 'true'); unlockBodyIfClear(); }
       }},
       { id: 'cal-confirm-sheet', close: () => { try { closeCalConfirmSheet(); } catch (e) {} } },
+      { id: 'imin-a2hs-sheet', close: () => { try { closeImInA2hsSheet(); } catch (e) {} } },
       { id: 'axum-drop', close: () => { try { closeAxumDrop(); } catch (e) {} } },
       { id: 'axum-card', close: () => { try { closeAxumCard(); } catch (e) {} } },
       { id: 'raffle-live', close: () => { try { closeRaffleLive(); } catch (e) {} } }
@@ -3771,10 +3766,17 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       'FN:' + name,
       'N:;' + name + ';;;'
     ];
-    if (phone) lines.push('TEL;TYPE=CELL:' + phone);
-    lines.push('ORG:Sons of Thunder');
-    lines.push('URL:' + publicUrl('/'));
-    if (bio && !forQr) lines.push('NOTE:' + bio.replace(/,/g, '\\,'));
+    if (phone) {
+      let tel = phone;
+      if (tel.length === 10) tel = '1' + tel;
+      if (tel.charAt(0) !== '+') tel = '+' + tel;
+      lines.push('TEL;TYPE=CELL:' + tel);
+    }
+    if (!forQr) {
+      lines.push('ORG:Sons of Thunder');
+      lines.push('URL:' + publicUrl('/'));
+      if (bio) lines.push('NOTE:' + bio.replace(/,/g, '\\,'));
+    }
     lines.push('END:VCARD');
     return lines.join('\r\n');
   }
@@ -3862,90 +3864,73 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       'QR unavailable right now.<br><strong>Use SHARE CONTACT</strong> below.</div>';
   }
 
-  function paintLocalQr(target, vcard, dim) {
-    if (typeof QRCode === 'undefined') return false;
+  /* QR LAW: the only painter. Profile, contact modal, Axum, anything future. */
+  function paintThunderQr(target, text, dim) {
+    if (!target || !text || typeof QRCode === 'undefined') return false;
+    const hold = document.createElement('div');
+    hold.style.cssText = 'position:absolute;left:-9999px;top:0;width:8px;height:8px;overflow:hidden;';
+    document.body.appendChild(hold);
     try {
-      target.innerHTML = '';
-      target.style.cssText = 'width:' + dim + 'px;height:' + dim + 'px;min-width:' + dim +
-        'px;min-height:' + dim + 'px;background:#ffffff;display:block;margin:0 auto;position:relative;z-index:1;';
-      qrcodeInstance = new QRCode(target, {
-        text: vcard,
-        width: dim,
-        height: dim,
+      const inst = new QRCode(hold, {
+        text: String(text),
+        width: 8,
+        height: 8,
         colorDark: '#000000',
         colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.M
+        correctLevel: QRCode.CorrectLevel.H
       });
-      const painted = target.querySelector('canvas, img, table');
-      return !!painted;
+      const matrix = inst._oQRCode;
+      if (!matrix || typeof matrix.getModuleCount !== 'function') {
+        hold.remove();
+        return false;
+      }
+      const n = matrix.getModuleCount();
+      const quiet = 4;
+      const modules = n + quiet * 2;
+      const px = Math.max(4, Math.floor((dim * (window.devicePixelRatio || 2)) / modules));
+      const size = modules * px;
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      canvas.style.cssText = 'width:' + dim + 'px;height:' + dim + 'px;display:block;image-rendering:pixelated;';
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = '#000000';
+      for (let r = 0; r < n; r++) {
+        for (let c = 0; c < n; c++) {
+          if (matrix.isDark(r, c)) {
+            ctx.fillRect((c + quiet) * px, (r + quiet) * px, px, px);
+          }
+        }
+      }
+      target.innerHTML = '';
+      target.style.cssText = 'width:' + dim + 'px;height:' + dim + 'px;background:#fff;display:block;margin:0 auto;position:relative;z-index:1;';
+      target.appendChild(canvas);
+      hold.remove();
+      qrcodeInstance = inst;
+      return true;
     } catch (e) {
-      console.warn('Local QR failed', e);
+      try { hold.remove(); } catch (e2) {}
+      console.warn('Thunder QR failed', e);
       return false;
     }
+  }
+  try { window.paintThunderQr = paintThunderQr; } catch (e) {}
+
+  function paintLocalQr(target, vcard, dim) {
+    return paintThunderQr(target, vcard, dim);
   }
 
   function renderBrotherQR(vcard, targetEl, size) {
     const target = targetEl || $('#qr-code-target') || $('#brother-qr-target');
     if (!target) return false;
-    const dim = size || 200;
-
-    // Cancel any prior load timer on this target
+    const dim = size || 240;
     const prev = qrLoadTimers.get(target);
     if (prev) clearTimeout(prev);
-
-    target.innerHTML =
-      '<div class="qr-loading" style="display:flex;align-items:center;justify-content:center;' +
-      'width:100%;height:100%;min-height:' + dim + 'px;background:#fff;color:#666;font-size:12px;' +
-      'letter-spacing:0.06em;text-transform:uppercase;">Building QR…</div>';
-    target.style.cssText = 'width:' + dim + 'px;height:' + dim + 'px;min-width:' + dim +
-      'px;min-height:' + dim + 'px;background:#ffffff;display:block;margin:0 auto;position:relative;z-index:1;';
-
-    let settled = false;
-    function settleOk() {
-      settled = true;
-      const t = qrLoadTimers.get(target);
-      if (t) {
-        clearTimeout(t);
-        qrLoadTimers.delete(target);
-      }
-    }
-    function settleFail() {
-      if (settled) return;
-      settled = true;
-      const t = qrLoadTimers.get(target);
-      if (t) {
-        clearTimeout(t);
-        qrLoadTimers.delete(target);
-      }
-      // Try local lib before giving up
-      if (!paintLocalQr(target, vcard, dim)) {
-        qrFailMessage(target);
-      }
-    }
-
-    // Timeout: blank/hung network must not last forever
-    const timer = setTimeout(settleFail, 5000);
-    qrLoadTimers.set(target, timer);
-
-    const img = document.createElement('img');
-    img.width = dim;
-    img.height = dim;
-    img.alt = 'Contact QR';
-    img.decoding = 'async';
-    img.style.cssText = 'width:' + dim + 'px;height:' + dim + 'px;display:block;';
-    img.onload = function () {
-      if (settled) return;
-      settleOk();
-      target.innerHTML = '';
-      target.appendChild(img);
-    };
-    img.onerror = function () {
-      settleFail();
-    };
-    img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=' + dim + 'x' + dim +
-      '&ecc=M&margin=1&color=000000&bgcolor=ffffff&data=' + encodeURIComponent(vcard);
-
-    return true;
+    if (paintThunderQr(target, vcard, dim)) return true;
+    qrFailMessage(target);
+    return false;
   }
 
   function showContactQR(brother) {
@@ -3982,7 +3967,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     // Wait until panel is laid out (was hidden) so canvas gets real dimensions
     requestAnimationFrame(function () {
       requestAnimationFrame(function () {
-        renderBrotherQR(vcard, target, 200);
+        renderBrotherQR(vcard, target, 240);
       });
     });
   }
@@ -6138,9 +6123,12 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       try { renderRsvp(); } catch (e) {}
       try { honorFirst('imin'); } catch (e) {}
       if (!isSignedIn() && supabaseEnabled()) {
+        window.__tbA2hsAfterAuth = true;
         setTimeout(function () {
           try { openImInSignIn(); } catch (e) {}
         }, 700);
+      } else {
+        setTimeout(function () { try { maybeOfferImInA2hs(); } catch (e) {} }, 1100);
       }
     });
 
@@ -8748,9 +8736,68 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     if (el) el.classList.add('hidden');
   }
   function showHomeA2hs() {
-    if (isStandalonePwa()) { hideHomeA2hs(); return; }
-    const el = document.getElementById('home-a2hs');
-    if (el) el.classList.remove('hidden');
+    hideHomeA2hs();
+  }
+  function imInA2hsAsked() {
+    try { return load('iminA2hsAsked') === '1' || load('iminA2hsAsked') === true; } catch (e) { return false; }
+  }
+  function markImInA2hsAsked() {
+    try { save('iminA2hsAsked', '1'); } catch (e) {}
+  }
+  function closeImInA2hsSheet() {
+    const el = document.getElementById('imin-a2hs-sheet');
+    if (el) {
+      el.classList.add('hidden');
+      el.setAttribute('aria-hidden', 'true');
+    }
+    document.body.classList.remove('tb-imin-a2hs-open');
+    if (typeof unlockBodyIfClear === 'function') unlockBodyIfClear();
+    else document.body.style.overflow = '';
+  }
+  function openImInA2hsSheet() {
+    if (isStandalonePwa()) { hideHomeA2hs(); return false; }
+    if (imInA2hsAsked()) return false;
+    if (a2hsHushed()) return false;
+    const el = document.getElementById('imin-a2hs-sheet');
+    if (!el) return false;
+    el.classList.remove('hidden');
+    el.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('tb-imin-a2hs-open');
+    document.body.style.overflow = 'hidden';
+    return true;
+  }
+  function maybeOfferImInA2hs() {
+    if (isStandalonePwa()) return false;
+    if (imInA2hsAsked()) return false;
+    if (a2hsHushed()) return false;
+    if (document.body.classList.contains('tb-tour-open')) return false;
+    const gate = document.getElementById('auth-gate');
+    if (gate && !gate.classList.contains('hidden')) {
+      window.__tbA2hsAfterAuth = true;
+      return false;
+    }
+    return openImInA2hsSheet();
+  }
+  function bindImInA2hsSheet() {
+    if (document.documentElement.dataset.tbImInA2hsBound === '1') return;
+    document.documentElement.dataset.tbImInA2hsBound = '1';
+    const put = document.getElementById('imin-a2hs-put');
+    const later = document.getElementById('imin-a2hs-later');
+    const x = document.getElementById('imin-a2hs-close');
+    const backdrop = document.getElementById('imin-a2hs-backdrop');
+    function doneHush() {
+      markImInA2hsAsked();
+      hushA2hs(7);
+      closeImInA2hsSheet();
+    }
+    if (put) put.addEventListener('click', function () {
+      markImInA2hsAsked();
+      closeImInA2hsSheet();
+      try { launchAddToHomeScreen(); } catch (e) {}
+    });
+    if (later) later.addEventListener('click', doneHush);
+    if (x) x.addEventListener('click', doneHush);
+    if (backdrop) backdrop.addEventListener('click', doneHush);
   }
   function paintCalA2hs() {
     const btn = document.getElementById('cal-confirm-a2hs');
@@ -8959,7 +9006,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   async function ensureServiceWorker() {
     if (!('serviceWorker' in navigator)) return null;
     try {
-      const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+      const reg = await navigator.serviceWorker.register('/sw.js?v=' + encodeURIComponent((cfg().APP_BUILD || '1')), { scope: '/' });
       await navigator.serviceWorker.ready;
       return reg;
     } catch (e) {
@@ -9194,12 +9241,37 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
 
   // Housekeeping: bounded, event-driven only — no polling, no auto-delete of user data
+  function cacheClearBlocked() {
+    try {
+      if (typeof __tourActive !== 'undefined' && __tourActive) return true;
+      if (document.body.classList.contains('tb-tour-open')) return true;
+      if (document.body.classList.contains('tb-ask-open')) return true;
+      if (document.body.classList.contains('tb-raffle-live')) return true;
+      if (document.body.classList.contains('tb-axum-open')) return true;
+      const gate = document.getElementById('auth-gate');
+      if (gate && !gate.classList.contains('hidden')) return true;
+      const splash = document.getElementById('splash');
+      if (splash && !splash.classList.contains('splash-done') && !splash.classList.contains('hidden')) return true;
+    } catch (e) {}
+    return false;
+  }
+
+  function pingServiceWorkerUpdate() {
+    try {
+      if (!('serviceWorker' in navigator)) return;
+      navigator.serviceWorker.getRegistration().then(function (reg) {
+        if (reg && reg.update) reg.update().catch(function () {});
+      }).catch(function () {});
+    } catch (e) {}
+  }
+
   function reconcileOnWake() {
     try { refreshAlertsToggleUI(); } catch (e) {}
     try {
       const sb = getSb && getSb();
       if (sb && sb.auth && sb.auth.getSession) sb.auth.getSession().catch(function () {});
     } catch (e) {}
+    try { pingServiceWorkerUpdate(); } catch (e) {}
     try { checkStaleBuild(); } catch (e) {}
   }
 
@@ -9234,23 +9306,27 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     window.addEventListener('online', function () {
       reconcileOnWake();
     });
-    setTimeout(function () { try { checkStaleBuild(); } catch (e) {} }, 5500);
+    window.addEventListener('pageshow', function () {
+      reconcileOnWake();
+    });
+    window.addEventListener('focus', function () {
+      try { checkStaleBuild(); } catch (e) {}
+    });
+    setTimeout(function () { try { checkStaleBuild(); } catch (e) {} }, 2500);
   }
 
   async function checkStaleBuild() {
     try {
-      if (sessionStorage.getItem('tb_stale_nudge') === '1') return;
-      if (typeof __tourActive !== 'undefined' && __tourActive) return;
-      const splash = document.getElementById('splash');
-      if (splash && !splash.classList.contains('splash-done') && !splash.classList.contains('hidden')) return;
+      if (cacheClearBlocked()) return;
       const r = await fetch('build.json?_=' + Date.now(), { cache: 'no-store' });
       if (!r.ok) return;
       const j = await r.json();
       const live = String(j.APP_BUILD || '');
       const here = String((cfg() && cfg().APP_BUILD) || '');
       if (!live || !here || live === here) return;
-      sessionStorage.setItem('tb_stale_nudge', '1');
-      tbToast('New drop on the board. Tap to refresh.', 8000, forceRefreshApp);
+      if (sessionStorage.getItem('tb_reloading') === live) return;
+      sessionStorage.setItem('tb_reloading', live);
+      forceRefreshApp();
     } catch (e) {}
   }
 
@@ -9889,6 +9965,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
         hideHomeA2hs();
       }
     } catch (e) {}
+    bindImInA2hsSheet();
     const a2hsPut = document.getElementById('home-a2hs-put');
     const a2hsLater = document.getElementById('home-a2hs-later');
     if (a2hsPut && !a2hsPut.dataset.tbBound) {
@@ -9906,6 +9983,9 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       if (navigator.serviceWorker) {
         navigator.serviceWorker.addEventListener('message', function (ev) {
           if (ev.data && ev.data.type === 'tb-open') applyDeepLink(ev.data.url || '/?view=home');
+          if (ev.data && ev.data.type === 'tb-sw-updated') {
+            try { checkStaleBuild(); } catch (e) {}
+          }
         });
       }
     } catch (e) {}
