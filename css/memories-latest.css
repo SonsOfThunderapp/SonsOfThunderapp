@@ -1,0 +1,20 @@
+/* Newest drop takes the wall */
+.latest-chip {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: #e10600;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+.media-hero { position: relative; }
+.media-thumb-hero { position: relative; }
+.media-hero.latest-flash .media-thumb-hero {
+  box-shadow: 0 0 0 3px #f5c518, 0 12px 28px rgba(0,0,0,0.45);
+  transition: box-shadow 0.4s ease;
+}
