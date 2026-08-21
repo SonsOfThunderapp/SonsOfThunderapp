@@ -10023,24 +10023,9 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   }
 
   function bindLeaderGhost() {
+    /* Leadership stays on More. Quiet button. No 7-tap hide. */
     const zone = document.querySelector('.admin-zone');
-    if (!zone) return;
-    zone.classList.add('tb-leader-ghost');
-    let taps = 0;
-    let tmr = null;
-    const logo = document.getElementById('header-logo');
-    if (logo && logo.dataset.leaderGhost !== '1') {
-      logo.dataset.leaderGhost = '1';
-      logo.addEventListener('click', function () {
-        taps += 1;
-        if (tmr) clearTimeout(tmr);
-        tmr = setTimeout(function () { taps = 0; }, 2400);
-        if (taps >= 7) {
-          taps = 0;
-          zone.classList.remove('tb-leader-ghost');
-        }
-      });
-    }
+    if (zone) zone.classList.remove('tb-leader-ghost');
   }
 
   function maybeStartProductTour() {
