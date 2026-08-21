@@ -1129,6 +1129,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       save('pendingSeat', null);
     } catch (e) {}
   }
+
+  function openImInSignIn() {
     const gate = document.getElementById('auth-gate');
     const title = document.getElementById('auth-title');
     const sub = document.getElementById('auth-sub');
