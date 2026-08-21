@@ -1,6 +1,7 @@
 /**
  * One-to-one birthday-honor text after LOCK YOUR SEAT + explicit opt-in.
- * Not TEXT THE CLUB. Never SELECT brothers.phone. Fail closed if Twilio missing.
+ * Queues the send if Twilio/A2P is not ready. honor-sms-retry catches them up.
+ * Never SELECT brothers.phone. Fail closed if Twilio missing.
  */
 const crypto = require('crypto');
 
@@ -28,31 +29,77 @@ exports.handler = async (event) => {
   if (d.length !== 10) return json(400, { error: 'bad_phone', sent: false });
   const to = '+1' + d;
   const hash = crypto.createHash('sha256').update('1' + d).digest('hex').slice(0, 24);
-  const kind = 'sms-bday-' + hash;
-  const meetingKey = 'honor-once';
 
-  const sbUrl = (process.env.SUPABASE_URL || '').replace(/\/$/, '');
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-  if (sbUrl && serviceKey) {
-    try {
-      const already = await fetch(
-        sbUrl +
-          '/rest/v1/push_dispatch?kind=eq.' +
-          encodeURIComponent(kind) +
-          '&meeting_key=eq.' +
-          encodeURIComponent(meetingKey) +
-          '&select=kind',
-        { headers: { apikey: serviceKey, Authorization: 'Bearer ' + serviceKey } }
-      );
-      if (already.ok) {
-        const rows = await already.json();
-        if (rows && rows.length) return json(200, { ok: true, sent: false, skipped: 'already' });
-      }
-    } catch (e) {}
+  await queueHonor(hash, to);
+
+  if (await alreadySent(sid, token, hash)) {
+    return json(200, { ok: true, sent: false, skipped: 'already' });
   }
 
+  const twilioOk = await sendHonor(sid, token, from, to);
+  if (twilioOk) {
+    await markSent(hash);
+    await noteDispatch(hash);
+    return json(200, { ok: true, sent: true });
+  }
+  return json(202, { ok: true, sent: false, queued: true });
+};
+
+async function queueHonor(hash, to) {
+  try {
+    const { getStore } = require('@netlify/blobs');
+    const store = getStore('honor-sms');
+    const prev = await store.get(hash, { type: 'json' });
+    if (prev && prev.sent) return;
+    await store.setJSON(hash, { to: to, sent: false, at: Date.now() });
+  } catch (e) {}
+}
+
+async function markSent(hash) {
+  try {
+    const { getStore } = require('@netlify/blobs');
+    const store = getStore('honor-sms');
+    const prev = (await store.get(hash, { type: 'json' })) || {};
+    await store.setJSON(hash, Object.assign({}, prev, { sent: true, sentAt: Date.now() }));
+  } catch (e) {}
+}
+
+async function alreadySent(sid, token, hash) {
+  const sbUrl = (process.env.SUPABASE_URL || '').replace(/\/$/, '');
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+  if (!sbUrl || !serviceKey) return false;
+  try {
+    const already = await fetch(
+      sbUrl + '/rest/v1/push_dispatch?kind=eq.' + encodeURIComponent('sms-bday-' + hash) +
+        '&meeting_key=eq.honor-once&select=kind',
+      { headers: { apikey: serviceKey, Authorization: 'Bearer ' + serviceKey } }
+    );
+    if (!already.ok) return false;
+    const rows = await already.json();
+    return !!(rows && rows.length);
+  } catch (e) { return false; }
+}
+
+async function noteDispatch(hash) {
+  const sbUrl = (process.env.SUPABASE_URL || '').replace(/\/$/, '');
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+  if (!sbUrl || !serviceKey) return;
+  try {
+    await fetch(sbUrl + '/rest/v1/push_dispatch', {
+      method: 'POST',
+      headers: {
+        apikey: serviceKey,
+        Authorization: 'Bearer ' + serviceKey,
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal'
+      },
+      body: JSON.stringify({ kind: 'sms-bday-' + hash, meeting_key: 'honor-once' })
+    });
+  } catch (e) {}
+}
+
+async function sendHonor(sid, token, from, to) {
   const auth = Buffer.from(sid + ':' + token).toString('base64');
-  let twilioOk = false;
   try {
     const res = await fetch('https://api.twilio.com/2010-04-01/Accounts/' + sid + '/Messages.json', {
       method: 'POST',
@@ -62,29 +109,11 @@ exports.handler = async (event) => {
       },
       body: new URLSearchParams({ To: to, From: from, Body: HONOR_BODY }).toString()
     });
-    twilioOk = res.ok;
+    return res.ok;
   } catch (e) {
-    return json(502, { error: 'twilio_failed', sent: false });
+    return false;
   }
-  if (!twilioOk) return json(502, { error: 'twilio_failed', sent: false });
-
-  if (sbUrl && serviceKey) {
-    try {
-      await fetch(sbUrl + '/rest/v1/push_dispatch', {
-        method: 'POST',
-        headers: {
-          apikey: serviceKey,
-          Authorization: 'Bearer ' + serviceKey,
-          'Content-Type': 'application/json',
-          Prefer: 'return=minimal'
-        },
-        body: JSON.stringify({ kind: kind, meeting_key: meetingKey })
-      });
-    } catch (e) {}
-  }
-
-  return json(200, { ok: true, sent: true });
-};
+}
 
 function cors() {
   return {
