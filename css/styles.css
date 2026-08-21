@@ -8976,3 +8976,41 @@ body:has(#imin-a2hs-sheet:not(.hidden)) .bottom-nav {
   }
   #rsvp-btn.btn-rsvp.imin-strike::after { display: none !important; }
 }
+
+/* More — invite + share cards: copy and red CTAs centered */
+#view-about .install-card-more,
+#view-about .invite-card {
+  text-align: center;
+}
+#view-about .install-card-more .install-card-row,
+#view-about .invite-card .install-card-row {
+  justify-content: center;
+  text-align: center;
+}
+#view-about .install-card-more .install-card-body,
+#view-about .invite-card .install-card-body {
+  width: 100%;
+  text-align: center;
+}
+#view-about .install-card-more .install-card-title,
+#view-about .install-card-more .install-card-sub,
+#view-about .invite-card .install-card-title,
+#view-about .invite-card .install-card-sub {
+  text-align: center;
+}
+#view-about .install-card-more .install-card-actions,
+#view-about .invite-card .install-card-actions {
+  display: flex !important;
+  flex-direction: column;
+  align-items: stretch;
+  grid-template-columns: none !important;
+  width: 100%;
+}
+#view-about .install-card-more .install-card-btn,
+#view-about .invite-card .install-card-btn {
+  width: 100% !important;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
