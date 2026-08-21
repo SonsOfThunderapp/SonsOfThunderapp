@@ -370,9 +370,13 @@ begin
   end;
 end $$;
 
--- Anon may read the directory. Anon may not read the contact column.
--- Authenticated still reads the full row. Apply in SQL editor if this file was already run.
+-- PHONE VAULT (20260821-chief1)
+-- Anon may read the directory. Anon may not SELECT phone (column privilege).
+-- RLS cannot hide a column; GRANT/REVOKE does. Authenticated still reads the full row.
+-- THIS REPO PUSH DOES NOT APPLY LIVE POLICIES. Run this block in Supabase → SQL Editor.
 revoke select on table public.brothers from anon;
+revoke select (phone) on table public.brothers from anon;
+revoke select (phone) on table public.brothers from public;
 grant select (
   id,
   name,
@@ -385,4 +389,3 @@ grant select (
   owner_id
 ) on table public.brothers to anon;
 grant select on table public.brothers to authenticated;
-
