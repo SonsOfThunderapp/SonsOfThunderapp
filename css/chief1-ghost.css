@@ -1,0 +1,60 @@
+/* === 20260821-chief1 GHOST WORDMARK ===
+   Keep IMG_7697 lockup. Header is a flex sibling of #views; min-height:0
+   let it shrink so the die-cut PNG + bolt overlay painted over Home cards.
+   Solid black bar, no shrink, clip overflow so announcements never read
+   through the mark. Do not invent a new logo. Loaded after styles.css. */
+#app > #main-header.header,
+#main-header.header,
+#main-header,
+.header#main-header {
+  flex: 0 0 auto !important;
+  flex-shrink: 0 !important;
+  min-height: auto !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: hidden !important;
+  isolation: isolate !important;
+  contain: paint !important;
+  clip-path: inset(0) !important;
+  background: #000000 !important;
+  background-color: #000000 !important;
+  opacity: 1 !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 500 !important;
+  padding: calc(10px + env(safe-area-inset-top, 20px)) 12px 14px !important;
+  box-shadow: none !important;
+  border-bottom: none !important;
+}
+#main-header.header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #000000;
+  z-index: 0;
+  pointer-events: none;
+}
+#main-header .logo-wrap,
+.header .logo-wrap {
+  overflow: hidden !important;
+  background: #000000 !important;
+  isolation: isolate !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+#main-header .logo,
+#main-header #header-logo {
+  position: relative;
+  z-index: 2;
+}
+#main-header .logo-bolt-life {
+  max-width: 100% !important;
+  max-height: 100% !important;
+}
+#views,
+#view-home,
+#view-home .feed,
+#view-home .announcement-card {
+  position: relative;
+  z-index: 1;
+}
