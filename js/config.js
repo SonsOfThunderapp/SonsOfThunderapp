@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260821-stay1',
+  APP_BUILD: '20260821-mempage1',
   /* First-run tour is OPTIONAL. Thunder backstage invites once:
      "New here? Tap me. I'll show you the room." Tap Thunder or the bubble → tour.
      Ignore once = no nag. More → TAKE THE TOUR always remains. */
@@ -123,6 +123,17 @@ window.TB_CONFIG = {
       m.href = 'css/memories-latest.css?v=20260821-mem1';
       (document.head || document.documentElement).appendChild(m);
     }
+    if (!document.querySelector('link[href*="memories-page.css"]')) {
+      var p = document.createElement('link');
+      p.rel = 'stylesheet';
+      p.href = 'css/memories-page.css?v=20260821-mempage1';
+      (document.head || document.documentElement).appendChild(p);
+    }
+    try {
+      var ev = document.querySelector('.nav-item[data-view="events"] span');
+      if (ev) ev.textContent = 'Memories';
+    } catch (eNav) {}
+
   } catch (e) {}
   try {
     if (document.querySelector('script[src*="bday-autotext.js"]')) return;

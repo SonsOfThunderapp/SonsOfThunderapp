@@ -1,0 +1,15 @@
+/* Events tab is the Memories wall. Mission lives on Home. */
+#view-events .events-subhead,
+#view-events #activity-tags,
+#view-events #activity-feed,
+#view-events #events-section-title,
+#view-events #events-note,
+#view-events #upcoming-events,
+#view-events #next-mission-card {
+  display: none !important;
+}
+
+/* Room-cut was hiding the home mission card. Show it when it has copy. */
+body.tb-room-cut #home-mission:not(.hidden) {
+  display: block !important;
+}
