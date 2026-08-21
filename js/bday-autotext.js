@@ -17,7 +17,42 @@
     var el = document.getElementById('auth-error');
     if (el) el.textContent = msg || '';
   }
+  function injectSheet() {
+    var name = document.getElementById('auth-name');
+    var email = document.getElementById('auth-email');
+    var phone = document.getElementById('auth-phone');
+    var card = document.querySelector('#auth-gate .auth-card');
+    if (!card || !name || !phone) return;
+    if (email) {
+      email.placeholder = 'Email (optional)';
+      try { card.insertBefore(phone, email); } catch (e) {}
+    }
+    if (!document.getElementById('auth-sms-opt')) {
+      var label = document.createElement('label');
+      label.className = 'auth-sms-opt';
+      label.setAttribute('for', 'auth-sms-opt');
+      var box = document.createElement('input');
+      box.type = 'checkbox';
+      box.id = 'auth-sms-opt';
+      var span = document.createElement('span');
+      span.textContent = 'Yes — text me once about the birthday honor';
+      label.appendChild(box);
+      label.appendChild(span);
+      if (email) {
+        try { card.insertBefore(label, email); } catch (e) { card.appendChild(label); }
+      } else {
+        phone.parentNode.insertBefore(label, phone.nextSibling);
+      }
+    }
+    if (!document.getElementById('tb-bday-sms-style')) {
+      var st = document.createElement('style');
+      st.id = 'tb-bday-sms-style';
+      st.textContent = '.auth-sms-opt{display:flex;align-items:flex-start;gap:10px;text-align:left;color:#ccc;font-size:14px;line-height:1.35;margin:2px 0 12px;cursor:pointer;font-family:Inter,system-ui,sans-serif}.auth-sms-opt input[type=checkbox]{width:18px;height:18px;margin:2px 0 0;flex:0 0 18px;accent-color:#E8B923}';
+      document.head.appendChild(st);
+    }
+  }
   function stash() {
+    injectSheet();
     var name = ((document.getElementById('auth-name') && document.getElementById('auth-name').value) || '').trim();
     var email = ((document.getElementById('auth-email') && document.getElementById('auth-email').value) || '').trim();
     var phone = ((document.getElementById('auth-phone') && document.getElementById('auth-phone').value) || '').trim();
@@ -127,6 +162,17 @@
       }
     } catch (e) {}
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', applyBdayLink);
-  else applyBdayLink();
+
+  function boot() {
+    injectSheet();
+    applyBdayLink();
+    var gate = document.getElementById('auth-gate');
+    if (gate && !gate.dataset.tbBdayObs) {
+      gate.dataset.tbBdayObs = '1';
+      var obs = new MutationObserver(function () { injectSheet(); });
+      obs.observe(gate, { attributes: true, attributeFilter: ['class'] });
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
 })();
