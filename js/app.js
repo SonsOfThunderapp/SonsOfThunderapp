@@ -808,6 +808,31 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     try { return !!(window.TB_CONFIG && window.TB_CONFIG.ROOM_CUT); } catch (e) { return false; }
   }
 
+  /* Screen Wake Lock (Safari 18.4+ / iOS Home Screen). Patio raffle, Axum QR, tour. */
+  const __tbWakeReasons = new Set();
+  let __tbWakeSentinel = null;
+  async function tbKeepAwake(reason) {
+    if (reason) __tbWakeReasons.add(reason);
+    if (!__tbWakeReasons.size) return;
+    try {
+      if (!navigator.wakeLock || !navigator.wakeLock.request) return;
+      if (__tbWakeSentinel && __tbWakeSentinel.released === false) return;
+      __tbWakeSentinel = await navigator.wakeLock.request('screen');
+      __tbWakeSentinel.addEventListener('release', function () { __tbWakeSentinel = null; });
+    } catch (e) {}
+  }
+  function tbAllowSleep(reason) {
+    if (reason) __tbWakeReasons.delete(reason);
+    if (__tbWakeReasons.size) return;
+    try { if (__tbWakeSentinel && __tbWakeSentinel.release) __tbWakeSentinel.release(); } catch (e) {}
+    __tbWakeSentinel = null;
+  }
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && __tbWakeReasons.size) {
+      tbKeepAwake();
+    }
+  });
+
   function currentUser() {
     return (sbSession && sbSession.user) || null;
   }
@@ -921,6 +946,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     const el = document.getElementById('axum-drop');
     if (el) el.classList.add('hidden');
     document.body.classList.remove('tb-axum-open');
+    try { tbAllowSleep('axum'); } catch (e) {}
   }
 
   function closeAxumCard() {
@@ -928,6 +954,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     if (el) el.classList.add('hidden');
     document.body.classList.remove('tb-axum-open');
     renderAxumChip();
+    try { tbAllowSleep('axum'); } catch (e) {}
   }
 
   function openAxumCard() {
@@ -959,6 +986,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     paintAxumQr(c.code);
     card.classList.remove('hidden');
     document.body.classList.add('tb-axum-open');
+    try { tbKeepAwake('axum'); } catch (e) {}
   }
 
   function openAxumDrop() {
@@ -968,6 +996,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     if (!drop) return;
     drop.classList.remove('hidden');
     document.body.classList.add('tb-axum-open');
+    try { tbKeepAwake('axum'); } catch (e) {}
   }
 
   function maybeShowAxumCoffee() {
@@ -4819,6 +4848,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       overlay.setAttribute('aria-hidden', 'true');
     }
     document.body.classList.remove('tb-raffle-live');
+    try { tbAllowSleep('raffle'); } catch (e) {}
   }
 
   const RAFFLE_CAST = [
@@ -4858,6 +4888,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     overlay.classList.remove('hidden', 'is-landed');
     overlay.setAttribute('aria-hidden', 'false');
     document.body.classList.add('tb-raffle-live');
+    try { tbKeepAwake('raffle'); } catch (e) {}
     const host = document.getElementById('raffle-live-host');
     if (host) {
       host.style.animation = 'none';
@@ -9771,6 +9802,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     root.classList.remove('hidden');
     root.setAttribute('aria-hidden', 'false');
     document.body.classList.add('tb-tour-open');
+    try { tbKeepAwake('tour'); } catch (e) {}
     syncTourExitUI();
     renderTourSlide();
   }
@@ -9791,6 +9823,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     document.body.classList.remove('tb-tour-open');
     document.body.classList.remove('tb-tour-mandatory');
     __tourActive = false;
+    try { tbAllowSleep('tour'); } catch (e) {}
   }
 
   function isTourMandatory() {
