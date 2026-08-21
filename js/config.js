@@ -44,7 +44,7 @@ window.TB_CONFIG = {
      This build freezes every signed-off system through cohe1/tap/voice/hero.
      Do not strip systems listed in SOURCE-OF-TRUTH.md without explicit user order.
      Housekeeping may repair collisions; it may not delete product surface.
-     ─────────────────────────────────────────────────────────── */
+     ─────────────────────────────────────── */
   PRODUCT_LOCK: {
     date: '2026-08-16',
     label: 'LOCKED',
@@ -63,7 +63,7 @@ window.TB_CONFIG = {
      Must pulse via boltLive / --tb-breathe with every other bolt
      Logo: bolt-only effects; NEVER full-box gradient/slab on wordmark
      Install explainer: CapCut VO, H.264+AAC, keepAudio true
-     ─────────────────────────────────────────────────────────── */
+     ─────────────────────────────────────── */
   /* LOGO CANON — OLD WORDMARK BANNED FOREVER
      Production header/splash/about MUST use assets/logo@2x.png + logo@3x.png
      derived ONLY from assets/CANONICAL/logo-official-7697-header.png (IMG_7697).
@@ -127,27 +127,27 @@ window.TB_CONFIG = {
   VENUE: 'Crooked Can Brewery Patio, Winter Garden',
   MEETING_TIME: '6:30 PM',
 
-  /* ── INSTALL EXPLAINER (LOCKED) ─────────────────────────────────
+  /* ── INSTALL EXPLAINER (LOCKED) ─────────────────────────────
      Source: CapCut VO cut. Asset: assets/install-explainer.mp4
      Encode: H.264 ~30fps ~540w + AAC voiceover + faststart.
      NEVER: mute permanently, strip audio, ship 120fps/HEVC, show native controls.
      Playback: HOW opens modal (user gesture) → try play WITH sound →
        if blocked, muted fallback + tap video to unmute/replay from 0 → loop.
      Close: pause + currentTime = 0.
-     ───────────────────────────────────────────────────────────── */
+     ─────────────────────────────────────────── */
 
-  /* ── SAVE REWARD (LOCKED) ───────────────────────────────────
+  /* ── SAVE REWARD (LOCKED) ───────────────────────────────
      ~3s Thunder pulse after successful profile save or new memory.
      Official bolt-only.png, masculine, no confetti / points / social.
      Only on real success — never on failed upload.
-     ───────────────────────────────────────────────────────────── */
+     ───────────────────────────────────────── */
 
-  /* ── SENSORY LIFE BLOOD (LOCKED) ─────────────────────────────
+  /* ── SENSORY LIFE BLOOD (LOCKED) ───────────────────────────
      Visual feedback is required on every platform.
      Vibration is optional Android progressive enhancement only.
      iPhone PWA has no navigator.vibrate — never force it.
      Semantic API only: thunderImpact / press / confirm / warningOrError / selection
-     ───────────────────────────────────────────────────────────── */
+     ───────────────────────────────────────── */
   SENSORY: {
     vibrateEnabled: true,
     /* iPhone web/PWA: Vibration API unsupported — visual tactility only */
@@ -198,3 +198,14 @@ window.TB_CONFIG = {
   // Web Push — PUBLIC key only. Private key is Netlify env VAPID_PRIVATE_KEY (never in client).
   VAPID_PUBLIC_KEY: 'BGRjLCD3QnLBxb2VFNgxpGcJ1Ptxosp8yGq8yiJTGm2YS8OHVYsOhVvCFpmyREbeQsmsq6NaJ42j9yMx19Vl6hE'
 };
+
+/* 20260821-chief1: load ghost-wordmark lock after styles.css (same rules as css/styles.css end lock). */
+(function () {
+  try {
+    if (document.querySelector('link[href*="chief1-ghost.css"]')) return;
+    var l = document.createElement('link');
+    l.rel = 'stylesheet';
+    l.href = 'css/chief1-ghost.css?v=20260821-chief1';
+    (document.head || document.documentElement).appendChild(l);
+  } catch (e) {}
+})();
