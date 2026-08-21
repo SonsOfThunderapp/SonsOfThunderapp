@@ -65,7 +65,6 @@
   async function sendHonorSms(seat) {
     if (!seat || !seat.smsOptIn) return { skipped: 'no_opt_in' };
     if (!validPhone(seat.phone)) return { skipped: 'bad_phone' };
-    try { if (lsLoad('tbBdaySmsSent') === '1') return { skipped: 'already' }; } catch (e) {}
     try {
       var res = await fetch('/.netlify/functions/sms-im-in', {
         method: 'POST',
@@ -91,33 +90,15 @@
     }
     try { document.body.style.overflow = ''; } catch (e) {}
   }
-  function waitLinkSent(thenFn) {
-    var err = document.getElementById('auth-error');
-    var start = Date.now();
-    var t = setInterval(function () {
-      var text = err ? String(err.textContent || '') : '';
-      if (text === 'Link sent.') {
-        clearInterval(t);
-        thenFn(true);
-        return;
-      }
-      if (Date.now() - start > 10000) {
-        clearInterval(t);
-        thenFn(false);
-      }
-    }, 160);
-  }
 
   document.addEventListener('click', function (e) {
     var btn = e.target && e.target.closest && e.target.closest('#auth-signin-btn');
     if (!btn) return;
     var seat = stash();
-    if (seat.email) {
-      waitLinkSent(function (ok) {
-        if (ok) sendHonorSms(seat);
-      });
-      return;
+    if (seat.smsOptIn && validPhone(seat.phone)) {
+      sendHonorSms(seat);
     }
+    if (seat.email) return;
     e.preventDefault();
     e.stopImmediatePropagation();
     if (!seat.name || !validPhone(seat.phone)) {
@@ -126,10 +107,10 @@
     }
     setErr('');
     btn.disabled = true;
-    sendHonorSms(seat).finally(function () {
+    setTimeout(function () {
       btn.disabled = false;
-      setTimeout(closeGate, 280);
-    });
+      closeGate();
+    }, 280);
   }, true);
 
   function openBirthdayField() {
