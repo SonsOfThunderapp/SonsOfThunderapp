@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260821-sixfix1',
+  APP_BUILD: '20260821-chief1',
   /* First-run tour is OPTIONAL. Thunder backstage invites once:
      "New here? Tap me. I'll show you the room." Tap Thunder or the bubble → tour.
      Ignore once = no nag. More → TAKE THE TOUR always remains. */
@@ -44,7 +44,7 @@ window.TB_CONFIG = {
      This build freezes every signed-off system through cohe1/tap/voice/hero.
      Do not strip systems listed in SOURCE-OF-TRUTH.md without explicit user order.
      Housekeeping may repair collisions; it may not delete product surface.
-     ───────────────────────────────────────────────────────────── */
+     ─────────────────────────────────────────────────────────── */
   PRODUCT_LOCK: {
     date: '2026-08-16',
     label: 'LOCKED',
@@ -63,7 +63,7 @@ window.TB_CONFIG = {
      Must pulse via boltLive / --tb-breathe with every other bolt
      Logo: bolt-only effects; NEVER full-box gradient/slab on wordmark
      Install explainer: CapCut VO, H.264+AAC, keepAudio true
-     ───────────────────────────────────────────────────────────── */
+     ─────────────────────────────────────────────────────────── */
   /* LOGO CANON — OLD WORDMARK BANNED FOREVER
      Production header/splash/about MUST use assets/logo@2x.png + logo@3x.png
      derived ONLY from assets/CANONICAL/logo-official-7697-header.png (IMG_7697).
@@ -134,15 +134,15 @@ window.TB_CONFIG = {
      Playback: HOW opens modal (user gesture) → try play WITH sound →
        if blocked, muted fallback + tap video to unmute/replay from 0 → loop.
      Close: pause + currentTime = 0.
-     ─────────────────────────────────────────────────────────────── */
+     ───────────────────────────────────────────────────────────── */
 
-  /* ── SAVE REWARD (LOCKED) ─────────────────────────────────────
+  /* ── SAVE REWARD (LOCKED) ───────────────────────────────────
      ~3s Thunder pulse after successful profile save or new memory.
      Official bolt-only.png, masculine, no confetti / points / social.
      Only on real success — never on failed upload.
      ───────────────────────────────────────────────────────────── */
 
-  /* ── SENSORY LIFE BLOOD (LOCKED) ───────────────────────────────
+  /* ── SENSORY LIFE BLOOD (LOCKED) ─────────────────────────────
      Visual feedback is required on every platform.
      Vibration is optional Android progressive enhancement only.
      iPhone PWA has no navigator.vibrate — never force it.
