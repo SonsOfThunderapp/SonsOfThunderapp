@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260822-memclean1',
+  APP_BUILD: '20260822-lead7b',
   /* First-run tour AUTO-STARTS once for a new phone. Skip stays.
      Already finished (thunderTourV42 done) = no nag. More → TAKE THE TOUR remains. */
   /* I'M IN vault locked 2026-08-21 — live-coal rest, bolt strike, yellow settle,
@@ -112,7 +112,7 @@ window.TB_CONFIG = {
     if (!document.querySelector('link[href*="chief1-ghost.css"]')) {
       var l = document.createElement('link');
       l.rel = 'stylesheet';
-      l.href = 'css/chief1-ghost.css?v=20260822-memclean1';
+      l.href = 'css/chief1-ghost.css?v=20260822-lead7b';
       (document.head || document.documentElement).appendChild(l);
     }
 
@@ -164,7 +164,7 @@ window.TB_CONFIG = {
       var name = src.split('/').pop();
       if (document.querySelector('script[src*="' + name + '"]')) return;
       var sc = document.createElement('script');
-      sc.src = src + '?v=20260822-memclean1';
+      sc.src = src + '?v=20260822-lead7b';
       sc.defer = true;
       (document.body || document.documentElement).appendChild(sc);
     });
@@ -173,21 +173,21 @@ window.TB_CONFIG = {
 
     if (!document.querySelector('script[src*="leader-door.js"]')) {
       var ld = document.createElement('script');
-      ld.src = 'js/leader-door.js?v=20260822-memclean1';
+      ld.src = 'js/leader-door.js?v=20260822-lead7b';
       ld.defer = true;
       (document.body || document.documentElement).appendChild(ld);
     }
 
     if (!document.querySelector('script[src*="tour-first.js"]')) {
       var tf = document.createElement('script');
-      tf.src = 'js/tour-first.js?v=20260822-memclean1';
+      tf.src = 'js/tour-first.js?v=20260822-lead7b';
       tf.defer = true;
       (document.body || document.documentElement).appendChild(tf);
     }
 
     if (!document.querySelector('script[src*="more-legal.js"]')) {
       var ml = document.createElement('script');
-      ml.src = 'js/more-legal.js?v=20260822-memclean1';
+      ml.src = 'js/more-legal.js?v=20260822-lead7b';
       ml.defer = true;
       (document.body || document.documentElement).appendChild(ml);
     }

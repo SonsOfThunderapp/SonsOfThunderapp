@@ -1,16 +1,30 @@
 /* More page: hide the Leadership button. Seven taps on the bolt
-   above Gathering Alerts opens chair tools. Live app.js is chair-account
-   only — btn.click() may no-op if not signed in. After 7 taps, reveal
-   existing #leader-tools / .admin-zone if no modal appears.
-   20260822-flowfix1: pointerdown+click on bolt and img; no preventDefault;
-   retry bind until bolt exists. */
+   above Gathering Alerts opens the existing chair tools panel.
+   Live app.js is chair-account only (requireLeader / refreshChairMode).
+   After 7 taps, keep #leader-tools / .admin-zone visible via session
+   flag tb_leaderDoor=1, MutationObserver, and a short re-apply timer.
+   20260822-lead7b */
 (function () {
   var NEED = 7;
   var GAP_MS = 1600;
+  var FLAG = 'tb_leaderDoor';
   var taps = 0;
   var last = 0;
   var lastEvent = 0;
   var bound = false;
+  var keepIv = null;
+
+  function doorOn() {
+    try { return sessionStorage.getItem(FLAG) === '1'; } catch (e) {
+      return window.__tbLeaderDoor === 1;
+    }
+  }
+
+  function setDoor() {
+    try { sessionStorage.setItem(FLAG, '1'); } catch (e) {
+      window.__tbLeaderDoor = 1;
+    }
+  }
 
   function hideButton() {
     var btn = document.getElementById('leader-unlock-btn');
@@ -21,33 +35,27 @@
     btn.tabIndex = -1;
   }
 
-  function toolsVisible() {
-    var tools = document.getElementById('leader-tools');
-    if (tools && !tools.classList.contains('hidden') && !tools.hidden) return true;
-    var modal = document.querySelector('.modal:not(.hidden)');
-    if (modal && /admin|leader/i.test(modal.id || '')) return true;
-    return false;
+  function showEl(el) {
+    if (!el) return;
+    el.classList.remove('hidden');
+    el.removeAttribute('hidden');
+    el.setAttribute('aria-hidden', 'false');
+    if (el.style && el.style.display === 'none') el.style.display = '';
+    if (el.style && el.style.visibility === 'hidden') el.style.visibility = 'visible';
   }
 
-  function revealTools() {
-    var zone = document.querySelector('.admin-zone');
-    if (zone) {
-      zone.classList.remove('hidden');
-      zone.removeAttribute('hidden');
-      zone.style.display = '';
-    }
-    var tools = document.getElementById('leader-tools');
-    if (tools) {
-      tools.classList.remove('hidden');
-      tools.removeAttribute('hidden');
-      tools.setAttribute('aria-hidden', 'false');
-      tools.style.display = '';
-    }
+  function findPinField() {
+    return document.querySelector(
+      '#leader-pin, #leader-pin-input, #pin-input, input[name="leader-pin"], input[id*="leader-pin"]'
+    );
   }
 
-  function openDoor() {
-    var btn = document.getElementById('leader-unlock-btn');
-    if (btn) {
+  function wireExistingPin(input) {
+    if (!input || input.getAttribute('data-tb-pinwire') === '1') return;
+    input.setAttribute('data-tb-pinwire', '1');
+    function go() {
+      var btn = document.getElementById('leader-unlock-btn');
+      if (!btn) return;
       try {
         btn.hidden = false;
         btn.style.display = 'none';
@@ -55,12 +63,90 @@
         btn.hidden = true;
       } catch (e) {}
     }
-    setTimeout(function () {
-      if (!toolsVisible()) revealTools();
-    }, 60);
+    var form = input.form || input.closest('form');
+    if (form) {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        go();
+      });
+    }
+    var nearby = input.parentNode && input.parentNode.querySelector('button');
+    if (nearby) {
+      nearby.addEventListener('click', function (e) {
+        e.preventDefault();
+        go();
+      });
+    }
   }
 
-  function onTap(e) {
+  function toolsHaveControls() {
+    var tools = document.getElementById('leader-tools');
+    return !!(tools && tools.querySelector('button, a, input'));
+  }
+
+  function ensureOverlay() {
+    if (document.getElementById('tb-chair-door')) return;
+    var box = document.createElement('div');
+    box.id = 'tb-chair-door';
+    box.setAttribute('role', 'dialog');
+    box.setAttribute('aria-label', 'Chair tools');
+    box.style.cssText = 'position:fixed;left:12px;right:12px;bottom:88px;z-index:9999;background:#111;color:#f4f0e6;border:1px solid #c8a44e;padding:14px 16px;border-radius:10px;font:15px/1.4 system-ui,sans-serif;';
+    var title = document.createElement('div');
+    title.textContent = 'Chair tools';
+    title.style.cssText = 'font-weight:700;margin-bottom:8px;';
+    box.appendChild(title);
+    var acts = document.createElement('div');
+    box.appendChild(acts);
+    function addIfExists(sel, label) {
+      var src = document.querySelector(sel);
+      if (!src) return;
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = label;
+      b.style.cssText = 'display:block;width:100%;margin:8px 0 0;padding:10px;background:#1a1a1a;color:#f4f0e6;border:1px solid #c8a44e;';
+      b.addEventListener('click', function () { try { src.click(); } catch (e) {} });
+      acts.appendChild(b);
+    }
+    addIfExists('#refresh-app-btn, #leader-refresh-btn, #admin-refresh-btn', 'REFRESH');
+    addIfExists('#ping-btn, #leader-ping-btn, #admin-ping-btn', 'PING');
+    document.body.appendChild(box);
+  }
+
+  function applyDoor() {
+    if (!doorOn()) return;
+    hideButton();
+    showEl(document.querySelector('.admin-zone'));
+    showEl(document.getElementById('leader-tools'));
+    var pin = findPinField();
+    if (pin) {
+      showEl(pin);
+      showEl(pin.closest('form, .modal, .admin-zone, div'));
+      wireExistingPin(pin);
+    }
+    if (!toolsHaveControls()) ensureOverlay();
+  }
+
+  function startKeep() {
+    if (!keepIv) keepIv = setInterval(applyDoor, 350);
+    if (window.__tbLeaderDoorObs || !document.body) return;
+    try {
+      var obs = new MutationObserver(function () { applyDoor(); });
+      obs.observe(document.body, {
+        attributes: true,
+        subtree: true,
+        attributeFilter: ['class', 'hidden', 'style', 'aria-hidden']
+      });
+      window.__tbLeaderDoorObs = obs;
+    } catch (e) {}
+  }
+
+  function openDoor() {
+    setDoor();
+    applyDoor();
+    startKeep();
+  }
+
+  function onTap() {
     var now = Date.now();
     if (now - lastEvent < 280) return;
     lastEvent = now;
@@ -107,7 +193,10 @@
   }
 
   function boot() {
-    try { bind(); } catch (e) {}
+    try {
+      bind();
+      if (doorOn()) openDoor();
+    } catch (e) {}
   }
 
   if (document.readyState === 'loading') {
