@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260821-memenhance1',
+  APP_BUILD: '20260822-flowfix1',
   /* First-run tour AUTO-STARTS once for a new phone. Skip stays.
      Already finished (thunderTourV42 done) = no nag. More → TAKE THE TOUR remains. */
   /* I'M IN vault locked 2026-08-21 — live-coal rest, bolt strike, yellow settle,
@@ -97,13 +97,7 @@ window.TB_CONFIG = {
     loop: true,
     noNativeControls: true
   },
-  PUBLIC_ORIGIN: '',
-  LEADER_PIN: 'thunder-board-lead',
-  LEADER_SMS_PARTS: ['40', '77', '39', '62', '43'],
-  SUPABASE_URL: 'https://mnsempcgomukcpofgvlm.supabase.co',
-  SUPABASE_ANON_KEY: 'sb_publishable_QkUCt8trZ0vUwXmqfaUQwg_qXZ5_87m',
-  MEMORIES_BUCKET: 'Sons Of Thunder Memories',
-  VAPID_PUBLIC_KEY: 'BGRjLCD3QnLBxb2VFNgxpGcJ1Ptxosp8yGq8yiJTGm2YS8OHVYsOhVvCFpmyREbeQsmsq6NaJ42j9yMx19Vl6hE'
+  PUBLIC_ORIGIN: ''
 };
 
 /* 20260821-bday2: ghost-wordmark + birthday-honor lock companion */
@@ -112,7 +106,7 @@ window.TB_CONFIG = {
     if (!document.querySelector('link[href*="chief1-ghost.css"]')) {
       var l = document.createElement('link');
       l.rel = 'stylesheet';
-      l.href = 'css/chief1-ghost.css?v=20260821-memwall3';
+      l.href = 'css/chief1-ghost.css?v=20260822-flowfix1';
       (document.head || document.documentElement).appendChild(l);
     }
 
@@ -167,7 +161,7 @@ window.TB_CONFIG = {
       var name = src.split('/').pop();
       if (document.querySelector('script[src*="' + name + '"]')) return;
       var sc = document.createElement('script');
-      sc.src = src + '?v=20260821-memwall3';
+      sc.src = src + '?v=20260822-flowfix1';
       sc.defer = true;
       (document.body || document.documentElement).appendChild(sc);
     });
@@ -176,16 +170,23 @@ window.TB_CONFIG = {
 
     if (!document.querySelector('script[src*="leader-door.js"]')) {
       var ld = document.createElement('script');
-      ld.src = 'js/leader-door.js?v=20260821-lead7';
+      ld.src = 'js/leader-door.js?v=20260822-flowfix1';
       ld.defer = true;
       (document.body || document.documentElement).appendChild(ld);
     }
 
     if (!document.querySelector('script[src*="tour-first.js"]')) {
       var tf = document.createElement('script');
-      tf.src = 'js/tour-first.js?v=20260821-tour1';
+      tf.src = 'js/tour-first.js?v=20260822-flowfix1';
       tf.defer = true;
       (document.body || document.documentElement).appendChild(tf);
+    }
+
+    if (!document.querySelector('script[src*="more-legal.js"]')) {
+      var ml = document.createElement('script');
+      ml.src = 'js/more-legal.js?v=20260822-flowfix1';
+      ml.defer = true;
+      (document.body || document.documentElement).appendChild(ml);
     }
 
     if (!document.querySelector('script[src*="thunder-ask.js"]')) {
