@@ -1,14 +1,7 @@
 /* hangout tour extras — TAKE THE TOUR only, no auto-start */
 (function(){
 if (window.__tbHangoutTour) return; window.__tbHangoutTour=true;
-var SRC=[
-  'assets/tour-hangouts/06-reading.jpg?v=hangout1',
-  'assets/tour-hangouts/01-patio.jpg?v=hangout1',
-  'assets/tour-hangouts/04-pickle.jpg?v=hangout1',
-  'assets/tour-hangouts/03-grill.jpg?v=hangout1',
-  'assets/tour-hangouts/05-birthday.jpg?v=hangout1',
-  'assets/tour-hangouts/02-fire.jpg?v=hangout1'
-];
+var SRC=window.TB_HANG_SRC||[];
 var TALK=[
   ["Quiet's fine.","When it isn't, ask."],
   ["You coming Monday?","That's the door. I'M IN."],
