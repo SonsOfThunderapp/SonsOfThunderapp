@@ -127,3 +127,10 @@ body.tb-tour-open #tb-tour { display:none !important; }
     object-position: center center !important;
   }
 }
+
+/* 20260822-chrome4: force pane switch; FAB off the dock hit targets */
+#view-home.active,#view-brothers.active,#view-events.active,#view-about.active{display:block!important;visibility:visible!important;opacity:1!important;position:relative!important;z-index:2!important}
+.view:not(.active){display:none!important}
+#thunder-fab{bottom:120px!important;width:48px!important;height:48px!important;pointer-events:auto}
+nav.bottom-nav{z-index:80!important;pointer-events:auto!important}
+.nav-item{pointer-events:auto!important}
