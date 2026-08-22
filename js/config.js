@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260821-tour1',
+  APP_BUILD: '20260821-ask1',
   /* First-run tour AUTO-STARTS once for a new phone. Skip stays.
      Already finished (thunderTourV42 done) = no nag. More → TAKE THE TOUR remains. */
   /* I'M IN vault locked 2026-08-21 — live-coal rest, bolt strike, yellow settle,
@@ -178,6 +178,13 @@ window.TB_CONFIG = {
       tf.src = 'js/tour-first.js?v=20260821-tour1';
       tf.defer = true;
       (document.body || document.documentElement).appendChild(tf);
+    }
+
+    if (!document.querySelector('script[src*="thunder-ask.js"]')) {
+      var ta = document.createElement('script');
+      ta.src = 'js/thunder-ask.js?v=20260821-ask1';
+      ta.defer = true;
+      (document.body || document.documentElement).appendChild(ta);
     }
 
     if (document.querySelector('script[src*="bday-autotext.js"]')) return;
