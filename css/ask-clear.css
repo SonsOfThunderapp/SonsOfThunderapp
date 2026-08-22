@@ -1,23 +1,25 @@
-/* Ask Thunder: tuxedo never covers the answer. */
+/* Ask Thunder: tuxedo never covers the answer. Head only once Grok replies. */
 .thunder-ask-hero {
   overflow: hidden !important;
   flex: 0 0 auto !important;
-  max-height: 28vh !important;
+  max-height: 88px !important;
   z-index: 1 !important;
   pointer-events: none !important;
+  padding: 4px 0 0 !important;
 }
 .thunder-ask-hero-img {
-  width: min(168px, 46vw) !important;
-  max-height: 26vh !important;
-  object-fit: contain !important;
-  object-position: center top !important;
+  width: 72px !important;
+  height: 72px !important;
+  max-height: 72px !important;
+  object-fit: cover !important;
+  object-position: 50% 10% !important;
 }
 .thunder-modal .thunder-messages {
   position: relative !important;
   z-index: 6 !important;
   background: #0a0a0a !important;
   flex: 1 1 auto !important;
-  min-height: 30vh !important;
+  min-height: 36vh !important;
 }
 .thunder-msg.assistant,
 .thunder-msg.user,
@@ -26,15 +28,17 @@
   z-index: 7 !important;
 }
 #thunder-modal.tb-ask-has-reply .thunder-ask-hero {
-  max-height: 14vh !important;
+  max-height: 64px !important;
   padding-top: 2px !important;
   padding-bottom: 0 !important;
 }
 #thunder-modal.tb-ask-has-reply .thunder-ask-hero-img {
-  width: min(92px, 26vw) !important;
-  max-height: 13vh !important;
+  width: 56px !important;
+  height: 56px !important;
+  max-height: 56px !important;
+  object-fit: cover !important;
+  object-position: 50% 8% !important;
 }
 #thunder-modal.tb-ask-has-reply .thunder-ask-hero::before {
-  width: min(28vw, 96px) !important;
-  height: min(28vw, 96px) !important;
+  display: none !important;
 }
