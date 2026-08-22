@@ -151,6 +151,8 @@ window.TB_CONFIG = {
       'js/memories-seed-l.js',
       'js/memories-seed-m.js',
       'js/memories-seed-n.js',
+      'js/memories-seed-o.js',
+      'js/memories-seed-p.js',
       'js/memories-seed-q.js',
       'js/memories-grid.js'
     ];
