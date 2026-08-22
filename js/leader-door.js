@@ -3,10 +3,10 @@
    Live app.js is chair-account only (requireLeader / refreshChairMode).
    After 7 taps, keep #leader-tools / .admin-zone visible via session
    flag tb_leaderDoor=1, MutationObserver, and a short re-apply timer.
-   20260822-lead7c */
+   20260822-lead7d */
 (function () {
   var NEED = 7;
-  var GAP_MS = 4000;
+  var GAP_MS = 1400;
   var FLAG = 'tb_leaderDoor';
   var taps = 0;
   var last = 0;
