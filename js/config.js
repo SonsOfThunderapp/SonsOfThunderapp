@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260822-noroomtrap1',
+  APP_BUILD: '20260822-tourkill1',
   /* First-run tour does NOT auto-start. New phone lands in the room.
      Already finished (thunderTourV42 done) = no nag. More → TAKE THE TOUR remains. */
   /* I'M IN vault locked 2026-08-21 — live-coal rest, bolt strike, yellow settle,
@@ -112,28 +112,28 @@ window.TB_CONFIG = {
     if (!document.querySelector('link[href*="chief1-ghost.css"]')) {
       var l = document.createElement('link');
       l.rel = 'stylesheet';
-      l.href = 'css/chief1-ghost.css?v=20260822-noroomtrap1';
+      l.href = 'css/chief1-ghost.css?v=20260822-tourkill1';
       (document.head || document.documentElement).appendChild(l);
     }
 
     if (!document.querySelector('link[href*="memories-latest.css"]')) {
       var m = document.createElement('link');
       m.rel = 'stylesheet';
-      m.href = 'css/memories-latest.css?v=20260822-noroomtrap1';
+      m.href = 'css/memories-latest.css?v=20260822-tourkill1';
       (document.head || document.documentElement).appendChild(m);
     }
 
     if (!document.querySelector('link[href*="ask-clear.css"]')) {
       var ac = document.createElement('link');
       ac.rel = 'stylesheet';
-      ac.href = 'css/ask-clear.css?v=20260822-noroomtrap1';
+      ac.href = 'css/ask-clear.css?v=20260822-tourkill1';
       (document.head || document.documentElement).appendChild(ac);
     }
 
     if (!document.querySelector('link[href*="memories-page.css"]')) {
       var p = document.createElement('link');
       p.rel = 'stylesheet';
-      p.href = 'css/memories-page.css?v=20260822-noroomtrap1';
+      p.href = 'css/memories-page.css?v=20260822-tourkill1';
       (document.head || document.documentElement).appendChild(p);
     }
     try {
@@ -145,7 +145,7 @@ window.TB_CONFIG = {
   try {
     if (!document.querySelector('script[src*="memories-grid.js"]')) {
       var mg = document.createElement('script');
-      mg.src = 'js/memories-grid.js?v=20260822-noroomtrap1';
+      mg.src = 'js/memories-grid.js?v=20260822-tourkill1';
       mg.defer = true;
       (document.body || document.documentElement).appendChild(mg);
     }
@@ -154,42 +154,49 @@ window.TB_CONFIG = {
 
     if (!document.querySelector('script[src*="leader-door.js"]')) {
       var ld = document.createElement('script');
-      ld.src = 'js/leader-door.js?v=20260822-noroomtrap1';
+      ld.src = 'js/leader-door.js?v=20260822-tourkill1';
       ld.defer = true;
       (document.body || document.documentElement).appendChild(ld);
     }
 
+    if (!document.querySelector('script[src*="tour-kill.js"]')) {
+      var tk = document.createElement('script');
+      tk.src = 'js/tour-kill.js?v=20260822-tourkill1';
+      tk.defer = true;
+      (document.body || document.documentElement).appendChild(tk);
+    }
+
     if (!document.querySelector('script[src*="tour-first.js"]')) {
       var tf = document.createElement('script');
-      tf.src = 'js/tour-first.js?v=20260822-noroomtrap1';
+      tf.src = 'js/tour-first.js?v=20260822-tourkill1';
       tf.defer = true;
       (document.body || document.documentElement).appendChild(tf);
     }
 
     if (!document.querySelector('script[src*="more-legal.js"]')) {
       var ml = document.createElement('script');
-      ml.src = 'js/more-legal.js?v=20260822-noroomtrap1';
+      ml.src = 'js/more-legal.js?v=20260822-tourkill1';
       ml.defer = true;
       (document.body || document.documentElement).appendChild(ml);
     }
 
     if (!document.querySelector('script[src*="thunder-ask.js"]')) {
       var ta = document.createElement('script');
-      ta.src = 'js/thunder-ask.js?v=20260822-noroomtrap1';
+      ta.src = 'js/thunder-ask.js?v=20260822-tourkill1';
       ta.defer = true;
       (document.body || document.documentElement).appendChild(ta);
     }
 
     if (!document.querySelector('script[src*="ask-clear.js"]')) {
       var aj = document.createElement('script');
-      aj.src = 'js/ask-clear.js?v=20260822-noroomtrap1';
+      aj.src = 'js/ask-clear.js?v=20260822-tourkill1';
       aj.defer = true;
       (document.body || document.documentElement).appendChild(aj);
     }
 
     if (document.querySelector('script[src*="bday-autotext.js"]')) return;
     var s = document.createElement('script');
-    s.src = 'js/bday-autotext.js?v=20260822-noroomtrap1';
+    s.src = 'js/bday-autotext.js?v=20260822-tourkill1';
     s.defer = true;
     (document.body || document.documentElement).appendChild(s);
   } catch (e2) {}
