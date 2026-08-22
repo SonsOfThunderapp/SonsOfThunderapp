@@ -209,6 +209,42 @@ window.TB_CONFIG = {
     }
 
 
+    if (!document.querySelector('script[src*="hangout-still-0.js"]')) {
+      var hs0 = document.createElement('script');
+      hs0.src = 'js/hangout-still-0.js?v=20260822-hangout1';
+      hs0.defer = true;
+      (document.body || document.documentElement).appendChild(hs0);
+    }
+    if (!document.querySelector('script[src*="hangout-still-1.js"]')) {
+      var hs1 = document.createElement('script');
+      hs1.src = 'js/hangout-still-1.js?v=20260822-hangout1';
+      hs1.defer = true;
+      (document.body || document.documentElement).appendChild(hs1);
+    }
+    if (!document.querySelector('script[src*="hangout-still-2.js"]')) {
+      var hs2 = document.createElement('script');
+      hs2.src = 'js/hangout-still-2.js?v=20260822-hangout1';
+      hs2.defer = true;
+      (document.body || document.documentElement).appendChild(hs2);
+    }
+    if (!document.querySelector('script[src*="hangout-still-3.js"]')) {
+      var hs3 = document.createElement('script');
+      hs3.src = 'js/hangout-still-3.js?v=20260822-hangout1';
+      hs3.defer = true;
+      (document.body || document.documentElement).appendChild(hs3);
+    }
+    if (!document.querySelector('script[src*="hangout-still-4.js"]')) {
+      var hs4 = document.createElement('script');
+      hs4.src = 'js/hangout-still-4.js?v=20260822-hangout1';
+      hs4.defer = true;
+      (document.body || document.documentElement).appendChild(hs4);
+    }
+    if (!document.querySelector('script[src*="hangout-still-5.js"]')) {
+      var hs5 = document.createElement('script');
+      hs5.src = 'js/hangout-still-5.js?v=20260822-hangout1';
+      hs5.defer = true;
+      (document.body || document.documentElement).appendChild(hs5);
+    }
     if (!document.querySelector('script[src*="hangout-tour.js"]')) {
       var htj = document.createElement('script');
       htj.src = 'js/hangout-tour.js?v=20260822-hangout1';
