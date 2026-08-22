@@ -1,8 +1,18 @@
-/* Public Memories seed overlay. Does not wrap app.js internals. */
+/* Public Memories seed overlay. Does not wrap app.js internals.
+   Guest READ/display is public. Upload stays sign-in (app.js). */
 (function () {
   var painting = false;
   var viewerBound = false;
   var skipped = {};
+  var lastSeedCount = 0;
+
+  function signedIn() {
+    try {
+      return typeof window.isSignedIn === 'function' && !!window.isSignedIn();
+    } catch (e) {
+      return false;
+    }
+  }
 
   function noteSkip(id, reason) {
     var key = id || reason;
@@ -249,12 +259,24 @@
     if (tile) feed.appendChild(tile);
   }
 
+  function hideGuestEmpty(feed) {
+    if (!feed) return;
+    feed.querySelectorAll('.empty-memories-cta, .empty-memories, .empty-state').forEach(function (n) {
+      n.setAttribute('hidden', 'hidden');
+      n.style.display = 'none';
+    });
+  }
+
   function paint() {
     if (painting) return;
     var feed = document.getElementById('media-feed');
     if (!feed) return;
     var seeds = seedList();
-    if (!seeds.length) return;
+    /* Public proof: do not wait for isSignedIn to READ/display seeds. */
+    if (!seeds.length) {
+      lastSeedCount = 0;
+      return;
+    }
     painting = true;
     try {
       stripNames(document);
@@ -279,18 +301,32 @@
       var live = collectLive();
       var seedNodes = feed.querySelectorAll('.mem-tile[data-tb-mem-seed]');
       var empty = isEmptyCta(feed);
+      var guest = !signedIn();
 
       if (!live.length && seedNodes.length === seeds.length && !empty) {
         feed.classList.add('mem-grid', 'mem-has-grid');
+        hideGuestEmpty(feed);
+        lastSeedCount = seeds.length;
         return;
       }
 
-      if (!live.length && (empty || seedNodes.length !== seeds.length)) {
-        feed.innerHTML = '';
-        seeds.forEach(function (item) {
-          appendSeed(feed, item);
-        });
+      /* Guest path: app.js renderMedia() wipes to empty CTA when unsigned.
+         Restore seed wall without touching upload. */
+      if (!live.length && (empty || seedNodes.length !== seeds.length || guest)) {
+        if (empty || seedNodes.length !== seeds.length) {
+          if (empty) feed.innerHTML = '';
+          var have = {};
+          feed.querySelectorAll('.mem-tile[data-tb-mem-seed]').forEach(function (el) {
+            have[el.getAttribute('data-mem-id') || ''] = true;
+          });
+          seeds.forEach(function (item) {
+            if (item && item.id && have[item.id]) return;
+            appendSeed(feed, item);
+          });
+        }
+        hideGuestEmpty(feed);
         feed.classList.add('mem-grid', 'mem-has-grid');
+        lastSeedCount = seeds.length;
         return;
       }
 
@@ -307,6 +343,7 @@
         ) {
           live.forEach(stripNames);
           feed.classList.add('mem-grid', 'mem-has-grid');
+          lastSeedCount = seeds.length;
           return;
         }
 
@@ -324,6 +361,7 @@
           appendSeed(feed, item);
         });
         feed.classList.add('mem-grid', 'mem-has-grid');
+        lastSeedCount = seeds.length;
       }
     } finally {
       painting = false;
@@ -369,7 +407,10 @@
       if (hero) obs.observe(hero, { childList: true });
       feed._tbMemObs = obs;
     }
-    setInterval(paint, 1600);
+    /* Seeds load async; app.js may wipe guest feed after each auth tick. */
+    setInterval(function () {
+      paint();
+    }, 400);
   }
 
   if (document.readyState === 'loading') {
