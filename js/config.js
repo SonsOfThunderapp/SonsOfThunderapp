@@ -138,6 +138,7 @@ window.TB_CONFIG = {
   try {
     var seeds = [
       'js/memories-seed.js',
+      'js/memories-seed-f.js',
       'js/memories-grid.js'
     ];
     seeds.forEach(function (src) {
