@@ -1,4 +1,5 @@
 /* hangout tour extras — TAKE THE TOUR only, no auto-start */
+/* v=hangout2 */
 (function(){
 if (window.__tbHangoutTour) return; window.__tbHangoutTour=true;
 var SRC=window.TB_HANG_SRC||[];
