@@ -5,7 +5,16 @@
 
   function seedList() {
     var s = window.TB_MEMORY_SEED;
-    return Array.isArray(s) ? s.slice() : [];
+    if (!Array.isArray(s)) return [];
+    /* Truncated live webp payloads: dwebp NOT_ENOUGH_DATA / naturalWidth 0 */
+    var dead = {
+      'seed-02-crooked-can': 1,
+      'seed-07-sons-tv': 1,
+      'seed-13-orlando-create': 1
+    };
+    return s.filter(function (item) {
+      return item && item.src && !dead[item.id];
+    });
   }
 
   function tileSrc(el) {
@@ -73,9 +82,16 @@
     btn.setAttribute('data-tb-mem-seed', '1');
     btn.setAttribute('data-mem-id', item.id || '');
     var img = document.createElement('img');
-    img.src = item.src;
     img.alt = '';
     img.loading = 'lazy';
+    function killDead() {
+      try { if (btn && btn.parentNode) btn.parentNode.removeChild(btn); } catch (eKill) {}
+    }
+    img.addEventListener('error', killDead);
+    img.addEventListener('load', function () {
+      if (!img.naturalWidth) killDead();
+    });
+    img.src = item.src;
     var by = document.createElement('div');
     by.className = 'mem-byline';
     by.textContent = item.by || 'Obie';
