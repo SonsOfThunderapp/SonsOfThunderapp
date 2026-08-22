@@ -5,12 +5,9 @@
   var skipped = {};
 
   var GUEST_WALL = [
-    { id: 'real-tree', src: 'assets/tour-memories/real-tree.jpg' },
-    { id: 'real-patio', src: 'assets/tour-memories/real-patio.jpg' },
-    { id: 'real-bowl', src: 'assets/tour-memories/real-bowl.jpg' },
-    { id: 'mem-patio', src: 'assets/tour-memories/mem-patio.jpg' },
-    { id: 'mem-lake', src: 'assets/tour-memories/mem-lake.jpg' },
-    { id: 'mem-fire', src: 'assets/tour-memories/mem-fire.jpg' }
+    { id: 'real-tree', src: '/assets/tour-memories/real-tree.jpg' },
+    { id: 'real-patio', src: '/assets/tour-memories/real-patio.jpg' },
+    { id: 'real-bowl', src: '/assets/tour-memories/real-bowl.jpg' }
   ];
 
   function signedIn() {
@@ -73,6 +70,14 @@
     try { if (el && el.parentNode) el.parentNode.removeChild(el); } catch (eRm) {}
   }
 
+  function applyCover(img) {
+    if (!img) return;
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.style.objectFit = 'cover';
+    img.style.objectPosition = 'center';
+  }
+
   function applyContain(img) {
     if (!img) return;
     img.style.width = '100%';
@@ -89,7 +94,6 @@
     function ok() {
       var w = media.naturalWidth || media.videoWidth || 0;
       if (!w) { kill(); return; }
-      el.style.display = '';
       el.classList.add('mem-decoded');
     }
     if (media.tagName === 'VIDEO') {
@@ -103,7 +107,6 @@
       else kill();
       return;
     }
-    el.style.display = 'none';
     media.addEventListener('error', kill);
     media.addEventListener('load', function () {
       if (media.naturalWidth > 0) ok();
@@ -196,11 +199,20 @@
     btn.className = 'mem-tile';
     btn.setAttribute('data-tb-mem-seed', '1');
     btn.setAttribute('data-mem-id', item.id || '');
-    btn.style.display = 'none';
+    btn.style.display = 'block';
+    btn.style.width = '100%';
+    btn.style.aspectRatio = '1';
+    btn.style.minHeight = '160px';
+    btn.style.padding = '0';
+    btn.style.border = '0';
+    btn.style.background = '#111';
+    btn.style.overflow = 'hidden';
     var img = document.createElement('img');
     img.alt = '';
     img.loading = 'lazy';
-    applyContain(img);
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.style.objectFit = 'cover';
     function killDead() {
       skipped[item.id || item.src] = 'decode-fail';
       removeTile(btn, item.id, 'decode-fail');
@@ -208,10 +220,7 @@
     img.addEventListener('error', killDead);
     img.addEventListener('load', function () {
       if (!img.naturalWidth) killDead();
-      else {
-        btn.style.display = '';
-        btn.classList.add('mem-decoded');
-      }
+      else btn.classList.add('mem-decoded');
     });
     try {
       img.src = item.src;
@@ -270,6 +279,31 @@
     });
   }
 
+  function hasVisibleDecodedImg(feed) {
+    if (!feed) return false;
+    var imgs = feed.querySelectorAll('img');
+    for (var i = 0; i < imgs.length; i++) {
+      var im = imgs[i];
+      if (!im) continue;
+      var vis = true;
+      try {
+        var st = window.getComputedStyle(im);
+        if (st && (st.display === 'none' || st.visibility === 'hidden')) vis = false;
+      } catch (eSt) {}
+      if (vis && im.naturalWidth > 0 && im.complete) return true;
+    }
+    return false;
+  }
+
+  function forceAppendGuestWall(feed) {
+    if (!feed) return;
+    GUEST_WALL.forEach(function (item) {
+      appendSeed(feed, item);
+    });
+    hideGuestEmpty(feed);
+    feed.classList.add('mem-grid', 'mem-has-grid');
+  }
+
   function paint() {
     if (painting) return;
     var feed = document.getElementById('media-feed');
@@ -296,7 +330,7 @@
           removeTile(el, id, skipped[id] || 'invalid-src');
           return;
         }
-        applyContain(media);
+        applyCover(media);
         bindDecodeGuard(el, media, id);
       });
 
@@ -308,10 +342,7 @@
       if (!live.length && seedNodes.length === seeds.length && !empty) {
         feed.classList.add('mem-grid', 'mem-has-grid');
         hideGuestEmpty(feed);
-        return;
-      }
-
-      if (!live.length && (empty || seedNodes.length !== seeds.length || guest)) {
+      } else if (!live.length && (empty || seedNodes.length !== seeds.length || guest)) {
         if (empty || seedNodes.length !== seeds.length) {
           if (empty) feed.innerHTML = '';
           var have = {};
@@ -325,10 +356,7 @@
         }
         hideGuestEmpty(feed);
         feed.classList.add('mem-grid', 'mem-has-grid');
-        return;
-      }
-
-      if (live.length) {
+      } else if (live.length) {
         var firstSeed = feed.querySelector('.mem-tile[data-tb-mem-seed]');
         var lastLiveInFeed = null;
         feed.querySelectorAll('.media-thumb').forEach(function (el) { lastLiveInFeed = el; });
@@ -341,23 +369,26 @@
         ) {
           live.forEach(stripNames);
           feed.classList.add('mem-grid', 'mem-has-grid');
-          return;
+        } else {
+          var liveSrc = {};
+          live.forEach(function (el) {
+            var s = tileSrc(el);
+            if (s) liveSrc[s] = true;
+            stripNames(el);
+            if (el.parentNode) el.parentNode.removeChild(el);
+          });
+          feed.innerHTML = '';
+          live.forEach(function (el) { feed.appendChild(el); });
+          seeds.forEach(function (item) {
+            if (!item || !item.src || liveSrc[item.src]) return;
+            appendSeed(feed, item);
+          });
+          feed.classList.add('mem-grid', 'mem-has-grid');
         }
+      }
 
-        var liveSrc = {};
-        live.forEach(function (el) {
-          var s = tileSrc(el);
-          if (s) liveSrc[s] = true;
-          stripNames(el);
-          if (el.parentNode) el.parentNode.removeChild(el);
-        });
-        feed.innerHTML = '';
-        live.forEach(function (el) { feed.appendChild(el); });
-        seeds.forEach(function (item) {
-          if (!item || !item.src || liveSrc[item.src]) return;
-          appendSeed(feed, item);
-        });
-        feed.classList.add('mem-grid', 'mem-has-grid');
+      if (!hasVisibleDecodedImg(feed)) {
+        forceAppendGuestWall(feed);
       }
     } finally {
       painting = false;
