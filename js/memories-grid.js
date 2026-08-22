@@ -36,6 +36,7 @@
   var painting = false;
   var viewerBound = false;
   var skipped = {};
+  var feedObs = null;
 
   var GUEST_WALL = [
     { id: 'real-tree', src: '/assets/tour-memories/real-tree.jpg' },
@@ -328,9 +329,27 @@
     return false;
   }
 
+  function guestWallAlreadyForced(feed) {
+    try {
+      if (window.__tbGuestWallForced) return true;
+      if (feed && feed.getAttribute && feed.getAttribute('data-tb-guest-wall') === '1') return true;
+    } catch (eFlag) {}
+    return false;
+  }
+
+  function markGuestWallForced(feed) {
+    try {
+      window.__tbGuestWallForced = true;
+      if (feed && feed.setAttribute) feed.setAttribute('data-tb-guest-wall', '1');
+    } catch (eMark) {}
+  }
+
   function forceAppendGuestWall(feed) {
     if (!feed) return;
+    if (guestWallAlreadyForced(feed)) return;
+    markGuestWallForced(feed);
     GUEST_WALL.forEach(function (item) {
+      if (!item || skipped[item.id] || skipped[item.src]) return;
       appendSeed(feed, item);
     });
     hideGuestEmpty(feed);
@@ -346,6 +365,9 @@
       return;
     }
     painting = true;
+    if (feedObs) {
+      try { feedObs.disconnect(); } catch (eDisc) {}
+    }
     try {
       stripNames(document);
       syncEventsFabClass();
@@ -425,6 +447,14 @@
       }
     } finally {
       painting = false;
+      if (feedObs) {
+        try {
+          var liveFeed = document.getElementById('media-feed');
+          if (liveFeed) feedObs.observe(liveFeed, { childList: true });
+          var liveHero = document.getElementById('media-hero');
+          if (liveHero) feedObs.observe(liveHero, { childList: true });
+        } catch (eRe) {}
+      }
     }
   }
 
@@ -466,6 +496,9 @@
       var hero = document.getElementById('media-hero');
       if (hero) obs.observe(hero, { childList: true });
       feed._tbMemObs = obs;
+      feedObs = obs;
+    } else if (feed && feed._tbMemObs) {
+      feedObs = feed._tbMemObs;
     }
     setInterval(function () {
       paint();
