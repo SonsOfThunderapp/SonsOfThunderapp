@@ -132,5 +132,15 @@ body.tb-tour-open #tb-tour { display:none !important; }
 #view-home.active,#view-brothers.active,#view-events.active,#view-about.active{display:block!important;visibility:visible!important;opacity:1!important;position:relative!important;z-index:2!important}
 .view:not(.active){display:none!important}
 #thunder-fab{bottom:120px!important;width:48px!important;height:48px!important;pointer-events:auto}
-nav.bottom-nav{z-index:80!important;pointer-events:auto!important}
 .nav-item{pointer-events:auto!important}
+
+/* 20260822-chrome6: dock above leftover splash */
+html body nav.bottom-nav,
+html body.tb-tour-open nav.bottom-nav,
+html body.tb-ask-open nav.bottom-nav,
+html body:has(#splash) nav.bottom-nav {
+  visibility: visible !important;
+  pointer-events: auto !important;
+  z-index: 40000 !important;
+}
+#splash, #tb-tour { pointer-events: none !important; }
