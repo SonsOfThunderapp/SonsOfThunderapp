@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260821-ask1',
+  APP_BUILD: '20260821-ask2',
   /* First-run tour AUTO-STARTS once for a new phone. Skip stays.
      Already finished (thunderTourV42 done) = no nag. More → TAKE THE TOUR remains. */
   /* I'M IN vault locked 2026-08-21 — live-coal rest, bolt strike, yellow settle,
@@ -122,6 +122,14 @@ window.TB_CONFIG = {
       m.href = 'css/memories-latest.css?v=20260821-memwall3';
       (document.head || document.documentElement).appendChild(m);
     }
+
+    if (!document.querySelector('link[href*="ask-clear.css"]')) {
+      var ac = document.createElement('link');
+      ac.rel = 'stylesheet';
+      ac.href = 'css/ask-clear.css?v=20260821-ask2';
+      (document.head || document.documentElement).appendChild(ac);
+    }
+
     if (!document.querySelector('link[href*="memories-page.css"]')) {
       var p = document.createElement('link');
       p.rel = 'stylesheet';
@@ -185,6 +193,13 @@ window.TB_CONFIG = {
       ta.src = 'js/thunder-ask.js?v=20260821-ask1';
       ta.defer = true;
       (document.body || document.documentElement).appendChild(ta);
+    }
+
+    if (!document.querySelector('script[src*="ask-clear.js"]')) {
+      var aj = document.createElement('script');
+      aj.src = 'js/ask-clear.js?v=20260821-ask2';
+      aj.defer = true;
+      (document.body || document.documentElement).appendChild(aj);
     }
 
     if (document.querySelector('script[src*="bday-autotext.js"]')) return;
