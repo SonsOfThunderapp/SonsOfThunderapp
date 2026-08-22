@@ -2,7 +2,9 @@
    Keep IMG_7697 lockup. Header is a flex sibling of #views; min-height:0
    let it shrink so the die-cut PNG + bolt overlay painted over Home cards.
    Solid black bar, no shrink, clip overflow so announcements never read
-   through the mark. Do not invent a new logo. Loaded after styles.css. */
+   through the mark. Do not invent a new logo. Loaded after styles.css.
+   20260822-flowfix1: phone lockup height capped so Home headings are not
+   clipped under a ~210px fixed overlay. Brand stays. */
 #app > #main-header.header,
 #main-header.header,
 #main-header,
@@ -57,4 +59,28 @@
 #view-home .announcement-card {
   position: relative;
   z-index: 1;
+}
+@media (max-width: 480px) {
+  #app > #main-header.header,
+  #main-header.header,
+  #main-header,
+  .header#main-header {
+    max-height: 96px !important;
+    padding: calc(6px + env(safe-area-inset-top, 0px)) 10px 6px !important;
+  }
+  #main-header .logo-wrap,
+  .header .logo-wrap {
+    max-height: 72px !important;
+    height: 72px !important;
+  }
+  #main-header .logo,
+  #main-header #header-logo,
+  #main-header .logo-bolt-life {
+    max-height: 72px !important;
+    height: 72px !important;
+    width: auto !important;
+    max-width: 100% !important;
+    object-fit: contain !important;
+    object-position: center center !important;
+  }
 }
