@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260822-chrome7',
+  APP_BUILD: '20260822-hangout1',
   /* First-run tour does NOT auto-start. New phone lands in the room.
      Already finished (thunderTourV42 done) = no nag. More → TAKE THE TOUR remains. */
   /* I'M IN vault locked 2026-08-21 — live-coal rest, bolt strike, yellow settle,
@@ -136,6 +136,13 @@ window.TB_CONFIG = {
       p.href = 'css/memories-page.css?v=20260822-chrome6';
       (document.head || document.documentElement).appendChild(p);
     }
+    if (!document.querySelector('link[href*="hangout-tour.css"]')) {
+      var ht = document.createElement('link');
+      ht.rel = 'stylesheet';
+      ht.href = 'css/hangout-tour.css?v=20260822-hangout1';
+      (document.head || document.documentElement).appendChild(ht);
+    }
+
     try {
       var ev = document.querySelector('.nav-item[data-view="events"] span');
       if (ev) ev.textContent = 'Memories';
@@ -201,6 +208,13 @@ window.TB_CONFIG = {
       (document.body || document.documentElement).appendChild(aj);
     }
 
+
+    if (!document.querySelector('script[src*="hangout-tour.js"]')) {
+      var htj = document.createElement('script');
+      htj.src = 'js/hangout-tour.js?v=20260822-hangout1';
+      htj.defer = true;
+      (document.body || document.documentElement).appendChild(htj);
+    }
     if (document.querySelector('script[src*="bday-autotext.js"]')) return;
     var s = document.createElement('script');
     s.src = 'js/bday-autotext.js?v=20260822-chrome6';
