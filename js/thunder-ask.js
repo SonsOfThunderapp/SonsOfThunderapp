@@ -1,13 +1,41 @@
-/* 20260822-chrome1 splash/tour kill */
+/* 20260822-chrome2: splash/tour hide only — no click capture, no showView wrap */
 (function(){
+  function hideOverlay(el){
+    if(!el) return;
+    el.classList.add("hidden","splash-done","splash-out");
+    el.setAttribute("hidden","hidden");
+    el.setAttribute("aria-hidden","true");
+    el.style.setProperty("display","none","important");
+    el.style.setProperty("visibility","hidden","important");
+    el.style.setProperty("pointer-events","none","important");
+    el.style.setProperty("inset","auto","important");
+    el.style.setProperty("height","0","important");
+    el.style.setProperty("width","0","important");
+    el.style.setProperty("overflow","hidden","important");
+    el.style.setProperty("z-index","-1","important");
+  }
   function killChrome(){
-    var s=document.getElementById("splash");
-    if(s){ s.classList.add("splash-done","splash-out","hidden"); s.style.setProperty("display","none","important"); }
+    hideOverlay(document.getElementById("splash"));
+    hideOverlay(document.getElementById("tb-tour"));
     try{ sessionStorage.setItem("tb_splash_done","1"); }catch(e){}
-    var t=document.getElementById("tb-tour");
-    if(t){ t.classList.add("hidden"); t.setAttribute("hidden","hidden"); t.setAttribute("aria-hidden","true"); t.style.setProperty("display","none","important"); t.style.setProperty("pointer-events","none","important"); }
-    try{ document.body.classList.remove("tb-tour-open","tb-tour-mandatory"); }catch(e2){}
-    try{ document.querySelectorAll(".tab-bar,.app-tabs,#tab-bar,.bottom-nav").forEach(function(n){ n.style.setProperty("display","flex","important"); n.style.setProperty("visibility","visible","important"); n.style.setProperty("opacity","1","important"); }); }catch(e3){}
+    try{
+      document.body.classList.remove("tb-tour-open","tb-tour-mandatory");
+      document.body.style.pointerEvents="";
+      document.body.style.overflow="";
+    }catch(e2){}
+    try{
+      document.querySelectorAll(".tab-bar,.app-tabs,#tab-bar,nav.bottom-nav,.bottom-nav").forEach(function(n){
+        n.style.setProperty("display","flex","important");
+        n.style.setProperty("visibility","visible","important");
+        n.style.setProperty("opacity","1","important");
+        n.style.setProperty("pointer-events","auto","important");
+        n.style.setProperty("z-index","50","important");
+      });
+      document.querySelectorAll(".nav-item,#nav-events,[data-view=events]").forEach(function(n){
+        n.style.setProperty("pointer-events","auto","important");
+        n.style.setProperty("z-index","50","important");
+      });
+    }catch(e3){}
   }
   function wrap(){
     if(typeof window.startTour==="function" && !window.startTour._tbKilled){
@@ -16,8 +44,8 @@
       window.startTour._tbKilled=true;
     }
   }
-  setTimeout(function(){ killChrome(); wrap(); }, 2500);
-  setInterval(function(){ killChrome(); wrap(); }, 300);
+  setTimeout(function(){ killChrome(); wrap(); }, 0);
+  setInterval(function(){ killChrome(); }, 300);
 })();
 
 /* Backstage Thunder bubble: tour invite is gone. He says ask me ANYTHING!

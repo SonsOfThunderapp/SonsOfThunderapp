@@ -1,3 +1,19 @@
+/* 20260822-chrome2: overlays must not capture Memories/nav clicks */
+#splash, #tb-tour {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  inset: auto !important;
+  height: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
+  z-index: -1 !important;
+}
+nav.bottom-nav, .nav-item, #nav-events, [data-view="events"] {
+  pointer-events: auto !important;
+  z-index: 50 !important;
+}
+
 #splash.splash-done, #splash.splash-out { display:none !important; visibility:hidden !important; pointer-events:none !important; }
 #tb-tour { display:none !important; }
 .tab-bar, .app-tabs, #tab-bar { display:flex !important; }
