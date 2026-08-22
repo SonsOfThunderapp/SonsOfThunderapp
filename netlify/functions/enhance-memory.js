@@ -1,7 +1,7 @@
 /**
- * Pre-gallery polish. Original stays in Storage.
- * Sharp: EXIF rotate → cap long edge → mild sharpen → WebP display + card.
- * Never blocks Drop a Shot. No secrets in the client.
+ * Conservative memory polish. Original stays in Storage.
+ * JWT first (user signed URL + row patch). Optional env: SUPABASE_SERVICE_ROLE_KEY
+ * Sharp: EXIF rotate → median denoise → cap long edge → mild sharpen → webp.
  */
 const sharp = require('sharp');
 
@@ -15,6 +15,13 @@ function json(status, body) {
   return { statusCode: status, headers: { ...CORS, 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
 }
 
+function encBucket(bucket) {
+  return encodeURIComponent(bucket);
+}
+function encPath(p) {
+  return String(p || '').split('/').map(encodeURIComponent).join('/');
+}
+
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: CORS, body: '' };
   if (event.httpMethod !== 'POST') return json(405, { ok: false, error: 'POST only' });
@@ -24,7 +31,7 @@ exports.handler = async (event) => {
   const anonKey = process.env.SUPABASE_ANON_KEY || '';
   const bucket = (process.env.MEMORIES_BUCKET || 'Sons Of Thunder Memories').trim();
 
-  if (!sbUrl || !serviceKey) {
+  if (!sbUrl || !anonKey) {
     return json(503, { ok: false, error: 'enhance_unconfigured', fallback: 'original' });
   }
 
@@ -45,21 +52,19 @@ exports.handler = async (event) => {
 
   try {
     const userRes = await fetch(sbUrl + '/auth/v1/user', {
-      headers: { apikey: anonKey || serviceKey, Authorization: 'Bearer ' + token }
+      headers: { apikey: anonKey, Authorization: 'Bearer ' + token }
     });
     if (!userRes.ok) return json(401, { ok: false, error: 'auth', fallback: 'original' });
     const user = await userRes.json();
     const uid = user && user.id;
     if (!uid) return json(401, { ok: false, error: 'auth', fallback: 'original' });
 
-    const rowRes = await fetch(
-      sbUrl + '/rest/v1/memories?id=eq.' + encodeURIComponent(memoryId) + '&select=id,user_id,storage_path,original_path,display_path,card_path&limit=1',
-      { headers: restHeaders(serviceKey) }
-    );
-    const rows = rowRes.ok ? await rowRes.json() : [];
-    const row = Array.isArray(rows) && rows[0];
+    const row = await loadRow(sbUrl, anonKey, token, serviceKey, memoryId);
     if (!row || row.user_id !== uid) {
       return json(403, { ok: false, error: 'forbidden', fallback: 'original' });
+    }
+    if (row.display_path && row.enhance_status === 'ready') {
+      return json(200, { ok: true, skipped: 'already', display_path: row.display_path, card_path: row.card_path || null });
     }
 
     const originalPath = row.original_path || row.storage_path;
@@ -68,19 +73,13 @@ exports.handler = async (event) => {
       return json(200, { ok: true, skipped: 'video', fallback: 'original' });
     }
 
-    const signed = await storageSign(sbUrl, serviceKey, bucket, originalPath, 120);
-    if (!signed) {
-      await markFailed(sbUrl, serviceKey, memoryId, 'sign_original');
-      return json(200, { ok: false, error: 'sign_original', fallback: 'original' });
-    }
-    const imgRes = await fetch(signed);
-    if (!imgRes.ok) {
-      await markFailed(sbUrl, serviceKey, memoryId, 'fetch_original');
+    const buf = await downloadOriginal(sbUrl, anonKey, token, serviceKey, bucket, originalPath);
+    if (!buf) {
+      await markFailed(sbUrl, anonKey, token, serviceKey, memoryId, 'fetch_original');
       return json(200, { ok: false, error: 'fetch_original', fallback: 'original' });
     }
-    const buf = Buffer.from(await imgRes.arrayBuffer());
     if (!buf.length || buf.length > 18 * 1024 * 1024) {
-      await markFailed(sbUrl, serviceKey, memoryId, 'size');
+      await markFailed(sbUrl, anonKey, token, serviceKey, memoryId, 'size');
       return json(200, { ok: false, error: 'size', fallback: 'original' });
     }
 
@@ -90,10 +89,10 @@ exports.handler = async (event) => {
     const displayPath = base + 'display.webp';
     const cardPath = base + 'card.webp';
 
-    const upDisplay = await storageUpload(sbUrl, serviceKey, bucket, displayPath, displayBuf, 'image/webp');
-    const upCard = await storageUpload(sbUrl, serviceKey, bucket, cardPath, cardBuf, 'image/webp');
+    const upDisplay = await storageUpload(sbUrl, anonKey, token, serviceKey, bucket, displayPath, displayBuf, 'image/webp');
+    const upCard = await storageUpload(sbUrl, anonKey, token, serviceKey, bucket, cardPath, cardBuf, 'image/webp');
     if (!upDisplay) {
-      await markFailed(sbUrl, serviceKey, memoryId, 'upload_display');
+      await markFailed(sbUrl, anonKey, token, serviceKey, memoryId, 'upload_display');
       return json(200, { ok: false, error: 'upload_display', fallback: 'original' });
     }
 
@@ -103,34 +102,61 @@ exports.handler = async (event) => {
       enhance_status: 'ready',
       enhance_error: null
     };
-    const upd = await fetch(sbUrl + '/rest/v1/memories?id=eq.' + encodeURIComponent(memoryId), {
-      method: 'PATCH',
-      headers: { ...restHeaders(serviceKey), Prefer: 'return=minimal' },
-      body: JSON.stringify(patch)
-    });
-    if (!upd.ok) {
-      await markFailed(sbUrl, serviceKey, memoryId, 'patch');
+    const patched = await patchRow(sbUrl, anonKey, token, serviceKey, memoryId, patch);
+    if (!patched) {
+      await markFailed(sbUrl, anonKey, token, serviceKey, memoryId, 'patch');
       return json(200, { ok: false, error: 'patch', fallback: 'original' });
     }
     return json(200, { ok: true, display_path: displayPath, card_path: upCard ? cardPath : null });
   } catch (e) {
-    try { await markFailed(sbUrl, serviceKey, memoryId, 'throw'); } catch (e2) {}
+    try { await markFailed(sbUrl, anonKey, token, serviceKey, memoryId, 'throw'); } catch (e2) {}
     return json(200, { ok: false, error: 'enhance_failed', fallback: 'original' });
   }
 };
 
-function restHeaders(serviceKey) {
+function restHeaders(apikey, token) {
   return {
-    apikey: serviceKey,
-    Authorization: 'Bearer ' + serviceKey,
+    apikey: apikey,
+    Authorization: 'Bearer ' + token,
     'Content-Type': 'application/json'
   };
 }
 
-async function storageSign(sbUrl, key, bucket, path, expires) {
+async function restGet(sbUrl, headers, qs) {
+  const res = await fetch(sbUrl + '/rest/v1/memories?' + qs, { headers: headers });
+  if (!res.ok) return [];
+  const rows = await res.json();
+  return Array.isArray(rows) ? rows : [];
+}
+
+async function loadRow(sbUrl, anonKey, userToken, serviceKey, id) {
+  const qs = 'id=eq.' + encodeURIComponent(id) + '&select=id,user_id,storage_path,original_path,display_path,card_path,enhance_status&limit=1';
+  let rows = await restGet(sbUrl, restHeaders(anonKey, userToken), qs);
+  if ((!rows || !rows[0]) && serviceKey) {
+    rows = await restGet(sbUrl, restHeaders(serviceKey, serviceKey), qs);
+  }
+  return rows && rows[0];
+}
+
+async function patchRow(sbUrl, anonKey, userToken, serviceKey, id, body) {
+  const url = sbUrl + '/rest/v1/memories?id=eq.' + encodeURIComponent(id);
+  const tryPatch = async (key, tok) => {
+    const res = await fetch(url, {
+      method: 'PATCH',
+      headers: { ...restHeaders(key, tok), Prefer: 'return=minimal' },
+      body: JSON.stringify(body)
+    });
+    return res.ok;
+  };
+  if (await tryPatch(anonKey, userToken)) return true;
+  if (serviceKey) return tryPatch(serviceKey, serviceKey);
+  return false;
+}
+
+async function storageSign(sbUrl, apikey, token, bucket, path, expires) {
   const res = await fetch(
-    sbUrl + '/storage/v1/object/sign/' + encodeURIComponent(bucket) + '/' + path,
-    { method: 'POST', headers: restHeaders(key), body: JSON.stringify({ expiresIn: expires || 120 }) }
+    sbUrl + '/storage/v1/object/sign/' + encBucket(bucket) + '/' + encPath(path),
+    { method: 'POST', headers: restHeaders(apikey, token), body: JSON.stringify({ expiresIn: expires || 120 }) }
   );
   if (!res.ok) return null;
   const data = await res.json();
@@ -140,35 +166,43 @@ async function storageSign(sbUrl, key, bucket, path, expires) {
   return sbUrl + '/storage/v1' + (String(signed).startsWith('/') ? signed : '/' + signed);
 }
 
-async function storageUpload(sbUrl, key, bucket, path, body, contentType) {
-  const res = await fetch(
-    sbUrl + '/storage/v1/object/' + encodeURIComponent(bucket) + '/' + path,
-    {
-      method: 'POST',
-      headers: {
-        apikey: key,
-        Authorization: 'Bearer ' + key,
-        'Content-Type': contentType,
-        'x-upsert': 'true'
-      },
-      body
-    }
-  );
-  return res.ok;
+async function downloadOriginal(sbUrl, anonKey, userToken, serviceKey, bucket, path) {
+  let signed = await storageSign(sbUrl, anonKey, userToken, bucket, path, 120);
+  if (!signed && serviceKey) signed = await storageSign(sbUrl, serviceKey, serviceKey, bucket, path, 120);
+  if (!signed) return null;
+  const imgRes = await fetch(signed);
+  if (!imgRes.ok) return null;
+  return Buffer.from(await imgRes.arrayBuffer());
 }
 
-async function markFailed(sbUrl, key, id, reason) {
-  if (!id || !sbUrl || !key) return;
-  try {
-    await fetch(sbUrl + '/rest/v1/memories?id=eq.' + encodeURIComponent(id), {
-      method: 'PATCH',
-      headers: { ...restHeaders(key), Prefer: 'return=minimal' },
-      body: JSON.stringify({
-        enhance_status: 'failed',
-        enhance_error: String(reason || 'failed').slice(0, 40)
-      })
-    });
-  } catch (e) {}
+async function storageUpload(sbUrl, anonKey, userToken, serviceKey, bucket, path, body, contentType) {
+  const tryUp = async (key, tok) => {
+    const res = await fetch(
+      sbUrl + '/storage/v1/object/' + encBucket(bucket) + '/' + encPath(path),
+      {
+        method: 'POST',
+        headers: {
+          apikey: key,
+          Authorization: 'Bearer ' + tok,
+          'Content-Type': contentType,
+          'x-upsert': 'true'
+        },
+        body
+      }
+    );
+    return res.ok;
+  };
+  if (await tryUp(anonKey, userToken)) return true;
+  if (serviceKey) return tryUp(serviceKey, serviceKey);
+  return false;
+}
+
+async function markFailed(sbUrl, anonKey, userToken, serviceKey, id, reason) {
+  if (!id || !sbUrl) return;
+  await patchRow(sbUrl, anonKey, userToken, serviceKey, id, {
+    enhance_status: 'failed',
+    enhance_error: String(reason || 'failed').slice(0, 40)
+  });
 }
 
 async function polish(buf, longEdge, quality) {
@@ -186,6 +220,7 @@ async function polish(buf, longEdge, quality) {
     });
   }
   return img
+    .median(3)
     .sharpen({ sigma: 0.7, m1: 0.8, m2: 0.4 })
     .webp({ quality: quality || 78, effort: 4, smartSubsample: true })
     .toBuffer();
