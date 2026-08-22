@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260822-tourunstick1',
+  APP_BUILD: '20260822-power1',
   /* First-run tour AUTO-STARTS once for a new phone. Skip stays.
      Already finished (thunderTourV42 done) = no nag. More → TAKE THE TOUR remains. */
   /* I'M IN vault locked 2026-08-21 — live-coal rest, bolt strike, yellow settle,
@@ -112,28 +112,28 @@ window.TB_CONFIG = {
     if (!document.querySelector('link[href*="chief1-ghost.css"]')) {
       var l = document.createElement('link');
       l.rel = 'stylesheet';
-      l.href = 'css/chief1-ghost.css?v=20260822-tourunstick1';
+      l.href = 'css/chief1-ghost.css?v=20260822-power1';
       (document.head || document.documentElement).appendChild(l);
     }
 
     if (!document.querySelector('link[href*="memories-latest.css"]')) {
       var m = document.createElement('link');
       m.rel = 'stylesheet';
-      m.href = 'css/memories-latest.css?v=20260822-tourunstick1';
+      m.href = 'css/memories-latest.css?v=20260822-power1';
       (document.head || document.documentElement).appendChild(m);
     }
 
     if (!document.querySelector('link[href*="ask-clear.css"]')) {
       var ac = document.createElement('link');
       ac.rel = 'stylesheet';
-      ac.href = 'css/ask-clear.css?v=20260822-tourunstick1';
+      ac.href = 'css/ask-clear.css?v=20260822-power1';
       (document.head || document.documentElement).appendChild(ac);
     }
 
     if (!document.querySelector('link[href*="memories-page.css"]')) {
       var p = document.createElement('link');
       p.rel = 'stylesheet';
-      p.href = 'css/memories-page.css?v=20260822-tourunstick1';
+      p.href = 'css/memories-page.css?v=20260822-power1';
       (document.head || document.documentElement).appendChild(p);
     }
     try {
@@ -143,72 +143,53 @@ window.TB_CONFIG = {
 
   } catch (e) {}
   try {
-    var seeds = [
-      'js/memories-seed.js',
-      'js/memories-seed-f.js',
-      'js/memories-seed-c.js',
-      'js/memories-seed-d.js',
-      'js/memories-seed-e.js',
-      'js/memories-seed-h.js',
-      'js/memories-seed-i.js',
-      'js/memories-seed-j.js',
-      'js/memories-seed-o.js',
-      'js/memories-seed-k.js',
-      'js/memories-seed-p.js',
-      'js/memories-seed-l.js',
-      'js/memories-seed-n.js',
-      'js/memories-seed-q.js',
-      'js/memories-grid.js'
-    ];
-    seeds.forEach(function (src) {
-      var name = src.split('/').pop();
-      if (document.querySelector('script[src*="' + name + '"]')) return;
-      var sc = document.createElement('script');
-      sc.src = src + '?v=20260822-tourunstick1';
-      sc.defer = true;
-      (document.body || document.documentElement).appendChild(sc);
-    });
+    if (!document.querySelector('script[src*="memories-grid.js"]')) {
+      var mg = document.createElement('script');
+      mg.src = 'js/memories-grid.js?v=20260822-power1';
+      mg.defer = true;
+      (document.body || document.documentElement).appendChild(mg);
+    }
   } catch (eSeed) {}
   try {
 
     if (!document.querySelector('script[src*="leader-door.js"]')) {
       var ld = document.createElement('script');
-      ld.src = 'js/leader-door.js?v=20260822-tourunstick1';
+      ld.src = 'js/leader-door.js?v=20260822-power1';
       ld.defer = true;
       (document.body || document.documentElement).appendChild(ld);
     }
 
     if (!document.querySelector('script[src*="tour-first.js"]')) {
       var tf = document.createElement('script');
-      tf.src = 'js/tour-first.js?v=20260822-tourunstick1';
+      tf.src = 'js/tour-first.js?v=20260822-power1';
       tf.defer = true;
       (document.body || document.documentElement).appendChild(tf);
     }
 
     if (!document.querySelector('script[src*="more-legal.js"]')) {
       var ml = document.createElement('script');
-      ml.src = 'js/more-legal.js?v=20260822-tourunstick1';
+      ml.src = 'js/more-legal.js?v=20260822-power1';
       ml.defer = true;
       (document.body || document.documentElement).appendChild(ml);
     }
 
     if (!document.querySelector('script[src*="thunder-ask.js"]')) {
       var ta = document.createElement('script');
-      ta.src = 'js/thunder-ask.js?v=20260822-tourunstick1';
+      ta.src = 'js/thunder-ask.js?v=20260822-power1';
       ta.defer = true;
       (document.body || document.documentElement).appendChild(ta);
     }
 
     if (!document.querySelector('script[src*="ask-clear.js"]')) {
       var aj = document.createElement('script');
-      aj.src = 'js/ask-clear.js?v=20260822-tourunstick1';
+      aj.src = 'js/ask-clear.js?v=20260822-power1';
       aj.defer = true;
       (document.body || document.documentElement).appendChild(aj);
     }
 
     if (document.querySelector('script[src*="bday-autotext.js"]')) return;
     var s = document.createElement('script');
-    s.src = 'js/bday-autotext.js?v=20260822-tourunstick1';
+    s.src = 'js/bday-autotext.js?v=20260822-power1';
     s.defer = true;
     (document.body || document.documentElement).appendChild(s);
   } catch (e2) {}
