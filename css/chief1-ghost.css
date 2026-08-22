@@ -1,4 +1,4 @@
-/* 20260822-chrome2: overlays must not capture Memories/nav clicks */
+/* 20260822-chrome3: overlays hide; FAB sits ABOVE the dock */
 #splash, #tb-tour {
   display: none !important;
   visibility: hidden !important;
@@ -9,11 +9,11 @@
   overflow: hidden !important;
   z-index: -1 !important;
 }
-nav.bottom-nav, .nav-item, #nav-events, [data-view="events"] {
-  pointer-events: auto !important;
-  z-index: 50 !important;
+#thunder-fab {
+  bottom: 88px !important;
+  width: 56px;
+  height: 56px;
 }
-
 #splash.splash-done, #splash.splash-out { display:none !important; visibility:hidden !important; pointer-events:none !important; }
 #tb-tour { display:none !important; }
 .tab-bar, .app-tabs, #tab-bar { display:flex !important; }
