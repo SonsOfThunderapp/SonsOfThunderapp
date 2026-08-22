@@ -97,7 +97,13 @@ window.TB_CONFIG = {
     loop: true,
     noNativeControls: true
   },
-  PUBLIC_ORIGIN: ''
+  PUBLIC_ORIGIN: '',
+  LEADER_PIN: 'thunder-board-lead',
+  LEADER_SMS_PARTS: ['40', '77', '39', '62', '43'],
+  SUPABASE_URL: 'https://mnsempcgomukcpofgvlm.supabase.co',
+  SUPABASE_ANON_KEY: 'sb_publishable_QkUCt8trZ0vUwXmqfaUQwg_qXZ5_87m',
+  MEMORIES_BUCKET: 'Sons Of Thunder Memories',
+  VAPID_PUBLIC_KEY: 'BGRjLCD3QnLBxb2VFNgxpGcJ1Ptxosp8yGq8yiJTGm2YS8OHVYsOhVvCFpmyREbeQsmsq6NaJ42j9yMx19Vl6hE'
 };
 
 /* 20260821-bday2: ghost-wordmark + birthday-honor lock companion */
