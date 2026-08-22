@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260821-memwall2',
+  APP_BUILD: '20260821-memwall3',
   /* First-run tour is OPTIONAL. Thunder backstage invites once:
      "New here? Tap me. I'll show you the room." Tap Thunder or the bubble → tour.
      Ignore once = no nag. More → TAKE THE TOUR always remains. */
@@ -113,20 +113,20 @@ window.TB_CONFIG = {
     if (!document.querySelector('link[href*="chief1-ghost.css"]')) {
       var l = document.createElement('link');
       l.rel = 'stylesheet';
-      l.href = 'css/chief1-ghost.css?v=20260821-memwall2';
+      l.href = 'css/chief1-ghost.css?v=20260821-memwall3';
       (document.head || document.documentElement).appendChild(l);
     }
 
     if (!document.querySelector('link[href*="memories-latest.css"]')) {
       var m = document.createElement('link');
       m.rel = 'stylesheet';
-      m.href = 'css/memories-latest.css?v=20260821-memwall2';
+      m.href = 'css/memories-latest.css?v=20260821-memwall3';
       (document.head || document.documentElement).appendChild(m);
     }
     if (!document.querySelector('link[href*="memories-page.css"]')) {
       var p = document.createElement('link');
       p.rel = 'stylesheet';
-      p.href = 'css/memories-page.css?v=20260821-memwall2';
+      p.href = 'css/memories-page.css?v=20260821-memwall3';
       (document.head || document.documentElement).appendChild(p);
     }
     try {
@@ -160,7 +160,7 @@ window.TB_CONFIG = {
       var name = src.split('/').pop();
       if (document.querySelector('script[src*="' + name + '"]')) return;
       var sc = document.createElement('script');
-      sc.src = src + '?v=20260821-memwall2';
+      sc.src = src + '?v=20260821-memwall3';
       sc.defer = true;
       (document.body || document.documentElement).appendChild(sc);
     });
@@ -168,7 +168,7 @@ window.TB_CONFIG = {
   try {
     if (document.querySelector('script[src*="bday-autotext.js"]')) return;
     var s = document.createElement('script');
-    s.src = 'js/bday-autotext.js?v=20260821-memwall2';
+    s.src = 'js/bday-autotext.js?v=20260821-memwall3';
     s.defer = true;
     (document.body || document.documentElement).appendChild(s);
   } catch (e2) {}
