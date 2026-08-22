@@ -1,49 +1,71 @@
-#splash.splash-done,#splash.splash-out,#splash.hidden{display:none!important;visibility:hidden!important;pointer-events:none!important}
-#tb-tour,#tb-tour[hidden],#tb-tour.hidden{display:none!important;visibility:hidden!important;pointer-events:none!important;z-index:-1!important}
-.tab-bar,.app-tabs,#tab-bar,.bottom-nav{display:flex!important;visibility:visible!important}
-.header-logo,.splash-mark,header img, .brand-mark{max-height:64px;object-fit:contain}
+#splash.splash-done, #splash.splash-out { display:none !important; visibility:hidden !important; pointer-events:none !important; }
+#tb-tour { display:none !important; }
+.tab-bar, .app-tabs, #tab-bar { display:flex !important; }
+/* 20260822-chrome1 emergency: leftover tour, dock, header lockup */
+#tb-tour, #tb-tour[hidden], #tb-tour.hidden { display:none !important; visibility:hidden !important; pointer-events:none !important; opacity:0 !important; z-index:-1 !important; }
+body.tb-tour-open #tb-tour { display:none !important; }
+.tab-bar, .app-tabs, nav.tabs, #tab-bar, .bottom-nav { display:flex !important; visibility:visible !important; opacity:1 !important; }
+#main-header .logo, #main-header #header-logo, header .logo, #header-logo {
+  max-height: 64px !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+}
+@media (max-width: 480px) {
+  #main-header.header, #main-header {
+    max-height: 88px !important;
+    overflow: hidden !important;
+  }
+  #main-header .logo-wrap { max-height: 64px !important; height: 64px !important; overflow: hidden !important; }
+  #main-header .logo, #main-header #header-logo, #main-header .logo-bolt-life {
+    max-height: 64px !important;
+    width: auto !important;
+    object-fit: contain !important;
+  }
+}
 
 /* Ask Thunder: tuxedo never covers the answer. Head only once Grok replies. */
 .thunder-ask-hero {
- overflow: hidden !important;
- flex: 0 0 auto !important;
- max-height: 88px !important;
- z-index: 1 !important;
- pointer-events: none !important;
- padding: 4px 0 0 !important;
+  overflow: hidden !important;
+  flex: 0 0 auto !important;
+  max-height: 88px !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
+  padding: 4px 0 0 !important;
 }
 .thunder-ask-hero-img {
- width: 72px !important;
- height: 72px !important;
- max-height: 72px !important;
- object-fit: cover !important;
- object-position: 50% 10% !important;
+  width: 72px !important;
+  height: 72px !important;
+  max-height: 72px !important;
+  object-fit: cover !important;
+  object-position: 50% 10% !important;
 }
 .thunder-modal .thunder-messages {
- position: relative !important;
- z-index: 6 !important;
- background: #0a0a0a !important;
- flex: 1 1 auto !important;
- min-height: 36vh !important;
+  position: relative !important;
+  z-index: 6 !important;
+  background: #0a0a0a !important;
+  flex: 1 1 auto !important;
+  min-height: 36vh !important;
 }
 .thunder-msg.assistant,
 .thunder-msg.user,
 .thunder-msg.system {
- position: relative !important;
- z-index: 7 !important;
+  position: relative !important;
+  z-index: 7 !important;
 }
 #thunder-modal.tb-ask-has-reply .thunder-ask-hero {
- max-height: 64px !important;
- padding-top: 2px !important;
- padding-bottom: 0 !important;
+  max-height: 64px !important;
+  padding-top: 2px !important;
+  padding-bottom: 0 !important;
 }
 #thunder-modal.tb-ask-has-reply .thunder-ask-hero-img {
- width: 56px !important;
- height: 56px !important;
- max-height: 56px !important;
- object-fit: cover !important;
- object-position: 50% 8% !important;
+  width: 56px !important;
+  height: 56px !important;
+  max-height: 56px !important;
+  object-fit: cover !important;
+  object-position: 50% 8% !important;
 }
 #thunder-modal.tb-ask-has-reply .thunder-ask-hero::before {
- display: none !important;
+  display: none !important;
 }
