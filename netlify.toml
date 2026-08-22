@@ -20,6 +20,9 @@
 [functions]
   node_bundler = "esbuild"
 
+[functions."enhance-memory"]
+  node_bundler = "zisi"
+
 [functions."push-gathering-tick"]
   schedule = "0 * * * *"
 

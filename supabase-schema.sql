@@ -386,3 +386,11 @@ grant select (
 ) on table public.brothers to anon;
 grant select on table public.brothers to authenticated;
 
+-- Memories polish: original stays, display is a derivative.
+alter table public.memories add column if not exists original_path text;
+alter table public.memories add column if not exists display_path text;
+alter table public.memories add column if not exists card_path text;
+alter table public.memories add column if not exists enhance_status text default '';
+alter table public.memories add column if not exists enhance_error text;
+
+

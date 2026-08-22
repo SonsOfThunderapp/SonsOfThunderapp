@@ -1709,11 +1709,26 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       return false;
     }
     const sb = getSb();
-    const { data: rows, error } = await sb
-      .from('memories')
-      .select('id,user_id,storage_path,caption,uploader_name,created_at,meeting_key')
-      .order('created_at', { ascending: false })
-      .limit(60);
+    let rows = null;
+    let error = null;
+    {
+      const full = await sb
+        .from('memories')
+        .select('id,user_id,storage_path,original_path,display_path,card_path,enhance_status,caption,uploader_name,created_at,meeting_key')
+        .order('created_at', { ascending: false })
+        .limit(60);
+      rows = full.data;
+      error = full.error;
+    }
+    if (error) {
+      const legacy = await sb
+        .from('memories')
+        .select('id,user_id,storage_path,caption,uploader_name,created_at,meeting_key')
+        .order('created_at', { ascending: false })
+        .limit(60);
+      rows = legacy.data;
+      error = legacy.error;
+    }
     if (error) throw new Error(error.message || 'Could not load memories.');
     if (!Array.isArray(rows)) {
       media = [];
@@ -1721,20 +1736,26 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     }
     const mapped = [];
     for (const r of rows) {
-      const path = r.storage_path;
+      const original = r.original_path || r.storage_path;
+      const display = r.display_path || original;
+      const card = r.card_path || display;
       let url = null;
-      try {
-        url = await signedUrlFor(path);
-      } catch (e) {
-        console.warn('sign fail', e);
+      let cardUrl = null;
+      try { url = await signedUrlFor(display); } catch (e) {}
+      if (!url && original && original !== display) {
+        try { url = await signedUrlFor(original); } catch (e) {}
       }
       if (!url) continue;
-      const lower = String(path || '').toLowerCase();
+      try { cardUrl = (card && card !== display) ? (await signedUrlFor(card)) : url; } catch (e) { cardUrl = url; }
+      const lower = String(original || display || '').toLowerCase();
       const isVideo = /\.(mp4|webm|mov)(\?|$)/i.test(lower);
       mapped.push({
         id: r.id,
-        data: url,
-        storage_path: path,
+        data: cardUrl || url,
+        full: url,
+        original_path: original,
+        display_path: r.display_path || '',
+        storage_path: r.storage_path || original,
         type: isVideo ? 'video' : 'image',
         caption: r.caption || '',
         uploader_name: r.uploader_name || '',
@@ -1744,8 +1765,53 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       });
     }
     media = mapped;
-    // Do not persist memory blobs to localStorage
     return true;
+  }
+
+  function memoryAccessToken() {
+    try { return (sbSession && sbSession.access_token) || ''; } catch (e) { return ''; }
+  }
+
+  function kickMemoryEnhance(memoryId) {
+    if (!memoryId) return;
+    const token = memoryAccessToken();
+    if (!token) return;
+    fetch('/.netlify/functions/enhance-memory', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + token
+      },
+      body: JSON.stringify({ id: memoryId })
+    }).then(function (res) {
+      if (!res.ok) return;
+      return res.json().catch(function () { return {}; });
+    }).then(function (body) {
+      if (!body || !body.ok) return;
+      setTimeout(function () {
+        Promise.resolve(pullMemories()).then(function () {
+          try { renderMedia(); } catch (e) {}
+          try { if (typeof renderLastFire === 'function') renderLastFire(); } catch (e) {}
+        }).catch(function () {});
+      }, 200);
+    }).catch(function (e) {
+      console.warn('enhance skip', e);
+    });
+  }
+
+  function extFromMemoryFile(item) {
+    const name = String((item && item.filename) || '');
+    const m = name.toLowerCase().match(/\.([a-z0-9]+)$/);
+    if (m && /^(jpe?g|png|webp|heic|heif|gif|mp4|webm|mov)$/.test(m[1])) {
+      return m[1] === 'jpeg' ? 'jpg' : m[1];
+    }
+    if (item && item.type === 'video') return 'mp4';
+    const t = (item && item.blob && item.blob.type) || '';
+    if (/png/i.test(t)) return 'png';
+    if (/webp/i.test(t)) return 'webp';
+    if (/heic|heif/i.test(t)) return 'heic';
+    if (/mp4/i.test(t)) return 'mp4';
+    return 'jpg';
   }
 
   async function pushMemory(item) {
@@ -1760,46 +1826,70 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     }
     if (!blob) throw new Error('No image to upload.');
 
-    const fname = safeFilename(item.filename || 'memory', isVideo);
-    const storagePath = 'private/' + user.id + '/' + Date.now() + '-' + fname;
+    const id = (typeof crypto !== 'undefined' && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : (Date.now().toString(16) + '-tbmem');
+    const ext = extFromMemoryFile(item);
+    const originalPath = 'private/' + user.id + '/' + id + '/original.' + ext;
+    const contentType = isVideo
+      ? (blob.type || 'video/mp4')
+      : (blob.type || 'image/jpeg');
 
     const { error: upErr } = await sb.storage
       .from(memoriesBucket())
-      .upload(storagePath, blob, {
-        contentType: isVideo ? 'video/mp4' : 'image/jpeg',
+      .upload(originalPath, blob, {
+        contentType: contentType,
         upsert: false
       });
     if (upErr) throw new Error('Upload failed: ' + (upErr.message || 'storage error'));
 
-    const row = {
+    const baseRow = {
+      id: id,
       user_id: user.id,
-      storage_path: storagePath,
+      storage_path: originalPath,
       caption: item.caption || '',
       uploader_name: item.uploader_name || myDisplayName() || (user.email || '').split('@')[0] || '',
       meeting_key: (typeof meetingKey === 'function' ? meetingKey() : '')
     };
+    const fullRow = Object.assign({}, baseRow, {
+      original_path: originalPath,
+      display_path: null,
+      card_path: null,
+      enhance_status: isVideo ? 'skipped' : 'pending'
+    });
 
-    const { data: saved, error: insErr } = await sb
-      .from('memories')
-      .insert(row)
-      .select('id,user_id,storage_path,caption,uploader_name,created_at,meeting_key')
-      .single();
+    let saved = null;
+    let insErr = null;
+    {
+      const first = await sb.from('memories').insert(fullRow).select('id,user_id,storage_path,original_path,display_path,caption,uploader_name,created_at,meeting_key').single();
+      saved = first.data;
+      insErr = first.error;
+    }
+    if (insErr) {
+      const second = await sb.from('memories').insert(baseRow).select('id,user_id,storage_path,caption,uploader_name,created_at,meeting_key').single();
+      saved = second.data;
+      insErr = second.error;
+    }
 
     if (insErr) {
-      // Exact-scope heal: storage succeeded, DB insert failed → remove that one object.
-      try { await sb.storage.from(memoriesBucket()).remove([storagePath]); } catch (e) {}
+      try { await sb.storage.from(memoriesBucket()).remove([originalPath]); } catch (e) {}
       throw new Error('Photo uploaded but could not save the record: ' + (insErr.message || 'database error'));
     }
 
     let url = null;
-    try { url = await signedUrlFor(storagePath); } catch (e) {}
+    try { url = await signedUrlFor(originalPath); } catch (e) {}
+    if (!isVideo) {
+      try { kickMemoryEnhance((saved && saved.id) || id); } catch (e) {}
+    }
     return {
       id: saved && saved.id,
       data: url || item.data,
-      storage_path: storagePath,
+      full: url || item.data,
+      original_path: originalPath,
+      storage_path: originalPath,
       type: isVideo ? 'video' : 'image',
       caption: (saved && saved.caption) || item.caption || '',
-      uploader_name: (saved && saved.uploader_name) || row.uploader_name,
+      uploader_name: (saved && saved.uploader_name) || baseRow.uploader_name,
       date: (saved && saved.created_at) || new Date().toISOString(),
       user_id: user.id
     };
@@ -4653,7 +4743,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       const prev = stage.querySelector('video');
       if (prev) { try { prev.pause(); } catch (e) {} }
       // Only allow data: or https: sources (never javascript: / arbitrary)
-      const src = String(m.data || '');
+      const src = String(m.full || m.data || '');
       const safe = src.startsWith('data:') || src.startsWith('https://') || src.startsWith('http://');
       if (!safe) {
         stage.textContent = 'Could not display this memory.';
@@ -4955,21 +5045,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     }
     try { showInstallToast('Uploading…'); } catch (e) {}
     try {
-      const dataUrl = await new Promise(function (resolve, reject) {
-        const reader = new FileReader();
-        reader.onload = function (ev) { resolve(ev.target.result); };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-      let payload = dataUrl;
-      try {
-        if (String(dataUrl).startsWith('data:image')) {
-          payload = await compressImageDataUrl(dataUrl, 1200, 0.72);
-        }
-      } catch (e) {}
       const item = {
-        data: payload,
-        blob: dataUrlToBlob(payload),
+        blob: file,
         filename: file.name || 'patio.jpg',
         type: 'image',
         caption: '',
@@ -4977,6 +5054,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         uploader_name: (typeof myDisplayName === 'function' && myDisplayName()) || ''
       };
       if (!supabaseEnabled()) throw new Error('Shared memories are not configured on this app yet.');
+      try { showInstallToast('Polishing…'); } catch (e) {}
       const saved = await pushMemory(item);
       media.unshift(saved);
       renderMedia();
@@ -6696,73 +6774,36 @@ $('#edit-profile-btn').addEventListener('click', () => {
 
       const isVideo = file.type.startsWith('video');
       const btn = $('#save-media');
-      if (btn) { btn.disabled = true; btn.textContent = 'Uploading…'; }
+      if (btn) { btn.disabled = true; btn.textContent = isVideo ? 'Uploading…' : 'Polishing…'; }
 
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const raw = ev.target.result;
-
-        const finish = async (dataUrl) => {
-          let payload = dataUrl;
-          try {
-            if (!isVideo && String(dataUrl).startsWith('data:image')) {
-              payload = await compressImageDataUrl(dataUrl, 1200, 0.72);
-            }
-          } catch (ce) {
-            if (btn) { btn.disabled = false; btn.textContent = 'Add to Memories'; }
-            return alert('Could not process that photo. Try another.');
+      const item = {
+        blob: file,
+        filename: file.name,
+        type: isVideo ? 'video' : 'image',
+        caption: ($('#media-caption').value || '').trim(),
+        date: new Date().toISOString(),
+        uploader_name: myDisplayName() || ''
+      };
+      (async function () {
+        try {
+          if (!supabaseEnabled()) {
+            throw new Error('Shared memories are not configured on this app yet.');
           }
-          const item = {
-            data: payload,
-            blob: dataUrlToBlob(payload),
-            filename: file.name,
-            type: isVideo ? 'video' : 'image',
-            caption: ($('#media-caption').value || '').trim(),
-            date: new Date().toISOString(),
-            uploader_name: myDisplayName() || ''
-          };
-          try {
-            if (!supabaseEnabled()) {
-              throw new Error('Shared memories are not configured on this app yet.');
-            }
-            const saved = await pushMemory(item);
-            media.unshift(saved);
-            renderMedia();
-            renderLastFire();
-            closeModal('media-modal');
-            $('#media-file').value = '';
-            $('#media-caption').value = '';
-            rewardSaveSuccess('memory');
-          } catch (err) {
-            console.error(err);
-            alert('Could not save memory. ' + (err.message || 'Try again.'));
-          } finally {
-            if (btn) { btn.disabled = false; btn.textContent = 'Add to Memories'; }
-          }
-        };
-
-        if (!isVideo && raw.startsWith('data:image')) {
-          const img = new Image();
-          img.onload = () => {
-            const maxW = 1200;
-            let w = img.width, h = img.height;
-            if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
-            const canvas = document.createElement('canvas');
-            canvas.width = w; canvas.height = h;
-            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-            finish(canvas.toDataURL('image/jpeg', 0.72));
-          };
-          img.onerror = () => finish(raw);
-          img.src = raw;
-        } else {
-          finish(raw);
+          const saved = await pushMemory(item);
+          media.unshift(saved);
+          renderMedia();
+          renderLastFire();
+          closeModal('media-modal');
+          $('#media-file').value = '';
+          $('#media-caption').value = '';
+          rewardSaveSuccess('memory');
+        } catch (err) {
+          console.error(err);
+          alert('Could not save memory. ' + (err.message || 'Try again.'));
+        } finally {
+          if (btn) { btn.disabled = false; btn.textContent = 'Add to Memories'; }
         }
-      };
-      reader.onerror = () => {
-        if (btn) { btn.disabled = false; btn.textContent = 'Add to Memories'; }
-        alert('Could not read that file.');
-      };
-      reader.readAsDataURL(file);
+      })();
     });
 
     // Auth gate actions
