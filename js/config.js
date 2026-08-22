@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260821-memwall3',
+  APP_BUILD: '20260821-lead7',
   /* First-run tour is OPTIONAL. Thunder backstage invites once:
      "New here? Tap me. I'll show you the room." Tap Thunder or the bubble → tour.
      Ignore once = no nag. More → TAKE THE TOUR always remains. */
@@ -166,6 +166,14 @@ window.TB_CONFIG = {
     });
   } catch (eSeed) {}
   try {
+
+    if (!document.querySelector('script[src*="leader-door.js"]')) {
+      var ld = document.createElement('script');
+      ld.src = 'js/leader-door.js?v=20260821-lead7';
+      ld.defer = true;
+      (document.body || document.documentElement).appendChild(ld);
+    }
+
     if (document.querySelector('script[src*="bday-autotext.js"]')) return;
     var s = document.createElement('script');
     s.src = 'js/bday-autotext.js?v=20260821-memwall3';
