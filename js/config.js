@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260822-chrome6',
+  APP_BUILD: '20260822-chrome7',
   /* First-run tour does NOT auto-start. New phone lands in the room.
      Already finished (thunderTourV42 done) = no nag. More → TAKE THE TOUR remains. */
   /* I'M IN vault locked 2026-08-21 — live-coal rest, bolt strike, yellow settle,
@@ -145,7 +145,7 @@ window.TB_CONFIG = {
   try {
     if (!document.querySelector('script[src*="memories-grid.js"]')) {
       var mg = document.createElement('script');
-      mg.src = 'js/memories-grid.js?v=20260822-chrome6';
+      mg.src = 'js/memories-grid.js?v=20260822-chrome7';
       mg.defer = true;
       (document.body || document.documentElement).appendChild(mg);
     }
