@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260822-pulse3',
+  APP_BUILD: '20260822-tourunstick1',
   /* First-run tour AUTO-STARTS once for a new phone. Skip stays.
      Already finished (thunderTourV42 done) = no nag. More → TAKE THE TOUR remains. */
   /* I'M IN vault locked 2026-08-21 — live-coal rest, bolt strike, yellow settle,
@@ -112,28 +112,28 @@ window.TB_CONFIG = {
     if (!document.querySelector('link[href*="chief1-ghost.css"]')) {
       var l = document.createElement('link');
       l.rel = 'stylesheet';
-      l.href = 'css/chief1-ghost.css?v=20260822-pulse3';
+      l.href = 'css/chief1-ghost.css?v=20260822-tourunstick1';
       (document.head || document.documentElement).appendChild(l);
     }
 
     if (!document.querySelector('link[href*="memories-latest.css"]')) {
       var m = document.createElement('link');
       m.rel = 'stylesheet';
-      m.href = 'css/memories-latest.css?v=20260821-memwall3';
+      m.href = 'css/memories-latest.css?v=20260822-tourunstick1';
       (document.head || document.documentElement).appendChild(m);
     }
 
     if (!document.querySelector('link[href*="ask-clear.css"]')) {
       var ac = document.createElement('link');
       ac.rel = 'stylesheet';
-      ac.href = 'css/ask-clear.css?v=20260821-ask2';
+      ac.href = 'css/ask-clear.css?v=20260822-tourunstick1';
       (document.head || document.documentElement).appendChild(ac);
     }
 
     if (!document.querySelector('link[href*="memories-page.css"]')) {
       var p = document.createElement('link');
       p.rel = 'stylesheet';
-      p.href = 'css/memories-page.css?v=20260822-pulse3';
+      p.href = 'css/memories-page.css?v=20260822-tourunstick1';
       (document.head || document.documentElement).appendChild(p);
     }
     try {
@@ -164,7 +164,7 @@ window.TB_CONFIG = {
       var name = src.split('/').pop();
       if (document.querySelector('script[src*="' + name + '"]')) return;
       var sc = document.createElement('script');
-      sc.src = src + '?v=20260822-pulse3';
+      sc.src = src + '?v=20260822-tourunstick1';
       sc.defer = true;
       (document.body || document.documentElement).appendChild(sc);
     });
@@ -173,42 +173,42 @@ window.TB_CONFIG = {
 
     if (!document.querySelector('script[src*="leader-door.js"]')) {
       var ld = document.createElement('script');
-      ld.src = 'js/leader-door.js?v=20260822-pulse3';
+      ld.src = 'js/leader-door.js?v=20260822-tourunstick1';
       ld.defer = true;
       (document.body || document.documentElement).appendChild(ld);
     }
 
     if (!document.querySelector('script[src*="tour-first.js"]')) {
       var tf = document.createElement('script');
-      tf.src = 'js/tour-first.js?v=20260822-pulse3';
+      tf.src = 'js/tour-first.js?v=20260822-tourunstick1';
       tf.defer = true;
       (document.body || document.documentElement).appendChild(tf);
     }
 
     if (!document.querySelector('script[src*="more-legal.js"]')) {
       var ml = document.createElement('script');
-      ml.src = 'js/more-legal.js?v=20260822-pulse3';
+      ml.src = 'js/more-legal.js?v=20260822-tourunstick1';
       ml.defer = true;
       (document.body || document.documentElement).appendChild(ml);
     }
 
     if (!document.querySelector('script[src*="thunder-ask.js"]')) {
       var ta = document.createElement('script');
-      ta.src = 'js/thunder-ask.js?v=20260821-ask1';
+      ta.src = 'js/thunder-ask.js?v=20260822-tourunstick1';
       ta.defer = true;
       (document.body || document.documentElement).appendChild(ta);
     }
 
     if (!document.querySelector('script[src*="ask-clear.js"]')) {
       var aj = document.createElement('script');
-      aj.src = 'js/ask-clear.js?v=20260821-ask2';
+      aj.src = 'js/ask-clear.js?v=20260822-tourunstick1';
       aj.defer = true;
       (document.body || document.documentElement).appendChild(aj);
     }
 
     if (document.querySelector('script[src*="bday-autotext.js"]')) return;
     var s = document.createElement('script');
-    s.src = 'js/bday-autotext.js?v=20260821-memwall3';
+    s.src = 'js/bday-autotext.js?v=20260822-tourunstick1';
     s.defer = true;
     (document.body || document.documentElement).appendChild(s);
   } catch (e2) {}
