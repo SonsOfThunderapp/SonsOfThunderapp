@@ -1,30 +1,14 @@
 /* hangout tour extras — TAKE THE TOUR only, no auto-start */
 (function(){
 if (window.__tbHangoutTour) return; window.__tbHangoutTour=true;
-function stillSrc(n){
-  var a=window.__tbHangSRC||[];
-  return a[n]||'';
-}
-function loadStills(done){
-  if(window.__tbHangSRC && window.__tbHangSRC.length>=6){ done(); return; }
-  var n=0, total=6;
-  function one(){
-    n++;
-    if(n>=total) done();
-  }
-  var base=(function(){
-    var s=document.querySelector('script[src*="hangout-tour.js"]');
-    if(!s) return '/js/';
-    return s.src.replace(/hangout-tour\.js.*$/,'');
-  })();
-  for(var i=1;i<=total;i++){
-    var el=document.createElement('script');
-    el.src=base+'hangout-stills-'+i+'.js?v=hangout2';
-    el.onload=one;
-    el.onerror=one;
-    document.head.appendChild(el);
-  }
-}
+var SRC=[
+  'assets/tour-hangouts/06-reading.jpg?v=hangout1',
+  'assets/tour-hangouts/01-patio.jpg?v=hangout1',
+  'assets/tour-hangouts/04-pickle.jpg?v=hangout1',
+  'assets/tour-hangouts/03-grill.jpg?v=hangout1',
+  'assets/tour-hangouts/05-birthday.jpg?v=hangout1',
+  'assets/tour-hangouts/02-fire.jpg?v=hangout1'
+];
 var TALK=[
   ["Quiet's fine.","When it isn't, ask."],
   ["You coming Monday?","That's the door. I'M IN."],
@@ -54,9 +38,8 @@ function paint(){
   }
   layer.setAttribute('data-mood', MOOD[i]||'read');
   var img=layer.querySelector('.tb-hang-art');
-  var src=stillSrc(i);
-  if(img && src && img.getAttribute('data-i')!==String(i)){
-    img.src=src;
+  if(img && SRC[i] && img.getAttribute('data-i')!==String(i)){
+    img.src=SRC[i];
     img.setAttribute('data-i', String(i));
   }
   var t=TALK[i]||['',''];
@@ -71,11 +54,6 @@ function watch(){
   new MutationObserver(paint).observe(tour,{attributes:true,subtree:true,attributeFilter:['class','data-board']});
   paint();
 }
-function start(){
-  loadStills(function(){
-    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',watch);
-    else watch();
-  });
-}
-start();
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',watch);
+else watch();
 })();
