@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260821-memenhance1',
+  APP_BUILD: '20260822-memenhance',
   /* First-run tour AUTO-STARTS once for a new phone. Skip stays.
      Already finished (thunderTourV42 done) = no nag. More → TAKE THE TOUR remains. */
   /* I'M IN vault locked 2026-08-21 — live-coal rest, bolt strike, yellow settle,
@@ -106,7 +106,7 @@ window.TB_CONFIG = {
   VAPID_PUBLIC_KEY: 'BGRjLCD3QnLBxb2VFNgxpGcJ1Ptxosp8yGq8yiJTGm2YS8OHVYsOhVvCFpmyREbeQsmsq6NaJ42j9yMx19Vl6hE'
 };
 
-/* 20260821-bday2: ghost-wordmark + birthday-honor lock companion */
+/* 20260822-memenhance: polish overlay + existing companions */
 (function () {
   try {
     if (!document.querySelector('link[href*="chief1-ghost.css"]')) {
@@ -135,6 +135,12 @@ window.TB_CONFIG = {
       p.rel = 'stylesheet';
       p.href = 'css/memories-page.css?v=20260821-memwall3';
       (document.head || document.documentElement).appendChild(p);
+    }
+    if (!document.querySelector('link[href*="memories-polish.css"]')) {
+      var mp = document.createElement('link');
+      mp.rel = 'stylesheet';
+      mp.href = 'css/memories-polish.css?v=20260822-memenhance';
+      (document.head || document.documentElement).appendChild(mp);
     }
     try {
       var ev = document.querySelector('.nav-item[data-view="events"] span');
@@ -173,6 +179,13 @@ window.TB_CONFIG = {
     });
   } catch (eSeed) {}
   try {
+
+    if (!document.querySelector('script[src*="memories-enhance.js"]')) {
+      var meh = document.createElement('script');
+      meh.src = 'js/memories-enhance.js?v=20260822-memenhance';
+      meh.defer = true;
+      (document.body || document.documentElement).appendChild(meh);
+    }
 
     if (!document.querySelector('script[src*="leader-door.js"]')) {
       var ld = document.createElement('script');
