@@ -1,10 +1,17 @@
-/* Public Memories seed overlay. Does not wrap app.js internals.
-   Guest READ/display is public. Upload stays sign-in (app.js). */
+/* Guest Memories wall: real image/* files only. No data:webp. Upload stays sign-in. */
 (function () {
   var painting = false;
   var viewerBound = false;
   var skipped = {};
-  var lastSeedCount = 0;
+
+  var GUEST_WALL = [
+    { id: 'real-tree', src: 'assets/tour-memories/real-tree.jpg' },
+    { id: 'real-patio', src: 'assets/tour-memories/real-patio.jpg' },
+    { id: 'real-bowl', src: 'assets/tour-memories/real-bowl.jpg' },
+    { id: 'mem-patio', src: 'assets/tour-memories/mem-patio.jpg' },
+    { id: 'mem-lake', src: 'assets/tour-memories/mem-lake.jpg' },
+    { id: 'mem-fire', src: 'assets/tour-memories/mem-fire.jpg' }
+  ];
 
   function signedIn() {
     try {
@@ -21,48 +28,34 @@
     try { console.info('[memories] skip', id || '', reason); } catch (e) {}
   }
 
-  function isTinyOrInvalidSrc(src) {
-    if (src == null) return true;
+  function isHttpImagePath(src) {
+    if (src == null) return false;
     src = String(src).trim();
-    if (!src || src === 'undefined' || src === 'null' || src === 'about:blank') return true;
-    if (src.indexOf('data:') === 0) {
-      var comma = src.indexOf(',');
-      if (comma < 0) return true;
-      var payload = src.slice(comma + 1).replace(/\s+/g, '');
-      if (payload.length < 800) return true;
-      var head = src.slice(0, comma).toLowerCase();
-      if (head.indexOf('image/') < 0 && head.indexOf('video/') < 0) return true;
-      return false;
-    }
-    if (/^javascript:/i.test(src) || /^blob:$/i.test(src)) return true;
-    if (/^https?:\/\/$/i.test(src) || /^https?:\/\/#/i.test(src)) return true;
-    try {
-      if (/^https?:\/\//i.test(src)) {
+    if (!src || src === 'undefined' || src === 'null' || src === 'about:blank') return false;
+    if (src.indexOf('data:') === 0) return false;
+    if (/^javascript:/i.test(src) || /^blob:/i.test(src)) return false;
+    if (/^https?:\/\/$/i.test(src) || /^https?:\/\/#/i.test(src)) return false;
+    if (/^https?:\/\//i.test(src)) {
+      try {
         var u = new URL(src);
-        if (!u.hostname) return true;
+        if (!u.hostname) return false;
+        return /\.(jpe?g|png|gif|webp)(\?|#|$)/i.test(u.pathname);
+      } catch (eUrl) {
+        return false;
       }
-    } catch (eUrl) {
-      return true;
+    }
+    if (src.charAt(0) === '/' || src.indexOf('assets/') === 0 || src.indexOf('img/') === 0) {
+      return /\.(jpe?g|png|gif|webp)(\?|#|$)/i.test(src);
     }
     return false;
   }
 
   function seedList() {
-    var s = window.TB_MEMORY_SEED;
-    if (!Array.isArray(s)) return [];
-    var dead = {
-      'seed-02-crooked-can': 1,
-      'seed-07-sons-tv': 1,
-      'seed-13-orlando-create': 1
-    };
-    return s.filter(function (item) {
+    return GUEST_WALL.filter(function (item) {
       if (!item || !item.src) return false;
-      if (dead[item.id] || skipped[item.id]) {
-        noteSkip(item.id, dead[item.id] ? 'known-truncated-webp' : skipped[item.id]);
-        return false;
-      }
-      if (isTinyOrInvalidSrc(item.src)) {
-        noteSkip(item.id || 'seed', 'tiny-or-invalid-data-uri');
+      if (skipped[item.id]) return false;
+      if (!isHttpImagePath(item.src)) {
+        noteSkip(item.id || 'seed', 'not-http-image');
         return false;
       }
       return true;
@@ -78,6 +71,15 @@
   function removeTile(el, id, reason) {
     noteSkip(id || (el && el.getAttribute && el.getAttribute('data-mem-id')) || 'tile', reason || 'decode-fail');
     try { if (el && el.parentNode) el.parentNode.removeChild(el); } catch (eRm) {}
+  }
+
+  function applyContain(img) {
+    if (!img) return;
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.style.objectFit = 'contain';
+    img.style.objectPosition = 'center';
+    img.style.background = '#000';
   }
 
   function bindDecodeGuard(el, media, id) {
@@ -114,7 +116,7 @@
     var media = el.querySelector('img, video');
     var src = tileSrc(el);
     var id = (el.getAttribute && el.getAttribute('data-mem-id')) || src.slice(0, 48);
-    if (!media || isTinyOrInvalidSrc(src)) {
+    if (!media || src.indexOf('data:') === 0 || !src) {
       removeTile(el, id, 'invalid-src');
       return false;
     }
@@ -142,7 +144,7 @@
   function openLocalViewer(src) {
     var viewer = document.getElementById('memory-viewer');
     var stage = document.getElementById('memory-viewer-stage');
-    if (!viewer || !stage || isTinyOrInvalidSrc(src)) return;
+    if (!viewer || !stage || !isHttpImagePath(src)) return;
     stage.innerHTML = '';
     var img = document.createElement('img');
     img.alt = '';
@@ -170,7 +172,7 @@
   }
 
   function onTileTap(src, btn) {
-    if (isTinyOrInvalidSrc(src)) return;
+    if (!isHttpImagePath(src)) return;
     if (typeof window.openMemoryViewer === 'function') {
       try {
         var media = window.media;
@@ -185,8 +187,8 @@
   }
 
   function makeSeedTile(item) {
-    if (!item || isTinyOrInvalidSrc(item.src)) {
-      noteSkip(item && item.id, 'tiny-or-invalid-data-uri');
+    if (!item || !isHttpImagePath(item.src)) {
+      noteSkip(item && item.id, 'not-http-image');
       return null;
     }
     var btn = document.createElement('button');
@@ -198,6 +200,7 @@
     var img = document.createElement('img');
     img.alt = '';
     img.loading = 'lazy';
+    applyContain(img);
     function killDead() {
       skipped[item.id || item.src] = 'decode-fail';
       removeTile(btn, item.id, 'decode-fail');
@@ -272,9 +275,7 @@
     var feed = document.getElementById('media-feed');
     if (!feed) return;
     var seeds = seedList();
-    /* Public proof: do not wait for isSignedIn to READ/display seeds. */
     if (!seeds.length) {
-      lastSeedCount = 0;
       return;
     }
     painting = true;
@@ -291,10 +292,11 @@
         var media = el.querySelector('img, video');
         var src = tileSrc(el);
         var id = el.getAttribute('data-mem-id') || '';
-        if (!media || isTinyOrInvalidSrc(src) || skipped[id]) {
+        if (!media || src.indexOf('data:') === 0 || skipped[id] || !isHttpImagePath(src)) {
           removeTile(el, id, skipped[id] || 'invalid-src');
           return;
         }
+        applyContain(media);
         bindDecodeGuard(el, media, id);
       });
 
@@ -306,12 +308,9 @@
       if (!live.length && seedNodes.length === seeds.length && !empty) {
         feed.classList.add('mem-grid', 'mem-has-grid');
         hideGuestEmpty(feed);
-        lastSeedCount = seeds.length;
         return;
       }
 
-      /* Guest path: app.js renderMedia() wipes to empty CTA when unsigned.
-         Restore seed wall without touching upload. */
       if (!live.length && (empty || seedNodes.length !== seeds.length || guest)) {
         if (empty || seedNodes.length !== seeds.length) {
           if (empty) feed.innerHTML = '';
@@ -326,7 +325,6 @@
         }
         hideGuestEmpty(feed);
         feed.classList.add('mem-grid', 'mem-has-grid');
-        lastSeedCount = seeds.length;
         return;
       }
 
@@ -343,7 +341,6 @@
         ) {
           live.forEach(stripNames);
           feed.classList.add('mem-grid', 'mem-has-grid');
-          lastSeedCount = seeds.length;
           return;
         }
 
@@ -361,7 +358,6 @@
           appendSeed(feed, item);
         });
         feed.classList.add('mem-grid', 'mem-has-grid');
-        lastSeedCount = seeds.length;
       }
     } finally {
       painting = false;
@@ -407,7 +403,6 @@
       if (hero) obs.observe(hero, { childList: true });
       feed._tbMemObs = obs;
     }
-    /* Seeds load async; app.js may wipe guest feed after each auth tick. */
     setInterval(function () {
       paint();
     }, 400);
