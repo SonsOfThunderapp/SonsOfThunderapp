@@ -1,4 +1,16 @@
 (function(){
+  function punchSplash(){
+    var s=document.getElementById("splash");
+    if(s){ s.classList.add("hidden","splash-done"); }
+    var t=document.getElementById("tb-tour");
+    if(t){ t.classList.add("hidden"); }
+  }
+  punchSplash();
+  setTimeout(punchSplash,0);
+  setTimeout(punchSplash,200);
+  setTimeout(punchSplash,800);
+})();
+(function(){
   function hide(el){
     if(!el) return;
     el.classList.add("hidden","splash-done","splash-out");
