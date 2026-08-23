@@ -1,4 +1,4 @@
-/* 20260823-flush1: new SW so Home Screen drops stale header CSS */
+/* 20260823-auto1: new SW so Home Screen drops stale header CSS */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
