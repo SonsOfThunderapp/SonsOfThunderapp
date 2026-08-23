@@ -8,6 +8,7 @@
       || window.navigator.standalone === true;
   } catch (e0) {}
   if (!stand) return;
+  try { document.documentElement.classList.add('tb-standalone'); } catch (eCls) {}
 
   function toast(msg) {
     try {

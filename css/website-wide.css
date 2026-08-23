@@ -561,3 +561,57 @@ body.tb-tour-open .tb-tour-boards .tb-tour-headline {
   visibility: hidden !important;
   pointer-events: none !important;
 }
+
+/* 20260823-logo1: full official mark. Never shear. Sit below island even if env() is 0. */
+html.tb-standalone #main-header.header,
+html.tb-standalone #main-header,
+html.tb-standalone .header {
+  padding-top: max(59px, calc(12px + env(safe-area-inset-top, 0px))) !important;
+  overflow: visible !important;
+  clip-path: none !important;
+  -webkit-clip-path: none !important;
+  max-height: none !important;
+  min-height: 0 !important;
+}
+html.tb-standalone #header-logo,
+html.tb-standalone .header img.logo,
+html.tb-standalone .logo-wrap .logo {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  max-height: 92px !important;
+  width: min(86vw, 300px) !important;
+  max-width: min(86vw, 300px) !important;
+  height: auto !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  clip-path: none !important;
+  -webkit-clip-path: none !important;
+}
+@media (display-mode: standalone) {
+  #main-header.header,
+  #main-header,
+  .header {
+    padding-top: max(59px, calc(12px + env(safe-area-inset-top, 0px))) !important;
+    overflow: visible !important;
+    clip-path: none !important;
+    -webkit-clip-path: none !important;
+    max-height: none !important;
+    min-height: 0 !important;
+  }
+  #header-logo,
+  .header img.logo,
+  .logo-wrap .logo {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    max-height: 92px !important;
+    width: min(86vw, 300px) !important;
+    max-width: min(86vw, 300px) !important;
+    height: auto !important;
+    object-fit: contain !important;
+    object-position: center center !important;
+    clip-path: none !important;
+    -webkit-clip-path: none !important;
+  }
+}
