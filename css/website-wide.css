@@ -1,1 +1,550 @@
-PLACEHOLDER_CSS
+/* WEBSITE CUT 2026-08-22 — extras only. Homepage frozen. Phone stays phone. */
+@media (min-width: 900px) {
+  .container {
+    max-width: 1080px;
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+  #main-header.header,
+  #main-header {
+    max-width: 1080px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+  }
+  .bottom-nav {
+    left: 50%;
+    right: auto;
+    width: min(1080px, 100%);
+    transform: translateX(-50%) !important;
+    border-left: 1px solid #1a1a1a;
+    border-right: 1px solid #1a1a1a;
+  }
+  .meeting-countdown { font-size: 2.6rem; }
+  .meeting-date { font-size: 36px; }
+  #rsvp-btn.btn-rsvp,
+  #rsvp-btn {
+    min-height: 64px;
+    font-size: 1.15rem;
+    letter-spacing: 0.08em;
+  }
+  .card { padding: 28px; }
+  .brothers-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .media-feed { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .brother-photo img,
+  .media-thumb img,
+  .media-thumb video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container { max-width: 1200px; }
+  #main-header.header, #main-header { max-width: 1200px; }
+  .bottom-nav { width: min(1200px, 100%); }
+  .brothers-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .media-feed { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+/* 2026-08-23: same product, different glass. Hide stray overlay bolt.
+   Higher specificity than styles.css .logo-bolt-life { display:block !important }. */
+#main-header .logo-bolt-life,
+#main-header img.logo-bolt-life,
+.logo-wrap img.logo-bolt-life,
+body img.logo-bolt-life,
+.logo-bolt-life,
+.tb-logo-bolt-life,
+img.logo-bolt-life {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  animation: none !important;
+}
+
+/* APP / phone: official mark fills the phone, does not eat the room. */
+#header-logo,
+.header img.logo,
+.logo-wrap .logo {
+  height: auto !important;
+  width: min(86vw, 300px) !important;
+  max-width: min(86vw, 300px) !important;
+  max-height: 92px !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  margin: 0 auto !important;
+  display: block !important;
+}
+
+/* APP Thunder: present, not a billboard. */
+#thunder-fab.thunder-fab {
+  width: 68px !important;
+  height: 68px !important;
+  right: 10px;
+  bottom: calc(80px + var(--safe-bottom, 0px));
+}
+#thunder-fab .thunder-fab-img,
+.thunder-fab-img {
+  width: 60px !important;
+  height: 60px !important;
+}
+
+/* WEB / desktop: huge mark, huge backstage Thunder. */
+@media (min-width: 900px) {
+  #header-logo,
+  .header img.logo,
+  .logo-wrap .logo {
+    width: min(68vw, 900px) !important;
+    max-width: min(68vw, 900px) !important;
+    max-height: none !important;
+  }
+  #thunder-fab.thunder-fab {
+    width: 148px !important;
+    height: 148px !important;
+    right: 28px;
+    bottom: calc(104px + var(--safe-bottom, 0px));
+  }
+  #thunder-fab .thunder-fab-img,
+  .thunder-fab-img {
+    width: 136px !important;
+    height: 136px !important;
+  }
+}
+
+/* 20260823-gold1e: splash classes must NEVER keep a hidden tour painted. */
+#tb-tour.hidden,
+#tb-tour.tb-tour.hidden,
+#tb-tour.tb-tour-slides.hidden,
+#tb-tour.splash-done.hidden,
+#tb-tour.splash-out.hidden {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+body.tb-tour-open #tb-tour.splash-done:not(.hidden),
+body.tb-tour-open #tb-tour.splash-out:not(.hidden),
+body.tb-tour-open #tb-tour.tb-tour.splash-done:not(.hidden),
+body.tb-tour-open #tb-tour.tb-tour.splash-out:not(.hidden) {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+body.tb-tour-open #tb-tour.tb-tour:not(.hidden),
+#tb-tour.tb-tour-slides:not(.hidden) {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  z-index: 50000 !important;
+}
+
+
+/* 20260823-tour-fill: overlay must fill the glass. Never a 20px sliver. */
+body.tb-tour-open #tb-tour.tb-tour,
+body.tb-tour-open #tb-tour.tb-tour-slides,
+#tb-tour.tb-tour:not(.hidden),
+#tb-tour.tb-tour-slides:not(.hidden) {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  width: 100dvw !important;
+  max-width: none !important;
+  min-width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-height: none !important;
+  margin: 0 !important;
+  transform: none !important;
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  z-index: 50000 !important;
+  box-sizing: border-box !important;
+}
+body.tb-tour-open #tb-tour .tb-tour-stage,
+body.tb-tour-open .tb-tour-stage {
+  width: min(100vw, 430px) !important;
+  max-width: 100vw !important;
+  min-width: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+}
+
+
+/* 20260823-gold1 — quiet the room. Homepage frozen. I'M IN vault untouched. */
+#fab-bubble.fab-bubble,
+#fab-bubble,
+.fab-bubble {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+body.tb-view-about #thunder-fab,
+#view-about ~ * #thunder-fab,
+body.tb-view-about .thunder-fab {
+  opacity: 0.28 !important;
+}
+
+#tb-tour .tb-guide-bubble,
+.tb-tour-boards .tb-guide-bubble,
+.tb-guide-bubble {
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  flex: 0 0 auto !important;
+  padding: 10px 14px !important;
+}
+#tb-tour-body.tb-tour-body,
+#tb-tour .tb-tour-body {
+  min-height: 0 !important;
+  height: auto !important;
+}
+
+body.tb-tour-open #tb-tour.tb-tour {
+  transition: opacity 0.28s ease;
+}
+
+.new-badge-card,
+.announcement-card .new-badge,
+.nav-new-dot {
+  display: none !important;
+}
+
+#view-about .more-tools {
+  display: flex !important;
+  flex-direction: column !important;
+}
+#view-about #replay-tour-card { order: 1; }
+#view-about #gathering-alerts-card { order: 2; }
+#view-about #invite-brother-card { order: 3; }
+#view-about #install-help-card { order: 4; }
+#view-about #install-help-btn {
+  display: none !important;
+}
+#view-about .install-card-more,
+#view-about .install-card {
+  animation: none !important;
+}
+
+#meeting-phase-label,
+.next-meeting .card-label,
+.memories-block .card-label,
+.home-mission .card-label,
+.next-mission .card-label,
+.card-label,
+.announcement-card-label,
+#info-detail-label,
+.info-detail-label,
+#cal-confirm-label,
+.cal-confirm-label,
+.last-fire-label,
+.event-month,
+.tb-live-label,
+.happy-birthday-label {
+  animation: none !important;
+}
+.bolt-glow,
+.mission-bolt,
+.welcome-bolt,
+.ios-install-bolt,
+.about-bolt-glow,
+.qr-bolt-glow {
+  animation: none !important;
+}
+
+
+/* 20260823-gold1b — sign-in whispers, photos lead. No auth/RSVP/app.js. */
+#view-brothers .btn-auth-entry,
+#auth-entry-btn.btn-auth-entry {
+  background: transparent !important;
+  border: 1px solid #2a2a2a !important;
+  box-shadow: none !important;
+  color: #888 !important;
+  min-height: 42px !important;
+  font-size: 12px !important;
+  letter-spacing: 0.1em !important;
+  font-weight: 600 !important;
+}
+#view-brothers .btn-auth-entry-sub,
+.btn-auth-entry-sub {
+  display: none !important;
+}
+#home-member-cta,
+.home-member-cta {
+  opacity: 0.55 !important;
+  border-color: #222 !important;
+}
+
+#memories-signin-shot.btn-rsvp:not(.hidden) {
+  min-height: 40px !important;
+  padding: 8px 14px !important;
+  font-size: 11px !important;
+  letter-spacing: 0.08em !important;
+  width: auto !important;
+  max-width: 240px !important;
+  margin: 8px auto 6px !important;
+  box-shadow: none !important;
+  filter: none !important;
+  animation: none !important;
+}
+#memories-library-btn.btn-mem-lib,
+#memories-library-btn {
+  font-size: 10px !important;
+  letter-spacing: 0.08em !important;
+  opacity: 0.45 !important;
+  text-transform: uppercase !important;
+  background: transparent !important;
+  border: 0 !important;
+}
+
+
+/* 20260823-gold1c — P1: tour copy stays on glass; ghost host dies with tour. */
+body:not(.tb-tour-open) #tb-tour-host,
+body:not(.tb-tour-open) #tb-tour-host.tb-guide-thunder,
+#tb-tour.hidden #tb-tour-host,
+#tb-tour.hidden .tb-guide-thunder {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  left: auto !important;
+  transform: none !important;
+}
+#tb-tour .tb-guide-bubble,
+.tb-tour-boards .tb-guide-bubble,
+.tb-guide-bubble {
+  max-width: min(100%, calc(100vw - 28px)) !important;
+  width: min(100%, calc(100vw - 28px)) !important;
+  box-sizing: border-box !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  left: auto !important;
+  right: auto !important;
+}
+
+
+/* 20260823-gold1d — P1: guide bubble cannot sit at left:107 in a 390 glass. */
+body.tb-tour-open #tb-tour .tb-guide-bubble,
+body.tb-tour-open #tb-tour .tb-tour-boards .tb-guide-bubble,
+body.tb-tour-open .tb-guide-bubble {
+  position: relative !important;
+  left: 0 !important;
+  right: 0 !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  width: calc(100% - 16px) !important;
+  max-width: calc(100vw - 32px) !important;
+  transform: none !important;
+  box-sizing: border-box !important;
+}
+
+
+/* 20260823-gold1e-bubble: clip the stage to the glass. */
+body.tb-tour-open #tb-tour.tb-tour,
+body.tb-tour-open #tb-tour {
+  overflow-x: hidden !important;
+}
+body.tb-tour-open #tb-tour .tb-tour-stage {
+  max-width: 100vw !important;
+  width: min(100vw, 430px) !important;
+  overflow-x: hidden !important;
+  left: 0 !important;
+  margin: 0 auto !important;
+}
+body.tb-tour-open #tb-tour .tb-tour-stage .tb-guide-bubble {
+  position: relative !important;
+  left: 0 !important;
+  right: 0 !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  transform: none !important;
+  box-sizing: border-box !important;
+}
+
+
+/* 20260823-gold1g: bubble is a flex sibling, never width:100% of the hero. */
+body.tb-tour-open #tb-tour .tb-tour-stage {
+  width: 100% !important;
+  max-width: 100% !important;
+  left: 0 !important;
+  right: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+}
+body.tb-tour-open #tb-tour .tb-tour-hero {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+}
+body.tb-tour-open #tb-tour .tb-tour-hero .tb-guide-thunder,
+body.tb-tour-open #tb-tour #tb-tour-host.tb-guide-thunder {
+  max-width: 72px !important;
+  width: 72px !important;
+  flex: 0 0 72px !important;
+}
+body.tb-tour-open #tb-tour .tb-tour-hero .tb-guide-bubble,
+body.tb-tour-open #tb-tour .tb-guide-bubble {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  width: auto !important;
+  max-width: none !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  transform: none !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+}
+
+
+/* 20260823-safe1: iOS Home Screen / standalone ONLY. Safari header unchanged. */
+@media (display-mode: standalone) {
+  #main-header.header,
+  #main-header,
+  .header {
+    padding-top: calc(10px + env(safe-area-inset-top, 47px)) !important;
+    overflow: visible !important;
+  }
+  #header-logo,
+  .header img.logo,
+  .logo-wrap .logo {
+    max-height: 92px !important;
+    width: min(86vw, 300px) !important;
+    max-width: min(86vw, 300px) !important;
+    object-fit: contain !important;
+    object-position: center center !important;
+  }
+  .thunder-header,
+  #thunder-modal .thunder-header,
+  .thunder-modal .modal-header,
+  #thunder-modal .modal-header,
+  .modal-header {
+    padding-top: calc(14px + env(safe-area-inset-top, 47px)) !important;
+  }
+  #ios-install-overlay .ios-install-panel,
+  #auth-gate .auth-card {
+    margin-top: env(safe-area-inset-top, 47px);
+  }
+}
+
+
+/* 20260823-bub2: Thunder's spoken line is the jewel. Full letters. Quiet gold. */
+body.tb-tour-open #tb-tour .tb-tour-hero {
+  overflow: visible !important;
+}
+body.tb-tour-open #tb-tour .tb-guide-bubble,
+body.tb-tour-open .tb-guide-bubble {
+  overflow: visible !important;
+  background: #0b0b0b !important;
+  border: 1px solid rgba(254, 241, 5, 0.7) !important;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.65),
+    0 10px 28px rgba(0, 0, 0, 0.5),
+    0 0 16px rgba(254, 241, 5, 0.08) !important;
+  border-radius: 16px !important;
+  padding: 14px 16px 15px !important;
+  box-sizing: border-box !important;
+}
+body.tb-tour-open #tb-tour-body.tb-tour-body,
+body.tb-tour-open #tb-tour .tb-tour-body {
+  overflow: visible !important;
+  color: #f5f5f5 !important;
+  font-size: 15px !important;
+  line-height: 1.45 !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.012em !important;
+  text-shadow: 0 1px 0 #000 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  min-height: 1.45em !important;
+  height: auto !important;
+}
+body.tb-tour-open #tb-tour .tb-hang-talk,
+.tb-hang-talk {
+  overflow: visible !important;
+  background: #0b0b0b !important;
+  border: 1px solid rgba(254, 241, 5, 0.7) !important;
+  color: #f5f5f5 !important;
+  font: 600 14px/1.4 system-ui, sans-serif !important;
+  padding: 10px 14px !important;
+  border-radius: 14px !important;
+}
+body.tb-tour-open .tb-tour-boards .tb-tour-headline {
+  line-height: 1.1 !important;
+  overflow: visible !important;
+}
+
+
+/* 20260823-mark1: official mark never clipped by chrome, island, or overlay. */
+#main-header.header,
+#main-header,
+.header,
+.logo-wrap {
+  overflow: visible !important;
+  max-height: none !important;
+  clip-path: none !important;
+  -webkit-clip-path: none !important;
+}
+#header-logo,
+.header img.logo,
+.logo-wrap .logo {
+  overflow: visible !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  z-index: 600 !important;
+  position: relative !important;
+}
+@media (display-mode: standalone) {
+  #main-header.header,
+  #main-header,
+  .header {
+    padding-top: calc(12px + env(safe-area-inset-top, 47px)) !important;
+  }
+  #header-logo,
+  .header img.logo,
+  .logo-wrap .logo {
+    max-height: 92px !important;
+    width: min(86vw, 300px) !important;
+    max-width: min(86vw, 300px) !important;
+  }
+}
+
+/* 20260823-push1: app mark same as phone 300/92. Safe-area pad only. No drown. */
+
+/* 20260823-flush1: Home Screen mark has room. Never clip SONS. */
+@media (display-mode: standalone) {
+  #main-header.header,
+  #main-header,
+  .header,
+  .logo-wrap {
+    overflow: visible !important;
+    min-height: calc(92px + 10px + env(safe-area-inset-top, 47px));
+  }
+  #header-logo,
+  .header img.logo,
+  .logo-wrap .logo {
+    max-height: 92px !important;
+    width: min(86vw, 300px) !important;
+    max-width: min(86vw, 300px) !important;
+    object-fit: contain !important;
+  }
+}
