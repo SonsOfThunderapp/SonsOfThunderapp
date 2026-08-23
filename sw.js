@@ -1,4 +1,4 @@
-/* 20260823-icon1: header mark unclipped + Home Screen icon v4 (iOS needs delete+readd) */
+/* 20260823-markred1: header is official stacked mark (SONS + red OF THUNDER + tagline) */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

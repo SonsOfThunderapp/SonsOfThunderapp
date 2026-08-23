@@ -717,3 +717,10 @@ html.tb-standalone .logo-wrap .logo {
     max-height: none !important;
   }
 }
+
+/* Tagline lives in the official mark. Don't print it twice. */
+.identity-line,
+p.identity-line,
+#view-home .identity-line {
+  display: none !important;
+}
