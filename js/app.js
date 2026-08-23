@@ -6841,6 +6841,14 @@ $('#edit-profile-btn').addEventListener('click', () => {
         }
       });
     }
+    const seatForm = document.getElementById('auth-seat-form');
+    if (seatForm && seatForm.dataset.bound !== '1') {
+      seatForm.dataset.bound = '1';
+      seatForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (authSignInBtn) authSignInBtn.click();
+      });
+    }
     if (authSignUpBtn && authSignUpBtn.dataset.bound !== '1') {
       authSignUpBtn.dataset.bound = '1';
       authSignUpBtn.addEventListener('click', async () => {

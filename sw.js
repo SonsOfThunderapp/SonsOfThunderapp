@@ -1,4 +1,4 @@
-/* 20260823-seatname1: LOCK YOUR SEAT name field sits below the mark, never sheared */
+/* 20260823-seatfill1: LOCK YOUR SEAT is a real AutoFill form — name, phone, email */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

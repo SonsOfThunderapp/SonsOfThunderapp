@@ -109,7 +109,26 @@ body:has(#auth-gate:not(.hidden)) #main-header {
   visibility: visible !important;
   opacity: 1 !important;
   height: auto !important;
-  margin-bottom: 10px !important;
+  margin-bottom: 0 !important;
+}
+#auth-gate .auth-field {
+  display: block !important;
+  text-align: left;
+  color: #9a9a9a;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0 0 10px;
+}
+#auth-gate .auth-field input {
+  display: block !important;
+  width: 100% !important;
+  margin: 6px 0 0 !important;
+}
+#auth-gate input:-webkit-autofill {
+  -webkit-text-fill-color: #111 !important;
+  box-shadow: 0 0 0 1000px #f3edd4 inset;
 }
 
 
