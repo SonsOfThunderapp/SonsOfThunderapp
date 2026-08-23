@@ -78,10 +78,16 @@ body.tb-view-about #app > #main-header.header {
   padding-top: 8px !important;
 }
 
-/* LOCK YOUR SEAT sheet sits UNDER the official mark. Name is never sheared. */
+/* LOCK YOUR SEAT — mark stays, but shrinks so Name is never under it. */
 body:has(#auth-gate:not(.hidden)) #app > #main-header.header,
 body:has(#auth-gate:not(.hidden)) #main-header {
   z-index: 20050 !important;
+  padding: calc(6px + env(safe-area-inset-top, 0px)) 12px 4px !important;
+}
+body:has(#auth-gate:not(.hidden)) #main-header #header-logo,
+body:has(#auth-gate:not(.hidden)) #app > #main-header.header #header-logo {
+  width: min(48vw, 180px) !important;
+  max-width: min(48vw, 180px) !important;
 }
 #auth-gate.auth-gate,
 .auth-gate {
@@ -94,22 +100,25 @@ body:has(#auth-gate:not(.hidden)) #main-header {
   transform: translateZ(0);
 }
 #auth-gate .auth-card {
-  max-height: min(72vh, 560px);
+  max-height: min(68dvh, 520px);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   margin: 0 0 8px !important;
-  padding-top: 20px !important;
+  padding: 18px 18px 16px !important;
 }
 #auth-gate #auth-title {
   display: block !important;
+  margin: 0 0 12px !important;
 }
-#auth-gate #auth-name {
+#auth-gate #auth-name,
+#auth-gate #auth-phone,
+#auth-gate #auth-email {
   display: block !important;
   width: 100% !important;
   visibility: visible !important;
   opacity: 1 !important;
   height: auto !important;
-  margin-bottom: 0 !important;
+  min-height: 44px !important;
 }
 #auth-gate .auth-field {
   display: block !important;

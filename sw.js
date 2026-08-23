@@ -1,4 +1,4 @@
-/* 20260823-seatfill1: LOCK YOUR SEAT is a real AutoFill form — name, phone, email */
+/* 20260823-seatshow1: shrink header while LOCK YOUR SEAT is open so Name shows */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
