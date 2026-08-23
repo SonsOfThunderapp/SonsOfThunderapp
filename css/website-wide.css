@@ -323,3 +323,19 @@ body:not(.tb-tour-open) #tb-tour-host.tb-guide-thunder,
   left: auto !important;
   right: auto !important;
 }
+
+
+/* 20260823-gold1d — P1: guide bubble cannot sit at left:107 in a 390 glass. */
+body.tb-tour-open #tb-tour .tb-guide-bubble,
+body.tb-tour-open #tb-tour .tb-tour-boards .tb-guide-bubble,
+body.tb-tour-open .tb-guide-bubble {
+  position: relative !important;
+  left: 0 !important;
+  right: 0 !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  width: calc(100% - 16px) !important;
+  max-width: calc(100vw - 32px) !important;
+  transform: none !important;
+  box-sizing: border-box !important;
+}
