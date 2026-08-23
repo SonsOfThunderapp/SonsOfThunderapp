@@ -47,3 +47,62 @@
   .brothers-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .media-feed { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
+
+/* 2026-08-22 header lock: hide stray overlay bolt. Official mark already has the O-bolt. */
+.logo-bolt-life,
+.tb-logo-bolt-life,
+img.logo-bolt-life {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Official stacked mark huge. Never crop height. */
+#header-logo,
+.header img.logo,
+.logo-wrap .logo {
+  height: auto !important;
+  width: min(92vw, 640px) !important;
+  max-width: min(92vw, 640px) !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  margin: 0 auto !important;
+  display: block !important;
+}
+
+/* Backstage Thunder huge */
+#thunder-fab.thunder-fab {
+  width: 104px !important;
+  height: 104px !important;
+  right: 10px;
+  bottom: calc(92px + var(--safe-bottom));
+}
+#thunder-fab .thunder-fab-img,
+.thunder-fab-img {
+  width: 96px !important;
+  height: 96px !important;
+}
+
+@media (min-width: 900px) {
+  #header-logo,
+  .header img.logo,
+  .logo-wrap .logo {
+    width: min(68vw, 900px) !important;
+    max-width: min(68vw, 900px) !important;
+  }
+  #thunder-fab.thunder-fab {
+    width: 148px !important;
+    height: 148px !important;
+    right: 28px;
+    bottom: calc(104px + var(--safe-bottom));
+  }
+  #thunder-fab .thunder-fab-img,
+  .thunder-fab-img {
+    width: 136px !important;
+    height: 136px !important;
+  }
+}
