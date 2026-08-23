@@ -1,22 +1,37 @@
-/* 20260823-fullmark1 LAST WIN — full stacked official mark. Never crop OF THUNDER. */
+/* 20260823-headlock1
+   Official stacked mark (SONS + red OF THUNDER + tagline) is the header.
+   Visible on Home, Brothers, Memories, More. Sticky. Above page content.
+   Overlays (tour, auth, sheets) still sit on top of it. */
+
 #app > #main-header.header,
 #main-header.header,
 #main-header,
 .header#main-header {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 700 !important;
   overflow: visible !important;
   max-height: none !important;
   height: auto !important;
   contain: none !important;
   clip-path: none !important;
   -webkit-clip-path: none !important;
+  background: #000 !important;
+  pointer-events: auto !important;
 }
+
 #app > #main-header.header .logo-wrap,
 #main-header.header .logo-wrap,
 #main-header .logo-wrap {
+  display: flex !important;
   overflow: visible !important;
   max-height: none !important;
   height: auto !important;
 }
+
 #app > #main-header.header #header-logo,
 #main-header.header #header-logo,
 #main-header #header-logo,
@@ -32,11 +47,25 @@
   object-position: center center !important;
   clip-path: none !important;
   -webkit-clip-path: none !important;
+  position: relative !important;
+  z-index: 2 !important;
 }
+
+body.tb-view-about #main-header,
+body.tb-view-about #app > #main-header.header,
+#view-brothers ~ #main-header {
+  display: block !important;
+}
+
+#view-about .about-container {
+  padding-top: 8px !important;
+}
+
 @media (max-width: 480px) {
   #app > #main-header.header,
   #main-header.header,
   #main-header {
+    display: block !important;
     max-height: none !important;
     overflow: visible !important;
   }

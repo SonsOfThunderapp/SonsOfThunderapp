@@ -1,4 +1,4 @@
-/* 20260823-fullmark1: stop clipping header — full SONS + red OF THUNDER + tagline */
+/* 20260823-headlock1: official stacked mark sticky on every page */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

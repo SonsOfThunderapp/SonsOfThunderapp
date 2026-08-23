@@ -5849,7 +5849,12 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       }
     } catch (e) {}
     const header = $('#main-header');
-    if (header) header.style.display = 'block'; /* logo star on all 4 tabs */
+    if (header) {
+      header.style.display = 'block';
+      header.style.visibility = 'visible';
+      header.style.opacity = '1';
+      header.removeAttribute('hidden');
+    }
     // NEW no longer auto-clears on Home visit — only when items are opened
     if (name === 'brothers') {
       // Roster NEW clears when the brothers tab is opened
@@ -10343,6 +10348,14 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   // ---------- INIT ----------
   async function init() {
     runSplash();
+    try {
+      const header = document.getElementById('main-header');
+      if (header) {
+        header.style.display = 'block';
+        header.style.visibility = 'visible';
+        header.removeAttribute('hidden');
+      }
+    } catch (eH) {}
     try { if (roomCut()) document.body.classList.add('tb-room-cut'); } catch (e) {}
     try { presentationScrub(); } catch (e) {}
     try { bindLeaderGhost(); } catch (e) {}
