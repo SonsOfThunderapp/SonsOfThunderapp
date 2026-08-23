@@ -1327,7 +1327,10 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       if (ph && me && me.phone && !ph.value) ph.value = me.phone;
     } catch (e) {}
     openAuthGate('');
-    if (sub) { sub.textContent = ''; sub.classList.add('hidden'); }
+    try {
+      const nm = document.getElementById('auth-name');
+      if (nm) setTimeout(function () { try { nm.focus(); } catch (e2) {} }, 80);
+    } catch (e) {}
     return true;
   }
 
@@ -1367,8 +1370,10 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       }
     }
     try {
+      const nm = $('#auth-name');
       const em = $('#auth-email');
-      if (em) setTimeout(() => em.focus(), 80);
+      const target = (nm && !nm.classList.contains('hidden')) ? nm : em;
+      if (target) setTimeout(() => target.focus(), 80);
     } catch (e) {}
   }
 

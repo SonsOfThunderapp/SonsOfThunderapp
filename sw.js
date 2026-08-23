@@ -1,4 +1,4 @@
-/* 20260823-logolock1: official header mark ETERNAL — never crop, hide, or swap */
+/* 20260823-seatname1: LOCK YOUR SEAT name field sits below the mark, never sheared */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
