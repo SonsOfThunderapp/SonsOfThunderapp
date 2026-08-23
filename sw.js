@@ -1,4 +1,4 @@
-/* 20260823-seatshow1: shrink header while LOCK YOUR SEAT is open so Name shows */
+/* 20260823-seatlow1: LOCK YOUR SEAT sheet sits in the lower half of the phone */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

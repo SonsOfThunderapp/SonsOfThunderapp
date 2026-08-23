@@ -96,15 +96,17 @@ body:has(#auth-gate:not(.hidden)) #app > #main-header.header #header-logo {
   justify-content: center !important;
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch;
-  padding: 0 12px calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+  padding: 0 12px calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+  padding-top: 42vh !important;
   transform: translateZ(0);
 }
 #auth-gate .auth-card {
-  max-height: min(68dvh, 520px);
+  max-height: min(54dvh, 440px);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  margin: 0 0 8px !important;
-  padding: 18px 18px 16px !important;
+  margin: 0 0 4px !important;
+  padding: 16px 18px 14px !important;
+  width: 100%;
 }
 #auth-gate #auth-title {
   display: block !important;
