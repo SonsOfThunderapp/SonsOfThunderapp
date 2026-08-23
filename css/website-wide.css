@@ -253,3 +253,48 @@ body.tb-tour-open #tb-tour.tb-tour {
 .qr-bolt-glow {
   animation: none !important;
 }
+
+
+/* 20260823-gold1b — sign-in whispers, photos lead. No auth/RSVP/app.js. */
+#view-brothers .btn-auth-entry,
+#auth-entry-btn.btn-auth-entry {
+  background: transparent !important;
+  border: 1px solid #2a2a2a !important;
+  box-shadow: none !important;
+  color: #888 !important;
+  min-height: 42px !important;
+  font-size: 12px !important;
+  letter-spacing: 0.1em !important;
+  font-weight: 600 !important;
+}
+#view-brothers .btn-auth-entry-sub,
+.btn-auth-entry-sub {
+  display: none !important;
+}
+#home-member-cta,
+.home-member-cta {
+  opacity: 0.55 !important;
+  border-color: #222 !important;
+}
+
+#memories-signin-shot.btn-rsvp:not(.hidden) {
+  min-height: 40px !important;
+  padding: 8px 14px !important;
+  font-size: 11px !important;
+  letter-spacing: 0.08em !important;
+  width: auto !important;
+  max-width: 240px !important;
+  margin: 8px auto 6px !important;
+  box-shadow: none !important;
+  filter: none !important;
+  animation: none !important;
+}
+#memories-library-btn.btn-mem-lib,
+#memories-library-btn {
+  font-size: 10px !important;
+  letter-spacing: 0.08em !important;
+  opacity: 0.45 !important;
+  text-transform: uppercase !important;
+  background: transparent !important;
+  border: 0 !important;
+}
