@@ -372,3 +372,45 @@ body.tb-tour-open #tb-tour .tb-tour-stage .tb-guide-bubble {
   transform: none !important;
   box-sizing: border-box !important;
 }
+
+
+/* 20260823-gold1g: bubble is a flex sibling, never width:100% of the hero. */
+body.tb-tour-open #tb-tour .tb-tour-stage {
+  width: 100% !important;
+  max-width: 100% !important;
+  left: 0 !important;
+  right: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+}
+body.tb-tour-open #tb-tour .tb-tour-hero {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding-left: 10px !important;
+  padding-right: 10px !important;
+}
+body.tb-tour-open #tb-tour .tb-tour-hero .tb-guide-thunder,
+body.tb-tour-open #tb-tour #tb-tour-host.tb-guide-thunder {
+  max-width: 72px !important;
+  width: 72px !important;
+  flex: 0 0 72px !important;
+}
+body.tb-tour-open #tb-tour .tb-tour-hero .tb-guide-bubble,
+body.tb-tour-open #tb-tour .tb-guide-bubble {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  width: auto !important;
+  max-width: none !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  transform: none !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+}

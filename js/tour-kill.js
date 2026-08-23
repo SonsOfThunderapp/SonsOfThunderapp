@@ -1,4 +1,4 @@
-/* 20260823-gold1f: paint when open. Kill leftover inline flex when closed. Pin bubble to glass. */
+/* 20260823-gold1g: paint when open. Kill leftover inline flex when closed. Pin bubble to glass. */
 (function () {
   function punchSplash() {
     var s = document.getElementById('splash');
@@ -14,30 +14,50 @@
   function pinBubble() {
     var root = document.getElementById('tb-tour');
     if (!root) return;
+    root.style.setProperty('overflow-x', 'hidden', 'important');
+    root.style.setProperty('width', '100%', 'important');
+    root.style.setProperty('max-width', '100%', 'important');
+    root.style.setProperty('left', '0', 'important');
+    root.style.setProperty('right', '0', 'important');
+    var stage = root.querySelector('.tb-tour-stage');
+    if (stage) {
+      stage.style.setProperty('max-width', '100%', 'important');
+      stage.style.setProperty('width', '100%', 'important');
+      stage.style.setProperty('overflow-x', 'hidden', 'important');
+      stage.style.setProperty('left', '0', 'important');
+      stage.style.setProperty('right', '0', 'important');
+      stage.style.setProperty('margin', '0', 'important');
+      stage.style.setProperty('box-sizing', 'border-box', 'important');
+    }
+    var hero = root.querySelector('.tb-tour-hero');
+    if (hero) {
+      hero.style.setProperty('width', '100%', 'important');
+      hero.style.setProperty('max-width', '100%', 'important');
+      hero.style.setProperty('overflow', 'hidden', 'important');
+      hero.style.setProperty('box-sizing', 'border-box', 'important');
+      hero.style.setProperty('padding-left', '10px', 'important');
+      hero.style.setProperty('padding-right', '10px', 'important');
+    }
+    var host = document.getElementById('tb-tour-host');
+    if (host) {
+      host.style.setProperty('width', '72px', 'important');
+      host.style.setProperty('max-width', '72px', 'important');
+      host.style.setProperty('flex', '0 0 72px', 'important');
+    }
     var bubbles = root.querySelectorAll('.tb-guide-bubble');
     var i;
     for (i = 0; i < bubbles.length; i++) {
       var b = bubbles[i];
       b.style.setProperty('position', 'relative', 'important');
-      b.style.setProperty('left', '0', 'important');
-      b.style.setProperty('right', '0', 'important');
-      b.style.setProperty('max-width', '100%', 'important');
-      b.style.setProperty('width', '100%', 'important');
+      b.style.setProperty('left', 'auto', 'important');
+      b.style.setProperty('right', 'auto', 'important');
+      b.style.setProperty('width', 'auto', 'important');
+      b.style.setProperty('max-width', 'none', 'important');
+      b.style.setProperty('flex', '1 1 auto', 'important');
+      b.style.setProperty('min-width', '0', 'important');
       b.style.setProperty('transform', 'none', 'important');
       b.style.setProperty('box-sizing', 'border-box', 'important');
     }
-    var stage = root.querySelector('.tb-tour-stage');
-    if (stage) {
-      stage.style.setProperty('max-width', '100vw', 'important');
-      stage.style.setProperty('width', 'min(100vw, 430px)', 'important');
-      stage.style.setProperty('overflow-x', 'hidden', 'important');
-      stage.style.setProperty('left', '0', 'important');
-      stage.style.setProperty('margin', '0 auto', 'important');
-    }
-    root.style.setProperty('overflow-x', 'hidden', 'important');
-    root.style.setProperty('width', '100vw', 'important');
-    root.style.setProperty('left', '0', 'important');
-    root.style.setProperty('right', '0', 'important');
   }
 
   function killTour() {
