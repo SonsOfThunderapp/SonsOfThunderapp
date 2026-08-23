@@ -1,4 +1,4 @@
-/* 20260823-headlock1: official stacked mark sticky on every page */
+/* 20260823-headhd1: header mark pinned top layer, true aspect, HD diecut */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

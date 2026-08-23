@@ -1,7 +1,6 @@
-/* 20260823-headlock1
-   Official stacked mark (SONS + red OF THUNDER + tagline) is the header.
-   Visible on Home, Brothers, Memories, More. Sticky. Above page content.
-   Overlays (tour, auth, sheets) still sit on top of it. */
+/* 20260823-headhd1
+   Official mark pinned to the TOP LAYER of every page.
+   True aspect. Never crop. Never stretch. HD srcset. */
 
 #app > #main-header.header,
 #main-header.header,
@@ -12,7 +11,10 @@
   opacity: 1 !important;
   position: sticky !important;
   top: 0 !important;
-  z-index: 700 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  z-index: 8000 !important;
   overflow: visible !important;
   max-height: none !important;
   height: auto !important;
@@ -21,12 +23,17 @@
   -webkit-clip-path: none !important;
   background: #000 !important;
   pointer-events: auto !important;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  padding: calc(8px + env(safe-area-inset-top, 0px)) 12px 8px !important;
 }
 
 #app > #main-header.header .logo-wrap,
 #main-header.header .logo-wrap,
 #main-header .logo-wrap {
   display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
   overflow: visible !important;
   max-height: none !important;
   height: auto !important;
@@ -39,21 +46,31 @@
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
-  width: min(78vw, 300px) !important;
-  max-width: min(78vw, 300px) !important;
+  width: min(86vw, 340px) !important;
+  max-width: min(86vw, 340px) !important;
   height: auto !important;
   max-height: none !important;
+  aspect-ratio: 3000 / 2077 !important;
   object-fit: contain !important;
-  object-position: center center !important;
+  object-position: center top !important;
+  flex-shrink: 0 !important;
   clip-path: none !important;
   -webkit-clip-path: none !important;
   position: relative !important;
   z-index: 2 !important;
+  image-rendering: auto;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* Thunder stays below the mark. Never cover the header. */
+#thunder-fab.thunder-fab,
+#thunder-fab {
+  z-index: 150 !important;
 }
 
 body.tb-view-about #main-header,
-body.tb-view-about #app > #main-header.header,
-#view-brothers ~ #main-header {
+body.tb-view-about #app > #main-header.header {
   display: block !important;
 }
 
@@ -72,8 +89,9 @@ body.tb-view-about #app > #main-header.header,
   #app > #main-header.header #header-logo,
   #main-header.header #header-logo,
   #main-header #header-logo {
-    width: min(78vw, 300px) !important;
+    width: min(86vw, 340px) !important;
     height: auto !important;
     max-height: none !important;
+    aspect-ratio: 3000 / 2077 !important;
   }
 }

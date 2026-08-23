@@ -1,9 +1,9 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260823-headlock1',
+  APP_BUILD: '20260823-headhd1',
   /* HEADER MARK locked 2026-08-23 — official stacked PNG (SONS + red OF THUNDER
-     + tagline) is sticky on Home / Brothers / Memories / More. Never hide it.
-     Never crop it. Overlays may cover it; pages may not. */
+     + tagline) is sticky on Home / Brothers / Memories / More. Top layer of the
+     page (z 8000). True aspect, never crop/stretch. HD @2x/@3x/@4x. */
   /* First-run tour does NOT auto-start. New phone lands in the room.
      Already finished (thunderTourV42 done) = no nag. More → TAKE THE TOUR remains. */
   /* I'M IN vault locked 2026-08-21 — live-coal rest, bolt strike, yellow settle,
