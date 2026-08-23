@@ -48,7 +48,12 @@
   .media-feed { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 
-/* 2026-08-23: same product, different glass. Hide stray overlay bolt. */
+/* 2026-08-23: same product, different glass. Hide stray overlay bolt.
+   Higher specificity than styles.css .logo-bolt-life { display:block !important }. */
+#main-header .logo-bolt-life,
+#main-header img.logo-bolt-life,
+.logo-wrap img.logo-bolt-life,
+body img.logo-bolt-life,
 .logo-bolt-life,
 .tb-logo-bolt-life,
 img.logo-bolt-life {
