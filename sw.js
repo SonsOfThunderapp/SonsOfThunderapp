@@ -1,4 +1,4 @@
-/* 20260823-seatlow1: LOCK YOUR SEAT sheet sits in the lower half of the phone */
+/* 20260823-seatdown1: full header stays; entire LOCK YOUR SEAT card sits below it */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

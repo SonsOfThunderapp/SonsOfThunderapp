@@ -78,16 +78,10 @@ body.tb-view-about #app > #main-header.header {
   padding-top: 8px !important;
 }
 
-/* LOCK YOUR SEAT — mark stays, but shrinks so Name is never under it. */
+/* LOCK YOUR SEAT — full mark stays. Entire card sits below it. */
 body:has(#auth-gate:not(.hidden)) #app > #main-header.header,
 body:has(#auth-gate:not(.hidden)) #main-header {
   z-index: 20050 !important;
-  padding: calc(6px + env(safe-area-inset-top, 0px)) 12px 4px !important;
-}
-body:has(#auth-gate:not(.hidden)) #main-header #header-logo,
-body:has(#auth-gate:not(.hidden)) #app > #main-header.header #header-logo {
-  width: min(48vw, 180px) !important;
-  max-width: min(48vw, 180px) !important;
 }
 #auth-gate.auth-gate,
 .auth-gate {
@@ -96,15 +90,17 @@ body:has(#auth-gate:not(.hidden)) #app > #main-header.header #header-logo {
   justify-content: center !important;
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch;
-  padding: 0 12px calc(12px + env(safe-area-inset-bottom, 0px)) !important;
-  padding-top: 42vh !important;
   transform: translateZ(0);
+  padding-left: 12px !important;
+  padding-right: 12px !important;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+  padding-top: calc(20px + env(safe-area-inset-top, 0px) + (min(86vw, 340px) * 2077 / 3000)) !important;
 }
 #auth-gate .auth-card {
-  max-height: min(54dvh, 440px);
+  max-height: none;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  margin: 0 0 4px !important;
+  margin: 0 !important;
   padding: 16px 18px 14px !important;
   width: 100%;
 }
