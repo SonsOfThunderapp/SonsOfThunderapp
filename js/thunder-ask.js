@@ -63,8 +63,8 @@
    Tap Thunder still opens Ask. Bubble tap no longer starts the tour.
    20260822-chrome3: killChrome nav loop removed. */
 (function () {
-  var LINE = 'ask me ANYTHING!';
-  var OLD = /new here\?|show you the room/i;
+  var LINE = '';
+  var OLD = /new here\?|show you the room|ask me ANYTHING/i;
 
   function disarmTourInvite(b) {
     if (!b) return;
@@ -74,9 +74,9 @@
 
   function retarget(b) {
     if (!b) return;
-    var t = String(b.textContent || '');
-    if (!OLD.test(t)) return;
-    b.textContent = LINE;
+    b.textContent = '';
+    b.classList.add('hidden');
+    b.classList.remove('is-on');
     disarmTourInvite(b);
   }
 
