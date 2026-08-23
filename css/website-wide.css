@@ -71,9 +71,9 @@ img.logo-bolt-life {
 .header img.logo,
 .logo-wrap .logo {
   height: auto !important;
-  width: min(86vw, 300px) !important;
-  max-width: min(86vw, 300px) !important;
-  max-height: 92px !important;
+  width: min(92vw, 360px) !important;
+  max-width: min(92vw, 360px) !important;
+  max-height: 118px !important;
   object-fit: contain !important;
   object-position: center center !important;
   margin: 0 auto !important;
@@ -98,8 +98,8 @@ img.logo-bolt-life {
   #header-logo,
   .header img.logo,
   .logo-wrap .logo {
-    width: min(68vw, 900px) !important;
-    max-width: min(68vw, 900px) !important;
+    width: min(78vw, 980px) !important;
+    max-width: min(78vw, 980px) !important;
     max-height: none !important;
   }
   #thunder-fab.thunder-fab {
@@ -613,5 +613,44 @@ html.tb-standalone .logo-wrap .logo {
     object-position: center center !important;
     clip-path: none !important;
     -webkit-clip-path: none !important;
+  }
+}
+
+/* 20260823-logo2: phone header mark a little bigger. Still phone, not desktop. */
+@media (max-width: 899px) {
+  #header-logo,
+  .header img.logo,
+  .logo-wrap .logo {
+    width: min(92vw, 360px) !important;
+    max-width: min(92vw, 360px) !important;
+    max-height: 118px !important;
+    height: auto !important;
+  }
+}
+html.tb-standalone #header-logo,
+html.tb-standalone .header img.logo,
+html.tb-standalone .logo-wrap .logo {
+  width: min(92vw, 360px) !important;
+  max-width: min(92vw, 360px) !important;
+  max-height: 118px !important;
+}
+@media (display-mode: standalone) {
+  #header-logo,
+  .header img.logo,
+  .logo-wrap .logo {
+    width: min(92vw, 360px) !important;
+    max-width: min(92vw, 360px) !important;
+    max-height: 118px !important;
+  }
+}
+
+/* 20260823-logo2-web: website header same bump as app. Phone 360/118. Desktop a notch bigger. */
+@media (min-width: 900px) {
+  #header-logo,
+  .header img.logo,
+  .logo-wrap .logo {
+    width: min(78vw, 980px) !important;
+    max-width: min(78vw, 980px) !important;
+    max-height: none !important;
   }
 }
