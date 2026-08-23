@@ -3,7 +3,7 @@
  * Subscribe via webcal://…/gathering.ics so native Calendar owns the alarms.
  */
 exports.handler = async (event) => {
-  const host = (event.headers && (event.headers.host || event.headers.Host)) || 'sonsofthunder.netlify.app';
+  const host = (event.headers && (event.headers.host || event.headers.Host)) || 'sonsofthunderboard.com';
   const origin = 'https://' + host.replace(/^https?:\/\//, '');
   const ics = buildIcs(nextGathering(new Date()), origin);
   return {
@@ -63,8 +63,8 @@ function buildIcs(meet, origin) {
   const start = new Date(meet);
   start.setHours(18, 30, 0, 0);
   const end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
-  const uid = 'thunder-gathering@' + String(origin || 'https://sonsofthunder.netlify.app').replace(/^https?:\/\//, '');
-  const url = (origin || 'https://sonsofthunder.netlify.app') + '/';
+  const uid = 'thunder-gathering@' + String(origin || 'https://sonsofthunderboard.com').replace(/^https?:\/\//, '');
+  const url = (origin || 'https://sonsofthunderboard.com') + '/';
   return [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',

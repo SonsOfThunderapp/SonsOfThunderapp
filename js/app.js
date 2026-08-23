@@ -10,7 +10,7 @@
     try {
       if (location && location.origin && /^https?:/.test(location.origin)) return location.origin;
     } catch (e2) {}
-    return 'https://sonsofthunder.netlify.app';
+    return 'https://sonsofthunderboard.com';
   }
   function publicUrl(path) {
     return publicOrigin() + (path || '/');
@@ -349,7 +349,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       return d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + 'T' +
         pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds());
     }
-    const uid = 'thunder-gathering-' + start.getFullYear() + pad(start.getMonth() + 1) + pad(start.getDate()) + '@sonsofthunder.netlify.app';
+    const uid = 'thunder-gathering-' + start.getFullYear() + pad(start.getMonth() + 1) + pad(start.getDate()) + '@sonsofthunderboard.com';
     const title = 'Sons of Thunder — Next Gathering';
     const loc = venueName();
     const desc = [
@@ -473,7 +473,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     return true;
   }
   function addToNativeCalendar() {
-    const host = location.host || 'sonsofthunder.netlify.app';
+    const host = location.host || 'sonsofthunderboard.com';
     const icsPath = '/.netlify/functions/gathering-ics';
     const httpsUrl = location.origin + icsPath;
     try {

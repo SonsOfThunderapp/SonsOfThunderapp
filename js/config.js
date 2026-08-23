@@ -1,13 +1,13 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260823-close1',
+  APP_BUILD: '20260823-domain1',
   /* First-run tour does NOT auto-start. New phone lands in the room.
      Already finished (thunderTourV42 done) = no nag. More → TAKE THE TOUR remains. */
   /* I'M IN vault locked 2026-08-21 — live-coal rest, bolt strike, yellow settle,
      Thunder nod then drift. Sign-in / A2HS wait until the lock lands. */
   /* ONE-PUSH DEPLOY locked 2026-08-21
      After every finished piece: commit → push origin main.
-     Netlify auto-publishes sonsofthunder.netlify.app. Grok "Publish App" is not the brothers' site. */
+     Netlify auto-publishes https://sonsofthunderboard.com (custom domain on this site). Grok "Publish App" is not the brothers' site. */
   ONE_PUSH_DEPLOY: true,
   /* WAR ROOM locked 2026-08-21 — WAR-ROOM.md. Eight chairs. Assassin last. */
   /* QR LAW locked 2026-08-20 — EVERY code in the app (profile, contact modal, Axum).
@@ -97,7 +97,7 @@ window.TB_CONFIG = {
     loop: true,
     noNativeControls: true
   },
-  PUBLIC_ORIGIN: '',
+  PUBLIC_ORIGIN: 'https://sonsofthunderboard.com',
   LEADER_PIN: 'thunder-board-lead',
   LEADER_SMS_PARTS: ['40', '77', '39', '62', '43'],
   SUPABASE_URL: 'https://mnsempcgomukcpofgvlm.supabase.co',
