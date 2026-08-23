@@ -34,9 +34,8 @@
 /* More page: hide the Leadership button. Seven taps on the bolt
    above Gathering Alerts opens the existing chair tools panel.
    Live app.js is chair-account only (requireLeader / refreshChairMode).
-   After 7 taps, keep #leader-tools / .admin-zone visible via session
-   flag tb_leaderDoor=1, MutationObserver, and a short re-apply timer.
-   20260822-lead7d */
+   7 taps ask the chair unlock. Guests get nothing.
+   Never force-show #leader-tools. 20260823-lead1 */
 (function () {
   var NEED = 7;
   var GAP_MS = 1400;
@@ -145,18 +144,25 @@
     document.body.appendChild(box);
   }
 
-  function applyDoor() {
-    if (!doorOn()) return;
+  function tryChairUnlock() {
     hideButton();
-    showEl(document.querySelector('.admin-zone'));
-    showEl(document.getElementById('leader-tools'));
-    var pin = findPinField();
-    if (pin) {
-      showEl(pin);
-      showEl(pin.closest('form, .modal, .admin-zone, div'));
-      wireExistingPin(pin);
-    }
-    if (!toolsHaveControls()) ensureOverlay();
+    var btn = document.getElementById('leader-unlock-btn');
+    if (!btn) return;
+    try {
+      btn.hidden = false;
+      btn.style.setProperty('display', 'none', 'important');
+      btn.click();
+    } catch (e) {}
+    try { btn.hidden = true; } catch (e2) {}
+    hideButton();
+  }
+
+  function applyDoor() {
+    hideButton();
+    /* Never force-show THE ROOM. app.js applyChairVisibility is chair-only.
+       7-tap only clicks the hidden unlock; requireLeader blocks guests. */
+    if (!doorOn()) return;
+    tryChairUnlock();
   }
 
   function startKeep() {
@@ -176,13 +182,6 @@
   function openDoor() {
     setDoor();
     applyDoor();
-    startKeep();
-    var tools = document.getElementById('leader-tools');
-    if (tools && tools.scrollIntoView) {
-      try { tools.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) {
-        try { tools.scrollIntoView(true); } catch (e2) {}
-      }
-    }
   }
 
   function onTap() {

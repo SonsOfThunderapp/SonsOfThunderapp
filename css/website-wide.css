@@ -548,3 +548,16 @@ body.tb-tour-open .tb-tour-boards .tb-tour-headline {
     object-fit: contain !important;
   }
 }
+
+/* 20260823-lead1: chair tools never sit on More for guests. */
+#leader-unlock-btn,
+#leader-unlock-btn.btn-leadership {
+  display: none !important;
+}
+.admin-zone.hidden,
+#leader-tools.hidden,
+#leader-tools.leader-tools.hidden {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
