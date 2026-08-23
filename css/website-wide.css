@@ -654,3 +654,28 @@ html.tb-standalone .logo-wrap .logo {
     max-height: none !important;
   }
 }
+
+/* 20260823-close1: header mark last-win. Phone 360, desktop 980. No 92px clamp. */
+#header-logo,
+.header img.logo,
+.logo-wrap .logo {
+  width: min(92vw, 360px) !important;
+  max-width: min(92vw, 360px) !important;
+  height: auto !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  overflow: visible !important;
+  clip-path: none !important;
+  -webkit-clip-path: none !important;
+}
+@media (min-width: 900px) {
+  #header-logo,
+  .header img.logo,
+  .logo-wrap .logo {
+    width: min(78vw, 980px) !important;
+    max-width: min(78vw, 980px) !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+}
