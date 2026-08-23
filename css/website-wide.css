@@ -106,3 +106,22 @@ img.logo-bolt-life {
     height: 136px !important;
   }
 }
+
+/* 2026-08-22 tour visible: splash hide must never apply to #tb-tour */
+#tb-tour.splash-done,
+#tb-tour.splash-out,
+#tb-tour.tb-tour.splash-done,
+#tb-tour.tb-tour.splash-out {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+body.tb-tour-open #tb-tour.tb-tour:not(.hidden),
+#tb-tour.tb-tour-slides:not(.hidden) {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  z-index: 50000 !important;
+}
