@@ -492,3 +492,36 @@ body.tb-tour-open .tb-tour-boards .tb-tour-headline {
   line-height: 1.1 !important;
   overflow: visible !important;
 }
+
+
+/* 20260823-mark1: official mark never clipped by chrome, island, or overlay. */
+#main-header.header,
+#main-header,
+.header,
+.logo-wrap {
+  overflow: visible !important;
+  max-height: none !important;
+  clip-path: none !important;
+  -webkit-clip-path: none !important;
+}
+#header-logo,
+.header img.logo,
+.logo-wrap .logo {
+  overflow: visible !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  z-index: 600 !important;
+  position: relative !important;
+}
+@media (display-mode: standalone) {
+  #main-header.header,
+  #main-header,
+  .header {
+    padding-top: calc(12px + env(safe-area-inset-top, 47px)) !important;
+  }
+  #header-logo,
+  .header img.logo,
+  .logo-wrap .logo {
+    max-height: 68px !important;
+  }
+}
