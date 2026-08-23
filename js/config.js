@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260823-markred1',
+  APP_BUILD: '20260823-fullmark1',
   /* First-run tour does NOT auto-start. New phone lands in the room.
      Already finished (thunderTourV42 done) = no nag. More → TAKE THE TOUR remains. */
   /* I'M IN vault locked 2026-08-21 — live-coal rest, bolt strike, yellow settle,
@@ -113,7 +113,7 @@ window.TB_CONFIG = {
     if (!document.querySelector('link[href*="chief1-ghost.css"]')) {
       var l = document.createElement('link');
       l.rel = 'stylesheet';
-      l.href = 'css/chief1-ghost.css?v=20260822-chrome6';
+      l.href = 'css/chief1-ghost.css?v=' + encodeURIComponent(__tbB);
       (document.head || document.documentElement).appendChild(l);
     }
 
@@ -134,7 +134,7 @@ window.TB_CONFIG = {
     if (!document.querySelector('link[href*="memories-page.css"]')) {
       var p = document.createElement('link');
       p.rel = 'stylesheet';
-      p.href = 'css/memories-page.css?v=20260822-chrome6';
+      p.href = 'css/memories-page.css?v=' + encodeURIComponent(__tbB);
       (document.head || document.documentElement).appendChild(p);
     }
     var ww = document.querySelector('link[href*="website-wide.css"]');
@@ -146,6 +146,13 @@ window.TB_CONFIG = {
       (document.head || document.documentElement).appendChild(ww);
     } else if ((ww.getAttribute('href') || '').indexOf('v=' + __tbB) === -1) {
       ww.href = wwHref;
+    }
+
+    if (!document.querySelector('link[href*="header-mark.css"]')) {
+      var hm = document.createElement('link');
+      hm.rel = 'stylesheet';
+      hm.href = 'css/header-mark.css?v=' + encodeURIComponent(__tbB);
+      (document.head || document.documentElement).appendChild(hm);
     }
 
     if (!document.querySelector('link[href*="hangout-tour.css"]')) {

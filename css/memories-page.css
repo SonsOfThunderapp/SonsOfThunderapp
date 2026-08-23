@@ -6,21 +6,22 @@
 body.tb-tour-open #tb-tour { display:none !important; }
 .tab-bar, .app-tabs, nav.tabs, #tab-bar, .bottom-nav { display:flex !important; visibility:visible !important; opacity:1 !important; }
 #main-header .logo, #main-header #header-logo, header .logo, #header-logo {
-  max-height: 64px !important;
-  width: auto !important;
+  max-height: none !important;
+  width: min(78vw, 300px) !important;
   height: auto !important;
   object-fit: contain !important;
   object-position: center center !important;
 }
 @media (max-width: 480px) {
   #main-header.header, #main-header {
-    max-height: 88px !important;
-    overflow: hidden !important;
+    max-height: none !important;
+    overflow: visible !important;
   }
-  #main-header .logo-wrap { max-height: 64px !important; height: 64px !important; overflow: hidden !important; }
-  #main-header .logo, #main-header #header-logo, #main-header .logo-bolt-life {
-    max-height: 64px !important;
-    width: auto !important;
+  #main-header .logo-wrap { max-height: none !important; height: auto !important; overflow: visible !important; }
+  #main-header .logo, #main-header #header-logo {
+    max-height: none !important;
+    height: auto !important;
+    width: min(78vw, 300px) !important;
     object-fit: contain !important;
   }
 }

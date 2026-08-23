@@ -1,0 +1,50 @@
+/* 20260823-fullmark1 LAST WIN — full stacked official mark. Never crop OF THUNDER. */
+#app > #main-header.header,
+#main-header.header,
+#main-header,
+.header#main-header {
+  overflow: visible !important;
+  max-height: none !important;
+  height: auto !important;
+  contain: none !important;
+  clip-path: none !important;
+  -webkit-clip-path: none !important;
+}
+#app > #main-header.header .logo-wrap,
+#main-header.header .logo-wrap,
+#main-header .logo-wrap {
+  overflow: visible !important;
+  max-height: none !important;
+  height: auto !important;
+}
+#app > #main-header.header #header-logo,
+#main-header.header #header-logo,
+#main-header #header-logo,
+#main-header.header img.logo {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: min(78vw, 300px) !important;
+  max-width: min(78vw, 300px) !important;
+  height: auto !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  clip-path: none !important;
+  -webkit-clip-path: none !important;
+}
+@media (max-width: 480px) {
+  #app > #main-header.header,
+  #main-header.header,
+  #main-header {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  #app > #main-header.header #header-logo,
+  #main-header.header #header-logo,
+  #main-header #header-logo {
+    width: min(78vw, 300px) !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+}
