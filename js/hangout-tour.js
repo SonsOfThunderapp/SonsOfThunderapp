@@ -1,7 +1,7 @@
 /* hangout4: Brothers slide heads open unique nights. Official faces only. No painted stills. TAKE THE TOUR only. */
 (function () {
-  if (window.__tbHangoutTour4) return;
-  window.__tbHangoutTour4 = true;
+  if (window.__tbHangoutTour8) return;
+  window.__tbHangoutTour8 = true;
 
   var FACE = 'assets/tour-faces/';
   var SCENES = {
@@ -113,7 +113,11 @@
       closeScene();
     }
     el.querySelector('.tb-hang-back').addEventListener('click', exit, true);
-    el.querySelector('.tb-hang-door').addEventListener('click', exit, true);
+    el.querySelector('.tb-hang-door').addEventListener('click', function (e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      var key = el.getAttribute('data-key') || 'smirk';
+      goFeature(SCENES[key] || SCENES.smirk);
+    }, true);
     el.addEventListener('click', function (e) {
       if (e.target === el) exit(e);
     }, true);
@@ -128,6 +132,49 @@
   }
   window.__tbHangClose = closeScene;
 
+  function onBrothersSlide() {
+    var stage = document.querySelector('#tb-tour .tb-tour-stage');
+    if (stage && stage.getAttribute('data-board') === '2') return true;
+    var on = document.querySelector('#tb-tour .tb-live-slide.is-on .tb-live-bros');
+    if (on) return true;
+    var h = document.getElementById('tb-tour-headline');
+    return !!(h && /BROTHERS/i.test(h.textContent || ''));
+  }
+
+  function closeTour() {
+    var b = document.getElementById('tb-tour-close') || document.getElementById('tb-tour-skip');
+    if (b) b.click();
+  }
+
+  function goFeature(spec) {
+    closeScene();
+    var door = String((spec && spec.door) || '').toUpperCase();
+    var feat = String((spec && spec.feat) || '').toUpperCase();
+    if (door.indexOf('GRID') >= 0 || door.indexOf('ROUND TABLE') >= 0) return;
+    closeTour();
+    setTimeout(function () {
+      if (feat.indexOf('ASK') >= 0 || door === 'ASK') {
+        var fab = document.getElementById('thunder-fab');
+        if (fab) fab.click();
+        return;
+      }
+      if (feat.indexOf('MEMOR') >= 0 || door.indexOf('DROP') >= 0) {
+        var ev = document.querySelector('.nav-item[data-view="events"]');
+        if (ev) ev.click();
+        return;
+      }
+      if (door.indexOf('TEXT') >= 0 || feat.indexOf('TEXT') >= 0) {
+        var t = document.getElementById('text-leader-btn');
+        if (t) t.click();
+        return;
+      }
+      if (feat.indexOf("I'M IN") >= 0 || door.indexOf("I'M IN") >= 0) {
+        var home = document.querySelector('.nav-item[data-view="home"]');
+        if (home) home.click();
+      }
+    }, 120);
+  }
+
   function openScene(key) {
     var spec = SCENES[key] || SCENES.smirk;
     var el = sceneRoot();
@@ -141,16 +188,26 @@
     el.querySelector('.tb-hang-talk.b').textContent = spec.talk[1] || '';
     el.querySelector('.tb-hang-feat').textContent = spec.feat || '';
     el.querySelector('.tb-hang-door').textContent = spec.door || 'BACK';
+    el.setAttribute('data-key', key);
     el.classList.add('on');
   }
 
   function bind() {
     var tour = document.getElementById('tb-tour');
-    if (!tour || tour.dataset.hang4 === '1') return;
-    tour.dataset.hang4 = '1';
+    if (!tour || tour.dataset.hang8 === '1') return;
+    tour.dataset.hang8 = '1';
     tour.addEventListener('click', function (e) {
-      var hit = e.target && e.target.closest && e.target.closest('.tb-hang-back, .tb-hang-door');
-      if (hit) {
+      var door = e.target && e.target.closest && e.target.closest('.tb-hang-door');
+      if (door) {
+        e.preventDefault();
+        e.stopPropagation();
+        var scene = document.querySelector('#tb-tour .tb-hang-scene.on');
+        var key = scene && scene.getAttribute('data-key') || 'smirk';
+        goFeature(SCENES[key] || SCENES.smirk);
+        return;
+      }
+      var back = e.target && e.target.closest && e.target.closest('.tb-hang-back');
+      if (back) {
         e.preventDefault();
         e.stopPropagation();
         closeScene();
@@ -158,10 +215,11 @@
       }
       var open = document.querySelector('#tb-tour .tb-hang-scene.on');
       if (open) return;
-      var img = e.target && e.target.closest && e.target.closest('#tb-tour .tb-live-face');
+      var cell = e.target && e.target.closest && e.target.closest('#tb-tour .tb-live-bro, #tb-tour .tb-live-face');
+      if (!cell) return;
+      if (!onBrothersSlide()) return;
+      var img = cell.tagName === 'IMG' ? cell : cell.querySelector('.tb-live-face');
       if (!img) return;
-      var stage = document.querySelector('#tb-tour .tb-tour-stage');
-      if (!stage || stage.getAttribute('data-board') !== '2') return;
       e.preventDefault();
       e.stopPropagation();
       openScene(keyFrom(img));
