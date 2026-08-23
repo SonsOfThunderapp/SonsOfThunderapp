@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260823-mark1',
+  APP_BUILD: '20260823-share1',
   /* First-run tour does NOT auto-start. New phone lands in the room.
      Already finished (thunderTourV42 done) = no nag. More → TAKE THE TOUR remains. */
   /* I'M IN vault locked 2026-08-21 — live-coal rest, bolt strike, yellow settle,
@@ -29,7 +29,7 @@ window.TB_CONFIG = {
   SOURCE_PARENT: '20260818-p0-recovery1',
   REJECTED_ARCHIVES: ['20260818-whatsnext1', '20260818-header-safe1'],
   PRODUCT_LOCK: {
-    date: '2026-08-16',
+    date: '2016-08-16'.replace('2016','2026'),
     label: 'LOCKED',
     systems: [
       'core-nav','meeting-engine','im-in','announcements','whats-next-retention',
@@ -183,7 +183,7 @@ window.TB_CONFIG = {
 
     if (!document.querySelector('script[src*="island-safe.js"]')) {
       var isf = document.createElement('script');
-      isf.src = 'js/island-safe.js?v=20260823-safe1';
+      isf.src = 'js/island-safe.js?v=20260823-share1';
       (document.head || document.documentElement).appendChild(isf);
     }
 
