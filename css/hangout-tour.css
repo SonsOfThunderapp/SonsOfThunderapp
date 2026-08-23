@@ -60,3 +60,58 @@
 @media (prefers-reduced-motion:reduce){
   .tb-hang-scene .tb-hang-heads img,.tb-hang-scene[data-mood="fire"]::after{animation:none!important;}
 }
+
+/* 20260823-hang5: the night is the room. Official heads stay. No invented faces. */
+.tb-hang-scene{background:#050505;}
+.tb-hang-scene::before{
+  content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse at 50% 78%, rgba(254,241,5,.08), transparent 55%),
+    linear-gradient(180deg,#0a0a0a 0%,#000 70%);
+}
+.tb-hang-scene[data-mood="patio"]::before{
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.45) 0%,rgba(0,0,0,.72) 100%),
+    url("../assets/tour-memories/real-patio.jpg") center 40%/cover no-repeat;
+  filter:saturate(.85) brightness(.72);
+}
+.tb-hang-scene[data-mood="grill"]::before{
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.4) 0%,rgba(0,0,0,.75) 100%),
+    url("../assets/tour-memories/real-bowl.jpg") center 45%/cover no-repeat;
+  filter:saturate(.8) brightness(.7);
+}
+.tb-hang-scene[data-mood="camp"]::before,
+.tb-hang-scene[data-mood="fire"]::before{
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.35) 0%,rgba(20,8,0,.7) 100%),
+    url("../assets/tour-memories/real-tree.jpg") center 30%/cover no-repeat;
+  filter:saturate(.75) brightness(.65);
+}
+.tb-hang-scene[data-mood="pickle"]::before{
+  background:
+    radial-gradient(ellipse at 50% 100%,rgba(40,90,30,.35),transparent 55%),
+    linear-gradient(180deg,#0a1208 0%,#000 80%);
+}
+.tb-hang-scene[data-mood="range"]::before{
+  background:linear-gradient(180deg,#12110e 0%,#000 78%);
+}
+.tb-hang-scene[data-mood="lake"]::before{
+  background:
+    radial-gradient(ellipse at 50% 100%,rgba(20,50,80,.4),transparent 50%),
+    linear-gradient(180deg,#071018 0%,#000 80%);
+}
+.tb-hang-scene[data-mood="read"]::before{
+  background:
+    radial-gradient(ellipse at 70% 20%,rgba(254,241,5,.12),transparent 40%),
+    linear-gradient(180deg,#120e08 0%,#000 80%);
+}
+.tb-hang-scene[data-mood="bday"]::before{
+  background:
+    radial-gradient(ellipse at 50% 30%,rgba(254,241,5,.1),transparent 45%),
+    linear-gradient(180deg,#140c08 0%,#000 85%);
+}
+.tb-hang-heads,.tb-hang-talk,.tb-hang-feat,.tb-hang-door,.tb-hang-back{z-index:3;}
+@media (display-mode: standalone){
+  .tb-hang-scene .tb-hang-back{top:calc(8px + env(safe-area-inset-top,47px));}
+}
