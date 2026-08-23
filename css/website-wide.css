@@ -447,29 +447,48 @@ body.tb-tour-open #tb-tour .tb-guide-bubble {
 }
 
 
-/* 20260823-bub1: word bubbles never eat letters. Tour hero must not clip. */
+/* 20260823-bub2: Thunder's spoken line is the jewel. Full letters. Quiet gold. */
 body.tb-tour-open #tb-tour .tb-tour-hero {
   overflow: visible !important;
 }
 body.tb-tour-open #tb-tour .tb-guide-bubble,
-body.tb-tour-open .tb-guide-bubble,
-body.tb-tour-open #tb-tour .tb-hang-talk,
-.tb-hang-talk {
+body.tb-tour-open .tb-guide-bubble {
   overflow: visible !important;
-  padding-top: 12px !important;
-  padding-bottom: 12px !important;
-  line-height: 1.35 !important;
+  background: #0b0b0b !important;
+  border: 1px solid rgba(254, 241, 5, 0.7) !important;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.65),
+    0 10px 28px rgba(0, 0, 0, 0.5),
+    0 0 16px rgba(254, 241, 5, 0.08) !important;
+  border-radius: 16px !important;
+  padding: 14px 16px 15px !important;
   box-sizing: border-box !important;
 }
 body.tb-tour-open #tb-tour-body.tb-tour-body,
 body.tb-tour-open #tb-tour .tb-tour-body {
   overflow: visible !important;
-  line-height: 1.35 !important;
-  padding-top: 2px !important;
-  min-height: 0 !important;
+  color: #f5f5f5 !important;
+  font-size: 15px !important;
+  line-height: 1.45 !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.012em !important;
+  text-shadow: 0 1px 0 #000 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  min-height: 1.45em !important;
   height: auto !important;
 }
+body.tb-tour-open #tb-tour .tb-hang-talk,
+.tb-hang-talk {
+  overflow: visible !important;
+  background: #0b0b0b !important;
+  border: 1px solid rgba(254, 241, 5, 0.7) !important;
+  color: #f5f5f5 !important;
+  font: 600 14px/1.4 system-ui, sans-serif !important;
+  padding: 10px 14px !important;
+  border-radius: 14px !important;
+}
 body.tb-tour-open .tb-tour-boards .tb-tour-headline {
-  line-height: 1.08 !important;
+  line-height: 1.1 !important;
   overflow: visible !important;
 }
