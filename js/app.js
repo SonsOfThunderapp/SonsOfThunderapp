@@ -1000,7 +1000,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     if (load('signedInWelcomeSent')) return;
     try { save('signedInWelcomeSent', 1); } catch (e) {}
     const title = 'You’re in the room.';
-    const body = 'Free coffee at Axum. I’m In carries your name.';
+    const body = 'You’re in. Monday knows your name.';
     try { fireLocalNotification(title, body, 'thunder-signedin', '/?view=home'); } catch (e) {}
   }
 
@@ -1520,13 +1520,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         if (event === 'SIGNED_IN') {
           try { requestPersistentStorage(); } catch (eP) {}
           try { fireSignedInWelcome(); } catch (e) {}
-          try { issueAxumCoffee(); } catch (e) {}
           try {
-            Promise.resolve(pullAxumCoffee()).then(function () {
-              try { maybeShowAxumCoffee(); } catch (e2) {}
-            });
-          } catch (e) {}
-            try {
             Promise.resolve(claimBrotherOnSignIn()).then(function () {
               try { flushPendingSeat(); } catch (e2) {}
             });
@@ -7397,9 +7391,6 @@ $('#edit-profile-btn').addEventListener('click', () => {
       'Memories follow you. Sign in. Don’t leave nights on one phone.',
       'Signed in is the backstage pass.',
       'Already a Member. That’s how you join the count.',
-      /* Axum */
-      'First sign-in. Free coffee at Axum. One cup.',
-      'Axum. Winter Garden. First time in, coffee’s on us.',
       /* Install / share */
       'Put it on the Home Screen. That’s when it becomes a room.',
       'Share Thunder with a brother. One link. He’s in.',

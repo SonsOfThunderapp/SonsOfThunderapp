@@ -1,4 +1,4 @@
-/* 20260823-domain1: custom domain share + ghost cut + cache bump */
+/* 20260823-agrade1: 1200x630 share + calendar sheet gone + Axum copy cut */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
