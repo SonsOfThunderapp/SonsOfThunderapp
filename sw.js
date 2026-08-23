@@ -1,4 +1,4 @@
-/* 20260823-agrade1: 1200x630 share + calendar sheet gone + Axum copy cut */
+/* 20260823-icon1: header mark unclipped + Home Screen icon v4 (iOS needs delete+readd) */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

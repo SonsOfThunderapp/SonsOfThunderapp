@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260823-agrade1',
+  APP_BUILD: '20260823-icon1',
   /* First-run tour does NOT auto-start. New phone lands in the room.
      Already finished (thunderTourV42 done) = no nag. More → TAKE THE TOUR remains. */
   /* I'M IN vault locked 2026-08-21 — live-coal rest, bolt strike, yellow settle,
@@ -109,6 +109,7 @@ window.TB_CONFIG = {
 /* 20260821-bday2: ghost-wordmark + birthday-honor lock companion */
 (function () {
   try {
+    var __tbB = (window.TB_CONFIG && window.TB_CONFIG.APP_BUILD) || '1';
     if (!document.querySelector('link[href*="chief1-ghost.css"]')) {
       var l = document.createElement('link');
       l.rel = 'stylesheet';
@@ -126,7 +127,7 @@ window.TB_CONFIG = {
     if (!document.querySelector('link[href*="ask-clear.css"]')) {
       var ac = document.createElement('link');
       ac.rel = 'stylesheet';
-      ac.href = 'css/ask-clear.css?v=20260822-chrome6';
+      ac.href = 'css/ask-clear.css?v=' + encodeURIComponent(__tbB);
       (document.head || document.documentElement).appendChild(ac);
     }
 
@@ -136,7 +137,6 @@ window.TB_CONFIG = {
       p.href = 'css/memories-page.css?v=20260822-chrome6';
       (document.head || document.documentElement).appendChild(p);
     }
-    var __tbB = (window.TB_CONFIG && window.TB_CONFIG.APP_BUILD) || '1';
     var ww = document.querySelector('link[href*="website-wide.css"]');
     var wwHref = 'css/website-wide.css?v=' + encodeURIComponent(__tbB);
     if (!ww) {
