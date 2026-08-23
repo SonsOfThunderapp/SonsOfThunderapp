@@ -298,3 +298,28 @@ body.tb-tour-open #tb-tour.tb-tour {
   background: transparent !important;
   border: 0 !important;
 }
+
+
+/* 20260823-gold1c — P1: tour copy stays on glass; ghost host dies with tour. */
+body:not(.tb-tour-open) #tb-tour-host,
+body:not(.tb-tour-open) #tb-tour-host.tb-guide-thunder,
+#tb-tour.hidden #tb-tour-host,
+#tb-tour.hidden .tb-guide-thunder {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  left: auto !important;
+  transform: none !important;
+}
+#tb-tour .tb-guide-bubble,
+.tb-tour-boards .tb-guide-bubble,
+.tb-guide-bubble {
+  max-width: min(100%, calc(100vw - 28px)) !important;
+  width: min(100%, calc(100vw - 28px)) !important;
+  box-sizing: border-box !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  left: auto !important;
+  right: auto !important;
+}
