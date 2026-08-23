@@ -1,22 +1,62 @@
-/* Hangout tour layer. TAKE THE TOUR only. Official bolts. HTML talk, not painted. */
-#tb-tour-live{position:relative;}
-.tb-hang-layer{position:absolute;inset:0;z-index:4;overflow:hidden;pointer-events:none;background:#000;}
-.tb-hang-art{width:100%;height:100%;object-fit:cover;display:block;transform-origin:50% 42%;}
-.tb-hang-talk{position:absolute;max-width:46%;padding:8px 10px;border-radius:12px;background:#111;color:#fff;font:700 12px/1.25 system-ui,sans-serif;border:1px solid #FEF105;}
-.tb-hang-talk.a{left:6%;top:8%;}
-.tb-hang-talk.b{right:6%;top:14%;}
-.tb-hang-layer[data-mood="patio"] .tb-hang-art{animation:tb-hang-rail 4.2s ease-in-out infinite;}
-.tb-hang-layer[data-mood="fire"] .tb-hang-art{animation:tb-hang-fireheads 2.8s ease-in-out infinite;}
-.tb-hang-layer[data-mood="fire"]::after{content:"";position:absolute;left:18%;bottom:6%;width:64%;height:28%;border-radius:50%;background:radial-gradient(ellipse at 50% 70%,rgba(255,110,20,.4),transparent 70%);animation:tb-hang-ember 1.15s ease-in-out infinite;mix-blend-mode:screen;pointer-events:none;}
-.tb-hang-layer[data-mood="grill"] .tb-hang-art{animation:tb-hang-grate 3.4s ease-in-out infinite;}
-.tb-hang-layer[data-mood="pickle"] .tb-hang-art{animation:tb-hang-court 1.15s ease-in-out infinite;}
-.tb-hang-layer[data-mood="bday"] .tb-hang-art{animation:tb-hang-honor 4.4s ease-in-out infinite;}
-.tb-hang-layer[data-mood="read"] .tb-hang-art{animation:tb-hang-word 7s ease-in-out infinite;}
-@keyframes tb-hang-rail{0%,100%{transform:rotate(-.5deg)}50%{transform:rotate(.8deg)}}
-@keyframes tb-hang-fireheads{0%,100%{transform:translateY(0) rotate(-.6deg)}50%{transform:translateY(-6px) rotate(1.2deg)}}
-@keyframes tb-hang-ember{0%,100%{opacity:.2}50%{opacity:.4}}
-@keyframes tb-hang-grate{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
-@keyframes tb-hang-court{0%,100%{transform:translate(-2px,0) rotate(-1deg)}50%{transform:translate(4px,-6px) rotate(1.4deg)}}
-@keyframes tb-hang-honor{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+/* hangout4 — Brothers heads open nights. Official faces only. HTML talk. */
+#tb-tour .tb-live-bros .tb-live-face{
+  pointer-events:auto!important;
+  cursor:pointer;
+  z-index:8;
+}
+#tb-tour .tb-live-bros .tb-live-bro{pointer-events:auto!important;}
+.tb-hang-scene{
+  position:absolute;inset:0;z-index:20;
+  display:none;flex-direction:column;align-items:center;justify-content:flex-end;
+  background:#000;overflow:hidden;
+}
+.tb-hang-scene.on{display:flex;}
+.tb-hang-scene .tb-hang-back{
+  position:absolute;top:8px;left:8px;z-index:5;
+  background:transparent;border:1px solid #333;color:#aaa;
+  border-radius:10px;padding:6px 10px;font:700 11px/1 system-ui;
+}
+.tb-hang-heads{
+  position:absolute;inset:8% 6% 28%;
+  display:flex;align-items:flex-end;justify-content:center;gap:6%;
+}
+.tb-hang-heads img{
+  width:min(34%,140px);height:auto;object-fit:contain;
+  filter:drop-shadow(0 0 10px rgba(254,241,5,.22));
+  transform-origin:50% 70%;
+}
+.tb-hang-talk{
+  position:relative;z-index:3;max-width:82%;
+  margin:0 0 6px;padding:8px 12px;border-radius:12px;
+  background:#111;color:#fff;font:700 13px/1.3 system-ui,sans-serif;
+  border:1px solid #FEF105;
+}
+.tb-hang-feat{
+  position:relative;z-index:3;margin:0 0 10px;
+  color:#FEF105;font:800 11px/1 system-ui;letter-spacing:.14em;
+}
+.tb-hang-door{
+  position:relative;z-index:3;margin:0 0 14px;
+  background:#E30600;color:#fff;border:0;border-radius:12px;
+  padding:10px 22px;font:800 14px/1 system-ui;letter-spacing:.08em;
+}
+.tb-hang-scene[data-mood="patio"] .tb-hang-heads img{animation:tb-hang-nod 3.2s ease-in-out infinite;}
+.tb-hang-scene[data-mood="fire"] .tb-hang-heads img{animation:tb-hang-breathe 4.6s ease-in-out infinite;}
+.tb-hang-scene[data-mood="fire"]::after{content:"";position:absolute;left:18%;bottom:8%;width:64%;height:22%;border-radius:50%;background:radial-gradient(ellipse at 50% 70%,rgba(255,110,20,.38),transparent 70%);animation:tb-hang-ember 1.2s ease-in-out infinite;mix-blend-mode:screen;pointer-events:none;}
+.tb-hang-scene[data-mood="grill"] .tb-hang-heads img{animation:tb-hang-watch 3.6s ease-in-out infinite;}
+.tb-hang-scene[data-mood="pickle"] .tb-hang-heads img{animation:tb-hang-split 1.1s ease-in-out infinite;}
+.tb-hang-scene[data-mood="bday"] .tb-hang-heads img{animation:tb-hang-honor 4.4s ease-in-out infinite;}
+.tb-hang-scene[data-mood="read"] .tb-hang-heads img{animation:tb-hang-word 7s ease-in-out infinite;}
+.tb-hang-scene[data-mood="camp"] .tb-hang-heads img{animation:tb-hang-watch 5s ease-in-out infinite;}
+.tb-hang-scene[data-mood="range"] .tb-hang-heads img{animation:tb-hang-honor 3.8s ease-in-out infinite;}
+.tb-hang-scene[data-mood="lake"] .tb-hang-heads img{animation:tb-hang-word 6s ease-in-out infinite;}
+@keyframes tb-hang-nod{0%,100%{transform:rotate(-1deg) translateY(0)}40%{transform:rotate(2deg) translateY(3px)}70%{transform:rotate(-.5deg) translateY(-1px)}}
+@keyframes tb-hang-breathe{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-5px) scale(1.02)}}
+@keyframes tb-hang-ember{0%,100%{opacity:.18}50%{opacity:.4}}
+@keyframes tb-hang-watch{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes tb-hang-split{0%,100%{transform:translate(-3px,0) rotate(-1.2deg)}50%{transform:translate(4px,-7px) rotate(1.6deg)}}
+@keyframes tb-hang-honor{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-4px) rotate(-.6deg)}}
 @keyframes tb-hang-word{0%,100%{transform:translateY(0)}50%{transform:translateY(-1px)}}
-@media (prefers-reduced-motion:reduce){.tb-hang-art,.tb-hang-layer[data-mood="fire"]::after{animation:none!important;}}
+@media (prefers-reduced-motion:reduce){
+  .tb-hang-scene .tb-hang-heads img,.tb-hang-scene[data-mood="fire"]::after{animation:none!important;}
+}
