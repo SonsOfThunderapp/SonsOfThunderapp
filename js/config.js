@@ -29,7 +29,7 @@ window.TB_CONFIG = {
   SOURCE_PARENT: '20260818-p0-recovery1',
   REJECTED_ARCHIVES: ['20260818-whatsnext1', '20260818-header-safe1'],
   PRODUCT_LOCK: {
-    date: '2016-08-16'.replace('2016','2026'),
+    date: '2026-08-16',
     label: 'LOCKED',
     systems: [
       'core-nav','meeting-engine','im-in','announcements','whats-next-retention',
