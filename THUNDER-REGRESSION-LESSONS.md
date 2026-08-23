@@ -41,6 +41,9 @@
 51. **Freeze-frame motion test:** Every keyframe of AI animation must stand as an approved still (START/25/50/75/END).
 52. **One heartbeat:** Do not introduce a second ambient pulse clock that drifts from `--tb-breathe`.
 
+53. **HEADER CLIP (2026-08-23, HARD FAIL):** `chief1-ghost.css` / `memories-page.css` capped `#header-logo` at 64–96px with `overflow: hidden` and `clip-path: inset(0)`. Phone showed SONS only — red OF THUNDER sheared off. **Phone-approved lock = IMG_7978** (full SONS + gold bolt + red OF THUNDER). Never cap header height. Never overflow-hidden the header. Source = `logo-print-diecut.png`. See `HEADER-MARK-LOCK.md`.
+
+
 ## CONCIERGE HOST SIZE + PLACEMENT = ONE SYSTEM (2026-08-17 device fail)
 
 HARD FAIL evidence: screenshots showed Thunder clipped by status bar, overlapping YOU'RE IN CTA, logo, speech disconnected.

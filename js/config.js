@@ -1,9 +1,23 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260823-headhd1',
-  /* HEADER MARK locked 2026-08-23 — official stacked PNG (SONS + red OF THUNDER
-     + tagline) is sticky on Home / Brothers / Memories / More. Top layer of the
-     page (z 8000). True aspect, never crop/stretch. HD @2x/@3x/@4x. */
+  APP_BUILD: '20260823-logolock1',
+  /* HEADER MARK — ETERNAL 2026-08-23. Phone-approved (IMG_7978).
+     White SONS + gold 3D bolt through O + red OF THUNDER.
+     Sticky top of Home / Brothers / Memories / More. z-index 8000.
+     Source: assets/CANONICAL/logo-print-diecut.png → logo@2x/@3x/@4x.
+     NEVER crop, hide, stretch, AI-redraw, or swap this mark.
+     NEVER max-height / overflow:hidden / clip-path on #main-header or #header-logo. */
+  HEADER_ANCHOR: {
+    eternal: true,
+    approved: '2026-08-23',
+    proof: 'IMG_7978',
+    source: 'assets/CANONICAL/logo-print-diecut.png',
+    slots: ['assets/logo@2x.png', 'assets/logo@3x.png', 'assets/logo@4x.png'],
+    aspect: '3000/2077',
+    z: 8000,
+    pages: ['home', 'brothers', 'events', 'about'],
+    forbid: ['max-height-cap', 'overflow-hidden-header', 'clip-path-header', 'ai-redraw']
+  },
   /* First-run tour does NOT auto-start. New phone lands in the room.
      Already finished (thunderTourV42 done) = no nag. More → TAKE THE TOUR remains. */
   /* I'M IN vault locked 2026-08-21 — live-coal rest, bolt strike, yellow settle,
@@ -44,9 +58,10 @@ window.TB_CONFIG = {
     ]
   },
   LOGO_CANON: {
-    master: 'assets/CANONICAL/logo-official-7697-header.png',
+    master: 'assets/CANONICAL/logo-print-diecut.png',
     header2x: 'assets/logo@2x.png',
     header3x: 'assets/logo@3x.png',
+    header4x: 'assets/logo@4x.png',
     about: 'assets/logo-about.png',
     banned: ['pre-7697-wordmark', 'white-outline-legacy', 'logo*.old-backup']
   },
