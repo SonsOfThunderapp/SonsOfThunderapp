@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260823-header-app1',
+  APP_BUILD: '20260823-tour-fill1',
   /* First-run tour does NOT auto-start. New phone lands in the room.
      Already finished (thunderTourV42 done) = no nag. More → TAKE THE TOUR remains. */
   /* I'M IN vault locked 2026-08-21 — live-coal rest, bolt strike, yellow settle,
@@ -139,7 +139,7 @@ window.TB_CONFIG = {
     if (!document.querySelector('link[href*="website-wide.css"]')) {
       var ww = document.createElement('link');
       ww.rel = 'stylesheet';
-      ww.href = 'css/website-wide.css?v=20260823-header-app1';
+      ww.href = 'css/website-wide.css?v=20260823-tour-fill1';
       (document.head || document.documentElement).appendChild(ww);
     }
 
