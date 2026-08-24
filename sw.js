@@ -1,4 +1,4 @@
-/* 20260824-askex1: Ask Thunder examples — tap a question, don’t stare at empty space */
+/* 20260824-askex2: Ask examples a man would actually search — not The Code */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

@@ -10113,7 +10113,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       id: 'ask-thunder',
       headline: 'ASK THUNDER',
       sub: 'WHAT I CAN DO',
-      body: 'Tap a question or type anything. I know this board. I\u2019ll go get the rest. I don\u2019t listen until you tap. Heavy night? That\u2019s a leader, not me.',
+      body: 'When we meet. How to lock in. How to drop a pic. Or ask me anything you\u2019d Google at a red light. I don\u2019t listen until you tap. Heavy night? That\u2019s a leader, not me.',
       nextLabel: 'LET\u2019S GO'
     }
   ];
