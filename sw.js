@@ -1,4 +1,4 @@
-/* 20260824-open1: hard refresh on every app open — loop-guarded, skip tour/sheets */
+/* 20260824-cache1: Home Screen URL / is no-store so Safari cannot keep a dead document */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
