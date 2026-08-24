@@ -3945,7 +3945,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       { id: 'imin-a2hs-sheet', close: () => { try { closeImInA2hsSheet(); } catch (e) {} } },
       { id: 'axum-drop', close: () => { try { closeAxumDrop(); } catch (e) {} } },
       { id: 'axum-card', close: () => { try { closeAxumCard(); } catch (e) {} } },
-      { id: 'raffle-live', close: () => { try { closeRaffleLive(); } catch (e) {} } }
+      { id: 'raffle-live', close: () => { try { closeRaffleLive(); } catch (e) {} } },
+      { id: 'contact-swap', close: () => { try { closeContactSwap(); } catch (e) {} } }
     ];
     specs.forEach(({ id, close }) => {
       const el = document.getElementById(id);
@@ -4140,9 +4141,9 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       lines.push('TEL;TYPE=CELL:' + tel);
     }
     if (brother && brother.id) lines.push('UID:sot-' + String(brother.id).replace(/[^\w\-]+/g, '').slice(0, 36));
+    lines.push('ORG:Sons of Thunder');
+    lines.push('URL:' + publicUrl('/'));
     if (!forQr) {
-      lines.push('ORG:Sons of Thunder');
-      lines.push('URL:' + publicUrl('/'));
       if (bio) lines.push('NOTE:' + bio.replace(/,/g, '\\,'));
     }
     lines.push('END:VCARD');
@@ -4183,6 +4184,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file], title, text });
         try { honorFirst('share'); } catch (e) {}
+        try { offerContactSwap(brother); } catch (e2) {}
         return true;
       }
     } catch (e) {
@@ -4195,6 +4197,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
           title,
           text: text + '\n\nSons of Thunder contact'
         });
+        try { offerContactSwap(brother); } catch (e2) {}
         return true;
       }
     } catch (e) {
@@ -4203,8 +4206,81 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     }
     // Fallback: download .vcf so they can AirDrop / Nearby Share from Files
     downloadVCard(brother);
-    alert('Contact file saved. Open it or share from Files (AirDrop / Nearby Share).');
+    try { offerContactSwap(brother); } catch (e2) {}
     return true;
+  }
+
+  function myBrotherRecord() {
+    const id = myProfileId;
+    if (!id) return null;
+    return (brothers || []).find(function (b) { return b && b.id === id; }) || null;
+  }
+
+  function closeContactSwap() {
+    const el = document.getElementById('contact-swap');
+    if (!el) return;
+    try { clearQrTarget(document.getElementById('swap-qr-target')); } catch (e) {}
+    el.classList.add('hidden');
+    el.setAttribute('aria-hidden', 'true');
+    try { unlockBodyIfClear(); } catch (e2) {}
+  }
+
+  function offerContactSwap(shared) {
+    const me = myBrotherRecord();
+    if (shared && me && shared.id && shared.id === me.id) return;
+    const el = document.getElementById('contact-swap');
+    if (!el) return;
+    const title = document.getElementById('contact-swap-title');
+    const hint = document.getElementById('contact-swap-hint');
+    const shareBtn = document.getElementById('contact-swap-share');
+    const stage = document.getElementById('swap-qr-stage');
+    const target = document.getElementById('swap-qr-target');
+    const ready = !!(me && (me.name || '').trim() && digitsOnly(me.phone));
+    if (title) title.textContent = ready ? 'Let him scan you.' : 'Put your number on.';
+    if (hint) hint.textContent = ready ? 'Your code. Hand him the phone.' : 'Then he can scan you back.';
+    if (shareBtn) {
+      shareBtn.textContent = ready ? 'SHARE MY CONTACT' : 'ADD MY NUMBER';
+      shareBtn.onclick = function () {
+        if (ready) shareContact(me);
+        else {
+          closeContactSwap();
+          try { openProfileEditor(); } catch (e) {}
+        }
+      };
+    }
+    el.classList.remove('hidden');
+    el.setAttribute('aria-hidden', 'false');
+    if (stage) stage.classList.toggle('hidden', !ready);
+    if (ready && target) {
+      const vcard = buildVCard(me, { forQr: true });
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          renderBrotherQR(vcard, target, 220);
+        });
+      });
+    } else if (target) {
+      try { clearQrTarget(target); } catch (e) {}
+    }
+  }
+
+  function bindContactSwap() {
+    const el = document.getElementById('contact-swap');
+    if (!el || el.dataset.bound === '1') return;
+    el.dataset.bound = '1';
+    const close = function (e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      closeContactSwap();
+    };
+    const x = document.getElementById('contact-swap-close');
+    const skip = document.getElementById('contact-swap-skip');
+    if (x) x.addEventListener('click', close);
+    if (skip) skip.addEventListener('click', close);
+    el.addEventListener('click', function (e) {
+      if (e.target === el) closeContactSwap();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && el && !el.classList.contains('hidden')) closeContactSwap();
+    });
   }
 
   // Contact QR: remote PNG first (reliable fingerprint), local lib fallback,
@@ -6634,6 +6710,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
     bindMemoryViewer();
     bindInfoDetail();
     bindSwipeCloseAllWindows();
+    try { bindContactSwap(); } catch (e) {}
 
     // Profile photo
     $('#profile-photo').addEventListener('change', (e) => {
