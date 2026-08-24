@@ -4407,7 +4407,13 @@ h1.code-title-glow,
   font-weight: 500;
 }
 .btn-auth-entry:active { transform: scale(0.98); }
-.btn-auth-entry.hidden { display: none !important; }
+#auth-entry-btn,
+#home-member-cta,
+.home-member-cta,
+.btn-auth-entry,
+#memories-signin-shot {
+  display: none !important;
+}
 .auth-session-bar-brothers {
   margin: 0 0 16px;
 }

@@ -1,4 +1,4 @@
-/* 20260824-chair1: empty chair is take your seat — photo + profile */
+/* 20260824-imin1: only I’M IN signs a brother in. No Brothers/Home SIGN IN. */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

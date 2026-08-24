@@ -1407,27 +1407,16 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
 
   function syncBrothersSeatBtn() {
     const btn = document.getElementById('edit-profile-btn');
-    const entry = document.getElementById('auth-entry-btn');
     const me = (brothers || []).find(function (b) { return b && b.id === myProfileId && (b.name || '').trim(); });
     if (!isSignedIn()) {
       if (btn) {
         btn.classList.add('hidden');
         btn.textContent = 'EDIT PROFILE';
       }
-      if (entry) {
-        entry.classList.remove('hidden');
-        entry.removeAttribute('hidden');
-        entry.setAttribute('aria-hidden', 'false');
-      }
     } else {
       if (btn) {
         btn.classList.remove('hidden');
         btn.textContent = me ? 'EDIT PROFILE' : 'YOUR SEAT';
-      }
-      if (entry) {
-        entry.classList.add('hidden');
-        entry.setAttribute('hidden', 'hidden');
-        entry.setAttribute('aria-hidden', 'true');
       }
     }
   }
@@ -1437,16 +1426,13 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     try { syncBrothersSeatBtn(); } catch (e) {}
     const bar = $('#auth-session-bar');
     const who = $('#auth-who');
-    const entry = $('#auth-entry-btn');
     const homeCta = document.getElementById('home-member-cta');
+    if (homeCta) homeCta.classList.add('hidden');
+    const entry = $('#auth-entry-btn');
     if (entry) {
-      if (isSignedIn()) {
-        entry.classList.add('hidden');
-        entry.setAttribute('hidden', 'hidden');
-      } else {
-        entry.classList.remove('hidden');
-        entry.removeAttribute('hidden');
-      }
+      entry.classList.add('hidden');
+      entry.setAttribute('hidden', 'hidden');
+      entry.setAttribute('aria-hidden', 'true');
     }
     if (!supabaseEnabled()) {
       if (bar) bar.classList.add('hidden');
@@ -1460,7 +1446,6 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       if (homeCta) homeCta.classList.add('hidden');
     } else {
       if (bar) bar.classList.add('hidden');
-      if (homeCta) homeCta.classList.remove('hidden');
     }
   }
 
