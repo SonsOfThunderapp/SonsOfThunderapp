@@ -1,62 +1,78 @@
-/* 20260823-roundtable1 — approved Option A. Locked faces. No grid. No nested nights. */
+/* 20260824-tourfix1 — Round Table, no CSS-angle crash. Locked faces. */
 .tb-tour-stage[data-board="2"] .tb-live-slide[data-slide="2"].is-on {
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
   justify-content: flex-start !important;
   background: #000 !important;
-  padding: 8px 6px 10px !important;
+  padding: 6px 4px 8px !important;
+  overflow: hidden !important;
 }
 .tb-live-roundtable {
   position: relative !important;
-  width: min(92%, 280px) !important;
-  aspect-ratio: 1 !important;
-  margin: 4px auto 0 !important;
+  width: min(88%, 240px) !important;
+  height: min(88vw, 240px) !important;
+  aspect-ratio: auto !important;
+  margin: 2px auto 0 !important;
   display: block !important;
   background: transparent !important;
+  overflow: visible !important;
 }
 .tb-live-roundtable .tb-live-bro {
   position: absolute !important;
-  left: 50% !important;
-  top: 50% !important;
-  width: 30% !important;
-  height: 30% !important;
+  width: 26% !important;
+  height: 26% !important;
   margin: 0 !important;
   padding: 0 !important;
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
-  border-radius: 0 !important;
+  transform: translate(-50%, -50%) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  transform: translate(-50%, -50%) rotate(var(--a, 0deg)) translateY(-118%) rotate(calc(var(--a, 0deg) * -1)) !important;
 }
+.tb-live-roundtable .tb-live-bro:nth-child(1) { left: 50%; top: 14%; }
+.tb-live-roundtable .tb-live-bro:nth-child(2) { left: 79%; top: 27%; }
+.tb-live-roundtable .tb-live-bro:nth-child(3) { left: 88%; top: 50%; }
+.tb-live-roundtable .tb-live-bro:nth-child(4) { left: 79%; top: 73%; }
+.tb-live-roundtable .tb-live-bro:nth-child(5) { left: 50%; top: 86%; }
+.tb-live-roundtable .tb-live-bro:nth-child(6) { left: 21%; top: 73%; }
+.tb-live-roundtable .tb-live-bro:nth-child(7) { left: 12%; top: 50%; }
+.tb-live-roundtable .tb-live-bro:nth-child(8) { left: 21%; top: 27%; }
 .tb-live-roundtable .tb-live-bro.tb-round-heart {
-  width: 26% !important;
-  height: 26% !important;
-  transform: translate(-50%, -50%) !important;
+  left: 50% !important;
+  top: 50% !important;
+  width: 24% !important;
+  height: 24% !important;
   z-index: 2 !important;
 }
 .tb-live-roundtable .tb-live-face {
   width: 100% !important;
   height: 100% !important;
-  max-width: none !important;
-  max-height: none !important;
   object-fit: contain !important;
   background: transparent !important;
   filter: none !important;
   animation: none !important;
-  mix-blend-mode: normal !important;
 }
 .tb-live-round-line {
-  margin: 8px 8px 0 !important;
+  margin: 6px 8px 0 !important;
   text-align: center !important;
   color: #b0b0b0 !important;
   font-size: 12px !important;
-  letter-spacing: 0.02em !important;
 }
 .tb-tour-stage[data-board="2"] .tb-hang-scene,
 .tb-tour-stage[data-board="2"] .tb-hang-scene.on {
   display: none !important;
+}
+.tb-tour-stage[data-board="2"] #tb-tour-host,
+.tb-tour-stage[data-board="2"] .tb-guide-thunder {
+  width: 72px !important;
+  max-height: 88px !important;
+}
+.tb-tour-close,
+#tb-tour-close,
+.tb-tour-actions {
+  z-index: 20 !important;
+  pointer-events: auto !important;
 }

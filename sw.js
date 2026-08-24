@@ -1,4 +1,4 @@
-/* 20260824-swap1: SHARE CONTACT swap + board URL on every unique QR */
+/* 20260824-tourfix1: Round Table seats are fixed positions — no CSS-angle crash */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
