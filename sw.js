@@ -1,4 +1,4 @@
-/* 20260824-round2: brothers slide — table is the star, host off, faces idle */
+/* 20260824-homen1: first-run lands on Home; tour is More → TAKE THE TOUR only */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

@@ -10564,8 +10564,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   }
 
   function maybeStartProductTour() {
-    if (typeof isTourComplete === 'function' && isTourComplete()) return;
-    if (typeof startTour === 'function') startTour();
+    return;
   }
 
   function bindTourControls() {
