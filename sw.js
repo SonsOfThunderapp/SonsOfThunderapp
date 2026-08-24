@@ -1,4 +1,4 @@
-/* 20260824-fast1: splash is a blink, then the room */
+/* 20260824-ios1: iOS launch — no 1.4MB video, no 3x/4x logo, companions idle */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260824-fast1',
+  APP_BUILD: '20260824-ios1',
   /* HEADER MARK — ETERNAL 2026-08-23. Phone-approved (IMG_7978).
      White SONS + gold 3D bolt through O + red OF THUNDER.
      Sticky top of Home / Brothers / Memories / More. z-index 8000.
@@ -128,64 +128,25 @@ window.TB_CONFIG = {
 (function () {
   try {
     var __tbB = (window.TB_CONFIG && window.TB_CONFIG.APP_BUILD) || '1';
-    if (!document.querySelector('link[href*="chief1-ghost.css"]')) {
+    function addCss(href) {
+      if (document.querySelector('link[href*="' + href.split('?')[0] + '"]')) return;
       var l = document.createElement('link');
       l.rel = 'stylesheet';
-      l.href = 'css/chief1-ghost.css?v=' + encodeURIComponent(__tbB);
+      l.href = href + '?v=' + encodeURIComponent(__tbB);
       (document.head || document.documentElement).appendChild(l);
     }
-
-    if (!document.querySelector('link[href*="memories-latest.css"]')) {
-      var m = document.createElement('link');
-      m.rel = 'stylesheet';
-      m.href = 'css/memories-latest.css?v=' + encodeURIComponent(__tbB);
-      (document.head || document.documentElement).appendChild(m);
+    function loadCompanions() {
+      addCss('css/chief1-ghost.css');
+      addCss('css/memories-latest.css');
+      addCss('css/ask-clear.css');
+      addCss('css/memories-page.css');
+      addCss('css/website-wide.css');
+      addCss('css/header-mark.css');
+      addCss('css/hangout-tour.css');
+      addCss('css/tour-roundtable.css');
     }
-
-    if (!document.querySelector('link[href*="ask-clear.css"]')) {
-      var ac = document.createElement('link');
-      ac.rel = 'stylesheet';
-      ac.href = 'css/ask-clear.css?v=' + encodeURIComponent(__tbB);
-      (document.head || document.documentElement).appendChild(ac);
-    }
-
-    if (!document.querySelector('link[href*="memories-page.css"]')) {
-      var p = document.createElement('link');
-      p.rel = 'stylesheet';
-      p.href = 'css/memories-page.css?v=' + encodeURIComponent(__tbB);
-      (document.head || document.documentElement).appendChild(p);
-    }
-    var ww = document.querySelector('link[href*="website-wide.css"]');
-    var wwHref = 'css/website-wide.css?v=' + encodeURIComponent(__tbB);
-    if (!ww) {
-      ww = document.createElement('link');
-      ww.rel = 'stylesheet';
-      ww.href = wwHref;
-      (document.head || document.documentElement).appendChild(ww);
-    } else if ((ww.getAttribute('href') || '').indexOf('v=' + __tbB) === -1) {
-      ww.href = wwHref;
-    }
-
-    if (!document.querySelector('link[href*="header-mark.css"]')) {
-      var hm = document.createElement('link');
-      hm.rel = 'stylesheet';
-      hm.href = 'css/header-mark.css?v=' + encodeURIComponent(__tbB);
-      (document.head || document.documentElement).appendChild(hm);
-    }
-
-    if (!document.querySelector('link[href*="hangout-tour.css"]')) {
-      var ht = document.createElement('link');
-      ht.rel = 'stylesheet';
-      ht.href = 'css/hangout-tour.css?v=' + encodeURIComponent(__tbB);
-      (document.head || document.documentElement).appendChild(ht);
-    }
-
-    if (!document.querySelector('link[href*="tour-roundtable.css"]')) {
-      var rt = document.createElement('link');
-      rt.rel = 'stylesheet';
-      rt.href = 'css/tour-roundtable.css?v=' + encodeURIComponent(__tbB);
-      (document.head || document.documentElement).appendChild(rt);
-    }
+    if ('requestIdleCallback' in window) requestIdleCallback(loadCompanions, { timeout: 800 });
+    else setTimeout(loadCompanions, 400);
 
     try {
       var ev = document.querySelector('.nav-item[data-view="events"] span');
@@ -193,6 +154,7 @@ window.TB_CONFIG = {
     } catch (eNav) {}
 
   } catch (e) {}
+  function loadExtraJs() {
   try {
     if (!document.querySelector('script[src*="memories-grid.js"]')) {
       var mg = document.createElement('script');
@@ -272,19 +234,29 @@ window.TB_CONFIG = {
     s.defer = true;
     (document.body || document.documentElement).appendChild(s);
   } catch (e2) {}
+  }
+  setTimeout(loadExtraJs, 550);
 })();
 
 /* 20260823-auto1: old Home Screen copies fetch live build on open and retarget extras. */
 (function () {
   var here = (window.TB_CONFIG && window.TB_CONFIG.APP_BUILD) || '';
-  try {
-    fetch('build.json?_=' + Date.now(), { cache: 'no-store' }).then(function (r) {
-      return r.ok ? r.json() : null;
-    }).then(function (j) {
-      if (!j || !here) return;
-      if (String(j.APP_BUILD || '') === String(here)) return;
-      try { sessionStorage.setItem('tb_reloading', String(j.APP_BUILD)); } catch (e0) {}
-      try { location.reload(); } catch (e1) {}
-    }).catch(function () {});
-  } catch (e2) {}
+  function check() {
+    try {
+      var splash = document.getElementById('splash');
+      if (splash && !splash.classList.contains('splash-done') && !splash.classList.contains('hidden')) {
+        setTimeout(check, 400);
+        return;
+      }
+      fetch('build.json?_=' + Date.now(), { cache: 'no-store' }).then(function (r) {
+        return r.ok ? r.json() : null;
+      }).then(function (j) {
+        if (!j || !here) return;
+        if (String(j.APP_BUILD || '') === String(here)) return;
+        try { sessionStorage.setItem('tb_reloading', String(j.APP_BUILD)); } catch (e0) {}
+        try { location.reload(); } catch (e1) {}
+      }).catch(function () {});
+    } catch (e2) {}
+  }
+  setTimeout(check, 1800);
 })();
