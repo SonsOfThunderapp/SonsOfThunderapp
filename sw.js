@@ -1,4 +1,4 @@
-/* 20260824-cache3: companion css/js versioned by APP_BUILD so immutable cache cannot freeze them */
+/* 20260824-tourcap1: last tour slide — Thunder names what he can do */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

@@ -10107,8 +10107,8 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     {
       id: 'ask-thunder',
       headline: 'ASK THUNDER',
-      sub: 'AT YOUR SERVICE',
-      body: 'Questions? I\u2019m in the corner. Tap me when you\u2019re ready. You\u2019re set, brother.',
+      sub: 'WHAT I CAN DO',
+      body: 'Tap me in the corner. I know this board \u2014 gathering, your seat, brothers, memories. Ask me anything else and I\u2019ll go get it. I don\u2019t listen until you tap. Heavy night? That\u2019s a leader, not me.',
       nextLabel: 'LET\u2019S GO'
     }
   ];
