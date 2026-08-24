@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260823-seatdown1',
+  APP_BUILD: '20260823-roundtable1',
   /* HEADER MARK — ETERNAL 2026-08-23. Phone-approved (IMG_7978).
      White SONS + gold 3D bolt through O + red OF THUNDER.
      Sticky top of Home / Brothers / Memories / More. z-index 8000.
@@ -178,6 +178,13 @@ window.TB_CONFIG = {
       ht.rel = 'stylesheet';
       ht.href = 'css/hangout-tour.css?v=20260823-hang7';
       (document.head || document.documentElement).appendChild(ht);
+    }
+
+    if (!document.querySelector('link[href*="tour-roundtable.css"]')) {
+      var rt = document.createElement('link');
+      rt.rel = 'stylesheet';
+      rt.href = 'css/tour-roundtable.css?v=' + encodeURIComponent(__tbB);
+      (document.head || document.documentElement).appendChild(rt);
     }
 
     try {

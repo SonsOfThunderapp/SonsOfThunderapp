@@ -1,4 +1,4 @@
-/* 20260823-seatdown1: full header stays; entire LOCK YOUR SEAT card sits below it */
+/* 20260823-roundtable1: tour slide 3 is the approved Round Table — locked faces, no grid */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

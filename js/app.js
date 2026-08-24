@@ -9842,7 +9842,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       id: 'brothers',
       headline: 'BROTHERS',
       sub: 'THE ROUND TABLE',
-      body: 'This is where we stay connected. Names. Faces. A seat for every man — like knights at one table.',
+      body: 'A seat for every man. Names. Faces. The table.',
       nextLabel: 'NEXT'
     },
     {

@@ -217,12 +217,7 @@
       if (open) return;
       var cell = e.target && e.target.closest && e.target.closest('#tb-tour .tb-live-bro, #tb-tour .tb-live-face');
       if (!cell) return;
-      if (!onBrothersSlide()) return;
-      var img = cell.tagName === 'IMG' ? cell : cell.querySelector('.tb-live-face');
-      if (!img) return;
-      e.preventDefault();
-      e.stopPropagation();
-      openScene(keyFrom(img));
+      return;
     }, true);
   }
 
