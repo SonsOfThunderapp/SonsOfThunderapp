@@ -1,4 +1,4 @@
-/* 20260824-cache2: HTML/manifest no-store; versioned css/js immutable */
+/* 20260824-cache3: companion css/js versioned by APP_BUILD so immutable cache cannot freeze them */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260824-cache2',
+  APP_BUILD: '20260824-cache3',
   /* HEADER MARK — ETERNAL 2026-08-23. Phone-approved (IMG_7978).
      White SONS + gold 3D bolt through O + red OF THUNDER.
      Sticky top of Home / Brothers / Memories / More. z-index 8000.
@@ -138,7 +138,7 @@ window.TB_CONFIG = {
     if (!document.querySelector('link[href*="memories-latest.css"]')) {
       var m = document.createElement('link');
       m.rel = 'stylesheet';
-      m.href = 'css/memories-latest.css?v=20260822-chrome6';
+      m.href = 'css/memories-latest.css?v=' + encodeURIComponent(__tbB);
       (document.head || document.documentElement).appendChild(m);
     }
 
@@ -176,7 +176,7 @@ window.TB_CONFIG = {
     if (!document.querySelector('link[href*="hangout-tour.css"]')) {
       var ht = document.createElement('link');
       ht.rel = 'stylesheet';
-      ht.href = 'css/hangout-tour.css?v=20260823-hang7';
+      ht.href = 'css/hangout-tour.css?v=' + encodeURIComponent(__tbB);
       (document.head || document.documentElement).appendChild(ht);
     }
 
@@ -196,7 +196,7 @@ window.TB_CONFIG = {
   try {
     if (!document.querySelector('script[src*="memories-grid.js"]')) {
       var mg = document.createElement('script');
-      mg.src = 'js/memories-grid.js?v=20260822-chrome7';
+      mg.src = 'js/memories-grid.js?v=' + encodeURIComponent(__tbB);
       mg.defer = true;
       (document.body || document.documentElement).appendChild(mg);
     }
@@ -205,14 +205,14 @@ window.TB_CONFIG = {
 
     if (!document.querySelector('script[src*="leader-door.js"]')) {
       var ld = document.createElement('script');
-      ld.src = 'js/leader-door.js?v=20260823-lead1';
+      ld.src = 'js/leader-door.js?v=' + encodeURIComponent(__tbB);
       ld.defer = true;
       (document.body || document.documentElement).appendChild(ld);
     }
 
     if (!document.querySelector('script[src*="nav-wire.js"]')) {
       var nw = document.createElement('script');
-      nw.src = 'js/nav-wire.js?v=20260822-chrome6';
+      nw.src = 'js/nav-wire.js?v=' + encodeURIComponent(__tbB);
       nw.defer = true;
       (document.body || document.documentElement).appendChild(nw);
     }
@@ -220,41 +220,41 @@ window.TB_CONFIG = {
 
     if (!document.querySelector('script[src*="island-safe.js"]')) {
       var isf = document.createElement('script');
-      isf.src = 'js/island-safe.js?v=20260823-share1';
+      isf.src = 'js/island-safe.js?v=' + encodeURIComponent(__tbB);
       (document.head || document.documentElement).appendChild(isf);
     }
 
     if (!document.querySelector('script[src*="tour-kill.js"]')) {
       var tk = document.createElement('script');
-      tk.src = 'js/tour-kill.js?v=20260824-tourgo1';
+      tk.src = 'js/tour-kill.js?v=' + encodeURIComponent(__tbB);
       tk.defer = true;
       (document.body || document.documentElement).appendChild(tk);
     }
 
     if (!document.querySelector('script[src*="tour-first.js"]')) {
       var tf = document.createElement('script');
-      tf.src = 'js/tour-first.js?v=20260824-tourgo1';
+      tf.src = 'js/tour-first.js?v=' + encodeURIComponent(__tbB);
       tf.defer = true;
       (document.body || document.documentElement).appendChild(tf);
     }
 
     if (!document.querySelector('script[src*="more-legal.js"]')) {
       var ml = document.createElement('script');
-      ml.src = 'js/more-legal.js?v=20260822-chrome6';
+      ml.src = 'js/more-legal.js?v=' + encodeURIComponent(__tbB);
       ml.defer = true;
       (document.body || document.documentElement).appendChild(ml);
     }
 
     if (!document.querySelector('script[src*="thunder-ask.js"]')) {
       var ta = document.createElement('script');
-      ta.src = 'js/thunder-ask.js?v=20260823-gold1e';
+      ta.src = 'js/thunder-ask.js?v=' + encodeURIComponent(__tbB);
       ta.defer = true;
       (document.body || document.documentElement).appendChild(ta);
     }
 
     if (!document.querySelector('script[src*="ask-clear.js"]')) {
       var aj = document.createElement('script');
-      aj.src = 'js/ask-clear.js?v=20260822-chrome6';
+      aj.src = 'js/ask-clear.js?v=' + encodeURIComponent(__tbB);
       aj.defer = true;
       (document.body || document.documentElement).appendChild(aj);
     }
@@ -262,13 +262,13 @@ window.TB_CONFIG = {
 
     if (!document.querySelector('script[src*="hangout-tour.js"]')) {
       var htj = document.createElement('script');
-      htj.src = 'js/hangout-tour.js?v=20260823-push1';
+      htj.src = 'js/hangout-tour.js?v=' + encodeURIComponent(__tbB);
       htj.defer = true;
       (document.body || document.documentElement).appendChild(htj);
     }
     if (document.querySelector('script[src*="bday-autotext.js"]')) return;
     var s = document.createElement('script');
-    s.src = 'js/bday-autotext.js?v=20260822-chrome6';
+    s.src = 'js/bday-autotext.js?v=' + encodeURIComponent(__tbB);
     s.defer = true;
     (document.body || document.documentElement).appendChild(s);
   } catch (e2) {}
