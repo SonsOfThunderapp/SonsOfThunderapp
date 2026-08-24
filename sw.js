@@ -1,4 +1,4 @@
-/* 20260824-goose1: no unsolicited TAP SHARE; Grok/in-app → Open in Safari */
+/* 20260824-goose2: Grok/webview is not Safari. TAP SHARE only in real Safari. Home first. */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

@@ -8173,7 +8173,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
 
     async function runSmartInstall() {
       // Trapped in Instagram / Messenger / etc.
-      if (isInAppBrowser()) {
+      if (isInAppBrowser() || (isIos() && !isIosSafariBrowser())) {
         setInstallProgress('WRONG_BROWSER');
         openInAppInstallOverlay();
         return;
@@ -9151,11 +9151,6 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       if (finished) return;
       finished = true;
       // Splash → tour with nothing in between (no home/welcome flash)
-      try {
-        if (typeof fromPatio === 'function' && fromPatio() && typeof isInAppBrowser === 'function' && isInAppBrowser()) {
-          try { openInAppInstallOverlay(); } catch (e2) {}
-        }
-      } catch (e) {}
       el.classList.add('splash-out');
       setTimeout(() => {
         try { sessionStorage.setItem('tb_splash_done', '1'); } catch (e) {}
@@ -9239,13 +9234,6 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     markPatioFromUrl();
     if (!fromPatio()) return;
     if (isStandalonePwa()) return;
-    if (typeof isInAppBrowser === 'function' && isInAppBrowser()) {
-      try { openInAppInstallOverlay(); } catch (e) {}
-      return;
-    }
-    if (typeof isTourComplete === 'function' && isTourComplete()) {
-      return;
-    }
   }
   function a2hsHushed() {
     try { return Date.now() < Number(load('a2hsQuietUntil') || 0); } catch (e) { return false; }
@@ -9381,6 +9369,9 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     const ua = navigator.userAgent || '';
     if (/FBAN|FBAV|Instagram|Line\/|LinkedInApp|Twitter|TikTok|Snapchat|MicroMessenger|Pinterest|Grok|xAI|ChatGPT|OpenAI|Claude|Anthropic|Perplexity|Copilot/i.test(ua)) return true;
     try {
+      if (window.self !== window.top) return true;
+    } catch (e) { return true; }
+    try {
       if (document.referrer && /grok\.com|x\.ai|chatgpt\.com|openai\.com/i.test(document.referrer)) return true;
     } catch (e) {}
     if (isIos() && !isStandalonePwa()) {
@@ -9396,7 +9387,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
    */
   function getInstallState() {
     if (isStandalonePwa()) return 'INSTALLED';
-    if (isInAppBrowser()) return 'IN_APP_BROWSER';
+    if (isInAppBrowser() || (isIos() && !isIosSafariBrowser())) return 'IN_APP_BROWSER';
     if (typeof window.__tbDeferredInstall !== 'undefined' && window.__tbDeferredInstall) return 'ANDROID_NATIVE';
     if (isIos()) return 'IPHONE_SAFARI';
     if (isAndroid()) return 'ANDROID_MANUAL';
@@ -9574,6 +9565,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     }
     if (isIos() && !isStandalonePwa()) {
       setAlertsHint('iPhone: Add to Home Screen first, then open from the icon and turn alerts on.');
+      try { launchAddToHomeScreen(); } catch (e) {}
       return false;
     }
 
