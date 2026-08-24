@@ -27,6 +27,12 @@
   schedule = "0 * * * *"
 
 [[redirects]]
+  from = "https://sonsofthunder.netlify.app/*"
+  to = "https://sonsofthunderboard.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
   from = "/gathering.ics"
   to = "/.netlify/functions/gathering-ics"
   status = 200

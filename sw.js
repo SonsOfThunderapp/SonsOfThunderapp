@@ -1,4 +1,4 @@
-/* 20260824-a2p1: A2P privacy + terms + SMS checkbox disclosures */
+/* 20260824-official1: canonical sonsofthunderboard.com; privacy/terms branded; netlify.app 301 */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

@@ -5207,6 +5207,17 @@ h1.code-title-glow,
 #thunder-modal.tb-ask-has-reply .thunder-examples {
   display: none !important;
 }
+.tb-legal-footer {
+  text-align: center;
+  margin: 28px 0 24px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: #777;
+}
+.tb-legal-footer a {
+  color: #aaa;
+  text-decoration: underline;
+}
 
 /* ===== 7-SLIDE PRODUCT TOUR — restored 20260818, glow + motion ===== */
 .tb-tour.tb-tour-slides {
