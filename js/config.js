@@ -1,13 +1,16 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260824-ios2',
+  APP_BUILD: '20260824-ios3',
   LAUNCH: {
     splashHoldMs: 200,
     splashFadeMs: 160,
     splashWatchMs: 500,
     extraCssMs: 800,
     extraJsMs: 900,
-    roomBudgetMs: 600
+    roomBudgetMs: 600,
+    lcpMs: 2500,
+    inpMs: 200,
+    cls: 0.1
   },
   /* HEADER MARK — ETERNAL 2026-08-23. Phone-approved (IMG_7978).
      White SONS + gold 3D bolt through O + red OF THUNDER.
@@ -244,6 +247,30 @@ window.TB_CONFIG = {
   } catch (e2) {}
   }
   setTimeout(loadExtraJs, (window.TB_CONFIG.LAUNCH && window.TB_CONFIG.LAUNCH.extraJsMs) || 900);
+  setTimeout(function () {
+    var v = window.__tbVitals = { lcp: 0, cls: 0, inp: 0 };
+    try {
+      if (!window.PerformanceObserver) return;
+      new PerformanceObserver(function (list) {
+        list.getEntries().forEach(function (e) {
+          v.lcp = Math.round(e.startTime);
+        });
+      }).observe({ type: 'largest-contentful-paint', buffered: true });
+      new PerformanceObserver(function (list) {
+        list.getEntries().forEach(function (e) {
+          if (!e.hadRecentInput) v.cls = Math.round((v.cls + e.value) * 1000) / 1000;
+        });
+      }).observe({ type: 'layout-shift', buffered: true });
+      try {
+        new PerformanceObserver(function (list) {
+          list.getEntries().forEach(function (e) {
+            var d = Math.round(e.duration || 0);
+            if (d > v.inp) v.inp = d;
+          });
+        }).observe({ type: 'event', buffered: true, durationThreshold: 16 });
+      } catch (eInp) {}
+    } catch (eV) {}
+  }, 1200);
 })();
 
 /* 20260823-auto1: old Home Screen copies fetch live build on open and retarget extras. */

@@ -1,4 +1,4 @@
-/* 20260824-ios2: launch budget — room in under 600ms */
+/* 20260824-ios3: Core Web Vitals watch (LCP/INP/CLS) — no extra library */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
