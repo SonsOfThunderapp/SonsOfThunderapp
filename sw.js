@@ -1,4 +1,4 @@
-/* 20260824-askex3: Stay sharp. Real questions. I got you, brother. */
+/* 20260824-a2p1: A2P privacy + terms + SMS checkbox disclosures */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

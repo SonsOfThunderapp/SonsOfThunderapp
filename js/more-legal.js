@@ -41,9 +41,9 @@
     row.id = 'tb-legal-row';
     row.setAttribute('data-tb-legal', '1');
     row.style.cssText = 'text-align:center;margin:20px 0 10px;font-size:12px;letter-spacing:.06em;opacity:.65;';
-    row.innerHTML = '<a href="privacy.html" style="color:inherit;text-decoration:underline;">Privacy</a>'
+    row.innerHTML = '<a href="https://sonsofthunderboard.com/privacy" style="color:inherit;text-decoration:underline;">Privacy</a>'
       + ' <span aria-hidden="true"> · </span> '
-      + '<a href="terms.html" style="color:inherit;text-decoration:underline;">Terms</a>';
+      + '<a href="https://sonsofthunderboard.com/terms" style="color:inherit;text-decoration:underline;">Terms</a>';
     tools.appendChild(row);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', paint);

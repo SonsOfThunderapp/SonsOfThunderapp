@@ -33,7 +33,7 @@
       box.type = 'checkbox';
       box.id = 'auth-sms-opt';
       var span = document.createElement('span');
-      span.textContent = 'Yes — text me once about the birthday honor';
+      span.innerHTML = 'Yes — text me from Sons of Thunder. Msg frequency varies. Msg & data rates may apply. Reply STOP to cancel, HELP for help. Consent is not required to sit with us. <a href="https://sonsofthunderboard.com/privacy">Privacy</a> · <a href="https://sonsofthunderboard.com/terms">Terms</a>. We do not share, sell, or provide your mobile number or messaging consent to third parties or affiliates for marketing or promotional purposes.';
       label.appendChild(box);
       label.appendChild(span);
       if (slot) slot.appendChild(label);
