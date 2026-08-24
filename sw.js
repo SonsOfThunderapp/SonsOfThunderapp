@@ -1,4 +1,4 @@
-/* 20260824-cache1: Home Screen URL / is no-store so Safari cannot keep a dead document */
+/* 20260824-cache2: HTML/manifest no-store; versioned css/js immutable */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
