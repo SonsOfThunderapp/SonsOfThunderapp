@@ -1,4 +1,4 @@
-/* 20260824-hunt1: empty contact card was forced visible by CSS; hunter heals on launch */
+/* 20260824-tourgo1: tour-first no longer kills the live tour; empty contact shell stays dead */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

@@ -10386,8 +10386,14 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     if (!root) return;
     try { closeInAppInstallOverlay(); } catch (e) {}
     try { closeIosInstallOverlay(); } catch (e) {}
-    root.classList.remove('hidden');
+    root.classList.remove('hidden', 'splash-done', 'splash-out');
+    root.removeAttribute('hidden');
     root.setAttribute('aria-hidden', 'false');
+    root.style.setProperty('display', 'flex', 'important');
+    root.style.setProperty('visibility', 'visible', 'important');
+    root.style.setProperty('opacity', '1', 'important');
+    root.style.setProperty('pointer-events', 'auto', 'important');
+    root.style.setProperty('z-index', '50000', 'important');
     document.body.classList.add('tb-tour-open');
     try { tbKeepAwake('tour'); } catch (e) {}
     syncTourExitUI();
@@ -10454,6 +10460,14 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     if (__tourActive && !opts.force) return;
     if (!opts.force && !opts.replay && isTourComplete()) return;
     try { closeBrotherDetail(); } catch (e) {}
+    try {
+      var shell = document.getElementById('brother-detail');
+      if (shell) {
+        shell.classList.add('hidden');
+        shell.setAttribute('aria-hidden', 'true');
+        shell.style.setProperty('display', 'none', 'important');
+      }
+    } catch (e1) {}
     try { closeContactSwap(); } catch (e2) {}
     try { closeAuthGate(); } catch (e3) {}
     try { closeInfoDetail(); } catch (e4) {}
@@ -10577,7 +10591,10 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     if (replay) replay.textContent = 'TAKE THE TOUR';
     if (replay && !replay.dataset.tbBound) {
       replay.dataset.tbBound = '1';
-      replay.addEventListener('click', function () { startTour({ force: true, replay: true }); });
+      replay.addEventListener('click', function (e) {
+        if (e) { e.preventDefault(); e.stopPropagation(); }
+        startTour({ force: true, replay: true });
+      });
     }
   }
 

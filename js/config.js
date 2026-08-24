@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260824-hunt1',
+  APP_BUILD: '20260824-tourgo1',
   /* HEADER MARK — ETERNAL 2026-08-23. Phone-approved (IMG_7978).
      White SONS + gold 3D bolt through O + red OF THUNDER.
      Sticky top of Home / Brothers / Memories / More. z-index 8000.
@@ -226,14 +226,14 @@ window.TB_CONFIG = {
 
     if (!document.querySelector('script[src*="tour-kill.js"]')) {
       var tk = document.createElement('script');
-      tk.src = 'js/tour-kill.js?v=20260823-bub1';
+      tk.src = 'js/tour-kill.js?v=20260824-tourgo1';
       tk.defer = true;
       (document.body || document.documentElement).appendChild(tk);
     }
 
     if (!document.querySelector('script[src*="tour-first.js"]')) {
       var tf = document.createElement('script');
-      tf.src = 'js/tour-first.js?v=20260822-chrome6';
+      tf.src = 'js/tour-first.js?v=20260824-tourgo1';
       tf.defer = true;
       (document.body || document.documentElement).appendChild(tf);
     }

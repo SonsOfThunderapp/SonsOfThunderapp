@@ -61,19 +61,13 @@
   }
 
   function killTour() {
+    if (document.body.classList.contains('tb-tour-open')) return;
     var root = document.getElementById('tb-tour');
     if (!root) return;
     root.classList.add('hidden');
     root.setAttribute('aria-hidden', 'true');
     root.style.setProperty('display', 'none', 'important');
-    root.style.setProperty('visibility', 'hidden', 'important');
-    root.style.setProperty('opacity', '0', 'important');
     root.style.setProperty('pointer-events', 'none', 'important');
-    var host = document.getElementById('tb-tour-host');
-    if (host) {
-      host.style.setProperty('display', 'none', 'important');
-      host.style.setProperty('opacity', '0', 'important');
-    }
   }
 
   function paintTour() {
