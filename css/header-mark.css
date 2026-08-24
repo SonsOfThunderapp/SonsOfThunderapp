@@ -162,6 +162,19 @@ body:has(#auth-gate:not(.hidden)) #main-header {
 #brother-detail #brother-qr-wrap:not(.hidden) {
   display: block !important;
 }
+#brother-detail .qr-stage-inline {
+  position: relative !important;
+  overflow: visible !important;
+  background: #fff !important;
+  border-radius: 16px !important;
+}
+#brother-detail .qr-bolt-pad,
+#contact-qr-modal .qr-bolt-pad,
+.qr-stage .qr-bolt-pad,
+.qr-stage-inline .qr-bolt-pad {
+  display: none !important;
+}
+
 
 
 

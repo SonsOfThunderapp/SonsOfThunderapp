@@ -1,4 +1,4 @@
-/* 20260823-contact1: brother profile is the locked contact card — overlay, SHARE, inline QR */
+/* 20260824-qrbolt1: unique brother QR with official bolt stamped in the center */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

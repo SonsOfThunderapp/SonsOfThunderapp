@@ -4139,6 +4139,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       if (tel.charAt(0) !== '+') tel = '+' + tel;
       lines.push('TEL;TYPE=CELL:' + tel);
     }
+    if (brother && brother.id) lines.push('UID:sot-' + String(brother.id).replace(/[^\w\-]+/g, '').slice(0, 36));
     if (!forQr) {
       lines.push('ORG:Sons of Thunder');
       lines.push('URL:' + publicUrl('/'));
@@ -4231,7 +4232,44 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       'QR unavailable right now.<br><strong>Use SHARE CONTACT</strong> below.</div>';
   }
 
-  /* QR LAW: the only painter. Profile, contact modal, Axum, anything future. */
+  /* QR LAW: the only painter. Profile, contact modal, Axum, anything future.
+     Unique vCard per brother. Official bolt stamped in the center (Cash App). */
+  let __tbQrBolt = null;
+  function stampBoltOnQr(canvas) {
+    if (!canvas) return;
+    function draw(img) {
+      try {
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width;
+        const pad = Math.max(36, Math.round(w * 0.22));
+        const x = Math.round((w - pad) / 2);
+        const y = x;
+        const r = Math.max(6, Math.round(pad * 0.16));
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(x - 2, y - 2, pad + 4, pad + 4, r + 2);
+        else ctx.rect(x - 2, y - 2, pad + 4, pad + 4);
+        ctx.fill();
+        ctx.fillStyle = '#000000';
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(x, y, pad, pad, r);
+        else ctx.rect(x, y, pad, pad);
+        ctx.fill();
+        const inset = Math.round(pad * 0.16);
+        ctx.drawImage(img, x + inset, y + inset, pad - inset * 2, pad - inset * 2);
+      } catch (e) {}
+    }
+    if (__tbQrBolt && __tbQrBolt.complete && __tbQrBolt.naturalWidth) {
+      draw(__tbQrBolt);
+      return;
+    }
+    const img = new Image();
+    img.onload = function () {
+      __tbQrBolt = img;
+      draw(img);
+    };
+    img.src = 'assets/bolt-for-qr.png';
+  }
   function paintThunderQr(target, text, dim) {
     if (!target || !text || typeof QRCode === 'undefined') return false;
     const hold = document.createElement('div');
@@ -4271,6 +4309,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
           }
         }
       }
+      stampBoltOnQr(canvas);
       target.innerHTML = '';
       target.style.cssText = 'width:' + dim + 'px;height:' + dim + 'px;background:#fff;display:block;margin:0 auto;position:relative;z-index:1;';
       target.appendChild(canvas);
