@@ -1,4 +1,4 @@
-/* 20260824-official1: canonical sonsofthunderboard.com; privacy/terms branded; netlify.app 301 */
+/* 20260824-splash1: opening screen cannot trap a first-time iPhone */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

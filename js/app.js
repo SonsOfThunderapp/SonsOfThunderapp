@@ -9170,7 +9170,10 @@ $('#thunder-input').addEventListener('keydown', (e) => {
         runWelcome();
       }, 280);
       const hide = () => {
-        el.classList.add('splash-done');
+        el.classList.add('splash-done', 'hidden');
+        el.style.setProperty('display', 'none', 'important');
+        el.style.setProperty('visibility', 'hidden', 'important');
+        el.style.setProperty('pointer-events', 'none', 'important');
       };
       el.addEventListener('transitionend', hide, { once: true });
       setTimeout(hide, 1400); // cover full dramatic zoom duration
@@ -9184,7 +9187,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       setTimeout(() => { try { tbFeedback.thunderImpact(); } catch (e2) {} }, 300);
     }
     // Hold for bolt settle, then dramatic zoom → welcome
-    setTimeout(finish, 2200);
+    setTimeout(finish, 1100);
 
     const img = el.querySelector('.splash-mark');
     if (img) {
@@ -9929,7 +9932,6 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     if (window.__tbHousekeepingBound) return;
     window.__tbHousekeepingBound = true;
     try { runLaunchHousekeeping(); } catch (e) {}
-    try { openHardRefresh(); } catch (eBoot) {}
     const build = (cfg().APP_BUILD || '').toString();
     try {
       const prev = sessionStorage.getItem('tb_app_build');
@@ -9945,8 +9947,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       }
       reconcileOnWake();
       try {
-        var away = Date.now() - (window.__tbHiddenAt || 0);
-        if (away > 1500) openHardRefresh();
+        pingServiceWorkerUpdate();
       } catch (eV) {}
     });
     window.addEventListener('online', function () {
@@ -9954,9 +9955,6 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     });
     window.addEventListener('pageshow', function (e) {
       reconcileOnWake();
-      if (e && e.persisted) {
-        try { openHardRefresh(); } catch (eP) {}
-      }
     });
     window.addEventListener('focus', function () {
       try { checkStaleBuild(); } catch (e) {}
