@@ -1,3 +1,6 @@
+# Old host is not the official site. Send every netlify.app URL to the real domain.
+https://sonsofthunder.netlify.app/*  https://sonsofthunderboard.com/:splat  301!
+
 # Pretty calendar URL must beat the SPA catch-all.
 /gathering.ics  /.netlify/functions/gathering-ics  200!
 
