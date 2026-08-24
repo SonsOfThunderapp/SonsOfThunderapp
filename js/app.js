@@ -4466,9 +4466,11 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   let brotherDetailIndex = -1;
 
   function openBrotherDetail(index) {
+    if (document.body.classList.contains('tb-tour-open')) return;
     const list = brothers || [];
     if (!list.length || index < 0 || index >= list.length) return;
     const b = list[index];
+    if (!b || !(b.name || '').trim()) return;
     brotherDetailIndex = index;
     const detail = $('#brother-detail');
     if (!detail) return;
@@ -10342,6 +10344,9 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     opts = opts || {};
     if (__tourActive && !opts.force) return;
     if (!opts.force && !opts.replay && isTourComplete()) return;
+    try { closeBrotherDetail(); } catch (e) {}
+    try { closeContactSwap(); } catch (e2) {}
+    try { closeAuthGate(); } catch (e3) {}
     __tourActive = true;
     __tourIdx = 0;
     showTour();

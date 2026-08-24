@@ -159,6 +159,10 @@ body:has(#auth-gate:not(.hidden)) #main-header {
   display: block !important;
   width: calc(100% - 36px) !important;
 }
+#brother-detail #brother-share-contact.hidden,
+#brother-detail .btn-share.hidden {
+  display: none !important;
+}
 #brother-detail #brother-qr-wrap:not(.hidden) {
   display: block !important;
 }
@@ -238,4 +242,22 @@ body:has(#auth-gate:not(.hidden)) #main-header {
     max-height: none !important;
     aspect-ratio: 3000 / 2077 !important;
   }
+}
+
+/* Tour stays above contact cards. Empty sheet cannot freeze TAKE THE TOUR. */
+#tb-tour.tb-tour,
+#tb-tour.tb-tour-slides,
+.tb-tour.tb-tour-slides {
+  z-index: 40000 !important;
+  pointer-events: auto !important;
+}
+#tb-tour.hidden,
+#tb-tour.tb-tour.hidden {
+  display: none !important;
+  pointer-events: none !important;
+}
+body.tb-tour-open #brother-detail,
+body.tb-tour-open #contact-swap,
+body.tb-tour-open #auth-gate {
+  display: none !important;
 }

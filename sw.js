@@ -1,4 +1,4 @@
-/* 20260824-tourfix1: Round Table seats are fixed positions — no CSS-angle crash */
+/* 20260824-tourtrap1: tour stays on top; empty contact card cannot freeze it */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
