@@ -728,13 +728,16 @@ h1.code-title-glow {
 .nav-item {
   flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
   background: none; border: none; color: #777; font-size: 10px; font-weight: 600;
-  letter-spacing: 0.3px; padding: 10px 4px 8px; cursor: pointer; transition: color 0.2s;
+  letter-spacing: 0.3px; padding: 10px 4px 8px; cursor: pointer;
+  transition: color 0.08s linear;
   min-height: 44px;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  contain: layout style;
 }
-.nav-item svg { width: 22px; height: 22px; opacity: 0.85; }
+.nav-item:active,
 .nav-item.active { color: var(--yellow); }
+.nav-item svg { width: 22px; height: 22px; opacity: 0.85; }
 
 /* FLOATING THUNDER — character only, no yellow circle */
 .thunder-fab {

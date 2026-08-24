@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260824-ios3',
+  APP_BUILD: '20260824-inp1',
   LAUNCH: {
     splashHoldMs: 200,
     splashFadeMs: 160,

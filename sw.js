@@ -1,4 +1,4 @@
-/* 20260824-ios3: Core Web Vitals watch (LCP/INP/CLS) — no extra library */
+/* 20260824-inp1: dock tap paints first — no reflow, no ghost nav binders */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

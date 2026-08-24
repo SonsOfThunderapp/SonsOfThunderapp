@@ -5916,64 +5916,64 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   const TAB_ORDER = ['home', 'brothers', 'events', 'about'];
   let currentViewName = 'home';
 
+  function paintDock(name) {
+    var i, el, on;
+    for (i = 0; i < TAB_ORDER.length; i++) {
+      el = document.getElementById('view-' + TAB_ORDER[i]);
+      if (!el) continue;
+      on = TAB_ORDER[i] === name;
+      if (on) el.classList.add('active');
+      else el.classList.remove('active');
+    }
+    var navs = document.querySelectorAll('.nav-item[data-view]');
+    for (i = 0; i < navs.length; i++) {
+      on = navs[i].getAttribute('data-view') === name;
+      if (on) navs[i].classList.add('active');
+      else navs[i].classList.remove('active', 'nav-peek');
+    }
+  }
+
   function showView(name, opts) {
     if (!TAB_ORDER.includes(name)) return;
-    const fromSwipe = opts && opts.fromSwipe;
-    $$('.view').forEach(function (v) {
-      v.classList.remove('active', 'view-swipe-in', 'view-enter', 'view-swipe-in-prev', 'view-swipe-in-next', 'elastic-dragging', 'elastic-settling');
-      v.style.transform = '';
-      v.style.opacity = '';
-      v.style.transition = '';
-    });
-    $$('.nav-item').forEach(n => n.classList.remove('active'));
-    const view = $(`#view-${name}`);
-    const nav = $(`.nav-item[data-view="${name}"]`);
-    if (view) {
-      view.classList.add('active');
-      view.classList.remove('view-enter');
-      if (fromSwipe) {
-        const dir = (opts && opts.swipeDir) || 'next';
-        view.classList.add(dir === 'prev' ? 'view-swipe-in-prev' : 'view-swipe-in-next');
-        setTimeout(() => {
-          view.classList.remove('view-swipe-in-prev', 'view-swipe-in-next', 'view-swipe-in');
-        }, 240);
-      } else if (!(opts && opts.silent) && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
-        // Level 4: one-shot arrive on tab tap — not on swipe, not on silent
-        void view.offsetWidth;
-        view.classList.add('view-enter');
-        setTimeout(() => view.classList.remove('view-enter'), 320);
-      }
-    }
-    if (nav) {
-      nav.classList.add('active');
-      $$('.nav-item').forEach(n => n.classList.remove('nav-peek'));
-      if (typeof tbGlowHit === 'function') tbGlowHit(nav, 'yellow');
-    }
+    var same = currentViewName === name && !(opts && opts.force) && !(opts && opts.fromSwipe);
+    paintDock(name);
     currentViewName = name;
-    try {
-      document.body.classList.toggle('tb-view-about', name === 'about');
-    } catch (e) {}
-    try {
-      const app = document.getElementById('app');
-      if (app) {
-        app.classList.remove('tb-underlay-depth');
-        app.style.removeProperty('--tb-depth');
+    try { window.showView = showView; } catch (e0) {}
+    if (same) return;
+
+    var fromSwipe = opts && opts.fromSwipe;
+    var extras = function () {
+      try { document.body.classList.toggle('tb-view-about', name === 'about'); } catch (e) {}
+      try {
+        var app = document.getElementById('app');
+        if (app) {
+          app.classList.remove('tb-underlay-depth');
+          app.style.removeProperty('--tb-depth');
+        }
+      } catch (e) {}
+      var header = document.getElementById('main-header');
+      if (header) {
+        header.style.display = 'block';
+        header.style.visibility = 'visible';
+        header.style.opacity = '1';
+        header.removeAttribute('hidden');
       }
-    } catch (e) {}
-    const header = $('#main-header');
-    if (header) {
-      header.style.display = 'block';
-      header.style.visibility = 'visible';
-      header.style.opacity = '1';
-      header.removeAttribute('hidden');
+      if (name === 'brothers') {
+        try { markBrothersSeen(); } catch (e2) {}
+      }
+      try { parkFabByImin(); } catch (e3) {}
+    };
+    if (fromSwipe) {
+      extras();
+      return;
     }
-    // NEW no longer auto-clears on Home visit — only when items are opened
-    if (name === 'brothers') {
-      // Roster NEW clears when the brothers tab is opened
-      markBrothersSeen();
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(function () { requestAnimationFrame(extras); });
+    } else {
+      setTimeout(extras, 0);
     }
-    try { parkFabByImin(); } catch (e) {}
   }
+  try { window.showView = showView; } catch (eSV) {}
 
   function isOverlayBlockingSwipe() {
     if ($('#memory-viewer') && !$('#memory-viewer').classList.contains('hidden')) return true;
@@ -6504,9 +6504,11 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       if (btn.dataset.navBound === '1') return;
       btn.dataset.navBound = '1';
       const go = function (e) {
-        if (e) { e.preventDefault(); e.stopPropagation(); }
-        showView(btn.dataset.view);
+        const name = btn.dataset.view;
+        if (!name) return;
+        showView(name);
       };
+      btn.addEventListener('pointerdown', go);
       btn.addEventListener('click', go);
     });
     setupTabSwipe();
