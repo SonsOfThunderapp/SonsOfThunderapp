@@ -1,4 +1,4 @@
-/* 20260824-tourtrap1: tour stays on top; empty contact card cannot freeze it */
+/* 20260824-ghost1: nameless brothers, empty sheets, overlay z-index, scroll lock */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

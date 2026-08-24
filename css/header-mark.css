@@ -190,7 +190,10 @@ body:has(#auth-gate:not(.hidden)) #main-header {
   justify-content: center !important;
   padding: 12px 12px calc(16px + env(safe-area-inset-bottom, 0px)) !important;
 }
-#contact-swap.hidden { display: none !important; }
+#contact-swap.hidden,
+#contact-swap.contact-swap.hidden {
+  display: none !important;
+}
 #contact-swap .contact-swap-panel {
   position: relative !important;
   width: min(100%, 400px) !important;
@@ -260,4 +263,19 @@ body.tb-tour-open #brother-detail,
 body.tb-tour-open #contact-swap,
 body.tb-tour-open #auth-gate {
   display: none !important;
+}
+
+/* Every sheet sits above the sticky mark so it cannot shear a card. */
+#info-detail.info-detail,
+.memory-viewer,
+#memory-viewer,
+.modal,
+.thunder-modal,
+.cal-confirm-sheet,
+#imin-a2hs-sheet,
+.ios-install-overlay,
+#axum-drop,
+#axum-card,
+#install-modal {
+  z-index: 12000 !important;
 }

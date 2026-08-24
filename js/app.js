@@ -98,7 +98,7 @@
     brothers.forEach(function (b) {
       if (!b) return;
       const key = String(b.name || '').trim().toLowerCase();
-      if (!key) { out.push(b); return; }
+      if (!key) return;
       if (idxByName[key] == null) {
         idxByName[key] = out.length;
         out.push(b);
@@ -3850,6 +3850,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   function openInfoDetail(payload) {
     const detail = $('#info-detail');
     if (!detail) return;
+    payload = payload || {};
+    if (!(payload.title || '').trim() && !(payload.body || '').trim()) return;
     const label = $('#info-detail-label');
     const title = $('#info-detail-title');
     const meta = $('#info-detail-meta');
@@ -6042,11 +6044,19 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
 
   /** Unlock body scroll only when no overlay still claims it */
   function anyOverlayOpen() {
+    const ids = [
+      'brother-detail', 'info-detail', 'memory-viewer', 'auth-gate', 'contact-swap',
+      'tb-tour', 'raffle-live', 'cal-confirm-sheet', 'imin-a2hs-sheet',
+      'ios-install-overlay', 'inapp-install-overlay', 'axum-drop', 'axum-card',
+      'install-modal', 'thunder-modal', 'contact-qr-modal', 'profile-modal',
+      'media-modal', 'qr-explainer-modal'
+    ];
+    for (let i = 0; i < ids.length; i++) {
+      const el = document.getElementById(ids[i]);
+      if (el && !el.classList.contains('hidden')) return true;
+    }
     if (document.querySelector('.modal:not(.hidden)')) return true;
-    if ($('#brother-detail') && !$('#brother-detail').classList.contains('hidden')) return true;
-    if ($('#info-detail') && !$('#info-detail').classList.contains('hidden')) return true;
-    if ($('#memory-viewer') && !$('#memory-viewer').classList.contains('hidden')) return true;
-    if ($('#auth-gate') && !$('#auth-gate').classList.contains('hidden')) return true;
+    if (document.body.classList.contains('tb-tour-open')) return true;
     return false;
   }
   function unlockBodyIfClear() {
@@ -10305,6 +10315,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     document.body.classList.remove('tb-tour-mandatory');
     __tourActive = false;
     try { tbAllowSleep('tour'); } catch (e) {}
+    try { unlockBodyIfClear(); } catch (e2) {}
   }
 
   function isTourMandatory() {
@@ -10347,6 +10358,8 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     try { closeBrotherDetail(); } catch (e) {}
     try { closeContactSwap(); } catch (e2) {}
     try { closeAuthGate(); } catch (e3) {}
+    try { closeInfoDetail(); } catch (e4) {}
+    try { closeMemoryViewer(); } catch (e5) {}
     __tourActive = true;
     __tourIdx = 0;
     showTour();
@@ -10383,7 +10396,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     try { closeCalConfirmSheet(); } catch (e) {}
     try { closeAxumDrop(); } catch (e) {}
     try { closeAxumCard(); } catch (e) {}
-    ['ios-install-overlay', 'inapp-install-overlay', 'welcome', 'axum-drop', 'axum-card', 'cal-confirm-sheet'].forEach(function (id) {
+    ['ios-install-overlay', 'inapp-install-overlay', 'welcome', 'axum-drop', 'axum-card', 'cal-confirm-sheet', 'contact-swap', 'imin-a2hs-sheet'].forEach(function (id) {
       const el = document.getElementById(id);
       if (el) {
         el.classList.add('hidden');
