@@ -9163,7 +9163,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       setTimeout(() => {
         try { sessionStorage.setItem('tb_splash_done', '1'); } catch (e) {}
         runWelcome();
-      }, 280);
+      }, 80);
       const hide = () => {
         el.classList.add('splash-done', 'hidden');
         el.style.setProperty('display', 'none', 'important');
@@ -9171,18 +9171,11 @@ $('#thunder-input').addEventListener('keydown', (e) => {
         el.style.setProperty('pointer-events', 'none', 'important');
       };
       el.addEventListener('transitionend', hide, { once: true });
-      setTimeout(hide, 1400); // cover full dramatic zoom duration
+      setTimeout(hide, 220);
     };
 
-    // HERO: splash ignition feel (no laser streaks) on cold splash only
-    try {
-      if (window.ThunderFX) ThunderFX.appIgnition();
-      else setTimeout(() => { try { tbFeedback.thunderImpact(); } catch (e) {} }, 300);
-    } catch (e) {
-      setTimeout(() => { try { tbFeedback.thunderImpact(); } catch (e2) {} }, 300);
-    }
-    // Hold for bolt settle, then dramatic zoom → welcome
-    setTimeout(finish, 1100);
+    try { tbFeedback.thunderImpact(); } catch (e) {}
+    setTimeout(finish, 280);
 
     const img = el.querySelector('.splash-mark');
     if (img) {

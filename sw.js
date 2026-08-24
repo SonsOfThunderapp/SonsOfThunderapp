@@ -1,4 +1,4 @@
-/* 20260824-dad1: splash cannot trap; I’M IN is the only sign-in; chair is your seat */
+/* 20260824-fast1: splash is a blink, then the room */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
