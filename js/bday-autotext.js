@@ -21,12 +21,10 @@
     var name = document.getElementById('auth-name');
     var email = document.getElementById('auth-email');
     var phone = document.getElementById('auth-phone');
+    var slot = document.getElementById('auth-sms-slot');
     var card = document.querySelector('#auth-gate .auth-card');
     if (!card || !name || !phone) return;
-    if (email) {
-      email.placeholder = 'Email (optional)';
-      try { card.insertBefore(phone, email); } catch (e) {}
-    }
+    if (email) email.placeholder = 'Email';
     if (!document.getElementById('auth-sms-opt')) {
       var label = document.createElement('label');
       label.className = 'auth-sms-opt';
@@ -35,14 +33,12 @@
       box.type = 'checkbox';
       box.id = 'auth-sms-opt';
       var span = document.createElement('span');
-      span.textContent = 'Yes — text me once about the birthday honor';
+      span.innerHTML = 'Yes — text me from Sons of Thunder. Msg frequency varies. Msg & data rates may apply. Reply STOP to cancel, HELP for help. Consent is not required to sit with us. <a href="https://sonsofthunderboard.com/privacy">Privacy</a> · <a href="https://sonsofthunderboard.com/terms">Terms</a>. We do not share, sell, or provide your mobile number or messaging consent to third parties or affiliates for marketing or promotional purposes.';
       label.appendChild(box);
       label.appendChild(span);
-      if (email) {
-        try { card.insertBefore(label, email); } catch (e) { card.appendChild(label); }
-      } else {
-        phone.parentNode.insertBefore(label, phone.nextSibling);
-      }
+      if (slot) slot.appendChild(label);
+      else if (email && email.parentNode) email.parentNode.insertBefore(label, email.nextSibling);
+      else card.appendChild(label);
     }
     if (!document.getElementById('tb-bday-sms-style')) {
       var st = document.createElement('style');

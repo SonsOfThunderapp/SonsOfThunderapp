@@ -73,6 +73,6 @@ This is permanent. Future sessions read this before any Thunder image work.
 ## OFFICIAL ASSET LOCK (2026-08-17 — ETERNITY)
 Authoritative visual sources (user-provided, locked forever):
 1. **Thunder character:** IMG_7692 — yellow geometric 3D bolt HEAD only, black wayfarers, restrained smirk. Production files: `assets/thunder-cool.png`, `assets/thunder-cool-fab.png`, `assets/thunder-official-ref.png`. Bond files quarantined as `.rejected`.
-2. **Wordmark logo:** IMG_7697 — bold white SONS, yellow 3D bolt through O (no white outline on clean header), solid red OF THUNDER, tagline THUNDER DOESN'T DULL. Production: `assets/logo.png`, `logo@2x.png`, `logo@3x.png`, `logo-about.png`.
+2. **Wordmark logo:** Phone-approved 2026-08-23 (IMG_7978) — bold white SONS, gold 3D bolt through O, solid red OF THUNDER. Header source: `assets/CANONICAL/logo-print-diecut.png`. Production: `logo@2x.png`, `logo@3x.png`, `logo@4x.png`. Sticky on every page. NEVER crop. See `HEADER-MARK-LOCK.md`.
 
 Never replace these with AI reinterpretations. Image generation must match these pixels, not reinvent them.

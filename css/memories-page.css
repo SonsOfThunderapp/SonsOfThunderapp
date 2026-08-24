@@ -1,0 +1,179 @@
+#splash.splash-done, #splash.splash-out { display:none !important; visibility:hidden !important; pointer-events:none !important; }
+#tb-tour { display:none !important; }
+.tab-bar, .app-tabs, #tab-bar { display:flex !important; }
+/* 20260822-chrome1 emergency: leftover tour, dock, header lockup */
+#tb-tour, #tb-tour[hidden], #tb-tour.hidden { display:none !important; visibility:hidden !important; pointer-events:none !important; opacity:0 !important; z-index:-1 !important; }
+body.tb-tour-open #tb-tour { display:none !important; }
+.tab-bar, .app-tabs, nav.tabs, #tab-bar, .bottom-nav { display:flex !important; visibility:visible !important; opacity:1 !important; }
+#main-header .logo, #main-header #header-logo, header .logo, #header-logo {
+  max-height: none !important;
+  width: min(78vw, 300px) !important;
+  height: auto !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+}
+@media (max-width: 480px) {
+  #main-header.header, #main-header {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  #main-header .logo-wrap { max-height: none !important; height: auto !important; overflow: visible !important; }
+  #main-header .logo, #main-header #header-logo {
+    max-height: none !important;
+    height: auto !important;
+    width: min(78vw, 300px) !important;
+    object-fit: contain !important;
+  }
+}
+
+/* Events tab is the Memories wall. Mission lives on Home. */
+#view-events .events-subhead,
+#view-events #activity-tags,
+#view-events #activity-feed,
+#view-events #events-section-title,
+#view-events #events-note,
+#view-events #upcoming-events,
+#view-events #next-mission-card {
+  display: none !important;
+}
+
+/* Room-cut was hiding the home mission card. Show it when it has copy. */
+body.tb-room-cut #home-mission:not(.hidden) {
+  display: block !important;
+}
+
+/* Public seed wall: flat 2-col grid, square tiles. No uploader names. */
+#view-events #media-hero,
+#media-hero {
+  display: none !important;
+}
+
+#media-feed.media-feed,
+#media-feed.mem-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 24px;
+  min-height: 200px;
+}
+
+#media-feed.mem-has-grid .empty-memories-cta,
+#media-feed.mem-has-grid .empty-memories,
+#media-feed.mem-has-grid .empty-state,
+#media-feed:has(.mem-tile) .empty-memories-cta,
+#media-feed:has(.mem-tile) .empty-state {
+  display: none !important;
+}
+
+#media-feed .mem-tile {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  min-height: 160px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: #111;
+  overflow: hidden;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#media-feed .mem-tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 10px;
+  background: #141414;
+}
+
+#view-events #media-feed .media-thumb {
+  display: flex;
+  flex-direction: column;
+  aspect-ratio: auto;
+  overflow: visible;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+
+#view-events #media-feed .media-thumb img,
+#view-events #media-feed .media-thumb video {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  height: auto;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+#media-feed .mem-byline,
+#view-events #media-feed .media-thumb-cap,
+#media-feed .media-thumb-cap,
+.mem-byline,
+.uploader_name,
+.uploader-name,
+.memory-viewer-by,
+#memory-viewer-by,
+#memory-viewer-cap,
+.memory-viewer-cap,
+#memory-viewer-caption,
+.memory-viewer-caption,
+#memory-viewer .mem-byline {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+#memory-viewer,
+#memory-viewer.memory-viewer {
+  background: #000;
+}
+#memory-viewer-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  background: #000;
+  overflow: hidden;
+}
+#memory-viewer-stage img,
+#memory-viewer-stage video,
+#memory-viewer .memory-viewer-stage img,
+#memory-viewer .memory-viewer-stage video {
+  width: auto !important;
+  height: auto !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  aspect-ratio: auto !important;
+  border-radius: 0;
+  background: #000;
+}
+#memory-viewer-caption,
+.memory-viewer-caption {
+  display: none !important;
+}
+
+/* Memories tab only: shrink Ask Thunder FAB so he does not sit on the wall.
+   Home / Brothers / More keep the full-size mascot. */
+body.tb-view-events #thunder-fab,
+body.tb-view-events .thunder-fab {
+  transform: scale(0.7);
+  transform-origin: bottom right;
+  pointer-events: auto;
+}
+body.tb-view-events #thunder-fab .thunder-fab-img {
+  pointer-events: none;
+}

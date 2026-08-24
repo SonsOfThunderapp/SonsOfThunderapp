@@ -31,7 +31,7 @@ The repository remembers Thunder Board.
 
 If you cannot identify the **exact approved** logo or Thunder source asset → **STOP.** Report `APPROVED ASSET NOT VERIFIED.` Do not AI-redraw, guess, or use “similar” files.
 
-- Official logo canon: `assets/CANONICAL/logo-official-IMG_7697.jpg`
+- Official logo canon: `assets/CANONICAL/logo-print-diecut.png` (phone-approved header 2026-08-23). Production: `logo@2x.png` / `logo@3x.png` / `logo@4x.png`. See `HEADER-MARK-LOCK.md`. NEVER crop or hide `#header-logo`.
 - Official Thunder canon: `assets/CANONICAL/thunder-character-official-IMG_7692.jpg`
 - File existence ≠ approval. Mockup ≠ production.
 

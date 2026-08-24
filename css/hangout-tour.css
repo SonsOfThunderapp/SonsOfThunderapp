@@ -1,0 +1,200 @@
+/* hangout4 — Brothers heads open nights. Official faces only. HTML talk. */
+#tb-tour .tb-live-bros .tb-live-face{
+  pointer-events:auto!important;
+  cursor:pointer;
+  z-index:8;
+}
+#tb-tour .tb-live-bros .tb-live-bro{pointer-events:auto!important;}
+.tb-hang-scene{
+  position:absolute;inset:0;z-index:20;
+  display:none;flex-direction:column;align-items:center;justify-content:flex-end;
+  background:#000;overflow:hidden;
+}
+.tb-hang-scene.on{display:flex;}
+.tb-hang-scene .tb-hang-back{
+  position:absolute;top:8px;left:8px;z-index:5;
+  background:transparent;border:1px solid #333;color:#aaa;
+  border-radius:10px;padding:6px 10px;font:700 11px/1 system-ui;
+}
+.tb-hang-heads{
+  position:absolute;inset:8% 6% 28%;
+  display:flex;align-items:flex-end;justify-content:center;gap:6%;
+}
+.tb-hang-heads img{
+  width:min(34%,140px);height:auto;object-fit:contain;
+  filter:drop-shadow(0 0 10px rgba(254,241,5,.22));
+  transform-origin:50% 70%;
+}
+.tb-hang-talk{
+  position:relative;z-index:3;max-width:82%;
+  margin:0 0 6px;padding:8px 12px;border-radius:12px;
+  background:#111;color:#fff;font:700 13px/1.3 system-ui,sans-serif;
+  border:1px solid #FEF105;
+}
+.tb-hang-feat{
+  position:relative;z-index:3;margin:0 0 10px;
+  color:#FEF105;font:800 11px/1 system-ui;letter-spacing:.14em;
+}
+.tb-hang-door{
+  position:relative;z-index:3;margin:0 0 14px;
+  background:#E30600;color:#fff;border:0;border-radius:12px;
+  padding:10px 22px;font:800 14px/1 system-ui;letter-spacing:.08em;
+}
+.tb-hang-scene[data-mood="patio"] .tb-hang-heads img{animation:tb-hang-nod 3.2s ease-in-out infinite;}
+.tb-hang-scene[data-mood="fire"] .tb-hang-heads img{animation:tb-hang-breathe 4.6s ease-in-out infinite;}
+.tb-hang-scene[data-mood="fire"]::after{content:"";position:absolute;left:18%;bottom:8%;width:64%;height:22%;border-radius:50%;background:radial-gradient(ellipse at 50% 70%,rgba(255,110,20,.38),transparent 70%);animation:tb-hang-ember 1.2s ease-in-out infinite;mix-blend-mode:screen;pointer-events:none;}
+.tb-hang-scene[data-mood="grill"] .tb-hang-heads img{animation:tb-hang-watch 3.6s ease-in-out infinite;}
+.tb-hang-scene[data-mood="pickle"] .tb-hang-heads img{animation:tb-hang-split 1.1s ease-in-out infinite;}
+.tb-hang-scene[data-mood="bday"] .tb-hang-heads img{animation:tb-hang-honor 4.4s ease-in-out infinite;}
+.tb-hang-scene[data-mood="read"] .tb-hang-heads img{animation:tb-hang-word 7s ease-in-out infinite;}
+.tb-hang-scene[data-mood="camp"] .tb-hang-heads img{animation:tb-hang-watch 5s ease-in-out infinite;}
+.tb-hang-scene[data-mood="range"] .tb-hang-heads img{animation:tb-hang-honor 3.8s ease-in-out infinite;}
+.tb-hang-scene[data-mood="lake"] .tb-hang-heads img{animation:tb-hang-word 6s ease-in-out infinite;}
+@keyframes tb-hang-nod{0%,100%{transform:rotate(-1deg) translateY(0)}40%{transform:rotate(2deg) translateY(3px)}70%{transform:rotate(-.5deg) translateY(-1px)}}
+@keyframes tb-hang-breathe{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-5px) scale(1.02)}}
+@keyframes tb-hang-ember{0%,100%{opacity:.18}50%{opacity:.4}}
+@keyframes tb-hang-watch{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes tb-hang-split{0%,100%{transform:translate(-3px,0) rotate(-1.2deg)}50%{transform:translate(4px,-7px) rotate(1.6deg)}}
+@keyframes tb-hang-honor{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-4px) rotate(-.6deg)}}
+@keyframes tb-hang-word{0%,100%{transform:translateY(0)}50%{transform:translateY(-1px)}}
+@media (prefers-reduced-motion:reduce){
+  .tb-hang-scene .tb-hang-heads img,.tb-hang-scene[data-mood="fire"]::after{animation:none!important;}
+}
+
+/* 20260823-hang5: the night is the room. Official heads stay. No invented faces. */
+.tb-hang-scene{background:#050505;}
+.tb-hang-scene::before{
+  content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse at 50% 78%, rgba(254,241,5,.08), transparent 55%),
+    linear-gradient(180deg,#0a0a0a 0%,#000 70%);
+}
+.tb-hang-scene[data-mood="patio"]::before{
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.45) 0%,rgba(0,0,0,.72) 100%),
+    url("../assets/tour-memories/real-patio.jpg") center 40%/cover no-repeat;
+  filter:saturate(.85) brightness(.72);
+}
+.tb-hang-scene[data-mood="grill"]::before{
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.4) 0%,rgba(0,0,0,.75) 100%),
+    url("../assets/tour-memories/real-bowl.jpg") center 45%/cover no-repeat;
+  filter:saturate(.8) brightness(.7);
+}
+.tb-hang-scene[data-mood="camp"]::before,
+.tb-hang-scene[data-mood="fire"]::before{
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.35) 0%,rgba(20,8,0,.7) 100%),
+    url("../assets/tour-memories/real-tree.jpg") center 30%/cover no-repeat;
+  filter:saturate(.75) brightness(.65);
+}
+.tb-hang-scene[data-mood="pickle"]::before{
+  background:
+    radial-gradient(ellipse at 50% 100%,rgba(40,90,30,.35),transparent 55%),
+    linear-gradient(180deg,#0a1208 0%,#000 80%);
+}
+.tb-hang-scene[data-mood="range"]::before{
+  background:linear-gradient(180deg,#12110e 0%,#000 78%);
+}
+.tb-hang-scene[data-mood="lake"]::before{
+  background:
+    radial-gradient(ellipse at 50% 100%,rgba(20,50,80,.4),transparent 50%),
+    linear-gradient(180deg,#071018 0%,#000 80%);
+}
+.tb-hang-scene[data-mood="read"]::before{
+  background:
+    radial-gradient(ellipse at 70% 20%,rgba(254,241,5,.12),transparent 40%),
+    linear-gradient(180deg,#120e08 0%,#000 80%);
+}
+.tb-hang-scene[data-mood="bday"]::before{
+  background:
+    radial-gradient(ellipse at 50% 30%,rgba(254,241,5,.1),transparent 45%),
+    linear-gradient(180deg,#140c08 0%,#000 85%);
+}
+.tb-hang-heads,.tb-hang-talk,.tb-hang-feat,.tb-hang-door,.tb-hang-back{z-index:3;}
+@media (display-mode: standalone){
+  .tb-hang-scene .tb-hang-back{top:calc(8px + env(safe-area-inset-top,47px));}
+}
+
+
+/* 20260823-hang6: GRID and door sit above the night. Heads do not eat taps. */
+.tb-hang-heads{pointer-events:none!important;z-index:2!important;}
+.tb-hang-heads img{pointer-events:none!important;}
+.tb-hang-scene .tb-hang-back{
+  z-index:40!important;
+  pointer-events:auto!important;
+  min-height:44px;
+  min-width:72px;
+  padding:10px 14px;
+  background:rgba(0,0,0,.62);
+  border:1px solid #FEF105;
+  color:#FEF105;
+}
+.tb-hang-door,.tb-hang-talk,.tb-hang-feat{z-index:40!important;pointer-events:auto!important;}
+
+
+/* 20260823-hang7: every night gets a real opaque still. Official photos only. */
+.tb-hang-scene::before,
+.tb-hang-scene[data-mood="patio"]::before,
+.tb-hang-scene[data-mood="grill"]::before,
+.tb-hang-scene[data-mood="camp"]::before,
+.tb-hang-scene[data-mood="fire"]::before,
+.tb-hang-scene[data-mood="pickle"]::before,
+.tb-hang-scene[data-mood="range"]::before,
+.tb-hang-scene[data-mood="lake"]::before,
+.tb-hang-scene[data-mood="read"]::before,
+.tb-hang-scene[data-mood="bday"]::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  filter:none !important;
+  opacity:1 !important;
+}
+.tb-hang-scene::before,
+.tb-hang-scene[data-mood="patio"]::before{
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.14) 0%,rgba(0,0,0,.48) 100%),
+    url("../assets/tour-memories/real-patio.jpg") center 38%/cover no-repeat;
+}
+.tb-hang-scene[data-mood="grill"]::before{
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.14) 0%,rgba(0,0,0,.5) 100%),
+    url("../assets/tour-memories/real-bowl.jpg") center 42%/cover no-repeat;
+}
+.tb-hang-scene[data-mood="fire"]::before{
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.12) 0%,rgba(0,0,0,.46) 100%),
+    url("../assets/tour-memories/mem-fire.jpg") center 40%/cover no-repeat;
+}
+.tb-hang-scene[data-mood="camp"]::before{
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.14) 0%,rgba(0,0,0,.5) 100%),
+    url("../assets/tour-memories/real-tree.jpg") center 28%/cover no-repeat;
+}
+.tb-hang-scene[data-mood="lake"]::before{
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.12) 0%,rgba(0,0,0,.48) 100%),
+    url("../assets/tour-memories/mem-lake.jpg") center 45%/cover no-repeat;
+}
+.tb-hang-scene[data-mood="pickle"]::before{
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.14) 0%,rgba(0,0,0,.5) 100%),
+    url("../assets/tour-memories/mem-patio.jpg") center 40%/cover no-repeat;
+}
+.tb-hang-scene[data-mood="range"]::before{
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.16) 0%,rgba(0,0,0,.52) 100%),
+    url("../assets/tour-memories/real-tree.jpg") center 55%/cover no-repeat;
+}
+.tb-hang-scene[data-mood="read"]::before{
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.18) 0%,rgba(0,0,0,.55) 100%),
+    url("../assets/tour-memories/mem-patio.jpg") center 20%/cover no-repeat;
+}
+.tb-hang-scene[data-mood="bday"]::before{
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.12) 0%,rgba(0,0,0,.5) 100%),
+    url("../assets/tour-memories/real-patio.jpg") center 62%/cover no-repeat;
+}

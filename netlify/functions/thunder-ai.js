@@ -74,7 +74,7 @@ Answer the brother's latest message in that voice.`;
 
 exports.handler = async (event) => {
   const headers = {
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': 'https://sonsofthunderboard.com',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Content-Type': 'application/json'

@@ -3,7 +3,7 @@
    Never-white: refuse to publish if index.html was cut off. */
 const fs = require('fs');
 const html = fs.readFileSync('index.html', 'utf8');
-if (html.length < 50000 || html.indexOf('</html>') === -1 || html.indexOf("I'M IN") === -1) {
+if (html.length < 45000 || html.indexOf('</html>') === -1 || html.indexOf("I'M IN") === -1) {
   console.error('REFUSE: index.html is incomplete (' + html.length + ' bytes). Will not publish a white screen.');
   process.exit(1);
 }

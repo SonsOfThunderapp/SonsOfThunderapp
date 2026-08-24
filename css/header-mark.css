@@ -1,0 +1,287 @@
+/* 20260823-headhd1
+   Official mark pinned to the TOP LAYER of every page.
+   True aspect. Never crop. Never stretch. HD srcset. */
+
+#app > #main-header.header,
+#main-header.header,
+#main-header,
+.header#main-header {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: sticky !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  z-index: 8000 !important;
+  overflow: visible !important;
+  max-height: none !important;
+  height: auto !important;
+  contain: none !important;
+  clip-path: none !important;
+  -webkit-clip-path: none !important;
+  background: #000 !important;
+  pointer-events: auto !important;
+  transform: none;
+  -webkit-transform: none;
+  padding: calc(8px + env(safe-area-inset-top, 0px)) 12px 8px !important;
+}
+
+#app > #main-header.header .logo-wrap,
+#main-header.header .logo-wrap,
+#main-header .logo-wrap {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  overflow: visible !important;
+  max-height: none !important;
+  height: auto !important;
+}
+
+#app > #main-header.header #header-logo,
+#main-header.header #header-logo,
+#main-header #header-logo,
+#main-header.header img.logo {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: min(86vw, 340px) !important;
+  max-width: min(86vw, 340px) !important;
+  height: auto !important;
+  max-height: none !important;
+  aspect-ratio: 3000 / 2077 !important;
+  object-fit: contain !important;
+  object-position: center top !important;
+  flex-shrink: 0 !important;
+  clip-path: none !important;
+  -webkit-clip-path: none !important;
+  position: relative !important;
+  z-index: 2 !important;
+  image-rendering: auto;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* Thunder stays below the mark. Never cover the header. */
+#thunder-fab.thunder-fab,
+#thunder-fab {
+  z-index: 150 !important;
+}
+
+body.tb-view-about #main-header,
+body.tb-view-about #app > #main-header.header {
+  display: block !important;
+}
+
+#view-about .about-container {
+  padding-top: 8px !important;
+}
+
+/* LOCK YOUR SEAT — full mark stays. Entire card sits below it. */
+body:has(#auth-gate:not(.hidden)) #app > #main-header.header,
+body:has(#auth-gate:not(.hidden)) #main-header {
+  z-index: 20050 !important;
+}
+#auth-gate.auth-gate,
+.auth-gate {
+  z-index: 20000 !important;
+  align-items: flex-end !important;
+  justify-content: center !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
+  transform: translateZ(0);
+  padding-left: 12px !important;
+  padding-right: 12px !important;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+  padding-top: calc(20px + env(safe-area-inset-top, 0px) + (min(86vw, 340px) * 2077 / 3000)) !important;
+}
+#auth-gate .auth-card {
+  max-height: none;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 !important;
+  padding: 16px 18px 14px !important;
+  width: 100%;
+}
+#auth-gate #auth-title {
+  display: block !important;
+  margin: 0 0 12px !important;
+}
+#auth-gate #auth-name,
+#auth-gate #auth-phone,
+#auth-gate #auth-email {
+  display: block !important;
+  width: 100% !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  min-height: 44px !important;
+}
+#auth-gate .auth-field {
+  display: block !important;
+  text-align: left;
+  color: #9a9a9a;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0 0 10px;
+}
+#auth-gate .auth-field input {
+  display: block !important;
+  width: 100% !important;
+  margin: 6px 0 0 !important;
+}
+#auth-gate input:-webkit-autofill {
+  -webkit-text-fill-color: #111 !important;
+  box-shadow: 0 0 0 1000px #f3edd4 inset;
+}
+
+/* CONTACT CARD — only while open. .hidden must win or the empty shell paints on Home. */
+#brother-detail.brother-detail:not(.hidden),
+.brother-detail:not(.hidden) {
+  z-index: 21000 !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  padding-top: max(12px, env(safe-area-inset-top, 0px)) !important;
+  background: rgba(0, 0, 0, 0.94) !important;
+}
+#brother-detail.hidden,
+#brother-detail.brother-detail.hidden,
+.brother-detail.hidden {
+  display: none !important;
+  pointer-events: none !important;
+}
+#brother-detail .brother-detail-panel {
+  margin-top: 8px !important;
+  background: #0a0a0a !important;
+  border: 1px solid #2a2a2a !important;
+  border-radius: 18px !important;
+}
+#brother-detail .btn-share,
+#brother-detail #brother-share-contact {
+  display: block !important;
+  width: calc(100% - 36px) !important;
+}
+#brother-detail #brother-share-contact.hidden,
+#brother-detail .btn-share.hidden {
+  display: none !important;
+}
+#brother-detail #brother-qr-wrap:not(.hidden) {
+  display: block !important;
+}
+#brother-detail .qr-stage-inline {
+  position: relative !important;
+  overflow: visible !important;
+  background: #fff !important;
+  border-radius: 16px !important;
+}
+#brother-detail .qr-bolt-pad,
+#contact-qr-modal .qr-bolt-pad,
+.qr-stage .qr-bolt-pad,
+.qr-stage-inline .qr-bolt-pad {
+  display: none !important;
+}
+
+/* CONTACT SWAP — your bolt-QR after you save him */
+#contact-swap.contact-swap {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 22000 !important;
+  background: rgba(0, 0, 0, 0.94) !important;
+  display: flex !important;
+  align-items: flex-end !important;
+  justify-content: center !important;
+  padding: 12px 12px calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+}
+#contact-swap.hidden,
+#contact-swap.contact-swap.hidden {
+  display: none !important;
+}
+#contact-swap .contact-swap-panel {
+  position: relative !important;
+  width: min(100%, 400px) !important;
+  background: #0a0a0a !important;
+  border: 1px solid #2a2a2a !important;
+  border-radius: 18px !important;
+  padding: 22px 18px 16px !important;
+  text-align: center !important;
+}
+#contact-swap #contact-swap-title {
+  color: #fff !important;
+  font-family: inherit;
+  font-size: 22px;
+  margin: 8px 0 6px !important;
+  animation: none !important;
+  text-shadow: none !important;
+}
+#contact-swap .btn-share {
+  display: block !important;
+  width: 100% !important;
+  margin: 10px 0 8px !important;
+}
+#contact-swap .btn-text-link {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 13px;
+}
+#contact-swap .qr-stage-inline {
+  margin: 12px auto !important;
+}
+
+
+
+
+@media (max-width: 480px) {
+  #app > #main-header.header,
+  #main-header.header,
+  #main-header {
+    display: block !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  #app > #main-header.header #header-logo,
+  #main-header.header #header-logo,
+  #main-header #header-logo {
+    width: min(86vw, 340px) !important;
+    height: auto !important;
+    max-height: none !important;
+    aspect-ratio: 3000 / 2077 !important;
+  }
+}
+
+/* Tour stays above contact cards. Empty sheet cannot freeze TAKE THE TOUR. */
+#tb-tour.tb-tour,
+#tb-tour.tb-tour-slides,
+.tb-tour.tb-tour-slides {
+  z-index: 50000 !important;
+  pointer-events: auto !important;
+}
+#tb-tour.hidden,
+#tb-tour.tb-tour.hidden {
+  display: none !important;
+  pointer-events: none !important;
+}
+body.tb-tour-open #brother-detail,
+body.tb-tour-open #contact-swap,
+body.tb-tour-open #auth-gate {
+  display: none !important;
+}
+
+/* Every sheet sits above the sticky mark so it cannot shear a card. */
+#info-detail.info-detail,
+.memory-viewer,
+#memory-viewer,
+.modal,
+.thunder-modal,
+.cal-confirm-sheet,
+#imin-a2hs-sheet,
+.ios-install-overlay,
+#axum-drop,
+#axum-card,
+#install-modal {
+  z-index: 12000 !important;
+}

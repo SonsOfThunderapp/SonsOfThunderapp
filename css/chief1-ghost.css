@@ -1,8 +1,57 @@
+/* Splash leftover only. Never zero-out a live tour. */
+#splash {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  z-index: -1 !important;
+}
+#splash:not(.splash-done):not(.splash-out):not(.hidden) {
+  display: flex !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  z-index: 9999 !important;
+  width: 100% !important;
+  height: 100% !important;
+  inset: 0 !important;
+}
+#thunder-fab {
+  bottom: 88px !important;
+  width: 56px;
+  height: 56px;
+}
+#splash.splash-done, #splash.splash-out { display:none !important; visibility:hidden !important; pointer-events:none !important; }
+#tb-tour.hidden, #tb-tour[hidden] { display:none !important; }
+.tab-bar, .app-tabs, #tab-bar { display:flex !important; }
+#tb-tour.hidden, #tb-tour[hidden] { display:none !important; visibility:hidden !important; pointer-events:none !important; opacity:0 !important; }
+.tab-bar, .app-tabs, nav.tabs, #tab-bar, .bottom-nav { display:flex !important; visibility:visible !important; opacity:1 !important; }
+#main-header .logo, #main-header #header-logo, header .logo, #header-logo {
+  max-height: none !important;
+  width: min(78vw, 300px) !important;
+  height: auto !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+}
+@media (max-width: 480px) {
+  #main-header.header, #main-header {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  #main-header .logo-wrap { max-height: none !important; height: auto !important; overflow: visible !important; }
+  #main-header .logo, #main-header #header-logo, #main-header .logo-bolt-life {
+    max-height: none !important;
+    height: auto !important;
+    width: min(78vw, 300px) !important;
+    object-fit: contain !important;
+  }
+}
+
 /* === 20260821-chief1 GHOST WORDMARK ===
    Keep IMG_7697 lockup. Header is a flex sibling of #views; min-height:0
    let it shrink so the die-cut PNG + bolt overlay painted over Home cards.
    Solid black bar, no shrink, clip overflow so announcements never read
-   through the mark. Do not invent a new logo. Loaded after styles.css. */
+   through the mark. Do not invent a new logo. Loaded after styles.css.
+   20260822-flowfix1: phone lockup height capped so Home headings are not
+   clipped under a ~210px fixed overlay. Brand stays. */
 #app > #main-header.header,
 #main-header.header,
 #main-header,
@@ -12,17 +61,18 @@
   min-height: auto !important;
   height: auto !important;
   max-height: none !important;
-  overflow: hidden !important;
+  overflow: visible !important;
   isolation: isolate !important;
-  contain: paint !important;
-  clip-path: inset(0) !important;
+  contain: none !important;
+  clip-path: none !important;
+  -webkit-clip-path: none !important;
   background: #000000 !important;
   background-color: #000000 !important;
   opacity: 1 !important;
   position: sticky !important;
   top: 0 !important;
   z-index: 500 !important;
-  padding: calc(10px + env(safe-area-inset-top, 20px)) 12px 14px !important;
+  padding: calc(10px + env(safe-area-inset-top, 20px)) 12px 10px !important;
   box-shadow: none !important;
   border-bottom: none !important;
 }
@@ -36,7 +86,9 @@
 }
 #main-header .logo-wrap,
 .header .logo-wrap {
-  overflow: hidden !important;
+  overflow: visible !important;
+  max-height: none !important;
+  height: auto !important;
   background: #000000 !important;
   isolation: isolate !important;
   position: relative !important;
@@ -46,10 +98,13 @@
 #main-header #header-logo {
   position: relative;
   z-index: 2;
+  max-height: none !important;
+  height: auto !important;
+  width: min(78vw, 300px) !important;
+  object-fit: contain !important;
 }
 #main-header .logo-bolt-life {
-  max-width: 100% !important;
-  max-height: 100% !important;
+  display: none !important;
 }
 #views,
 #view-home,
@@ -58,3 +113,44 @@
   position: relative;
   z-index: 1;
 }
+@media (max-width: 480px) {
+  #app > #main-header.header,
+  #main-header.header,
+  #main-header,
+  .header#main-header {
+    max-height: none !important;
+    overflow: visible !important;
+    padding: calc(8px + env(safe-area-inset-top, 0px)) 10px 8px !important;
+  }
+  #main-header .logo-wrap,
+  .header .logo-wrap {
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  #main-header .logo,
+  #main-header #header-logo {
+    max-height: none !important;
+    height: auto !important;
+    width: min(78vw, 300px) !important;
+    object-fit: contain !important;
+    object-position: center center !important;
+  }
+}
+
+/* 20260822-chrome4: force pane switch; FAB off the dock hit targets */
+#view-home.active,#view-brothers.active,#view-events.active,#view-about.active{display:block!important;visibility:visible!important;opacity:1!important;position:relative!important;z-index:2!important}
+.view:not(.active){display:none!important}
+#thunder-fab{bottom:120px!important;width:48px!important;height:48px!important;pointer-events:auto}
+.nav-item{pointer-events:auto!important}
+
+/* 20260822-chrome6: dock above leftover splash */
+html body nav.bottom-nav {
+  visibility: visible !important;
+  pointer-events: auto !important;
+  z-index: 300 !important;
+}
+body.tb-tour-open nav.bottom-nav {
+  pointer-events: none !important;
+}
+#splash { pointer-events: none !important; }

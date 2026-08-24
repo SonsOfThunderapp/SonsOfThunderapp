@@ -1,0 +1,87 @@
+#splash.splash-done, #splash.splash-out { display:none !important; visibility:hidden !important; pointer-events:none !important; }
+#tb-tour.hidden, #tb-tour[hidden] { display:none !important; visibility:hidden !important; pointer-events:none !important; }
+.tab-bar, .app-tabs, #tab-bar { display:flex !important; }
+/* leftover splash only — never kill a live tour */
+#tb-tour.hidden, #tb-tour[hidden] { display:none !important; visibility:hidden !important; pointer-events:none !important; opacity:0 !important; }
+.tab-bar, .app-tabs, nav.tabs, #tab-bar, .bottom-nav { display:flex !important; visibility:visible !important; opacity:1 !important; }
+#main-header .logo, #main-header #header-logo, header .logo, #header-logo {
+  max-height: none !important;
+  width: min(92vw, 360px) !important;
+  height: auto !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+}
+@media (max-width: 480px) {
+  #main-header.header, #main-header {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  #main-header .logo-wrap { max-height: none !important; height: auto !important; overflow: visible !important; }
+  #main-header .logo, #main-header #header-logo {
+    max-height: none !important;
+    width: min(92vw, 360px) !important;
+    object-fit: contain !important;
+  }
+}
+
+/* Ask Thunder: tuxedo never covers the answer. Head only once Grok replies. */
+.thunder-ask-hero {
+  overflow: hidden !important;
+  flex: 0 0 auto !important;
+  max-height: 88px !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
+  padding: 4px 0 0 !important;
+}
+.thunder-ask-hero-img {
+  width: 72px !important;
+  height: 72px !important;
+  max-height: 72px !important;
+  object-fit: cover !important;
+  object-position: 50% 10% !important;
+}
+.thunder-modal .thunder-messages {
+  position: relative !important;
+  z-index: 6 !important;
+  background: #0a0a0a !important;
+  flex: 1 1 auto !important;
+  min-height: 36vh !important;
+}
+.thunder-msg.assistant,
+.thunder-msg.user,
+.thunder-msg.system {
+  position: relative !important;
+  z-index: 7 !important;
+}
+#thunder-modal.tb-ask-has-reply .thunder-ask-hero {
+  max-height: 64px !important;
+  padding-top: 2px !important;
+  padding-bottom: 0 !important;
+}
+#thunder-modal.tb-ask-has-reply .thunder-ask-hero-img {
+  width: 56px !important;
+  height: 56px !important;
+  max-height: 56px !important;
+  object-fit: cover !important;
+  object-position: 50% 8% !important;
+}
+#thunder-modal.tb-ask-has-reply .thunder-ask-hero::before {
+  display: none !important;
+}
+
+/* 20260822-chrome4: force pane switch; FAB off the dock hit targets */
+#view-home.active,#view-brothers.active,#view-events.active,#view-about.active{display:block!important;visibility:visible!important;opacity:1!important;position:relative!important;z-index:2!important}
+.view:not(.active){display:none!important}
+#thunder-fab{bottom:120px!important;width:48px!important;height:48px!important;pointer-events:auto}
+.nav-item{pointer-events:auto!important}
+
+/* 20260822-chrome6: dock above leftover splash */
+html body nav.bottom-nav {
+  visibility: visible !important;
+  pointer-events: auto !important;
+  z-index: 300 !important;
+}
+body.tb-tour-open nav.bottom-nav {
+  pointer-events: none !important;
+}
+#splash { pointer-events: none !important; }

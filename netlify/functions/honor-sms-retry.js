@@ -7,7 +7,7 @@ const crypto = require('crypto');
 
 const HONOR_BODY =
   "You're in for Monday. Want the birthday honor? Tap this and add the day. That's it.\n" +
-  'https://sonsofthunder.netlify.app/?bday=1';
+  'https://sonsofthunderboard.com/?bday=1';
 
 exports.handler = async () => {
   const sid = process.env.TWILIO_ACCOUNT_SID || '';

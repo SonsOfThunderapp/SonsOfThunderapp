@@ -7,7 +7,7 @@ const crypto = require('crypto');
 
 const HONOR_BODY =
   "You're in for Monday. Want the birthday honor? Tap this and add the day. That's it.\n" +
-  'https://sonsofthunder.netlify.app/?bday=1';
+  'https://sonsofthunderboard.com/?bday=1';
 
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: cors(), body: '' };
@@ -117,7 +117,7 @@ async function sendHonor(sid, token, from, to) {
 
 function cors() {
   return {
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': 'https://sonsofthunderboard.com',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Access-Control-Allow-Methods': 'POST, OPTIONS'
   };
