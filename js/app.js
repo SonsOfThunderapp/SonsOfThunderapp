@@ -4537,6 +4537,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
 
     detail.classList.remove('hidden');
     detail.setAttribute('aria-hidden', 'false');
+    detail.style.removeProperty('display');
     document.body.style.overflow = 'hidden';
     bindBrotherDetail(); // ensure X is wired
     // Inline Cash App–style QR with bolt center — ready as soon as profile opens
