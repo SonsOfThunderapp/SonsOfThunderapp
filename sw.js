@@ -1,4 +1,4 @@
-/* 20260824-tourcap1: last tour slide — Thunder names what he can do */
+/* 20260824-round2: brothers slide — table is the star, host off, faces idle */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

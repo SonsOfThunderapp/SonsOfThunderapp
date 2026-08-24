@@ -10262,7 +10262,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   function startBroPersonaIdle() {
     stopBroPersonaIdle();
     if (tourReducedMotion()) return;
-    document.querySelectorAll('.tb-live-bros-full .tb-live-face').forEach(function (el, i) {
+    document.querySelectorAll('.tb-live-roundtable .tb-live-face, .tb-live-bros-full .tb-live-face').forEach(function (el, i) {
       const persona = el.getAttribute('data-persona') || 'dad';
       const st = BRO_STYLE[persona] || BRO_STYLE.dad;
       const A = st.amp;
