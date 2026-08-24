@@ -1,13 +1,18 @@
-/* 20260822-chrome3: overlays hide; FAB sits ABOVE the dock */
-#splash, #tb-tour {
+/* Splash leftover only. Never zero-out a live tour. */
+#splash {
   display: none !important;
   visibility: hidden !important;
   pointer-events: none !important;
-  inset: auto !important;
-  height: 0 !important;
-  width: 0 !important;
-  overflow: hidden !important;
   z-index: -1 !important;
+}
+#splash:not(.splash-done):not(.splash-out):not(.hidden) {
+  display: flex !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  z-index: 9999 !important;
+  width: 100% !important;
+  height: 100% !important;
+  inset: 0 !important;
 }
 #thunder-fab {
   bottom: 88px !important;
@@ -15,11 +20,9 @@
   height: 56px;
 }
 #splash.splash-done, #splash.splash-out { display:none !important; visibility:hidden !important; pointer-events:none !important; }
-#tb-tour { display:none !important; }
+#tb-tour.hidden, #tb-tour[hidden] { display:none !important; }
 .tab-bar, .app-tabs, #tab-bar { display:flex !important; }
-/* 20260822-chrome1 emergency: leftover tour, dock, header lockup */
-#tb-tour, #tb-tour[hidden], #tb-tour.hidden { display:none !important; visibility:hidden !important; pointer-events:none !important; opacity:0 !important; z-index:-1 !important; }
-body.tb-tour-open #tb-tour { display:none !important; }
+#tb-tour.hidden, #tb-tour[hidden] { display:none !important; visibility:hidden !important; pointer-events:none !important; opacity:0 !important; }
 .tab-bar, .app-tabs, nav.tabs, #tab-bar, .bottom-nav { display:flex !important; visibility:visible !important; opacity:1 !important; }
 #main-header .logo, #main-header #header-logo, header .logo, #header-logo {
   max-height: none !important;
@@ -142,12 +145,12 @@ body.tb-tour-open #tb-tour { display:none !important; }
 .nav-item{pointer-events:auto!important}
 
 /* 20260822-chrome6: dock above leftover splash */
-html body nav.bottom-nav,
-html body.tb-tour-open nav.bottom-nav,
-html body.tb-ask-open nav.bottom-nav,
-html body:has(#splash) nav.bottom-nav {
+html body nav.bottom-nav {
   visibility: visible !important;
   pointer-events: auto !important;
-  z-index: 40000 !important;
+  z-index: 300 !important;
 }
-#splash, #tb-tour { pointer-events: none !important; }
+body.tb-tour-open nav.bottom-nav {
+  pointer-events: none !important;
+}
+#splash { pointer-events: none !important; }

@@ -1,4 +1,4 @@
-/* 20260824-ghost1: nameless brothers, empty sheets, overlay z-index, scroll lock */
+/* 20260824-stack1: kill leftover CSS that hid the live tour and boosted nav over it */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

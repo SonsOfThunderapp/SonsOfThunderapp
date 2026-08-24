@@ -23,8 +23,8 @@
   -webkit-clip-path: none !important;
   background: #000 !important;
   pointer-events: auto !important;
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
+  transform: none;
+  -webkit-transform: none;
   padding: calc(8px + env(safe-area-inset-top, 0px)) 12px 8px !important;
 }
 
@@ -251,7 +251,7 @@ body:has(#auth-gate:not(.hidden)) #main-header {
 #tb-tour.tb-tour,
 #tb-tour.tb-tour-slides,
 .tb-tour.tb-tour-slides {
-  z-index: 40000 !important;
+  z-index: 50000 !important;
   pointer-events: auto !important;
 }
 #tb-tour.hidden,
