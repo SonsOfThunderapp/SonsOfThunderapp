@@ -9772,10 +9772,26 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       if (document.body.classList.contains('tb-axum-open')) return true;
       const gate = document.getElementById('auth-gate');
       if (gate && !gate.classList.contains('hidden')) return true;
-      const splash = document.getElementById('splash');
-      if (splash && !splash.classList.contains('splash-done') && !splash.classList.contains('hidden')) return true;
+      const ae = document.activeElement;
+      if (ae && /INPUT|TEXTAREA|SELECT/.test(ae.tagName || '')) return true;
     } catch (e) {}
     return false;
+  }
+
+  function openHardRefresh() {
+    if (cacheClearBlocked()) return;
+    try {
+      if (sessionStorage.getItem('tb_hard_pending') === '1') {
+        sessionStorage.setItem('tb_hard_pending', '0');
+        sessionStorage.setItem('tb_hard_at', String(Date.now()));
+        return;
+      }
+      var last = parseInt(sessionStorage.getItem('tb_hard_at') || '0', 10);
+      if (last && Date.now() - last < 10000) return;
+      sessionStorage.setItem('tb_hard_pending', '1');
+      sessionStorage.setItem('tb_hard_at', String(Date.now()));
+    } catch (e) {}
+    forceRefreshApp(true);
   }
 
   function pingServiceWorkerUpdate() {
@@ -9908,6 +9924,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     if (window.__tbHousekeepingBound) return;
     window.__tbHousekeepingBound = true;
     try { runLaunchHousekeeping(); } catch (e) {}
+    try { openHardRefresh(); } catch (eBoot) {}
     const build = (cfg().APP_BUILD || '').toString();
     try {
       const prev = sessionStorage.getItem('tb_app_build');
@@ -9917,14 +9934,24 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       if (build) sessionStorage.setItem('tb_app_build', build);
     } catch (e) {}
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState !== 'visible') return;
+      if (document.visibilityState !== 'visible') {
+        window.__tbHiddenAt = Date.now();
+        return;
+      }
       reconcileOnWake();
+      try {
+        var away = Date.now() - (window.__tbHiddenAt || 0);
+        if (away > 1500) openHardRefresh();
+      } catch (eV) {}
     });
     window.addEventListener('online', function () {
       reconcileOnWake();
     });
-    window.addEventListener('pageshow', function () {
+    window.addEventListener('pageshow', function (e) {
       reconcileOnWake();
+      if (e && e.persisted) {
+        try { openHardRefresh(); } catch (eP) {}
+      }
     });
     window.addEventListener('focus', function () {
       try { checkStaleBuild(); } catch (e) {}
@@ -9970,9 +9997,11 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     } catch (e) {}
   }
 
-  async function forceRefreshApp() {
+  async function forceRefreshApp(silent) {
     // Cache/SW only. Never delete sb-* / supabase keys or IndexedDB auth.
-    try { tbToast('Updating… hang tight', 4000); } catch (e) {}
+    if (!silent) {
+      try { tbToast('Updating… hang tight', 4000); } catch (e) {}
+    }
     try {
       if ('serviceWorker' in navigator) {
         const regs = await navigator.serviceWorker.getRegistrations();

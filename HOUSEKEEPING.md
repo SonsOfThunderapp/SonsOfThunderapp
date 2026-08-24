@@ -13,7 +13,7 @@ No polling. No auto-reload. No auto-delete of brothers, memories, or announcemen
 | Trigger | Action |
 |---|---|
 | Launch | Stamp `APP_BUILD`; strip ghost `#rsvp-add-cal`; **huntGhosts** (empty contact card, leftover tour CSS, stuck overflow) |
-| Resume / Online / pageshow | huntGhosts + alerts + session |
+| Open / resume | **Hard refresh once** (clear SW+HTTP cache, reload). Skip if tour/Ask/auth/typing. Loop guard 10s. Silent. |
 | Tour open / close | huntGhosts — tour receives taps, stray sheets die |
 | Memory upload | If Storage succeeds and the DB insert fails, **remove that one storage object** |
 

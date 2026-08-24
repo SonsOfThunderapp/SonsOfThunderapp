@@ -1,4 +1,4 @@
-/* 20260824-tourgo1: tour-first no longer kills the live tour; empty contact shell stays dead */
+/* 20260824-open1: hard refresh on every app open — loop-guarded, skip tour/sheets */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
