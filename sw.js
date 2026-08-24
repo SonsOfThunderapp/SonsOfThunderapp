@@ -1,4 +1,4 @@
-/* 20260824-inp1: dock tap paints first — no reflow, no ghost nav binders */
+/* 20260824-joel1: CORS locked, leader SMS off the client, unsigned roster has no phone/bday */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

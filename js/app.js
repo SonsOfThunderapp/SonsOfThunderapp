@@ -2011,7 +2011,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       const signed = !!(typeof isSignedIn === 'function' && isSignedIn());
       const cols = signed
         ? 'id,name,bio,photo_url,skills,available,updated_at,birthday,phone'
-        : 'id,name,bio,photo_url,skills,available,updated_at,birthday';
+        : 'id,name,bio,photo_url,skills,available,updated_at';
       const { data, error } = await sb
         .from('brothers')
         .select(cols)
@@ -4850,7 +4850,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       if (prev) { try { prev.pause(); } catch (e) {} }
       // Only allow data: or https: sources (never javascript: / arbitrary)
       const src = String(m.full || m.data || '');
-      const safe = src.startsWith('data:') || src.startsWith('https://') || src.startsWith('http://');
+      const safe = /^https:\/\//i.test(src) || /^data:image\//i.test(src) || /^data:video\//i.test(src);
       if (!safe) {
         stage.textContent = 'Could not display this memory.';
       } else if (m.type === 'video') {
@@ -9116,11 +9116,16 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
 
   // Leadership contact — assembled only on tap, never rendered as text
-  function openLeaderSms() {
-    const parts = (cfg().LEADER_SMS_PARTS || []);
-    const digits = parts.join('').replace(/\D/g, '');
-    if (!digits) return;
-    window.location.href = 'sms:' + digits;
+  async function openLeaderSms() {
+    try {
+      const r = await fetch('/.netlify/functions/text-leader', { cache: 'no-store' });
+      const j = r.ok ? await r.json() : null;
+      if (j && typeof j.sms === 'string' && /^sms:\+?\d{10,15}$/.test(j.sms)) {
+        window.location.href = j.sms;
+        return;
+      }
+    } catch (e) {}
+    try { tbToast('Ask in the room.'); } catch (e2) {}
   }
 
 

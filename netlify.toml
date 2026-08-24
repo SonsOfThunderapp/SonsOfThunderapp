@@ -68,7 +68,7 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(self), microphone=(self), geolocation=(), payment=()"
-    Content-Security-Policy = "frame-ancestors 'none'"
+    Content-Security-Policy = "default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; img-src 'self' data: blob: https:; media-src 'self' blob:; font-src 'self' https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; connect-src 'self' https://mnsempcgomukcpofgvlm.supabase.co https://*.supabase.co https://cdn.jsdelivr.net; upgrade-insecure-requests"
 
 # Static assets — long cache (filenames are versioned by deploy)
 [[headers]]

@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260824-inp1',
+  APP_BUILD: '20260824-joel1',
   LAUNCH: {
     splashHoldMs: 200,
     splashFadeMs: 160,
@@ -127,8 +127,8 @@ window.TB_CONFIG = {
     noNativeControls: true
   },
   PUBLIC_ORIGIN: 'https://sonsofthunderboard.com',
+  /* LEADER_PIN is a UI lock only. Server writes need a signed-in app_members leader. */
   LEADER_PIN: 'thunder-board-lead',
-  LEADER_SMS_PARTS: ['40', '77', '39', '62', '43'],
   SUPABASE_URL: 'https://mnsempcgomukcpofgvlm.supabase.co',
   SUPABASE_ANON_KEY: 'sb_publishable_QkUCt8trZ0vUwXmqfaUQwg_qXZ5_87m',
   MEMORIES_BUCKET: 'Sons Of Thunder Memories',
