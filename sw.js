@@ -1,4 +1,4 @@
-/* 20260824-imin1: only I’M IN signs a brother in. No Brothers/Home SIGN IN. */
+/* 20260824-dad1: splash cannot trap; I’M IN is the only sign-in; chair is your seat */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

@@ -267,24 +267,11 @@ body.tb-tour-open #tb-tour.tb-tour {
 
 /* 20260823-gold1b — sign-in whispers, photos lead. No auth/RSVP/app.js. */
 #view-brothers .btn-auth-entry,
-#auth-entry-btn.btn-auth-entry {
-  background: transparent !important;
-  border: 1px solid #2a2a2a !important;
-  box-shadow: none !important;
-  color: #888 !important;
-  min-height: 42px !important;
-  font-size: 12px !important;
-  letter-spacing: 0.1em !important;
-  font-weight: 600 !important;
-}
-#view-brothers .btn-auth-entry-sub,
-.btn-auth-entry-sub {
-  display: none !important;
-}
+#auth-entry-btn.btn-auth-entry,
+#auth-entry-btn,
 #home-member-cta,
 .home-member-cta {
-  opacity: 0.55 !important;
-  border-color: #222 !important;
+  display: none !important;
 }
 
 #memories-signin-shot.btn-rsvp:not(.hidden) {
