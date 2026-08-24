@@ -1,4 +1,4 @@
-/* 20260824-splash1: opening screen cannot trap a first-time iPhone */
+/* 20260824-chair1: empty chair is take your seat — photo + profile */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

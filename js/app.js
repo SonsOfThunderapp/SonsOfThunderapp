@@ -4652,8 +4652,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       grid.innerHTML = `
         <button type="button" class="empty-state empty-brothers empty-brothers-cta" id="empty-brothers-cta" aria-label="Add your profile">
           <div class="empty-brothers-plus" aria-hidden="true">+</div>
-          <div class="empty-brothers-title">The room is waiting.</div>
-          <div class="empty-brothers-sub">Add your name.<br>Take your seat.</div>
+          <div class="empty-brothers-title">Your chair is open.</div>
+          <div class="empty-brothers-sub">Add your photo and name.<br>Take your seat.</div>
         </button>`;
       const cta = $('#empty-brothers-cta');
       if (cta) {
@@ -4689,12 +4689,20 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
           </div>
         </button>`;
     }).join('');
-    const inviteHtml = `
+    const meSeat = (brothers || []).find(function (b) { return b && b.id === myProfileId && String(b.name || '').trim(); });
+    const inviteHtml = meSeat ? `
       <button type="button" class="brother-card brother-chair" id="brother-open-chair" aria-label="Invite a brother">
         <div class="brother-chair-seat" aria-hidden="true"></div>
         <div class="brother-info">
           <div class="brother-chair-title">OPEN CHAIR</div>
           <div class="brother-slot-sub">Bring a brother</div>
+        </div>
+      </button>` : `
+      <button type="button" class="brother-card brother-chair" id="brother-open-chair" aria-label="Add your photo and profile">
+        <div class="brother-chair-seat" aria-hidden="true"></div>
+        <div class="brother-info">
+          <div class="brother-chair-title">YOUR SEAT</div>
+          <div class="brother-slot-sub">Photo + name. That’s you.</div>
         </div>
       </button>`;
     grid.innerHTML = cardsHtml + inviteHtml;
@@ -4710,7 +4718,9 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       chair.addEventListener('click', function () {
         if (typeof tbGlowHit === 'function') tbGlowHit(chair, 'yellow');
         try { tbFeedback.selection(); } catch (e) {}
-        inviteOpenChair();
+        const mine = (brothers || []).find(function (b) { return b && b.id === myProfileId && String(b.name || '').trim(); });
+        if (mine) inviteOpenChair();
+        else openProfileEditor();
       });
     }
     updateAllNewBadges();
