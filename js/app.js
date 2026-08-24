@@ -9432,14 +9432,14 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
   let __iosCoachStep = 0;
   const IOS_COACH = [
-    { line: 'TAP SHARE', hint: 'Box with ↑ — often bottom center, or via More (⋯) then Share' },
-    { line: 'ADD TO HOME SCREEN', hint: 'Scroll the Share sheet if needed — look for the Home Screen option' },
-    { line: 'TAP ADD', hint: 'Confirm in the top corner — then open the new Thunder icon' }
+    { line: 'TAP SHARE', hint: 'The square with the arrow up' },
+    { line: 'ADD TO HOME SCREEN', hint: 'Scroll the share list if you have to' },
+    { line: 'TAP ADD', hint: 'Then open the new Thunder icon' }
   ];
   const IOS_COACH_ALT = [
-    { line: 'FIND SHARE', hint: 'Some Safari layouts: tap More (⋯) first, then Share' },
-    { line: 'ADD TO HOME SCREEN', hint: 'May appear as “Add to Home Screen” or under Edit Actions' },
-    { line: 'TAP ADD', hint: 'Then leave Safari and open Thunder Board from your Home Screen' }
+    { line: 'FIND SHARE', hint: 'Safari: More (⋯), then Share' },
+    { line: 'ADD TO HOME SCREEN', hint: 'May sit under Edit Actions' },
+    { line: 'TAP ADD', hint: 'Then open Thunder from the Home Screen' }
   ];
 
   function renderIosCoachStep() {
@@ -9482,12 +9482,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     __iosCoachAlt = false;
     renderIosCoachStep();
     const sub = document.getElementById('ios-install-sub');
-    if (sub) {
-      const prog = getInstallProgress();
-      sub.textContent = (prog === 'RETURNED_NOT_INSTALLED' || prog === 'INSTALL_ATTEMPTED')
-        ? 'STILL WITH YOU. ⚡ Pick up where you left off.'
-        : 'Three quick taps.';
-    }
+    if (sub) sub.textContent = 'Share → Add to Home Screen → Add';
     el.classList.remove('hidden');
     el.setAttribute('aria-hidden', 'false');
   }

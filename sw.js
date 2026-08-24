@@ -1,4 +1,4 @@
-/* 20260824-homen1: first-run lands on Home; tour is More → TAKE THE TOUR only */
+/* 20260824-a2hs1: install sheet — one red, one quiet exit, short copy */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
