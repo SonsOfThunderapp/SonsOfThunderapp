@@ -9152,8 +9152,8 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       finished = true;
       // Splash → tour with nothing in between (no home/welcome flash)
       try {
-        if (typeof fromPatio === 'function' && fromPatio()) {
-          try { offerHomeScreen('alerts'); } catch (e2) {}
+        if (typeof fromPatio === 'function' && fromPatio() && typeof isInAppBrowser === 'function' && isInAppBrowser()) {
+          try { openInAppInstallOverlay(); } catch (e2) {}
         }
       } catch (e) {}
       el.classList.add('splash-out');
@@ -9244,7 +9244,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       return;
     }
     if (typeof isTourComplete === 'function' && isTourComplete()) {
-      setTimeout(function () { try { offerHomeScreen('alerts'); } catch (e) {} }, 700);
+      return;
     }
   }
   function a2hsHushed() {
@@ -9330,7 +9330,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   }
   function launchAddToHomeScreen() {
     if (isStandalonePwa()) return;
-    if (typeof isInAppBrowser === 'function' && isInAppBrowser()) {
+    if (typeof isInAppBrowser === 'function' && (isInAppBrowser() || (isIos() && !isIosSafariBrowser()))) {
       try { openInAppInstallOverlay(); } catch (e) {}
       return;
     }
@@ -9347,25 +9347,24 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     const card = document.getElementById('install-help-card');
     if (card) try { card.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
   }
+
+  function isIosSafariBrowser() {
+    if (!isIos() || isStandalonePwa()) return false;
+    const ua = navigator.userAgent || '';
+    if (/CriOS|FxiOS|EdgiOS/i.test(ua)) return false;
+    if (!/Safari/i.test(ua)) return false;
+    try { return typeof window.safari !== 'undefined'; } catch (e) { return false; }
+  }
   function offerHomeScreen(reason) {
     if (roomCut()) return false;
     if (isStandalonePwa()) { hideHomeA2hs(); return false; }
     if (document.body.classList.contains('tb-tour-open')) return false;
-    if (a2hsHushed() && reason !== 'alerts' && reason !== 'imin') return false;
-    try {
-      if (sessionStorage.getItem('tb_a2hs_shown') === '1' && reason !== 'alerts' && reason !== 'imin') return false;
-    } catch (e) {}
     if (reason === 'imin') {
       paintCalA2hs();
       return true;
     }
-    try { sessionStorage.setItem('tb_a2hs_shown', '1'); } catch (e) {}
-    if (reason === 'visit' || reason === 'gathering') {
-      showHomeA2hs();
-      return true;
-    }
-    launchAddToHomeScreen();
-    return true;
+    // Never throw TAP SHARE unsolicited. Door is More → PUT IT ON THE HOME SCREEN.
+    return false;
   }
 
   function isIos() {
@@ -9377,11 +9376,18 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     return /Android/i.test(navigator.userAgent || '');
   }
 
-  /** Instagram / Facebook / Messenger / TikTok / LinkedIn in-app browsers */
+  /** Instagram, Grok, ChatGPT, and other webviews that cannot Add to Home Screen. */
   function isInAppBrowser() {
     const ua = navigator.userAgent || '';
-    return /FBAN|FBAV|Instagram|Line\/|LinkedInApp|Twitter|TikTok|Snapchat|MicroMessenger|Pinterest/i.test(ua)
-      || (isIos() && !/Safari/i.test(ua) && /AppleWebKit/i.test(ua) && !/CriOS|FxiOS|EdgiOS/i.test(ua));
+    if (/FBAN|FBAV|Instagram|Line\/|LinkedInApp|Twitter|TikTok|Snapchat|MicroMessenger|Pinterest|Grok|xAI|ChatGPT|OpenAI|Claude|Anthropic|Perplexity|Copilot/i.test(ua)) return true;
+    try {
+      if (document.referrer && /grok\.com|x\.ai|chatgpt\.com|openai\.com/i.test(document.referrer)) return true;
+    } catch (e) {}
+    if (isIos() && !isStandalonePwa()) {
+      if (/CriOS|FxiOS|EdgiOS/i.test(ua)) return true;
+      if (!/Safari/i.test(ua) && /AppleWebKit/i.test(ua)) return true;
+    }
+    return false;
   }
 
   /**
@@ -9568,7 +9574,6 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     }
     if (isIos() && !isStandalonePwa()) {
       setAlertsHint('iPhone: Add to Home Screen first, then open from the icon and turn alerts on.');
-      try { offerHomeScreen('alerts'); } catch (e) {}
       return false;
     }
 
@@ -10474,9 +10479,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   function completeTour() {
     setTourState({ done: true, completed: true, at: Date.now() });
     hideTour();
-    setTimeout(function () {
-      try { offerHomeScreen('tour'); } catch (e) {}
-    }, 900);
+    /* Stay in the room. Install lives on More — not a trap after the tour. */
   }
 
   function startTour(opts) {
