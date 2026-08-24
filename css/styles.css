@@ -18,7 +18,6 @@
   --space-4: 16px;
   --space-5: 24px;
   --space-6: 32px;
-  color-scheme: dark;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -45,124 +44,106 @@ html, body {
   font-family: var(--font-body);
   font-size: 16px;
   line-height: 1.45;
-  overflow: hidden;
-  overscroll-behavior: none;
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
-}
-::selection {
-  background: #FEF105;
-  color: #000;
 }
 
 #app {
-  height: 100%;
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  /* Nav ~62px + FAB clearance — keep last cards above fixed chrome */
   padding-bottom: calc(96px + var(--safe-bottom));
 }
 
-#views {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-  touch-action: pan-y;
-}
-
-.view { display: none; height: 100%; }
-.view.active {
-  display: block;
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  touch-action: pan-y;
-  animation: none;
-}
-
-/* HEADER — full wordmark (SONS + bolt + OF THUNDER) on top, centered, no clip.
-   Never fixed-height crop. Bolt lives in the PNG only. */
+/* HEADER — compact APP header (not hero).
+   Safe-area grows padding; logo scale stays fixed and small. */
 .header {
-  padding: calc(10px + env(safe-area-inset-top, 24px)) 12px 8px;
+  padding: calc(8px + env(safe-area-inset-top, 20px)) 16px 8px;
   text-align: center;
   background: var(--black);
   position: sticky;
   top: 0;
   z-index: 50;
   overflow: visible;
-  min-height: 0;
 }
-.logo-wrap {
+.logo {
+  height: 72px;
+  width: auto;
+  max-width: 78vw;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+/* Pulse bolt asset — absolute over the O-bolt only; never inflate header height */
+.header-bolt-live {
+  position: absolute;
+  left: 29.4%;
+  top: 2%;
+  width: 17.3%;
+  height: 86%;
+  object-fit: contain;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Logo bolt pulse — clipped to the real bolt through the O (pixel-measured @2x).
+   Asset unchanged. NO drop-shadow on the box (avoids rectangular bloom).
+   Glow only inside the zigzag clip-path. Same 4s --tb-breathe as every other bolt. */
+.logo-glimmer-wrap {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  max-width: 100%;
+  display: inline-block;
+  max-width: 78vw;
   margin: 0 auto;
   line-height: 0;
   overflow: visible;
-  z-index: 2;
 }
-.logo,
-.header .logo,
-.header img.logo,
-#header-logo {
-  /* Authorized IMG_7697 stacked mark — SONS + RED OF THUNDER + tagline. Never crop height. */
-  height: auto !important;
-  width: auto !important;
-  max-width: 72vw !important;
-  max-height: none !important;
-  object-fit: contain !important;
-  object-position: center center !important;
-  display: block !important;
-  margin: 0 auto !important;
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
+.logo-glimmer-wrap .logo {
+  margin: 0 auto;
   position: relative;
-  z-index: 2;
+  z-index: 1;
 }
-/* Overlay bolt layers permanently removed — bolt is in the logo PNG */
-.header-bolt-live,
-.logo-bolt-glimmer,
-.logo-glimmer-wrap .header-bolt-live {
+.logo-bolt-glimmer {
+  /* DISABLED: full-rect gradient was painting a visible box over the wordmark
+     even with mask-image. Clean logo PNG already has the yellow bolt — no overlay. */
   display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-  opacity: 0 !important;
   pointer-events: none !important;
-  visibility: hidden !important;
+  opacity: 0 !important;
+  background: none !important;
+  animation: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+@keyframes logoBoltPulse {
+  0%, 100% {
+    opacity: 0.22;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.015);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .logo-bolt-glimmer {
+    animation: none !important;
+    opacity: 0 !important;
+  }
 }
 
 /* VIEWS */
-.view { display: none; }
+.view { display: none; flex: 1; }
+.view.active { display: block; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 /* Snappy tab change from swipe — short fade, no slide theater */
 .view.view-swipe-in {
   animation: viewSwipeIn 0.16s ease-out;
 }
-.view.view-swipe-in-next {
-  animation: viewSwipeNext 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-.view.view-swipe-in-prev {
-  animation: viewSwipePrev 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
 @keyframes viewSwipeIn {
   from { opacity: 0.55; }
   to { opacity: 1; }
-}
-@keyframes viewSwipeNext {
-  from { opacity: 0.4; transform: translate3d(22%, 0, 0); }
-  to { opacity: 1; transform: translate3d(0, 0, 0); }
-}
-@keyframes viewSwipePrev {
-  from { opacity: 0.4; transform: translate3d(-22%, 0, 0); }
-  to { opacity: 1; transform: translate3d(0, 0, 0); }
-}
-.nav-item.nav-peek {
-  color: #FEF105 !important;
-  text-shadow: 0 0 10px rgba(254,241,5,0.55);
 }
 
 
@@ -344,14 +325,7 @@ html, body {
   transform: scale(0.985);
   background: #161616;
 }
-.announcement-card h3 {
-  font-size: 15px;
-  font-weight: 800;
-  margin-bottom: 4px;
-  color: #fff;
-  animation: none;
-  text-shadow: none;
-}
+.announcement-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
 .announcement-card p { font-size: 13px; color: #aaa; line-height: 1.4; }
 
 /* BROTHERS */
@@ -392,17 +366,14 @@ html, body {
 }
 @keyframes brotherNamePulse {
   0%, 100% {
-    opacity: 0.92;
+    opacity: 0.88;
     text-shadow: 0 0 0 transparent;
     color: #fff;
   }
   50% {
     opacity: 1;
-    text-shadow:
-      0 0 6px rgba(254, 241, 5, 0.95),
-      0 0 14px rgba(254, 241, 5, 0.75),
-      0 0 28px rgba(254, 241, 5, 0.45);
-    color: #FEF105;
+    text-shadow: 0 0 10px rgba(254, 241, 5, 0.45), 0 0 2px rgba(254, 241, 5, 0.3);
+    color: #fff;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -440,26 +411,15 @@ html, body {
 .event-month {
   font-size: 10px;
   font-weight: 700;
-  color: #FEF105;
+  color: var(--yellow);
   letter-spacing: 0.5px;
   animation: brotherNamePulse var(--tb-breathe);
   will-change: opacity, text-shadow;
 }
-.event-day {
-  font-size: 18px;
-  font-weight: 800;
-  color: #FEF105;
-  animation: brotherNamePulse var(--tb-breathe);
-  will-change: opacity, text-shadow;
-}
 @media (prefers-reduced-motion: reduce) {
-  .event-month,
-  .event-day {
-    animation: none !important;
-    text-shadow: 0 0 8px rgba(254, 241, 5, 0.5) !important;
-    color: #FEF105 !important;
-  }
+  .event-month { animation: none !important; text-shadow: none !important; }
 }
+.event-day { font-size: 18px; font-weight: 800; }
 .event-details h3 { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
 .event-details p { font-size: 13px; color: var(--gray); }
 
@@ -634,33 +594,48 @@ html, body {
 .code-title-glow,
 .about-container .code-title.code-title-glow,
 h1.code-title-glow {
-  /* Brand red fill + red glow — OF THUNDER energy, not a yellow chip */
-  color: #E30600 !important;
-  -webkit-text-fill-color: #E30600 !important;
+  /* Yellow fill + red outline — pulses on same --tb-breathe as the More bolt icon */
+  color: #FEF105 !important;
   letter-spacing: 0.08em;
   animation: codeTitleGlow var(--tb-breathe) !important;
   animation-delay: 0s !important;
-  will-change: text-shadow, opacity;
+  will-change: text-shadow, filter, opacity;
 }
 @keyframes codeTitleGlow {
   0%, 100% {
-    color: #E30600;
-    -webkit-text-fill-color: #E30600;
-    opacity: 0.86;
+    opacity: 0.92;
+    filter: brightness(0.95);
     text-shadow:
-      0 0 8px rgba(227, 6, 0, 0.7),
-      0 0 20px rgba(227, 6, 0, 0.4),
-      0 0 36px rgba(227, 6, 0, 0.2);
+      -2px 0 0 rgba(227, 6, 0, 0.9),
+       2px 0 0 rgba(227, 6, 0, 0.9),
+       0 -2px 0 rgba(227, 6, 0, 0.9),
+       0  2px 0 rgba(227, 6, 0, 0.9),
+      -1px -1px 0 rgba(227, 6, 0, 0.85),
+       1px -1px 0 rgba(227, 6, 0, 0.85),
+      -1px  1px 0 rgba(227, 6, 0, 0.85),
+       1px  1px 0 rgba(227, 6, 0, 0.85),
+      0 0 8px rgba(227, 6, 0, 0.85),
+      0 0 18px rgba(227, 6, 0, 0.55),
+      0 0 32px rgba(227, 6, 0, 0.35),
+      0 0 48px rgba(227, 6, 0, 0.18);
   }
   50% {
-    color: #FF2A18;
-    -webkit-text-fill-color: #FF2A18;
     opacity: 1;
+    filter: brightness(1.08);
     text-shadow:
-      0 0 12px rgba(255, 50, 30, 1),
-      0 0 28px rgba(227, 6, 0, 0.95),
-      0 0 52px rgba(227, 6, 0, 0.55),
-      0 0 80px rgba(227, 6, 0, 0.28);
+      -2px 0 0 rgba(255, 45, 20, 1),
+       2px 0 0 rgba(255, 45, 20, 1),
+       0 -2px 0 rgba(255, 45, 20, 1),
+       0  2px 0 rgba(255, 45, 20, 1),
+      -1px -1px 0 rgba(227, 6, 0, 1),
+       1px -1px 0 rgba(227, 6, 0, 1),
+      -1px  1px 0 rgba(227, 6, 0, 1),
+       1px  1px 0 rgba(227, 6, 0, 1),
+      0 0 14px rgba(255, 50, 30, 1),
+      0 0 28px rgba(227, 6, 0, 1),
+      0 0 48px rgba(227, 6, 0, 0.9),
+      0 0 72px rgba(227, 6, 0, 0.6),
+      0 0 110px rgba(227, 6, 0, 0.4);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -719,11 +694,7 @@ h1.code-title-glow {
   height: calc(62px + var(--safe-bottom));
   padding-bottom: var(--safe-bottom);
   background: #0a0a0a; border-top: 1px solid #1a1a1a;
-  display: flex; justify-content: space-around; align-items: center;
-  z-index: 300 !important;
-  pointer-events: auto !important;
-  transform: none !important;
-  opacity: 1 !important;
+  display: flex; justify-content: space-around; align-items: center; z-index: 100;
 }
 .nav-item {
   flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
@@ -764,8 +735,10 @@ h1.code-title-glow {
   object-fit: contain;
   display: block;
   pointer-events: none;
-  filter: none;
-  animation: none;
+  filter:
+    drop-shadow(0 0 6px rgba(254, 241, 5, 0.55))
+    drop-shadow(0 0 14px rgba(254, 241, 5, 0.35));
+  animation: boltLive var(--tb-breathe);
 }
 .thunder-fab-aura {
   position: absolute;
@@ -1227,42 +1200,6 @@ h1.code-title-glow {
   font-size: 12px;
   color: #8a8a8a;
   line-height: 1.35;
-}
-.brother-chair {
-  background: #070707 !important;
-  border: 1.5px dashed #3a3a3a !important;
-  display: flex !important;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-}
-.brother-chair-seat {
-  width: 100%;
-  aspect-ratio: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: radial-gradient(ellipse at 50% 60%, #141414 0%, #070707 70%);
-}
-.brother-chair-seat::before {
-  content: "";
-  width: 38%;
-  height: 28%;
-  border: 2px solid #555;
-  border-bottom-width: 7px;
-  border-radius: 8px 8px 3px 3px;
-  box-shadow: 0 14px 0 -6px #3a3a3a;
-}
-.brother-chair-title {
-  font-weight: 800;
-  font-size: 12px;
-  letter-spacing: 0.14em;
-  color: #888;
-  margin-bottom: 4px;
-}
-.brother-chair:active {
-  border-color: #FEF105 !important;
-  transform: scale(0.98);
 }
 .leader-tools { margin-top: 4px; }
 .leader-tools.hidden { display: none; }
@@ -2449,7 +2386,7 @@ h1.code-title-glow {
 .auth-gate {
   position: fixed;
   inset: 0;
-  z-index: 20000;
+  z-index: 12000;
   background: rgba(0,0,0,0.92);
   display: flex;
   align-items: center;
@@ -2520,39 +2457,6 @@ h1.code-title-glow {
   cursor: pointer;
   padding: 0;
   font-size: 13px;
-}
-#auth-gate #auth-password,
-#auth-gate #auth-signup-btn,
-#auth-gate #auth-forgot-btn,
-#auth-gate #auth-hint,
-.auth-gate-imin .auth-sub,
-.auth-gate-imin #auth-password,
-.auth-gate-imin #auth-hint,
-.auth-gate-imin #auth-signup-btn,
-.auth-gate-imin #auth-forgot-btn {
-  display: none !important;
-}
-.auth-gate-imin .auth-link-row {
-  color: transparent;
-}
-.auth-gate-imin .auth-link-row button {
-  color: #777;
-  font-weight: 500;
-}
-.auth-gate-imin #auth-magic-btn {
-  display: none !important;
-}
-@media (prefers-reduced-motion: reduce) {
-  .auth-gate-imin #auth-magic-btn {
-    animation: none !important;
-    text-shadow: none !important;
-  }
-}
-.auth-gate-imin #auth-title {
-  color: #fff !important;
-  animation: none !important;
-  text-shadow: none !important;
-  margin-bottom: 18px;
 }
 .auth-session-bar {
   display: flex;
@@ -3179,16 +3083,6 @@ h1.code-title-glow {
   font-size: 15px;
   font-weight: 700;
   letter-spacing: -0.01em;
-  animation: brotherNamePulse var(--tb-breathe);
-  will-change: opacity, text-shadow;
-}
-@media (prefers-reduced-motion: reduce) {
-  .announcement-card h3,
-  .iron-title {
-    animation: none !important;
-    text-shadow: none !important;
-    color: #fff !important;
-  }
 }
 
 .announcement-card p,
@@ -3372,7 +3266,7 @@ h1.code-title-glow {
 
 /* Page view enter — slightly longer, ease-out */
 .view.active {
-  animation: none;
+  animation: viewIn 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
 @keyframes viewIn {
   from { opacity: 0; transform: translateY(6px); }
@@ -3631,10 +3525,6 @@ h1.code-title-glow {
 }
 .activity-card {
   display: block;
-  width: 100%;
-  text-align: left;
-  font: inherit;
-  cursor: pointer;
   text-decoration: none;
   color: inherit;
   background: #0e0e0e;
@@ -3746,6 +3636,31 @@ h1.code-title-glow {
   color: var(--yellow);
   flex: 1 1 100%;
 }
+
+
+/* Own-profile edit on brother detail */
+.btn-edit-profile {
+  display: block;
+  width: calc(100% - 32px);
+  margin: 14px 16px 8px;
+  box-sizing: border-box;
+  font-family: var(--font-display);
+  font-size: 15px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+  border-radius: 10px;
+  padding: 14px 16px;
+  border: none;
+  background: var(--red);
+  color: #fff;
+  cursor: pointer;
+  min-height: 48px;
+  box-shadow: 0 0 18px rgba(227, 6, 0, 0.32);
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+.btn-edit-profile:active { transform: scale(0.97); }
+.btn-edit-profile.hidden { display: none !important; }
 
 .brother-qr-wrap {
   margin-top: 8px;
@@ -3913,9 +3828,9 @@ h1.code-title-glow {
   --tb-ease-out: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* View enter: no transform — transform on the scrolling pane kills iOS pan */
+/* View enter: single path only */
 .view.active {
-  animation: none;
+  animation: viewIn 0.32s var(--tb-ease) both;
 }
 @keyframes viewIn {
   from { opacity: 0; transform: translateY(5px); }
@@ -4356,46 +4271,6 @@ h1.code-title-glow,
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-#view-brothers .btn-auth-entry,
-#auth-entry-btn.btn-auth-entry {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  margin: 0 0 16px;
-  padding: 14px 16px;
-  border-radius: 12px;
-  border: 1px solid rgba(254, 241, 5, 0.35);
-  background: #111;
-  color: #FEF105;
-  font-family: var(--font-display, "Bebas Neue", Impact, sans-serif);
-  font-size: 18px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  cursor: pointer;
-}
-#view-brothers .btn-auth-entry.hidden,
-#auth-entry-btn.hidden {
-  display: none !important;
-}
-#view-brothers .btn-brothers-seat,
-#edit-profile-btn.btn-brothers-seat {
-  flex-shrink: 0;
-  width: auto;
-  margin: 0;
-  padding: 7px 12px;
-  border-radius: 8px;
-  border: 1px solid rgba(254, 241, 5, 0.4);
-  background: transparent;
-  color: #FEF105;
-  font-family: var(--font-display, "Bebas Neue", Impact, sans-serif);
-  font-size: 12px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  cursor: pointer;
-}
 .btn-auth-entry-sub {
   display: block;
   margin-top: 4px;
@@ -4501,10 +4376,11 @@ h1.code-title-glow,
 .tb-underlay-depth .views,
 .tb-underlay-depth #views,
 .tb-underlay-depth .bottom-nav {
-  transition: none;
-  transform: none !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
+  transition: transform 0.12s linear, opacity 0.12s linear;
+  transform: scale(calc(1 - (var(--tb-depth, 0) * 0.018))) translateY(calc(var(--tb-depth, 0) * -4px));
+  opacity: calc(1 - (var(--tb-depth, 0) * 0.12));
+  transform-origin: center top;
+  pointer-events: none;
 }
 #memory-viewer-stage img {
   will-change: transform;
@@ -5046,6 +4922,173 @@ h1.code-title-glow,
 
 
 /* ── Product Tour (isolated; must not leak after hidden) ── */
+/* OLD Living Bolt floating Concierge CSS REMOVED 20260818 — see DO-NOT-RESURRECT */
+
+/* ===== SLIDE TOUR (canonical 2026-08-18) — old floating host RETIRED ===== */
+.tb-tour.tb-tour-slides {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
+}
+.tb-tour.tb-tour-slides.hidden { display: none !important; }
+.tb-tour-stage {
+  width: min(420px, 100%);
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #0a0a0a;
+  border-radius: 16px;
+  border: 1px solid #222;
+  overflow: hidden;
+  position: relative;
+}
+.tb-tour-slide-frame {
+  flex: 0 0 auto;
+  background: #000;
+  line-height: 0;
+  max-height: 58vh;
+  overflow: hidden;
+}
+.tb-tour-slide-img {
+  width: 100%;
+  height: auto;
+  max-height: 58vh;
+  object-fit: contain;
+  object-position: center top;
+  display: block;
+  background: #000;
+}
+.tb-tour-slide-img.tb-tour-slide-in {
+  animation: tbTourFade 0.35s ease-out;
+}
+@keyframes tbTourFade {
+  from { opacity: 0.35; }
+  to { opacity: 1; }
+}
+.tb-tour-caption {
+  padding: 12px 16px 4px;
+  flex: 0 0 auto;
+}
+.tb-tour-slides .tb-tour-headline {
+  color: #FEF105;
+  font-size: 1.25rem;
+  margin: 6px 0 4px;
+  letter-spacing: 0.04em;
+}
+.tb-tour-slides .tb-tour-body {
+  color: #ccc;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  margin: 0 0 8px;
+}
+.tb-tour-slides .tb-tour-actions {
+  display: flex;
+  gap: 8px;
+  padding: 8px 16px 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.tb-tour-back {
+  background: transparent;
+  border: 1px solid #333;
+  color: #aaa;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.tb-tour-back:disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+.tb-tour-slides .tb-tour-next {
+  flex: 1;
+  min-width: 120px;
+}
+.tb-tour-slides .tb-tour-skip {
+  width: 100%;
+  text-align: center;
+  margin-top: 2px;
+}
+/* Kill old floating host/spotlight if any residual CSS */
+.tb-tour-slides .tb-tour-host,
+.tb-tour-slides .tb-tour-spotlight,
+.tb-tour-slides .tb-tour-dim {
+  display: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tb-tour-slide-img.tb-tour-slide-in { animation: none !important; }
+}
+
+/* Shared tour chrome (slide tour) — rebuilt after floating CSS purge */
+.tb-tour-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  z-index: 5;
+  background: transparent;
+  border: none;
+  color: #888;
+  font-size: 28px;
+  line-height: 1;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+.tb-tour-close:active { color: #fff; }
+.tb-tour-bolt-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.tb-tour-follow {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: #FEF105;
+  font-weight: 700;
+}
+.tb-tour-progress {
+  font-size: 11px;
+  color: #666;
+}
+.tb-tour-dots {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  padding: 4px 0 8px;
+}
+.tb-tour-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #333;
+}
+.tb-tour-dots span.on {
+  background: #FEF105;
+}
+.tb-tour-slides .tb-tour-next {
+  background: #E30600;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  font-size: 14px;
+}
+.tb-tour-slides .tb-tour-skip {
+  background: transparent;
+  border: none;
+  color: #666;
+  font-size: 12px;
+  padding: 8px;
+}
 .sr-only {
   position: absolute;
   width: 1px;
@@ -5114,3953 +5157,3 @@ h1.code-title-glow,
     animation: none !important;
   }
 }
-
-/* === PUNCH 20260818: header logo on top, no bolt overlay, centered, no overlap === */
-.header-bolt-live,
-.logo-bolt-glimmer,
-.splash-logo-bolt-glimmer {
-  display: none !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-  width: 0 !important;
-  height: 0 !important;
-  max-width: 0 !important;
-  max-height: 0 !important;
-  background: none !important;
-  animation: none !important;
-  filter: none !important;
-  box-shadow: none !important;
-}
-.logo-wrap {
-  position: relative;
-  z-index: 2;
-}
-.header .logo {
-  position: relative;
-  z-index: 2;
-}
-
-/* === LOGO CLIP FIX 20260818: full wordmark, no height crop === */
-.header .logo,
-.header img.logo,
-#header-logo,
-.logo-wrap .logo {
-  height: auto !important;
-  width: auto !important;
-  max-height: none !important;
-  object-fit: contain !important;
-  object-position: center center !important;
-}
-.header {
-  overflow: visible !important;
-}
-.logo-wrap {
-  overflow: visible !important;
-  height: auto !important;
-  max-height: none !important;
-}
-
-/* === OVERRIDE 20260818: tuxedo Thunder on Ask Thunder page ONLY ===
-   Explicit product-owner override of body/tuxedo lock for this surface.
-   FAB, Home, tour, and all other surfaces stay bolt-head only. */
-.thunder-ask-hero {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 16px 4px;
-  background: #000;
-}
-.thunder-ask-hero-img {
-  width: min(220px, 58vw);
-  height: auto;
-  max-height: 42vh;
-  object-fit: contain;
-  object-position: center top;
-  display: block;
-  filter: drop-shadow(0 0 18px rgba(254, 241, 5, 0.25));
-}
-.thunder-modal .thunder-messages {
-  flex: 1;
-  min-height: 0;
-}
-
-/* ===== 7-SLIDE PRODUCT TOUR — restored 20260818, glow + motion ===== */
-.tb-tour.tb-tour-slides {
-  position: fixed;
-  inset: 0;
-  z-index: 12000;
-  background: rgba(0, 0, 0, 0.94);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom));
-}
-.tb-tour.tb-tour-slides.hidden { display: none !important; }
-body.tb-tour-open { overflow: hidden; }
-
-.tb-tour-stage {
-  width: min(420px, 100%);
-  max-height: 100%;
-  display: flex;
-  flex-direction: column;
-  background: #0a0a0a;
-  border-radius: 16px;
-  border: 1px solid #222;
-  box-shadow:
-    0 0 0 1px rgba(254, 241, 5, 0.08),
-    0 0 40px rgba(254, 241, 5, 0.12),
-    0 20px 60px rgba(0, 0, 0, 0.6);
-  overflow: hidden;
-  position: relative;
-  animation: tbTourStageIn 0.35s ease-out;
-}
-@keyframes tbTourStageIn {
-  from { opacity: 0; transform: scale(0.96) translateY(12px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-.tb-tour-slide-frame {
-  flex: 0 0 auto;
-  background: #000;
-  line-height: 0;
-  max-height: 52vh;
-  overflow: hidden;
-  position: relative;
-}
-.tb-tour-slide-frame::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  box-shadow: inset 0 0 40px rgba(254, 241, 5, 0.06);
-}
-.tb-tour-slide-img {
-  width: 100%;
-  height: auto;
-  max-height: 52vh;
-  object-fit: contain;
-  object-position: center top;
-  display: block;
-  background: #000;
-}
-.tb-tour-slide-img.tb-tour-slide-in {
-  animation: tbTourSlideIn 0.4s ease-out;
-}
-@keyframes tbTourSlideIn {
-  from { opacity: 0.2; transform: scale(1.03); filter: brightness(0.7); }
-  to { opacity: 1; transform: scale(1); filter: brightness(1); }
-}
-
-.tb-tour-caption { padding: 12px 16px 4px; flex: 0 0 auto; }
-.tb-tour-bolt-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-}
-.tb-tour-follow {
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  color: #FEF105;
-  font-weight: 700;
-  text-shadow:
-    0 0 8px rgba(254, 241, 5, 0.8),
-    0 0 18px rgba(254, 241, 5, 0.4);
-  animation: brotherNamePulse var(--tb-breathe);
-}
-.tb-tour-progress {
-  font-size: 11px;
-  color: #666;
-  letter-spacing: 0.06em;
-}
-.tb-tour-headline {
-  color: #fff;
-  font-size: 1.3rem;
-  margin: 4px 0 6px;
-  letter-spacing: 0.04em;
-  text-shadow:
-    0 0 10px rgba(254, 241, 5, 0.7),
-    0 0 24px rgba(254, 241, 5, 0.35);
-}
-.tb-tour-body {
-  color: #ccc;
-  font-size: 0.95rem;
-  line-height: 1.4;
-  margin: 0 0 8px;
-}
-.tb-tour-dots {
-  display: flex;
-  gap: 7px;
-  justify-content: center;
-  padding: 6px 0 10px;
-}
-.tb-tour-dots span {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #333;
-  transition: background 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
-}
-.tb-tour-dots span.on {
-  background: #FEF105;
-  box-shadow: 0 0 10px rgba(254, 241, 5, 0.8), 0 0 4px rgba(254, 241, 5, 0.9);
-  transform: scale(1.15);
-}
-.tb-tour-actions {
-  display: flex;
-  gap: 8px;
-  padding: 8px 16px 16px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-.tb-tour-back {
-  background: transparent;
-  border: 1px solid #333;
-  color: #aaa;
-  border-radius: 10px;
-  padding: 10px 14px;
-  font-size: 13px;
-  font-weight: 600;
-}
-.tb-tour-back:disabled {
-  opacity: 0.35;
-  pointer-events: none;
-}
-.tb-tour-next {
-  flex: 1;
-  min-width: 120px;
-  background: #E30600;
-  color: #fff;
-  border: none;
-  border-radius: 12px;
-  padding: 12px 18px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  font-size: 14px;
-  box-shadow: 0 0 16px rgba(227, 6, 0, 0.35);
-}
-.tb-tour-next:active { transform: scale(0.97); }
-.tb-tour-skip {
-  width: 100%;
-  text-align: center;
-  margin-top: 2px;
-  background: transparent;
-  border: none;
-  color: #666;
-  font-size: 12px;
-  padding: 8px;
-}
-.tb-tour-close {
-  position: absolute;
-  top: 8px;
-  right: 10px;
-  z-index: 5;
-  background: rgba(0,0,0,0.5);
-  border: none;
-  color: #888;
-  font-size: 28px;
-  line-height: 1;
-  width: 44px;
-  height: 44px;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border-radius: 8px;
-  touch-action: manipulation;
-}
-.tb-tour-close:active { color: #fff; }
-
-@media (prefers-reduced-motion: reduce) {
-  .tb-tour-stage { animation: none !important; }
-  .tb-tour-slide-img.tb-tour-slide-in { animation: none !important; }
-  .tb-tour-follow { animation: none !important; }
-}
-
-/* === LOGO PIN 20260818: exact current size, die-cut, top layer every page === */
-#main-header.header,
-.header#main-header,
-#main-header {
-  display: block !important;
-  position: sticky !important;
-  top: 0 !important;
-  z-index: 500 !important;
-  background: #000 !important;
-  padding: calc(8px + env(safe-area-inset-top, 20px)) 12px 8px !important;
-  overflow: visible !important;
-  box-shadow: none !important;
-  border-bottom: none !important;
-}
-.logo-wrap {
-  position: relative !important;
-  z-index: 501 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 100% !important;
-  margin: 0 auto !important;
-  overflow: visible !important;
-  background: transparent !important;
-  line-height: 0 !important;
-}
-/* Exact size — match live app, NOT enlarged. Die-cut = transparent, no box. */
-.header .logo,
-.header img.logo,
-#header-logo,
-.logo-wrap .logo {
-  height: 72px !important;
-  width: auto !important;
-  max-width: 78vw !important;
-  max-height: 72px !important;
-  object-fit: contain !important;
-  object-position: center center !important;
-  display: block !important;
-  margin: 0 auto !important;
-  position: relative !important;
-  z-index: 502 !important;
-  background: transparent !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  /* no rectangular pad — PNG die-cut only */
-  filter: none !important;
-  padding: 0 !important;
-}
-#views,
-.view,
-.view.active,
-.next-meeting.card,
-.announcement-card,
-.brother-card,
-.card {
-  position: relative;
-  z-index: 1;
-}
-.about-container {
-  padding-top: 8px !important;
-}
-
-
-/* === FIX 1: double logo on More — hide in-page about-logo === */
-.about-logo,
-img.about-logo,
-.about-container .about-logo {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  visibility: hidden !important;
-}
-.about-container {
-  /* header is always visible now — no extra top padding for a second logo */
-  padding-top: 8px !important;
-}
-
-
-/* === FIX 2: tour slide clean frame — no neighbor bleed === */
-.tb-tour-slide-frame {
-  overflow: hidden !important;
-  background: #000 !important;
-  border-radius: 12px 12px 0 0;
-}
-.tb-tour-slide-img {
-  width: 100% !important;
-  height: auto !important;
-  max-height: 52vh !important;
-  object-fit: contain !important;
-  object-position: center center !important;
-  display: block !important;
-  background: #000 !important;
-}
-
-
-/* === FIX 4: logo pin reaffirm — same size all pages, top layer === */
-#main-header {
-  display: block !important;
-  position: sticky !important;
-  top: 0 !important;
-  z-index: 500 !important;
-  background: #000 !important;
-}
-.header .logo,
-#header-logo {
-  height: 72px !important;
-  width: auto !important;
-  max-width: 78vw !important;
-  max-height: 72px !important;
-  object-fit: contain !important;
-}
-
-
-/* === TOUR TYPEWRITER — Thunder speaking === */
-.tb-tour-body {
-  min-height: 3.2em;
-  white-space: pre-wrap;
-}
-.tb-tour-body.tb-tour-typing::after {
-  content: '';
-  display: inline-block;
-  width: 2px;
-  height: 1em;
-  margin-left: 2px;
-  vertical-align: -0.1em;
-  background: #FEF105;
-  box-shadow: 0 0 8px rgba(254, 241, 5, 0.8);
-  animation: tbTourCursor 0.7s steps(1) infinite;
-}
-@keyframes tbTourCursor {
-  0%, 49% { opacity: 1; }
-  50%, 100% { opacity: 0; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .tb-tour-body.tb-tour-typing::after { display: none !important; animation: none !important; }
-}
-/* ===== Birthday Honors ===== */
-.brother-name.birthday-today {
-  color: #FEF105 !important;
-  text-shadow: 0 0 10px rgba(254, 241, 5, 0.55), 0 0 22px rgba(254, 241, 5, 0.25);
-}
-.today-badge {
-  display: inline-block;
-  background: #FEF105;
-  color: #000;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  padding: 2px 7px;
-  border-radius: 4px;
-  margin-left: 8px;
-  vertical-align: middle;
-  line-height: 1.2;
-}
-.happy-birthday-label {
-  color: #FEF105;
-  font-family: var(--font-display);
-  font-size: 26px;
-  letter-spacing: 0.04em;
-  margin: 12px 0 8px;
-  text-align: center;
-}
-#brother-text-him {
-  width: 100%;
-  margin-bottom: 10px;
-}
-.optional-tag,
-.field-hint {
-  font-size: 11px;
-  color: #888;
-  font-weight: 500;
-  margin-left: 6px;
-}
-
-/* === 20260819-red7697: stacked IMG_7697 mark MUST show full red OF THUNDER ===
-   Previous lock pinned height:72px for the old landscape wordmark.
-   That crop hides OF THUNDER on the stacked official mark. Size by WIDTH only. */
-#main-header.header,
-.header {
-  overflow: visible !important;
-  min-height: 0 !important;
-  height: auto !important;
-  padding: calc(8px + env(safe-area-inset-top, 20px)) 12px 4px !important;
-}
-.logo-wrap {
-  overflow: visible !important;
-  height: auto !important;
-  max-height: none !important;
-}
-.header .logo,
-.header img.logo,
-#header-logo,
-.logo-wrap .logo {
-  height: auto !important;
-  width: auto !important;
-  max-width: 70vw !important;
-  max-height: none !important;
-  object-fit: contain !important;
-  object-position: center top !important;
-}
-
-/* Splash uses the same stacked 7697 mark — full red OF THUNDER */
-.splash {
-  overflow: hidden;
-}
-.splash-inner {
-  overflow: visible !important;
-}
-.splash-logo-wrap {
-  max-width: min(78vw, 340px) !important;
-  overflow: visible !important;
-}
-.splash-mark,
-.splash-logo {
-  width: min(78vw, 340px) !important;
-  height: auto !important;
-  max-height: none !important;
-  object-fit: contain !important;
-}
-
-/* Header bolt — drop-shadow pulse on the bolt only. Never a box around the wordmark. */
-.logo-stack {
-  position: relative;
-  display: block;
-  width: min(70vw, 360px);
-  margin: 0 auto;
-  line-height: 0;
-  overflow: visible;
-  aspect-ratio: 800 / 591;
-}
-.logo-stack #header-logo,
-.logo-stack .logo {
-  max-width: 100% !important;
-  width: 100% !important;
-  height: auto !important;
-  display: block !important;
-  position: relative;
-  z-index: 1;
-}
-.header-bolt-pulse {
-  position: absolute;
-  left: 33.88%;
-  top: 2.2%;
-  width: 31.62%;
-  height: auto;
-  pointer-events: none;
-  z-index: 2;
-  display: block !important;
-  visibility: visible !important;
-  background: none !important;
-  border: none !important;
-  animation: headerBoltGlow var(--tb-breathe);
-  will-change: filter;
-}
-@keyframes headerBoltGlow {
-  0%, 100% {
-    filter:
-      drop-shadow(0 0 3px rgba(254, 241, 5, 0.35))
-      drop-shadow(0 0 8px rgba(254, 241, 5, 0.18));
-  }
-  50% {
-    filter:
-      drop-shadow(0 0 8px rgba(254, 241, 5, 0.95))
-      drop-shadow(0 0 18px rgba(254, 241, 5, 0.55))
-      drop-shadow(0 0 6px rgba(255, 160, 0, 0.4));
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .header-bolt-pulse {
-    animation: none !important;
-    filter: drop-shadow(0 0 8px rgba(254, 241, 5, 0.55));
-  }
-}
-
-
-/* ===== LIVE TOUR SLIDES — layered, manipulable ===== */
-#tb-tour-live.tb-tour-slide-frame {
-  height: min(38vh, 280px);
-  max-height: min(38vh, 280px);
-  overflow: hidden !important;
-  background: #000 !important;
-  position: relative;
-  flex: 1 1 auto;
-}
-.tb-live-slide {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 14px 16px 10px;
-  opacity: 0;
-  pointer-events: none;
-  background: #000;
-  transition: opacity 0.55s ease;
-  transform: none;
-}
-.tb-live-slide.is-on {
-  opacity: 1;
-  animation: none;
-}
-.tb-live-logo {
-  width: min(58%, 190px);
-  height: auto;
-  display: block;
-  margin: 4px auto;
-  animation: tbLiveKen 9s ease-in-out infinite alternate;
-  transform-origin: center 40%;
-}
-@keyframes tbLiveKen {
-  from { transform: scale(1); filter: brightness(1); }
-  to { transform: scale(1.08); filter: brightness(1.08); }
-}
-.tb-live-card {
-  width: 100%;
-  background: #111;
-  border: 1px solid #222;
-  border-left: 3px solid #FEF105;
-  border-radius: 12px;
-  padding: 14px 14px 16px;
-  margin-bottom: 8px;
-  position: relative;
-  z-index: 2;
-}
-.tb-live-label {
-  font-family: var(--font-display);
-  color: #FEF105;
-  letter-spacing: 0.12em;
-  font-size: 13px;
-  margin-bottom: 6px;
-  animation: brotherNamePulse var(--tb-breathe);
-}
-.tb-live-date {
-  color: #fff;
-  font-weight: 700;
-  font-size: 16px;
-}
-.tb-live-loc {
-  color: #888;
-  font-size: 12px;
-  margin-top: 4px;
-}
-.tb-live-im-in {
-  margin-top: 12px;
-  background: #E30600;
-  color: #fff;
-  text-align: center;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  padding: 12px 8px;
-  border-radius: 10px;
-  animation: tbLiveCtaPulse var(--tb-breathe);
-}
-@keyframes tbLiveCtaPulse {
-  0%, 100% { box-shadow: 0 0 0 rgba(227,6,0,0); }
-  50% { box-shadow: 0 0 18px rgba(227,6,0,0.55), 0 0 8px rgba(254,241,5,0.2); }
-}
-.tb-live-bros {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 8px;
-  z-index: 2;
-}
-.tb-live-bro {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: #111;
-  border-radius: 10px;
-  padding: 10px 12px;
-  border: 1px solid #1c1c1c;
-}
-.tb-live-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: #1a1a1a;
-  color: #FEF105;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-}
-.tb-live-bname {
-  color: #FEF105;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  animation: brotherNamePulse var(--tb-breathe);
-}
-.tb-live-bro-you { border: 1px dashed #333; }
-.tb-live-mem-row {
-  display: flex;
-  gap: 8px;
-  margin: 10px 0 6px;
-}
-.tb-live-mem {
-  flex: 1;
-  height: 64px;
-  border-radius: 8px;
-  background: #1a1a1a;
-  border: 1px solid #2a2a2a;
-}
-.tb-live-mem-add {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #FEF105;
-  font-size: 28px;
-  border: 1px dashed #444;
-  background: #0e0e0e;
-}
-.tb-live-code-title {
-  font-family: var(--font-display);
-  color: #FEF105;
-  font-size: 28px;
-  letter-spacing: 0.06em;
-  margin-bottom: 10px;
-  animation: codeTitleGlow var(--tb-breathe);
-}
-.tb-live-code-line {
-  color: #ddd;
-  font-size: 15px;
-  padding: 6px 0;
-  border-bottom: 1px solid #222;
-}
-.tb-live-text-leader {
-  margin-top: 10px;
-  background: #E30600;
-  color: #fff;
-  text-align: center;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  padding: 12px 8px;
-  border-radius: 10px;
-  animation: tbLiveCtaPulse var(--tb-breathe);
-}
-.tb-live-thunder {
-  position: absolute;
-  left: 8px;
-  bottom: 4px;
-  width: 72px;
-  height: auto;
-  z-index: 3;
-  filter: drop-shadow(0 0 10px rgba(254,241,5,0.25));
-  animation: tbLiveThunderIdle var(--tb-breathe);
-  pointer-events: none;
-}
-@keyframes tbLiveThunderIdle {
-  0%, 100% { transform: translateY(0); opacity: 0.95; }
-  50% { transform: translateY(-3px); opacity: 1; }
-}
-.tb-live-thunder-welcome {
-  width: 88px;
-  left: 10px;
-  bottom: 8px;
-}
-.tb-live-thunder-end {
-  width: 96px;
-  left: 50%;
-  bottom: 8px;
-  transform: translateX(-50%);
-}
-.tb-live-slide[data-slide="6"] .tb-live-thunder-end {
-  animation: tbLiveThunderEndIdle var(--tb-breathe);
-}
-@keyframes tbLiveThunderEndIdle {
-  0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.95; }
-  50% { transform: translateX(-50%) translateY(-3px); opacity: 1; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .tb-live-logo,
-  .tb-live-im-in,
-  .tb-live-label,
-  .tb-live-bname,
-  .tb-live-code-title,
-  .tb-live-text-leader,
-  .tb-live-thunder,
-  .tb-live-slide.is-on,
-  .tb-guide-thunder {
-    animation: none !important;
-  }
-}
-
-/* ===== TOUR FILM — Thunder as guide, one continuous scene ===== */
-.tb-tour-film {
-  display: flex;
-  flex-direction: column;
-  background: #000;
-  min-height: 0;
-}
-.tb-tour-guide {
-  display: flex;
-  align-items: flex-end;
-  gap: 8px;
-  padding: 0 14px 8px;
-  background: transparent;
-  flex: 0 0 auto;
-  margin-top: -18px;
-  position: relative;
-  z-index: 4;
-}
-.tb-guide-thunder {
-  width: 96px;
-  height: auto;
-  flex: 0 0 auto;
-  display: block;
-  background: transparent !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  overflow: visible;
-  filter: drop-shadow(0 0 10px rgba(254,241,5,0.4));
-  animation: tbLiveThunderIdle var(--tb-breathe);
-}
-.tb-guide-bubble {
-  flex: 1;
-  min-width: 0;
-  background: #161616;
-  border: 1px solid #2c2c2c;
-  border-radius: 12px 12px 12px 5px;
-  padding: 10px 12px 11px;
-  position: relative;
-  min-height: 3.4em;
-}
-.tb-guide-bubble::before {
-  content: '';
-  position: absolute;
-  left: -5px;
-  bottom: 18px;
-  width: 10px;
-  height: 10px;
-  background: #161616;
-  border-left: 1px solid #2c2c2c;
-  border-bottom: 1px solid #2c2c2c;
-  transform: rotate(45deg);
-}
-#tb-tour-body.tb-tour-body {
-  margin: 0;
-  color: #ececec;
-  font-size: 15px;
-  line-height: 1.4;
-  font-weight: 500;
-  min-height: 2.6em;
-  text-shadow: none;
-}
-.tb-tour-caption {
-  padding: 6px 16px 0;
-}
-.tb-tour-headline {
-  font-size: 1.05rem !important;
-  margin: 2px 0 0 !important;
-  animation: none !important;
-  color: #fff !important;
-  text-shadow: none !important;
-}
-.tb-tour-follow { display: none !important; }
-.tb-tour-bolt-row { justify-content: flex-end; }
-
-/* ===== WILD FACTOR — CSS-only, no transform fights on I'm In ===== */
-.next-meeting.commit-energized {
-  box-shadow:
-    0 0 0 1px rgba(254, 241, 5, 0.22),
-    0 0 24px rgba(227, 6, 0, 0.18);
-  animation: tbStormRim var(--tb-breathe);
-}
-@keyframes tbStormRim {
-  0%, 100% {
-    box-shadow:
-      0 0 0 1px rgba(254, 241, 5, 0.18),
-      0 0 16px rgba(227, 6, 0, 0.12);
-  }
-  50% {
-    box-shadow:
-      0 0 0 1px rgba(254, 241, 5, 0.45),
-      0 0 28px rgba(227, 6, 0, 0.32),
-      0 0 8px rgba(254, 241, 5, 0.2);
-  }
-}
-
-.thunder-ask-hero-img {
-  animation: tbTuxIdle var(--tb-breathe);
-  transform-origin: center 70%;
-}
-.thunder-ask-hero-img.tb-tux-in {
-  animation: tbTuxIn 0.7s cubic-bezier(0.22, 1, 0.36, 1), tbTuxIdle var(--tb-breathe) 0.7s infinite;
-}
-@keyframes tbTuxIn {
-  from { opacity: 0; transform: translateY(18px) scale(0.96); filter: brightness(0.6); }
-  to { opacity: 1; transform: translateY(0) scale(1); filter: brightness(1); }
-}
-@keyframes tbTuxIdle {
-  0%, 100% { transform: translateY(0); filter: drop-shadow(0 0 14px rgba(254,241,5,0.22)); }
-  50% { transform: translateY(-4px); filter: drop-shadow(0 0 22px rgba(254,241,5,0.4)); }
-}
-
-.tb-guide-bubble.tb-speak-flash {
-  animation: tbSpeakFlash 0.55s ease-out;
-}
-@keyframes tbSpeakFlash {
-  0% { box-shadow: 0 0 0 rgba(254,241,5,0); border-color: #2c2c2c; }
-  35% { box-shadow: 0 0 18px rgba(254,241,5,0.35); border-color: #FEF105; }
-  100% { box-shadow: none; border-color: #2c2c2c; }
-}
-
-.cal-confirm-sheet:not(.hidden) .cal-confirm-panel {
-  animation: tbSheetUp 0.38s cubic-bezier(0.22, 1, 0.36, 1);
-}
-@keyframes tbSheetUp {
-  from { opacity: 0; transform: translateY(28px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .next-meeting.commit-energized,
-  .thunder-ask-hero-img,
-  .tb-guide-bubble.tb-speak-flash,
-  .cal-confirm-sheet:not(.hidden) .cal-confirm-panel {
-    animation: none !important;
-  }
-}
-
-/* Scene chrome is not the title — don't let NEXT GATHERING / MEMORIES steal the pulse */
-.tb-live-label {
-  animation: none !important;
-  color: #888 !important;
-  letter-spacing: 0.1em;
-}
-.tb-live-code-title {
-  animation: none !important;
-}
-.tb-live-card { margin-bottom: 0; }
-.tb-live-bros { margin-bottom: 0; }
-
-/* ===== LABEL PULSE / TITLE SOLID =====
-   Chip (ANNOUNCEMENT) breathes. Title stands still. */
-.info-detail-label,
-.announcement-card-label {
-  animation: brotherNamePulse var(--tb-breathe) !important;
-  color: #FEF105 !important;
-  text-shadow:
-    0 0 8px rgba(254, 241, 5, 0.55),
-    0 0 16px rgba(254, 241, 5, 0.25) !important;
-  opacity: 1 !important;
-}
-.qr-label,
-.info-detail .card-label {
-  animation: none !important;
-  text-shadow: none !important;
-  color: #8a8a8a !important;
-}
-.info-detail-title {
-  color: #fff !important;
-  animation: none !important;
-  text-shadow: none !important;
-  font-weight: 800;
-}
-.brother-detail-name {
-  animation: none !important;
-  color: #fff !important;
-  text-shadow: none !important;
-}
-.announcement-card-label {
-  display: block;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  margin-bottom: 6px;
-  text-transform: uppercase;
-}
-.modal-header h2 {
-  animation: none !important;
-  text-shadow: none !important;
-}
-
-/* I'm In calendar — in-app sheet, never a trap */
-.cal-confirm-sheet {
-  position: fixed;
-  inset: 0;
-  z-index: 11000;
-  background: rgba(0,0,0,0.78);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding: 16px 16px calc(20px + env(safe-area-inset-bottom, 0px));
-}
-.cal-confirm-sheet.hidden { display: none !important; }
-.cal-confirm-panel {
-  position: relative;
-  width: 100%;
-  max-width: 420px;
-  background: #111;
-  border: 1px solid #2a2a2a;
-  border-radius: 16px 16px 12px 12px;
-  padding: 22px 18px 16px;
-}
-.cal-confirm-close {
-  position: absolute;
-  top: 8px;
-  right: 10px;
-  width: 44px;
-  height: 44px;
-  border: none;
-  background: transparent;
-  color: #888;
-  font-size: 28px;
-  line-height: 1;
-  cursor: pointer;
-  touch-action: manipulation;
-}
-.cal-confirm-title {
-  font-family: var(--font-display);
-  color: #fff;
-  font-size: 28px;
-  letter-spacing: 0.04em;
-  margin: 0 36px 8px 0;
-  animation: none;
-  text-shadow: none;
-}
-.cal-confirm-body {
-  color: #ccc;
-  font-size: 15px;
-  line-height: 1.4;
-  margin: 0 0 16px;
-}
-.cal-confirm-primary {
-  width: 100%;
-  background: #E30600;
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  padding: 14px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  cursor: pointer;
-}
-.cal-confirm-secondary {
-  width: 100%;
-  margin-top: 8px;
-  background: transparent;
-  color: #aaa;
-  border: 1px solid #333;
-  border-radius: 10px;
-  padding: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  cursor: pointer;
-}
-.cal-confirm-hint {
-  margin: 10px 0 0;
-  text-align: center;
-  color: #666;
-  font-size: 12px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .info-detail-title,
-  .brother-detail-name {
-    animation: none !important;
-  }
-}
-
-
-
-
-/* ===== 7-BOARD TOUR — poster spec (official Thunder) ===== */
-.tb-tour-boards .tb-tour-stage {
-  background: #000 !important;
-  display: flex;
-  flex-direction: column;
-  padding: 8px 18px calc(16px + env(safe-area-inset-bottom, 0px));
-  overflow-y: auto;
-  overflow-x: hidden;
-  max-height: 100%;
-}
-.tb-tour-boards .tb-tour-progress {
-  text-align: center;
-  font-size: 11px;
-  letter-spacing: 0.22em;
-  color: #FEF105;
-  margin: 4px 0 6px;
-  font-weight: 700;
-  animation: brotherNamePulse var(--tb-breathe);
-}
-.tb-tour-boards .tb-tour-headline {
-  text-align: center;
-  font-family: var(--font-display);
-  font-size: clamp(26px, 7vw, 36px);
-  color: #fff !important;
-  letter-spacing: 0.04em;
-  line-height: 0.95;
-  animation: none !important;
-  text-shadow: none !important;
-  margin: 0;
-}
-.tb-tour-boards .tb-tour-sub {
-  text-align: center;
-  font-family: var(--font-display);
-  font-size: clamp(16px, 4.8vw, 22px);
-  color: #bdbdbd;
-  letter-spacing: 0.04em;
-  line-height: 1;
-  margin: 6px 0 10px;
-}
-.tb-tour-hero {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin: 4px 0 10px;
-}
-.tb-tour-boards .tb-guide-bubble {
-  flex: 1;
-  min-width: 0;
-  background: #0a0a0a;
-  border: 1.5px solid #FEF105;
-  border-radius: 14px;
-  padding: 10px 12px;
-  box-shadow: 0 0 16px rgba(254,241,5,0.12);
-}
-.tb-tour-boards .tb-tour-body {
-  color: #eee;
-  font-size: 13px;
-  line-height: 1.35;
-  margin: 0;
-}
-.tb-tour-boards .tb-guide-thunder {
-  width: min(38vw, 148px);
-  height: auto;
-  flex: 0 0 auto;
-  background: none !important;
-  border: none !important;
-  filter: drop-shadow(0 0 12px rgba(254,241,5,0.45));
-  animation: tbLiveThunderIdle var(--tb-breathe);
-}
-.tb-phone {
-  display: block;
-  width: min(86%, 300px);
-  margin: 0 auto 10px;
-  background: #111;
-  border: 2px solid #2a2a2a;
-  border-radius: 22px;
-  padding: 12px 12px 10px;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.55);
-}
-.tb-tour-boards .tb-tour-stage:not([data-board="0"]) .tb-phone { display: block; }
-.tb-tour-boards .tb-tour-slide-frame {
-  height: auto !important;
-  max-height: none !important;
-  position: relative;
-  overflow: visible !important;
-  background: transparent !important;
-}
-.tb-tour-boards .tb-live-slide {
-  position: relative !important;
-  inset: auto !important;
-  opacity: 0;
-  display: none !important;
-  pointer-events: none;
-  background: #0a0a0a !important;
-}
-.tb-tour-boards .tb-live-slide.is-on {
-  display: block !important;
-  opacity: 1 !important;
-  pointer-events: auto;
-  animation: tbBoardIn 0.45s ease;
-  isolation: isolate;
-  background: #111 !important;
-}
-@keyframes tbBoardIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: none; }
-}
-.tb-live-bros-grid {
-  display: grid !important;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 4px;
-  flex-direction: unset !important;
-}
-.tb-live-bros-grid .tb-live-bro { justify-content: center; padding: 10px 0; }
-.tb-live-phone-foot {
-  text-align: center; color: #aaa; font-size: 11px; margin-top: 8px; letter-spacing: 0.04em;
-}
-.tb-live-remind, .tb-live-muted { text-align: center; color: #888; font-size: 12px; margin-top: 8px; }
-.tb-live-up {
-  display: flex; justify-content: space-between; color: #ddd; font-size: 13px;
-  padding: 8px 0; border-bottom: 1px solid #222;
-}
-.tb-live-allset {
-  margin-top: 12px; color: #FEF105; font-family: var(--font-display);
-  font-size: 18px; letter-spacing: 0.04em; text-align: center; line-height: 1.15;
-}
-.tb-tour-boards .tb-tour-dots { justify-content: center; margin: 4px 0 10px; }
-.tb-tour-boards .tb-tour-actions { margin-top: auto; }
-.tb-tour-boards .tb-tour-stage[data-board="0"] .tb-tour-back { display: none; }
-.tb-tour-boards .tb-tour-stage[data-board="0"] .tb-tour-next {
-  background: #FEF105 !important;
-  color: #000 !important;
-  box-shadow: 0 0 18px rgba(254,241,5,0.35);
-  flex: 1 1 100%;
-}
-.tb-tour-boards .tb-tour-skip { letter-spacing: 0.14em; font-size: 11px; }
-@media (prefers-reduced-motion: reduce) {
-  .tb-tour-boards .tb-live-slide.is-on,
-  .tb-tour-boards .tb-guide-thunder { animation: none !important; }
-}
-
-
-/* === LOCK 20260819-logofull1: stacked 7697 mark, FULL red OF THUNDER, every surface ===
-   Splash is the source of truth. Header was losing to leftover height:72px and a bolt overlay.
-   Size by WIDTH only. Never crop height. Overlay bolt is dead. */
-.header-bolt-pulse,
-.header-bolt-live,
-.logo-bolt-glimmer,
-.logo-stack {
-  display: none !important;
-}
-#main-header.header,
-.header {
-  overflow: visible !important;
-  height: auto !important;
-  min-height: 0 !important;
-  max-height: none !important;
-  padding: calc(8px + env(safe-area-inset-top, 20px)) 12px 8px !important;
-}
-.logo-wrap {
-  display: flex !important;
-  justify-content: center !important;
-  overflow: visible !important;
-  height: auto !important;
-  max-height: none !important;
-  aspect-ratio: auto !important;
-}
-.header .logo,
-.header img.logo,
-#header-logo,
-.logo-wrap .logo,
-.logo-stack #header-logo {
-  height: auto !important;
-  width: min(72vw, 320px) !important;
-  max-width: min(72vw, 320px) !important;
-  max-height: none !important;
-  object-fit: contain !important;
-  object-position: center top !important;
-  display: block !important;
-  margin: 0 auto !important;
-}
-.splash-mark,
-.splash-logo {
-  width: min(82vw, 340px) !important;
-  height: auto !important;
-  max-height: none !important;
-  object-fit: contain !important;
-}
-.tb-live-logo {
-  width: min(58%, 200px) !important;
-  height: auto !important;
-  max-height: none !important;
-  object-fit: contain !important;
-}
-
-/* Header logo stays on every tab — More no longer hides it */
-.about-container {
-  padding-top: 8px !important;
-}
-#main-header.header,
-#main-header {
-  display: block !important;
-}
-
-/* Ask Thunder: modal above sticky header; tux fully visible; logo shrinks */
-.thunder-modal {
-  z-index: 800 !important;
-  align-items: stretch !important;
-}
-.thunder-modal .thunder-content {
-  height: 100% !important;
-  max-height: 100% !important;
-  border-radius: 0 !important;
-  max-width: 100% !important;
-}
-body.tb-ask-open #main-header.header,
-body.tb-ask-open #main-header {
-  display: block !important;
-  padding: calc(4px + env(safe-area-inset-top, 12px)) 12px 2px !important;
-}
-body.tb-ask-open #header-logo,
-body.tb-ask-open .header .logo {
-  width: min(28vw, 110px) !important;
-  max-width: min(28vw, 110px) !important;
-  max-height: none !important;
-  height: auto !important;
-}
-.thunder-ask-hero {
-  padding: 4px 12px 0 !important;
-  flex: 0 0 auto;
-}
-.thunder-ask-hero-img {
-  width: min(300px, 78vw) !important;
-  max-height: 52vh !important;
-  height: auto !important;
-  object-fit: contain !important;
-  object-position: center top !important;
-}
-
-/* Beat 2: I'm In is the only object. Nothing sits behind or on it. */
-.tb-tour-stage[data-board="1"] .tb-tour-hero {
-  align-items: flex-start;
-}
-.tb-tour-stage[data-board="1"] .tb-guide-thunder {
-  max-width: 120px;
-  width: min(34vw, 120px);
-}
-.tb-tour-stage[data-board="1"] #tb-tour-host.tb-guide-thunder.tb-host-alive {
-  animation: tbHostSlide2 5.8s ease-in-out infinite !important;
-  transform-origin: 50% 80%;
-}
-@keyframes tbHostSlide2 {
-  0%   { transform: translateY(0) rotate(2deg) scale(1); }
-  16%  { transform: translateY(-9px) rotate(9deg) scale(1.05); }
-  26%  { transform: translateY(-9px) rotate(9deg) scale(1.05); }
-  38%  { transform: translateY(-2px) rotate(-5deg) scale(1); }
-  50%  { transform: translateY(-13px) rotate(3deg) scale(1.04); }
-  64%  { transform: translateY(0) rotate(7deg) scale(1.02); }
-  78%  { transform: translateY(-6px) rotate(1deg) scale(1.01); }
-  100% { transform: translateY(0) rotate(2deg) scale(1); }
-}
-.tb-live-imin-only {
-  position: relative;
-  z-index: 3;
-  isolation: isolate;
-}
-.tb-live-imin-only .tb-live-im-in {
-  position: relative;
-  z-index: 4;
-}
-
-.tb-live-bros-grid .tb-live-bro {
-  background: transparent;
-  border: none;
-  padding: 0;
-  justify-content: center;
-}
- .tb-live-face {
-  width: 78px;
-  height: 78px;
-  object-fit: contain;
-  display: block;
-  filter: none;
-}
-
-/* Tour host idle — #tb-tour-host only. Breath + irregular one-shots. Not a metronome. */
-.tb-guide-thunder.tb-host-alive {
-  transform-origin: 50% 85%;
-  animation: tbHostBreath 5.7s ease-in-out infinite !important;
-  will-change: transform, filter;
-}
-@keyframes tbHostBreath {
-  0%, 100% { transform: translateY(0) rotate(var(--host-rot, 0deg)); }
-  50% { transform: translateY(-2px) rotate(var(--host-rot, 0deg)); }
-}
-.tb-host-arrive { --host-rot: 0deg; }
-.tb-host-lockin { --host-rot: 1.4deg; }
-.tb-host-brotherhood { --host-rot: 1.1deg; }
-.tb-host-watch { --host-rot: 1.2deg; }
-.tb-host-think { --host-rot: -1.2deg; }
-.tb-host-listen { --host-rot: 1.6deg; }
-.tb-host-appreciate { --host-rot: 0deg; }
-.tb-guide-thunder.tb-host-enter {
-  animation: tbHostEnter 0.42s cubic-bezier(0.22, 1, 0.36, 1) !important;
-}
-@keyframes tbHostEnter {
-  from { opacity: 0.65; transform: translateY(8px) rotate(var(--host-rot, 0deg)); }
-  to { opacity: 1; transform: translateY(0) rotate(var(--host-rot, 0deg)); }
-}
-.tb-guide-thunder.tb-host-fidget {
-  animation: tbHostFidget 0.52s ease !important;
-}
-@keyframes tbHostFidget {
-  0% { transform: translateY(0) rotate(var(--host-rot, 0deg)); }
-  35% { transform: translateY(-2px) rotate(calc(var(--host-rot, 0deg) - 1.3deg)); }
-  100% { transform: translateY(0) rotate(var(--host-rot, 0deg)); }
-}
-.tb-guide-thunder.tb-host-sway {
-  animation: tbHostSway 1.4s ease-in-out !important;
-}
-@keyframes tbHostSway {
-  0%, 100% { transform: translateY(0) rotate(var(--host-rot, 0deg)); }
-  50% { transform: translateY(-1px) rotate(calc(var(--host-rot, 0deg) + 1.5deg)); }
-}
-.tb-guide-thunder.tb-host-glint {
-  filter: brightness(1.22) drop-shadow(0 0 10px rgba(254,241,5,0.55)) !important;
-  transition: filter 0.2s ease;
-}
-.tb-host-appreciate.tb-host-alive {
-  animation-duration: 6.4s !important;
-}
-@media (prefers-reduced-motion: reduce) {
-  .tb-guide-thunder.tb-host-alive,
-  .tb-guide-thunder.tb-host-enter,
-  .tb-guide-thunder.tb-host-fidget,
-  .tb-guide-thunder.tb-host-sway {
-    animation: none !important;
-    filter: none !important;
-  }
-}
-
-/* Backstage Thunder (FAB) — a little larger, same living idle as tour host */
-.thunder-fab {
-  width: 74px !important;
-  height: 74px !important;
-}
-.thunder-fab-img {
-  width: 68px !important;
-  height: 68px !important;
-}
-.thunder-fab-img.tb-fab-alive {
-  animation: none !important;
-}
-@keyframes tbFabBreath {
-  0%, 100% {
-    transform: translate(var(--fab-x, 0px), var(--fab-y, 0px)) rotate(var(--fab-r, 0deg)) scale(var(--fab-s, 1));
-  }
-  35% {
-    transform: translate(calc(var(--fab-x, 0px) + 4px), calc(var(--fab-y, 0px) - 7px)) rotate(calc(var(--fab-r, 0deg) + 2deg)) scale(calc(var(--fab-s, 1) * 1.02));
-  }
-  70% {
-    transform: translate(calc(var(--fab-x, 0px) - 3px), calc(var(--fab-y, 0px) - 4px)) rotate(calc(var(--fab-r, 0deg) - 1.5deg)) scale(calc(var(--fab-s, 1) * 1.01));
-  }
-}
-.thunder-fab-img.tb-fab-look {
-  filter: drop-shadow(0 0 10px rgba(254,241,5,0.4));
-}
-.thunder-fab-aura {
-  animation: none !important;
-  inset: -6px;
-}
-@media (prefers-reduced-motion: reduce) {
-  .thunder-fab-img.tb-fab-alive,
-  .thunder-fab-img.tb-host-fidget,
-  .thunder-fab-img.tb-host-sway {
-    animation: none !important;
-  }
-}
-
-/* Tour wow v17 — host + function beats only */
-.tb-tour-boards .tb-tour-next {
-  background: #FEF105 !important;
-  color: #000 !important;
-  box-shadow: 0 0 18px rgba(254,241,5,0.35);
-  letter-spacing: 0.12em;
-}
-.tb-live-slide.is-on .tb-live-face {
-  animation: tbFaceIn 0.35s ease both;
-}
-@keyframes tbFaceIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-.tb-live-slide.is-on .tb-live-code-line {
-  animation: tbFaceIn 0.4s ease both;
-}
-.tb-live-code-line:nth-child(2) { animation-delay: 0.05s; }
-.tb-live-code-line:nth-child(3) { animation-delay: 0.12s; }
-.tb-live-code-line:nth-child(4) { animation-delay: 0.19s; }
-.tb-live-code-line:nth-child(5) { animation-delay: 0.26s; }
-.tb-live-code-line:nth-child(6) { animation-delay: 0.33s; }
-.tb-live-mem-shot {
-  width: 48px;
-  height: 48px;
-  object-fit: contain;
-  background: #111;
-  border-radius: 8px;
-  padding: 2px;
-}
-.tb-live-ask {
-  margin: 8px 0 10px;
-  background: #FEF105;
-  color: #000;
-  text-align: center;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  padding: 14px 10px;
-  border-radius: 12px;
-  box-shadow: 0 0 16px rgba(254,241,5,0.35);
-}
-.tb-tour-boards .tb-live-logo {
-  width: min(86%, 240px) !important;
-  margin: 8px auto;
-}
-@media (prefers-reduced-motion: reduce) {
-  .tb-live-slide.is-on .tb-live-face,
-  .tb-live-slide.is-on .tb-live-code-line { animation: none !important; }
-}
-
-/* Director hires: crisp marks, smoother arrive, GPU-composite */
-#header-logo,
-.splash-logo,
-.tb-guide-thunder,
-.thunder-fab-img,
-.thunder-ask-hero-img,
-.tb-live-logo,
-.tb-live-face {
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-  transform: translateZ(0);
-  image-rendering: auto;
-}
-.view.view-enter {
-  animation: viewEnter 0.34s cubic-bezier(0.22, 1, 0.36, 1) both !important;
-}
-@keyframes viewEnter {
-  from { opacity: 0; transform: translate3d(0, 8px, 0); }
-  to { opacity: 1; transform: translate3d(0, 0, 0); }
-}
-.view.view-swipe-in {
-  animation: viewSwipeIn 0.2s cubic-bezier(0.22, 1, 0.36, 1) !important;
-}
-.card, .next-meeting, .announcement-card {
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-}
-
-/* Beat 2 jumble kill — date, venue, label each own a line. No stacked slides. */
-body.tb-tour-open #main-header { visibility: hidden !important; pointer-events: none !important; }
-.tb-tour-boards .tb-live-slide {
-  position: relative !important;
-  inset: auto !important;
-  display: none !important;
-  opacity: 1 !important;
-  pointer-events: none !important;
-  background: transparent !important;
-  transition: none !important;
-}
-.tb-tour-boards .tb-live-slide.is-on {
-  display: block !important;
-  pointer-events: auto !important;
-}
-.tb-live-imin-only {
-  isolation: isolate;
-  background: #111 !important;
-}
-.tb-live-imin-only .tb-live-label,
-.tb-live-imin-only .tb-live-date,
-.tb-live-imin-only .tb-live-loc,
-.tb-live-imin-only .tb-live-im-in {
-  position: relative !important;
-  display: block !important;
-  animation: none !important;
-  opacity: 1 !important;
-  transform: none !important;
-  line-height: 1.25;
-}
-.tb-live-imin-only .tb-live-label {
-  color: #FEF105 !important;
-  margin-bottom: 8px;
-}
-.tb-live-imin-only .tb-live-date {
-  color: #fff !important;
-  margin: 0 0 4px !important;
-  font-size: 17px;
-}
-.tb-live-imin-only .tb-live-loc {
-  color: #888 !important;
-  margin: 0 0 12px !important;
-}
-
-.tb-live-bros-grid .tb-live-face {
-  width: 78px !important;
-  height: 78px !important;
-  filter: none !important;
-}
-
-/* Slide 1 — zoom in, gentleman head-tip, then float. No spin. */
-/* Slide 1 — zoom in, forehead toward viewer (dramatic gentleman nod), then a real float. */
-.tb-tour-stage[data-board="0"] .tb-tour-hero {
-  perspective: 520px;
-  perspective-origin: 72% 38%;
-}
-.tb-tour-stage[data-board="0"] #tb-tour-host.tb-guide-thunder.tb-host-alive {
-  width: min(46vw, 168px) !important;
-  transform-origin: 50% 88%;
-  transform-style: preserve-3d;
-  backface-visibility: visible !important;
-  -webkit-backface-visibility: visible !important;
-  animation:
-    tbHostZoomTip 3.4s cubic-bezier(0.25, 0.1, 0.25, 1) 1 forwards,
-    tbHostFloatNotice 2.4s ease-in-out 3.45s infinite !important;
-}
-@keyframes tbHostZoomTip {
-  0%   { transform: scale(0.22) rotateX(0deg) rotateZ(0deg) translateZ(0); opacity: 0.2; }
-  26%  { transform: scale(1.04) rotateX(0deg) rotateZ(0deg) translateZ(0); opacity: 1; }
-  46%  { transform: scale(1.22) rotateX(-32deg) rotateZ(-6deg) translateZ(56px); }
-  70%  { transform: scale(1.22) rotateX(-32deg) rotateZ(-6deg) translateZ(56px); }
-  100% { transform: scale(1) rotateX(0deg) rotateZ(0deg) translateZ(0); }
-}
-@keyframes tbHostFloatNotice {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-16px) scale(1.05); }
-}
-@keyframes tbHostFloat {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-
-/* Brothers slide — no guide. Grid is the show. Copy stays. */
-.tb-tour-stage[data-board="2"] .tb-tour-hero {
-  margin-bottom: 2px;
-}
-.tb-tour-stage[data-board="2"] .tb-guide-bubble {
-  padding: 8px 10px;
-}
-.tb-tour-stage[data-board="2"] #tb-tour-host.tb-guide-thunder {
-  display: none !important;
-}
-.tb-tour-stage[data-board="2"] .tb-phone {
-  width: min(90%, 300px) !important;
-  padding: 8px 8px 6px !important;
-  flex: 1 1 auto;
-  min-height: 0;
-}
-.tb-tour-stage[data-board="2"] .tb-live-bros-grid {
-  gap: 0 !important;
-}
-.tb-tour-stage[data-board="2"] .tb-live-bros-grid .tb-live-face {
-  width: 78px !important;
-  height: 78px !important;
-  filter: none !important;
-}
-@media (prefers-reduced-motion: reduce) {
-  .tb-tour-stage[data-board="0"] #tb-tour-host.tb-guide-thunder.tb-host-alive,
-  .tb-tour-stage[data-board="1"] #tb-tour-host.tb-guide-thunder.tb-host-alive,
-  .tb-tour-stage[data-board="2"] #tb-tour-host.tb-guide-thunder.tb-host-alive {
-    animation: none !important;
-  }
-}
-
-.tb-tour.tb-tour-slides {
-  align-items: stretch !important;
-  padding: max(52px, env(safe-area-inset-top)) 10px max(18px, env(safe-area-inset-bottom)) !important;
-}
-.tb-tour-boards .tb-tour-stage {
-  max-height: 100% !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-}
-.tb-tour-boards .tb-tour-actions {
-  flex-shrink: 0 !important;
-  position: sticky;
-  bottom: 0;
-  background: #000;
-  z-index: 6;
-  padding-bottom: 10px !important;
-}
-.tb-tour-boards .tb-tour-slide-frame {
-  max-height: none !important;
-  overflow: visible !important;
-}
-.tb-live-face,
-.tb-live-bros-grid .tb-live-face {
-  filter: none !important;
-}
-
-/* Home announcements: ONLY the word ANNOUNCEMENT pulses. Title and card sit still. */
-.announcement-card,
-.announcement-card.announcement-new {
-  animation: none !important;
-  box-shadow: none !important;
-  border: 1px solid #222 !important;
-  border-left: 3px solid #FEF105 !important;
-}
-.announcement-card h3 {
-  animation: none !important;
-  text-shadow: none !important;
-  color: #fff !important;
-  opacity: 1 !important;
-  filter: none !important;
-}
-.announcement-card-label {
-  animation: brotherNamePulse var(--tb-breathe) !important;
-  color: #FEF105 !important;
-  text-shadow:
-    0 0 8px rgba(254, 241, 5, 0.55),
-    0 0 16px rgba(254, 241, 5, 0.25) !important;
-}
-@media (prefers-reduced-motion: reduce) {
-  .announcement-card-label { animation: none !important; text-shadow: none !important; }
-}
-
-/* CARDINAL: labels glow+pulse. Titles and body never do. */
-.card-label,
-.last-fire-label,
-.announcement-card-label,
-.info-detail-label,
-.tb-live-label,
-.alerts-card .card-label {
-  animation: brotherNamePulse var(--tb-breathe) !important;
-  color: #FEF105 !important;
-  text-shadow:
-    0 0 8px rgba(254, 241, 5, 0.55),
-    0 0 16px rgba(254, 241, 5, 0.25) !important;
-}
-h1, h2, h3,
-.announcement-card h3,
-.event-details h3,
-.info-detail-title,
-.tb-tour-headline,
-.tb-tour-sub,
-.brother-detail-name,
-.cal-confirm-title,
-.modal-header h2,
-.iron-title,
-.mission-title,
-.meeting-date,
-.meeting-countdown,
-.auth-card h2,
-#auth-title {
-  animation: none !important;
-  text-shadow: none !important;
-  color: #fff !important;
-  filter: none !important;
-}
-.announcement-card p,
-.info-detail-body,
-.tb-tour-body,
-.brother-bio,
-.about-text,
-.iron-excerpt {
-  animation: none !important;
-  text-shadow: none !important;
-}
-.qr-label,
-.file-label,
-.field-label,
-.activity-feed-close-label {
-  animation: none !important;
-  text-shadow: none !important;
-}
-@media (prefers-reduced-motion: reduce) {
-  .card-label,
-  .last-fire-label,
-  .announcement-card-label,
-  .info-detail-label,
-  .tb-live-label,
-  .alerts-card .card-label {
-    animation: none !important;
-    text-shadow: none !important;
-  }
-}
-
-/* Ask Thunder — die-cut tuxedo, no rectangle */
-.thunder-ask-hero {
-  background: transparent !important;
-  overflow: visible !important;
-}
-.thunder-ask-hero-img {
-  background: transparent !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  mix-blend-mode: normal;
-  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.55)) drop-shadow(0 0 14px rgba(254,241,5,0.22)) !important;
-}
-
-/* Thunder always the top layer in the tour — nod must never clip through a frame */
-.tb-tour-boards .tb-tour-stage {
-  overflow: visible !important;
-}
-.tb-tour-boards .tb-tour-hero {
-  overflow: visible !important;
-  position: relative;
-  z-index: 12;
-}
-.tb-tour-boards .tb-guide-bubble {
-  position: relative;
-  z-index: 1;
-}
-#tb-tour-host,
-.tb-tour-boards #tb-tour-host.tb-guide-thunder {
-  position: relative !important;
-  z-index: 80 !important;
-  isolation: isolate;
-}
-.tb-tour-boards .tb-phone {
-  position: relative;
-  z-index: 2;
-}
-.tb-tour-boards .tb-tour-headline,
-.tb-tour-boards .tb-tour-sub,
-.tb-tour-boards .tb-tour-progress {
-  position: relative;
-  z-index: 3;
-}
-.tb-tour-close { z-index: 90; }
-
-/* Slide 1: logo is the star. Thunder is the guide. Never cover the mark. */
-.tb-tour-stage[data-board="0"] .tb-tour-hero {
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
-  perspective: none;
-  margin: 4px 0 8px;
-}
-.tb-tour-stage[data-board="0"] #tb-tour-host.tb-guide-thunder {
-  order: 0;
-  width: 88px !important;
-  max-width: 88px;
-  z-index: 2 !important;
-  margin: 0;
-  flex: 0 0 88px;
-}
-.tb-tour-stage[data-board="0"] .tb-guide-bubble {
-  width: auto;
-  flex: 1;
-  max-width: none;
-  z-index: 10 !important;
-  position: relative;
-}
-.tb-tour-boards .tb-tour-dots,
-.tb-tour-boards .tb-tour-actions {
-  position: relative;
-  z-index: 15;
-}
-
-/* Slides 4–7 — each beat its own motion, a little more life */
-.tb-tour-stage[data-board="3"] #tb-tour-host.tb-guide-thunder.tb-host-alive {
-  animation: tbHostMem 5.2s ease-in-out infinite !important;
-  transform-origin: 50% 80%;
-}
-@keyframes tbHostMem {
-  0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
-  20% { transform: translateY(-8px) rotate(6deg) scale(1.04); }
-  36% { transform: translateY(-8px) rotate(6deg) scale(1.04); }
-  54% { transform: translateY(-4px) rotate(-4deg) scale(1.02); }
-  74% { transform: translateY(-12px) rotate(2deg) scale(1.05); }
-}
-
-.tb-tour-stage[data-board="4"] #tb-tour-host.tb-guide-thunder.tb-host-alive {
-  animation: tbHostListen 4.8s ease-in-out infinite !important;
-  transform-origin: 50% 80%;
-}
-@keyframes tbHostCode {
-  0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
-  22% { transform: translateY(-6px) rotate(-10deg) scale(1.03); }
-  38% { transform: translateY(-6px) rotate(-10deg) scale(1.03); }
-  58% { transform: translateY(0) rotate(4deg) scale(1); }
-  78% { transform: translateY(-9px) rotate(-3deg) scale(1.04); }
-}
-
-.tb-tour-stage[data-board="5"] #tb-tour-host.tb-guide-thunder.tb-host-alive {
-  animation: tbHostListen 4.8s ease-in-out infinite !important;
-  transform-origin: 50% 80%;
-}
-@keyframes tbHostListen {
-  0%, 100% { transform: translateY(0) rotate(4deg) scale(1); }
-  18% { transform: translateY(-10px) rotate(10deg) scale(1.06); }
-  32% { transform: translateY(-10px) rotate(10deg) scale(1.06); }
-  48% { transform: translateY(-3px) rotate(-6deg) scale(1.02); }
-  70% { transform: translateY(-12px) rotate(6deg) scale(1.05); }
-}
-
-.tb-tour-stage[data-board="5"] #tb-tour-host.tb-guide-thunder.tb-host-alive {
-  animation: tbHostBond 5.2s ease-in-out infinite !important;
-  transform-origin: 50% 88%;
-}
-@keyframes tbHostBond {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-4px) scale(1.01); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tb-tour-stage[data-board="3"] #tb-tour-host.tb-guide-thunder.tb-host-alive,
-  .tb-tour-stage[data-board="4"] #tb-tour-host.tb-guide-thunder.tb-host-alive,
-  .tb-tour-stage[data-board="5"] #tb-tour-host.tb-guide-thunder.tb-host-alive,
-  .tb-tour-stage[data-board="5"] #tb-tour-host.tb-guide-thunder.tb-host-alive {
-    animation: none !important;
-  }
-}
-
-/* Final slide — tuxedo Thunder, Ask Thunder page energy, Bond idle */
-.tb-tour-stage[data-board="5"] .tb-phone { display: none !important; }
-.tb-tour-stage[data-board="5"] .tb-tour-hero {
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-.tb-tour-stage[data-board="5"] #tb-tour-host.tb-guide-thunder,
-.tb-tour-stage[data-board="5"] #tb-tour-host.tb-host-bond {
-  order: -1;
-  width: min(70vw, 240px) !important;
-  max-width: 240px !important;
-  max-height: 44vh !important;
-  height: auto !important;
-  object-fit: contain !important;
-  object-position: center top !important;
-  background: transparent !important;
-  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.55)) drop-shadow(0 0 14px rgba(254,241,5,0.2)) !important;
-  z-index: 2 !important;
-}
-.tb-tour-stage[data-board="5"] .tb-guide-bubble {
-  width: 100%;
-  z-index: 10 !important;
-}
-
-/* 007 staging — finale + Ask Thunder only. Ring, not a logo. */
-.tb-tour-stage[data-board="5"] .tb-tour-hero {
-  position: relative;
-}
-.tb-tour-stage[data-board="5"] .tb-tour-hero::before,
-.thunder-ask-hero::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 42%;
-  width: min(56vw, 210px);
-  height: min(56vw, 210px);
-  transform: translate(-50%, -58%);
-  border-radius: 50%;
-  border: 1.5px solid rgba(254, 241, 5, 0.32);
-  box-shadow:
-    0 0 28px rgba(254, 241, 5, 0.12),
-    inset 0 0 40px rgba(0, 0, 0, 0.35);
-  pointer-events: none;
-  z-index: 0;
-}
-.thunder-ask-hero {
-  position: relative;
-  overflow: visible !important;
-}
-.thunder-ask-hero-img {
-  position: relative;
-  z-index: 2;
-}
-.tb-tour-stage[data-board="5"] #tb-tour-host {
-  position: relative;
-  z-index: 2;
-}
-.tb-tour-stage[data-board="5"] #tb-tour-host.tb-guide-thunder.tb-host-alive {
-  animation: tbHostBond 6.4s ease-in-out infinite !important;
-}
-
-#thunder-fab.tb-fab-acting {
-  width: 78px !important;
-  height: 78px !important;
-}
-.thunder-fab-img.tb-fab-act {
-  width: 72px !important;
-  height: 72px !important;
-}
-.thunder-fab-img.tb-fab-glint {
-  filter: none !important;
-  transition: none;
-}
-
-/* Special-agent inspect: glasses down, scan the room, 3 seconds */
-.thunder-fab-img.tb-fab-inspect {
-  animation: tbFabInspect 4.5s ease-in-out 1 forwards !important;
-  transform-origin: 50% 55%;
-}
-@keyframes tbFabInspect {
-  0%   { transform: translateY(0) rotate(-2deg) scale(1.02); }
-  28%  { transform: translateY(-2px) rotate(9deg) scale(1.05); }
-  55%  { transform: translateY(-2px) rotate(-9deg) scale(1.05); }
-  78%  { transform: translateY(-1px) rotate(4deg) scale(1.03); }
-  100% { transform: translateY(0) rotate(0deg) scale(1); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .thunder-fab-img.tb-fab-inspect { animation: none !important; }
-}
-
-/* App OPEN — greeting only. Not the waiting arsenal. */
-.thunder-fab-img.tb-fab-enter {
-  animation: tbFabEnter 2.2s cubic-bezier(0.25, 0.12, 0.25, 1) 1 forwards !important;
-  transform-origin: 50% 80%;
-}
-@keyframes tbFabEnter {
-  0%   { transform: scale(0.4) rotate(0deg); opacity: 0.35; }
-  38%  { transform: scale(1.08) rotate(0deg); opacity: 1; }
-  58%  { transform: scale(1) rotate(-18deg); }
-  78%  { transform: scale(1) rotate(-18deg); }
-  100% { transform: scale(1) rotate(0deg); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .thunder-fab-img.tb-fab-enter { animation: none !important; }
-}
-
-/* Brothers grid — full locked library (hats, facial hair, gear) */
-.tb-live-bros-full {
-  display: grid !important;
-  grid-template-columns: repeat(4, 1fr) !important;
-  gap: 0 !important;
-}
-.tb-tour-stage[data-board="2"] .tb-live-bros-full .tb-live-face {
-  width: 54px !important;
-  height: 54px !important;
-  filter: none !important;
-}
-.tb-tour-stage[data-board="2"] .tb-phone {
-  width: min(96%, 340px) !important;
-  padding: 6px 4px 4px !important;
-}
-.tb-tour-stage[data-board="2"] .tb-live-phone-foot { display: none !important; }
-
-/* Brother faces sit on black — no gray cards, no white matte */
-.tb-live-bros-grid .tb-live-bro {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  border-radius: 0 !important;
-}
-.tb-live-face {
-  background: transparent !important;
-  mix-blend-mode: normal;
-}
-
-/* Life-blood bolt: overlay is bolt-only PNG so drop-shadow follows the zig-zag — never a box */
-.logo-wrap,
-.splash-logo-wrap,
-.tb-live-logo-wrap {
-  position: relative !important;
-}
-.tb-logo-bolt-life {
-  position: absolute !important;
-  left: 32.4% !important;
-  top: 2.8% !important;
-  width: 31.3% !important;
-  height: 83.6% !important;
-  object-fit: contain !important;
-  pointer-events: none !important;
-  z-index: 4 !important;
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  animation: headerBoltGlow var(--tb-breathe) !important;
-  will-change: filter;
-}
-@keyframes headerBoltGlow {
-  0%, 100% {
-    filter:
-      drop-shadow(0 0 4px rgba(254, 241, 5, 0.4))
-      drop-shadow(0 0 10px rgba(254, 241, 5, 0.2));
-  }
-  50% {
-    filter:
-      drop-shadow(0 0 10px rgba(254, 241, 5, 1))
-      drop-shadow(0 0 22px rgba(254, 241, 5, 0.65))
-      drop-shadow(0 0 8px rgba(255, 160, 0, 0.45));
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .tb-logo-bolt-life {
-    animation: none !important;
-    filter: drop-shadow(0 0 8px rgba(254, 241, 5, 0.55));
-  }
-}
-
-/* Isolated bolt from the authorized mark — NOT an overlay graphic. Same pixels, same box. */
-.tb-logo-bolt-life { display: none !important; }
-.logo-wrap,
-.splash-logo-wrap,
-.tb-live-logo-wrap {
-  position: relative !important;
-  margin-left: auto;
-  margin-right: auto;
-}
-.logo-wrap { width: min(72vw, 320px) !important; }
-.splash-logo-wrap { width: min(82vw, 340px) !important; }
-.tb-live-logo-wrap { width: min(70%, 260px); }
-.logo-wordmark {
-  width: 100% !important;
-  height: auto !important;
-  display: block !important;
-  position: relative;
-  z-index: 1;
-}
-.logo-bolt-isolated {
-  position: absolute !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: contain !important;
-  object-position: center top !important;
-  z-index: 2 !important;
-  pointer-events: none !important;
-  display: block !important;
-  animation: logoBoltLife var(--tb-breathe) !important;
-  will-change: filter;
-}
-@keyframes logoBoltLife {
-  0%, 100% {
-    filter:
-      drop-shadow(0 0 3px rgba(254,241,5,0.35))
-      drop-shadow(0 0 8px rgba(254,241,5,0.18));
-  }
-  50% {
-    filter:
-      drop-shadow(0 0 10px rgba(254,241,5,0.95))
-      drop-shadow(0 0 20px rgba(254,241,5,0.55))
-      drop-shadow(0 0 6px rgba(255,140,0,0.4));
-  }
-}
-body.tb-ask-open .logo-wrap { width: min(28vw, 110px) !important; }
-@media (prefers-reduced-motion: reduce) {
-  .logo-bolt-isolated { animation: none !important; filter: drop-shadow(0 0 8px rgba(254,241,5,0.5)); }
-}
-
-/* Brothers grid — light staggered motion, more spotlight */
-.tb-tour-stage[data-board="2"] .tb-live-bros-full .tb-live-face {
-  width: 58px !important;
-  height: 58px !important;
-  animation: none !important;
-  transform-origin: 50% 70%;
-  transform: perspective(220px)
-    rotateX(var(--bro-x, 0deg))
-    rotateY(var(--bro-y, 0deg))
-    rotate(var(--bro-z, 0deg))
-    translateY(var(--bro-t, 0px));
-  transition: transform 0.55s ease;
-}
-.tb-live-bros-full .tb-live-bro { perspective: 220px; }
-@keyframes tbFaceIdle { 0%, 100% { transform: none; } }
-@media (prefers-reduced-motion: reduce) {
-  .tb-tour-stage[data-board="2"] .tb-live-bros-full .tb-live-face { animation: none !important; }
-}
-
-/* Brothers beat — guide gone. Copy + the square. */
-.tb-tour-stage[data-board="2"] #tb-tour-host {
-  display: none !important;
-}
-.tb-tour-stage[data-board="2"] .tb-tour-hero {
-  flex-direction: column;
-  width: 100%;
-  justify-content: center;
-}
-.tb-tour-stage[data-board="2"] .tb-guide-bubble {
-  width: 100%;
-  max-width: 100%;
-  text-align: center;
-  padding: 8px 12px;
-}
-.tb-tour-stage[data-board="2"] .tb-guide-bubble::before,
-.tb-tour-stage[data-board="2"] .tb-guide-bubble::after {
-  display: none !important;
-}
-.tb-tour-stage[data-board="2"] .tb-phone {
-  width: min(94%, 360px) !important;
-  max-width: 360px !important;
-  flex: 1 1 auto !important;
-  min-height: 42vh !important;
-  padding: 10px 8px 8px !important;
-  margin: 4px auto 0 !important;
-}
-.tb-tour-stage[data-board="2"] .tb-live-bros-full .tb-live-face {
-  width: 64px !important;
-  height: 64px !important;
-}
-
-/* Brothers — no containers. Faces live on the page. */
-.tb-tour-stage[data-board="2"] .tb-phone,
-.tb-tour-stage[data-board="2"] .tb-tour-slide-frame,
-.tb-tour-stage[data-board="2"] .tb-live-slide,
-.tb-tour-stage[data-board="2"] .tb-live-bros,
-.tb-tour-stage[data-board="2"] .tb-live-bros-full,
-.tb-tour-stage[data-board="2"] .tb-live-bro {
-  background: transparent !important;
-  background-color: transparent !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  outline: none !important;
-  padding: 0 !important;
-}
-.tb-tour-stage[data-board="2"] .tb-phone {
-  width: 100% !important;
-  max-width: 100% !important;
-  min-height: 0 !important;
-  margin: 6px 0 0 !important;
-  flex: 0 0 auto !important;
-}
-.tb-tour-stage[data-board="2"] .tb-tour-slide-frame::after {
-  display: none !important;
-}
-.tb-tour-stage[data-board="2"] .tb-tour-dots {
-  position: relative !important;
-  z-index: 6 !important;
-  margin: 10px 0 6px !important;
-  padding: 0 !important;
-  flex-shrink: 0 !important;
-}
-
-/* Authorized complete mark everywhere. Isolated overlay off. */
-.logo-bolt-isolated { display: none !important; }
-#header-logo,
-.splash-logo,
-.tb-live-logo {
-  animation: logoMarkLife var(--tb-breathe) !important;
-  will-change: filter;
-}
-@keyframes logoMarkLife {
-  0%, 100% {
-    filter:
-      drop-shadow(0 0 3px rgba(254,241,5,0.3))
-      drop-shadow(0 0 8px rgba(254,241,5,0.12));
-  }
-  50% {
-    filter:
-      drop-shadow(0 0 8px rgba(254,241,5,0.75))
-      drop-shadow(0 0 18px rgba(254,241,5,0.35));
-  }
-}
-/* Ask Thunder — tiny header, Bond gets the room */
-body.tb-ask-open .logo-wrap {
-  width: min(22vw, 84px) !important;
-}
-body.tb-ask-open #header-logo,
-body.tb-ask-open .header .logo {
-  width: min(22vw, 84px) !important;
-  max-width: min(22vw, 84px) !important;
-}
-@media (prefers-reduced-motion: reduce) {
-  #header-logo, .splash-logo, .tb-live-logo { animation: none !important; }
-}
-
-/* Bolt action — same pixels as the mark. SONS / OF THUNDER stay still. */
-#header-logo,
-.splash-logo,
-.tb-live-logo {
-  animation: none !important;
-  filter: none !important;
-}
-.logo-bolt-life {
-  position: absolute !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: contain !important;
-  object-position: center top !important;
-  pointer-events: none !important;
-  z-index: 5 !important;
-  display: block !important;
-  visibility: visible !important;
-  mix-blend-mode: normal;
-  opacity: 1 !important;
-  animation: logoBoltBreath var(--tb-breathe) !important;
-  will-change: filter;
-}
-@keyframes logoBoltBreath {
-  0%, 100% {
-    filter:
-      drop-shadow(0 0 5px rgba(254,241,5,0.45))
-      drop-shadow(0 0 10px rgba(254,241,5,0.2));
-  }
-  50% {
-    filter:
-      drop-shadow(0 0 10px rgba(254,241,5,0.85))
-      drop-shadow(0 0 20px rgba(254,241,5,0.4));
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .logo-bolt-life { animation: none !important; filter: drop-shadow(0 0 8px rgba(254,241,5,0.5)); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .view.view-swipe-in-next,
-  .view.view-swipe-in-prev { animation: none !important; }
-}
-
-.next-meeting .btn-rsvp.confirmed {
-  background: #FEF105 !important;
-  color: #000 !important;
-  border: none !important;
-  box-shadow: 0 0 28px rgba(254, 241, 5, 0.4);
-  animation: none !important;
-  font-size: 16px;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-}
-.next-meeting .rsvp-status:not(.hidden) {
-  margin-top: 10px;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #FEF105 !important;
-}
-.in-count {
-  margin-top: 14px;
-  text-align: center;
-}
-.in-count-num {
-  font-size: 18px;
-  letter-spacing: 0.2em;
-  font-weight: 800;
-  color: #FEF105;
-  text-transform: uppercase;
-  text-shadow:
-    0 0 8px rgba(254, 241, 5, 0.7),
-    0 0 18px rgba(254, 241, 5, 0.4);
-}
-.in-count-names {
-  margin-top: 8px;
-  font-size: 12px;
-  letter-spacing: 0.14em;
-  font-weight: 700;
-  color: #cfcfcf;
-  text-transform: uppercase;
-}
-.install-toast.toast-success {
-  background: #111;
-  border: 1.5px solid #FEF105;
-  color: #FEF105;
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  box-shadow: 0 8px 28px rgba(0,0,0,0.5), 0 0 20px rgba(254,241,5,0.25);
-}
-
-.memory-viewer-stage {
-  overflow: hidden;
-  touch-action: manipulation;
-}
-.memory-viewer-stage img {
-  transform-origin: 50% 50%;
-  will-change: transform;
-}
-.memory-viewer.is-zoomed {
-  touch-action: none;
-}
-.brother-detail-photo {
-  touch-action: manipulation;
-}
-.brother-detail.is-zoomed .brother-detail-photo {
-  overflow: visible !important;
-  z-index: 8;
-}
-
-/* THE CODE — identity mark. Brand red, same --tb-breathe. Not a yellow chip. */
-#view-about h1.code-title,
-#view-about h1.code-title-glow,
-h1.about-title.code-title.code-title-glow {
-  color: #E30600 !important;
-  -webkit-text-fill-color: #E30600 !important;
-  animation: codeTitleGlow var(--tb-breathe) !important;
-  animation-delay: 0s !important;
-  will-change: text-shadow, opacity;
-}
-@media (prefers-reduced-motion: reduce) {
-  #view-about h1.code-title,
-  #view-about h1.code-title-glow,
-  h1.about-title.code-title.code-title-glow {
-    animation: none !important;
-    color: #E30600 !important;
-    -webkit-text-fill-color: #E30600 !important;
-    text-shadow:
-      0 0 10px rgba(227, 6, 0, 0.7),
-      0 0 22px rgba(227, 6, 0, 0.4);
-  }
-}
-
-/* First-run tour: no skip, no X, no swipe-away */
-body.tb-tour-mandatory .tb-tour-close,
-body.tb-tour-mandatory .tb-tour-skip {
-  display: none !important;
-  pointer-events: none !important;
-  visibility: hidden !important;
-}
-
-/* In-app calendar — lives in Thunder Board, not Apple Calendar */
-.cal-confirm-title {
-  animation: none !important;
-  text-shadow: none !important;
-  color: #fff !important;
-}
-#cal-confirm-label {
-  text-align: center;
-  margin-bottom: 6px;
-}
-.tb-cal {
-  margin: 8px 0 12px;
-  background: #0a0a0a;
-  border: 1px solid #222;
-  border-radius: 12px;
-  padding: 12px 10px 10px;
-}
-.tb-cal-month {
-  text-align: center;
-  font-family: var(--font-display, inherit);
-  letter-spacing: 0.16em;
-  font-size: 13px;
-  color: #FEF105;
-  margin-bottom: 10px;
-}
-.tb-cal-dows {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  text-align: center;
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  color: #666;
-  margin-bottom: 6px;
-}
-.tb-cal-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px 0;
-  text-align: center;
-}
-.tb-cal-cell {
-  height: 36px;
-  line-height: 36px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #cfcfcf;
-}
-.tb-cal-cell.is-empty { visibility: hidden; }
-.tb-cal-cell.is-gathering {
-  color: #000;
-  background: #FEF105;
-  border-radius: 50%;
-  width: 36px;
-  margin: 0 auto;
-  font-weight: 800;
-  animation: tbCalDay var(--tb-breathe) ease-in-out infinite;
-}
-@keyframes tbCalDay {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(254,241,5,0.2); }
-  50% { box-shadow: 0 0 16px 2px rgba(254,241,5,0.55); }
-}
-.tb-cal-when {
-  text-align: center;
-  color: #fff;
-  font-weight: 700;
-  font-size: 15px;
-  margin: 0 0 4px;
-}
-.tb-cal-loc {
-  text-align: center;
-  color: #888;
-  font-size: 13px;
-  margin: 0 0 6px;
-}
-.tb-cal-alarms {
-  text-align: center;
-  color: #666;
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  margin: 0 0 14px;
-}
-@media (prefers-reduced-motion: reduce) {
-  .tb-cal-cell.is-gathering { animation: none; }
-}
-
-.file-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-.file-row .file-label {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 48px;
-  background: #1a1a1a;
-  border: 1px solid #333;
-  border-radius: 10px;
-  color: #fff;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  font-size: 12px;
-  text-transform: uppercase;
-}
-.file-row .file-label-cam {
-  border-color: #E30600;
-  color: #fff;
-}
-
-.home-a2hs {
-  margin: 8px 0 14px;
-  padding: 12px 12px 10px;
-  background: #111;
-  border: 1px solid #2a2a2a;
-  border-radius: 12px;
-}
-.home-a2hs.hidden { display: none !important; }
-.home-a2hs-copy {
-  margin: 0 0 10px;
-  color: #ddd;
-  font-size: 13px;
-  line-height: 1.35;
-  text-align: center;
-}
-.home-a2hs-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-.home-a2hs-put {
-  background: #E30600;
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  padding: 12px 8px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  font-size: 12px;
-}
-.home-a2hs-later {
-  background: transparent;
-  color: #888;
-  border: 1px solid #333;
-  border-radius: 10px;
-  padding: 12px 8px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  font-size: 12px;
-}
-.cal-a2hs-btn { margin-top: 8px; }
-
-.room-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin: 8px 0 14px;
-}
-.room-stat {
-  background: #111;
-  border: 1px solid #2a2a2a;
-  border-radius: 12px;
-  padding: 14px 10px;
-  text-align: center;
-}
-.room-stat b {
-  display: block;
-  font-size: 28px;
-  color: #FEF105;
-  font-weight: 800;
-}
-.room-stat span {
-  display: block;
-  margin-top: 4px;
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  color: #888;
-}
-.room-origin {
-  text-align: center;
-  color: #666;
-  font-size: 12px;
-  margin: 0 0 10px;
-}
-.room-in, .room-bday {
-  color: #ccc;
-  font-size: 14px;
-  line-height: 1.4;
-  margin: 8px 0 0;
-}
-.cal-a2hs-btn { margin-top: 8px; }
-
-#admin-room-modal .modal-content { max-height: 90vh; overflow-y: auto; }
-.room-list { margin-top: 8px; }
-.room-person {
-  padding: 10px 0;
-  border-bottom: 1px solid #1c1c1c;
-}
-.room-person.is-in .room-person-name { color: #FEF105; }
-.room-person-name {
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  font-size: 14px;
-}
-.room-person-meta {
-  color: #888;
-  font-size: 12px;
-  margin-top: 2px;
-}
-.room-mems { margin: 6px 0 12px; }
-.room-mem { color: #bbb; font-size: 13px; padding: 4px 0; }
-
-.thunder-fab-aura { display: none !important; }
-.thunder-fab {
-  width: 88px !important;
-  height: 88px !important;
-}
-.thunder-fab-img {
-  width: 80px !important;
-  height: 80px !important;
-  filter: none !important;
-}
-.thunder-fab-img.tb-fab-look { filter: none !important; }
-.thunder-fab-img.tb-fab-twirl {
-  animation: tbFabTwirl 1.4s ease-in-out;
-  transform-origin: 50% 55%;
-}
-@keyframes tbFabTwirl {
-  0% { transform: rotate(0deg) scale(1); }
-  40% { transform: rotate(-18deg) scale(1.06); }
-  100% { transform: rotate(360deg) scale(1); }
-}
-.fab-bubble {
-  position: absolute;
-  right: -4px;
-  left: auto;
-  bottom: calc(100% + 14px);
-  width: max-content;
-  max-width: min(260px, 74vw);
-  background: #111;
-  color: #fff;
-  border: 1.5px solid #FEF105;
-  border-radius: 16px 16px 16px 6px;
-  padding: 14px 16px;
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 1.4;
-  letter-spacing: 0.01em;
-  text-align: left;
-  z-index: 4;
-  pointer-events: none;
-  opacity: 0;
-  transform: translateY(10px) scale(0.9);
-  transform-origin: 85% 100%;
-  transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-  box-shadow: 0 10px 28px rgba(0,0,0,0.55);
-}
-.fab-bubble.is-on {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-.fab-bubble::after {
-  content: "";
-  position: absolute;
-  right: 22px;
-  bottom: -7px;
-  width: 12px;
-  height: 12px;
-  background: #111;
-  border-right: 1.5px solid #FEF105;
-  border-bottom: 1.5px solid #FEF105;
-  transform: rotate(45deg);
-}
-.fab-bubble.hidden { display: none !important; }
-.thunder-fab { overflow: visible !important; }
-.thunder-fab.tb-fab-by-imin {
-  z-index: 160;
-}
-@media (prefers-reduced-motion: reduce) {
-  .thunder-fab-img.tb-fab-twirl { animation: none !important; }
-}
-
-.thunder-fab-aura { display: none !important; animation: none !important; }
-#view-home .next-meeting { padding-right: 92px; }
-.thunder-fab-img,
-.thunder-fab-img.tb-fab-alive,
-.thunder-fab-img.tb-fab-look,
-.thunder-fab-img.tb-fab-act,
-.thunder-fab-img.tb-fab-inspect {
-  filter: none !important;
-}
-
-.tb-tour-stage[data-board="2"] .tb-live-bros-full .tb-live-face,
-.tb-tour-stage[data-board="2"] .tb-live-bros-grid .tb-live-face {
-  width: 108px !important;
-  height: 108px !important;
-}
-.tb-tour-stage[data-board="2"] .tb-live-bros-full {
-  grid-template-columns: repeat(3, 1fr) !important;
-  gap: 8px !important;
-  padding: 8px 4px !important;
-}
-
-.tb-live-drop {
-  margin: 14px 8px 4px;
-  background: #E30600;
-  color: #fff;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-  text-align: center;
-  padding: 14px 12px;
-  border-radius: 10px;
-}
-.tb-tour-stage[data-board="3"] .tb-live-mem-row {
-  display: grid !important;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 6px;
-  margin: 10px 4px 0;
-}
-.tb-tour-stage[data-board="3"] .tb-live-mem-shot {
-  display: block !important;
-  width: 100% !important;
-  height: 88px !important;
-  object-fit: cover !important;
-  border-radius: 10px !important;
-  background: #111 !important;
-}
-.tb-tour-stage[data-board="3"] .tb-live-phone-foot {
-  display: none !important;
-}
-
-.tb-tour-stage.tb-finale-leave .tb-phone,
-.tb-tour-stage.tb-finale-leave #tb-tour-host,
-.tb-tour-stage.tb-finale-leave .tb-guide-bubble {
-  opacity: 0 !important;
-  transform: translateY(14px) scale(0.96);
-  transition: opacity 0.32s ease, transform 0.32s ease;
-  pointer-events: none;
-}
-.tb-tour-stage[data-board="5"] .tb-phone {
-  display: none !important;
-}
-.tb-tour-stage[data-board="5"] #tb-tour-host.tb-guide-thunder.tb-host-alive,
-.tb-tour-stage[data-board="5"] #tb-tour-host.tb-host-bond {
-  animation: none !important;
-}
-.tb-tour-stage[data-board="5"] #tb-tour-host.tb-host-bond-pop {
-  animation:
-    tbBondPop 0.88s cubic-bezier(0.16, 1, 0.3, 1) 1 both,
-    tbHostBond 6.8s ease-in-out 0.9s infinite !important;
-  transform-origin: 50% 88%;
-}
-@keyframes tbBondPop {
-  0%   { opacity: 0; transform: translateY(64px) scale(0.7); }
-  62%  { opacity: 1; transform: translateY(-8px) scale(1.05); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .tb-tour-stage[data-board="5"] #tb-tour-host.tb-host-bond-pop { animation: none !important; }
-}
-
-#thunder-fab .thunder-fab-img.tb-fab-alive {
-  animation: none !important;
-  will-change: transform;
-}
-#thunder-fab .thunder-fab-img.tb-fab-twirl {
-  animation: tbFabTwirl 1.4s ease-in-out !important;
-}
-
-@property --fab-r { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
-@property --fab-x { syntax: "<length>"; inherits: false; initial-value: 0px; }
-@property --fab-y { syntax: "<length>"; inherits: false; initial-value: 0px; }
-@property --fab-s { syntax: "<number>"; inherits: false; initial-value: 1; }
-
-.axum-chip {
-  display: block;
-  width: 100%;
-  margin: 10px 0 0;
-  background: #111;
-  color: #FEF105;
-  border: 1px solid #FEF105;
-  border-radius: 10px;
-  padding: 12px 14px;
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-.axum-chip.hidden { display: none !important; }
-.axum-drop, .axum-card {
-  position: fixed;
-  inset: 0;
-  z-index: 240;
-}
-.axum-drop-backdrop {
-  position: absolute;
-  inset: 0;
-  border: 0;
-  background: rgba(0,0,0,0.72);
-}
-.axum-drop-sheet {
-  position: absolute;
-  left: 12px;
-  right: 12px;
-  bottom: calc(18px + var(--safe-bottom, 0px));
-  background: #0a0a0a;
-  border: 1.5px solid #FEF105;
-  border-radius: 16px;
-  padding: 22px 18px 16px;
-  text-align: center;
-}
-.axum-drop-thunder { width: 72px; height: 72px; margin: 0 auto 8px; display: block; }
-.axum-drop-kicker, .axum-card-kicker {
-  color: #FEF105;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.22em;
-}
-.axum-drop-title, .axum-card-title {
-  color: #FEF105;
-  font-size: 34px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  margin-top: 6px;
-}
-.axum-drop-sub, .axum-card-place { color: #fff; font-weight: 800; letter-spacing: 0.14em; margin-top: 4px; }
-.axum-drop-line { color: #999; font-size: 13px; margin: 10px 0 14px; }
-.axum-drop-addr { color: #777; font-size: 12px; margin-top: 10px; letter-spacing: 0.08em; }
-.axum-card {
-  background: #000;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 48px 22px 28px;
-  text-align: center;
-}
-.axum-card.hidden, .axum-drop.hidden { display: none !important; }
-.axum-card-close {
-  position: absolute;
-  top: calc(10px + var(--safe-top, 0px));
-  right: 14px;
-  background: none;
-  border: 0;
-  color: #fff;
-  font-size: 32px;
-  line-height: 1;
-}
-.axum-card-city { color: #888; font-size: 12px; letter-spacing: 0.16em; margin-top: 4px; }
-.axum-code {
-  color: #FEF105;
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: 0.28em;
-  margin-top: 4px;
-}
-.axum-name { color: #fff; font-weight: 800; letter-spacing: 0.18em; margin-top: 10px; }
-.axum-hint { color: #aaa; font-size: 13px; margin: 8px 0 16px; }
-.axum-fine { color: #666; font-size: 11px; margin-top: 12px; }
-.axum-card.is-used .axum-qr { opacity: 0.25; filter: grayscale(1); }
-.axum-card.is-used .axum-code { text-decoration: line-through; color: #666; }
-.axum-card.is-used::after {
-  content: "USED";
-  position: absolute;
-  top: 42%;
-  left: 50%;
-  transform: translate(-50%, -50%) rotate(-18deg);
-  color: #E30600;
-  border: 3px solid #E30600;
-  padding: 6px 16px;
-  font-size: 42px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  pointer-events: none;
-}
-.btn-here {
-  width: 100%;
-  margin-top: 10px;
-  background: #E30600;
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  padding: 16px;
-  font-size: 17px;
-  font-weight: 800;
-  letter-spacing: 1.2px;
-}
-.btn-here.hidden, .here-status.hidden, .raffle-board.hidden { display: none !important; }
-.here-status {
-  text-align: center;
-  margin-top: 10px;
-  color: #FEF105;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  font-size: 13px;
-}
-.raffle-board {
-  text-align: center;
-  margin-top: 8px;
-  color: #fff;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  font-size: 12px;
-}
-.btn-drop-shot {
-  width: 100%;
-  margin-top: 10px;
-  background: #111;
-  color: #FEF105;
-  border: 1px solid #FEF105;
-  border-radius: 10px;
-  padding: 14px;
-  font-size: 14px;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-}
-.btn-drop-shot.hidden { display: none !important; }
-.last-fire-strip {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
-.memories-block { margin: 4px 0 28px; }
-.memories-block .card-label {
-  margin-bottom: 6px;
-}
-.memories-lead {
-  color: #888;
-  font-size: 14px;
-  margin: 0 0 14px;
-}
-.memories-block .btn-rsvp {
-  width: 100%;
-}
-.btn-mem-lib {
-  display: block;
-  width: 100%;
-  margin: 10px 0 16px;
-  background: none;
-  border: 0;
-  color: #666;
-  font-size: 12px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-.media-hero {
-  margin-bottom: 8px;
-}
-.media-hero.hidden { display: none !important; }
-.media-thumb-hero {
-  aspect-ratio: 16 / 10;
-  width: 100%;
-  border-radius: 14px;
-}
-.events-subhead {
-  margin-top: 8px;
-}
-.events-subhead h1 {
-  font-size: 18px;
-  letter-spacing: 0.14em;
-}
-label.btn-rsvp, label.btn-drop-shot {
-  display: block;
-  text-align: center;
-  box-sizing: border-box;
-  cursor: pointer;
-}
-.memory-cam-input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  overflow: hidden;
-}
-
-/* SPOTLIGHT LAW: feature in front. Bubble never covers it. Rest is shadow. */
-.tb-tour-boards .tb-phone {
-  display: block !important;
-  position: relative !important;
-  z-index: 6;
-  filter: none;
-  opacity: 1;
-}
-.tb-tour-boards .tb-tour-headline,
-.tb-tour-boards .tb-tour-sub,
-.tb-tour-boards .tb-tour-progress {
-  opacity: 0.42;
-}
-.tb-tour-boards .tb-tour-slide-frame,
-.tb-tour-boards .tb-live-slide.is-on {
-  position: relative;
-  z-index: 7;
-}
-.tb-tour-boards .tb-phone .tb-guide-bubble {
-  position: relative !important;
-  left: auto !important;
-  right: auto !important;
-  top: auto !important;
-  z-index: 4 !important;
-  margin: 0 0 12px !important;
-  pointer-events: none !important;
-}
-.tb-tour-boards .tb-tour-hero {
-  justify-content: center;
-}
-.fab-bubble {
-  pointer-events: none !important;
-}
-.fab-bubble.is-on {
-  pointer-events: auto !important;
-  cursor: pointer;
-}
-
-/* Splash mark: dead-center of the phone on first paint. Must HIDE when done.
-   Later .splash { display:flex !important } was beating .splash-done { display:none }. */
-.splash:not(.splash-done):not(.hidden) {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 0 !important;
-  padding-top: 0 !important;
-  inset: 0 !important;
-}
-.splash.splash-done,
-.splash.hidden,
-#splash.splash-done {
-  display: none !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-  opacity: 0 !important;
-}
-.splash-inner {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 100% !important;
-  margin: 0 !important;
-  transform-origin: center center;
-}
-.splash-logo-wrap {
-  margin: 0 auto !important;
-  transform: translateY(-5vh);
-}
-.splash-line.hidden { display: none !important; }
-
-
-/* CARDINAL: modal titles white + still. Labels yellow + pulse. */
-.info-detail-label,
-.announcement-card-label,
-.card-label,
-.tb-live-label,
-.last-fire-label {
-  animation: brotherNamePulse var(--tb-breathe) !important;
-  color: #FEF105 !important;
-  text-shadow:
-    0 0 8px rgba(254, 241, 5, 0.55),
-    0 0 16px rgba(254, 241, 5, 0.25) !important;
-}
-#info-detail-title,
-.info-detail-title,
-.info-detail-panel .info-detail-title,
-.modal-header h2,
-.cal-confirm-title,
-.brother-detail-name,
-.announcement-card h3,
-.event-details h3,
-.axum-card-title,
-.axum-drop-title,
-.mission-title,
-.tb-tour-headline,
-.tb-tour-sub,
-#auth-title,
-.auth-card h2 {
-  color: #fff !important;
-  -webkit-text-fill-color: #fff !important;
-  animation: none !important;
-  text-shadow: none !important;
-  filter: none !important;
-}
-body.tb-room-cut .home-a2hs,
-body.tb-room-cut .home-mission,
-body.tb-room-cut .home-personal,
-body.tb-room-cut .rsvp-prompt,
-body.tb-room-cut #reminder-btn,
-body.tb-room-cut #text-leader-btn,
-body.tb-room-cut #home-member-cta,
-body.tb-room-cut #in-count,
-body.tb-room-cut #cal-confirm-sheet,
-body.tb-room-cut #drop-shot-btn,
-body.tb-room-cut #auth-sub,
-body.tb-room-cut #auth-hint {
-  display: none !important;
-}
-.tb-leader-ghost { display: none !important; }
-
-/* Modal labels ONLY — pulse + glow. Titles stay white. */
-#info-detail-label,
-.info-detail-label,
-#cal-confirm-label,
-.cal-confirm-label {
-  color: #FEF105 !important;
-  -webkit-text-fill-color: #FEF105 !important;
-  animation: brotherNamePulse var(--tb-breathe) !important;
-  text-shadow:
-    0 0 8px rgba(254, 241, 5, 0.85),
-    0 0 18px rgba(254, 241, 5, 0.45),
-    0 0 28px rgba(254, 241, 5, 0.22) !important;
-  filter: none !important;
-  opacity: 1 !important;
-}
-@media (prefers-reduced-motion: reduce) {
-  #info-detail-label,
-  .info-detail-label,
-  #cal-confirm-label {
-    animation: none !important;
-    text-shadow: none !important;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .info-detail-label,
-  .announcement-card-label {
-    animation: none !important;
-  }
-}
-
-/* LABEL LAW — yellow always, glow breathes. Never share brotherNamePulse (that keyframe goes WHITE at rest). */
-@keyframes tbLabelPulse {
-  0%, 100% {
-    color: #FEF105;
-    -webkit-text-fill-color: #FEF105;
-    opacity: 0.68;
-    text-shadow: 0 0 6px rgba(254, 241, 5, 0.4);
-  }
-  50% {
-    color: #FEF105;
-    -webkit-text-fill-color: #FEF105;
-    opacity: 1;
-    text-shadow:
-      0 0 10px rgba(254, 241, 5, 1),
-      0 0 22px rgba(254, 241, 5, 0.7),
-      0 0 38px rgba(254, 241, 5, 0.35);
-  }
-}
-#meeting-phase-label,
-.next-meeting .card-label,
-.memories-block .card-label,
-.card-label,
-.announcement-card-label,
-#info-detail-label,
-.info-detail-label,
-#cal-confirm-label,
-.cal-confirm-label,
-.last-fire-label,
-.event-month {
-  color: #FEF105 !important;
-  -webkit-text-fill-color: #FEF105 !important;
-  animation: tbLabelPulse 4s ease-in-out infinite !important;
-  text-shadow: 0 0 6px rgba(254, 241, 5, 0.4) !important;
-  filter: none !important;
-}
-.qr-label,
-.file-label,
-.field-label,
-.activity-feed-close-label {
-  animation: none !important;
-  color: #8a8a8a !important;
-  -webkit-text-fill-color: #8a8a8a !important;
-  text-shadow: none !important;
-}
-@media (prefers-reduced-motion: reduce) {
-  #meeting-phase-label,
-  .card-label,
-  .announcement-card-label,
-  .info-detail-label,
-  #info-detail-label,
-  .cal-confirm-label,
-  .last-fire-label,
-  .event-month {
-    animation: none !important;
-    opacity: 1 !important;
-    color: #FEF105 !important;
-    -webkit-text-fill-color: #FEF105 !important;
-    text-shadow: 0 0 8px rgba(254, 241, 5, 0.55) !important;
-  }
-}
-
-/* ============================================================
-   UPLOAD LOCK 20260820 — labels pulse. titles do not.
-   Last rules in the file. Do not add text animation after this.
-   ============================================================ */
-
-/* 1. TITLES / BODY — white, still, no glow */
-h1:not(.code-title),
-h2,
-h3,
-.section-title,
-#announcements-title,
-#events-section-title,
-#brothers-section-title,
-.about-title:not(.code-title),
-.info-detail-title,
-#info-detail-title,
-.mission-title,
-#home-mission-title,
-#mission-title,
-.meeting-date,
-.meeting-countdown,
-.meeting-time,
-.meeting-loc,
-.identity-line,
-.tb-tour-headline,
-.tb-tour-sub,
-.tb-tour-body,
-.cal-confirm-title,
-#cal-confirm-title,
-#auth-title,
-.auth-card h2,
-.modal-header h2,
-.install-card-title,
-.alerts-card-title,
-.ios-install-title,
-.brother-detail-bio,
-.info-detail-body,
-.announcement-card h3,
-.announcement-card p,
-.event-details h3,
-.event-day,
-.home-member-cta-title,
-.empty-brothers-title,
-.empty-memories-title {
-  animation: none !important;
-  color: #fff !important;
-  -webkit-text-fill-color: #fff !important;
-  text-shadow: none !important;
-  filter: none !important;
-}
-
-/* 2. LABELS — yellow, tbLabelPulse (never brotherNamePulse — that keyframe goes white) */
-#meeting-phase-label,
-.next-meeting .card-label,
-.memories-block .card-label,
-.home-mission .card-label,
-.next-mission .card-label,
-.card-label,
-.announcement-card-label,
-#info-detail-label,
-.info-detail-label,
-#cal-confirm-label,
-.cal-confirm-label,
-.last-fire-label,
-.event-month,
-.tb-live-label,
-.happy-birthday-label {
-  color: #FEF105 !important;
-  -webkit-text-fill-color: #FEF105 !important;
-  animation: tbLabelPulse 4s ease-in-out infinite !important;
-  text-shadow: 0 0 8px rgba(254, 241, 5, 0.45) !important;
-  filter: none !important;
-}
-
-/* 3. Form / chrome labels — not the life-blood chip */
-.qr-label,
-.file-label,
-.field-label,
-.activity-feed-close-label,
-.install-card-sub,
-.field-hint {
-  animation: none !important;
-  color: #8a8a8a !important;
-  -webkit-text-fill-color: #8a8a8a !important;
-  text-shadow: none !important;
-}
-
-/* 4. Locked exceptions (not titles, not generic labels) */
-.brother-name {
-  animation: brotherNamePulse var(--tb-breathe) !important;
-}
-#view-about h1.code-title,
-#view-about h1.code-title-glow,
-h1.about-title.code-title.code-title-glow {
-  color: #E30600 !important;
-  -webkit-text-fill-color: #E30600 !important;
-  animation: codeTitleGlow var(--tb-breathe) !important;
-  text-shadow:
-    0 0 12px rgba(227, 6, 0, 0.7),
-    0 0 28px rgba(227, 6, 0, 0.4) !important;
-}
-.btn-share,
-#brother-share-contact {
-  animation: shareContactPulse var(--tb-breathe) !important;
-}
-.rsvp-status,
-#rsvp-status {
-  animation: rsvpStatusBreathe var(--tb-breathe) !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  #meeting-phase-label,
-  .card-label,
-  .announcement-card-label,
-  .info-detail-label,
-  .tb-live-label,
-  .event-month,
-  .last-fire-label,
-  .brother-name,
-  h1.code-title,
-  .btn-share,
-  .rsvp-status {
-    animation: none !important;
-  }
-}
-
-/* LIVE RAFFLE — locked poster IMG_7854 / assets/raffle-win-lock.jpg
-   THE WIN + WINNER + ornate ticket (name + HE'S GOT IT) + host bottom + cast.
-   No fake TICKETS/PLAY/LEADERBOARD nav. */
-.raffle-live {
-  position: fixed;
-  inset: 0;
-  z-index: 9800;
-  background: #000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 18px 16px 28px;
-  overflow: hidden;
-  animation: raffleFlashIn 0.38s ease-out;
-}
-.raffle-live::before {
-  content: "";
-  position: absolute;
-  inset: 12% 8% 28%;
-  background: radial-gradient(ellipse at center, rgba(254,241,5,0.16) 0%, transparent 68%);
-  pointer-events: none;
-  z-index: 0;
-}
-.raffle-live.hidden { display: none !important; animation: none; }
-.raffle-live-close {
-  position: absolute;
-  top: calc(10px + var(--safe-top, 0px));
-  right: 12px;
-  width: 36px;
-  height: 36px;
-  border: none;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.08);
-  color: #fff;
-  font-size: 22px;
-  line-height: 36px;
-  z-index: 6;
-  cursor: pointer;
-}
-.raffle-live-inner {
-  text-align: center;
-  width: min(90vw, 340px);
-  position: relative;
-  z-index: 3;
-  padding-top: 8px;
-  padding-bottom: 132px;
-}
-.raffle-live-kicker {
-  font-family: var(--font-display, "Bebas Neue", Impact, sans-serif);
-  font-size: 13px;
-  letter-spacing: 0.42em;
-  color: #FEF105;
-  opacity: 0.85;
-  margin-bottom: 4px;
-}
-.raffle-live:not(.is-landed) .raffle-live-kicker { opacity: 0; }
-.raffle-live-prize {
-  font-family: var(--font-display, "Bebas Neue", Impact, sans-serif);
-  font-size: 64px;
-  line-height: 0.9;
-  letter-spacing: 0.04em;
-  color: #FEF105;
-  text-shadow:
-    0 0 18px rgba(254,241,5,0.75),
-    0 0 42px rgba(254,241,5,0.35);
-  margin: 0 0 16px;
-}
-.raffle-live-window {
-  position: relative;
-  border: 3px solid #E8B923;
-  border-radius: 6px;
-  padding: 22px 16px 18px;
-  background: #0a0a0a;
-  box-shadow:
-    0 0 0 1px #FEF105,
-    0 0 24px rgba(254,241,5,0.28),
-    inset 0 0 0 1px rgba(254,241,5,0.25);
-  min-height: 108px;
-}
-.raffle-live-name {
-  font-family: var(--font-display, "Bebas Neue", Impact, sans-serif);
-  font-size: 48px;
-  letter-spacing: 0.04em;
-  color: #fff;
-  line-height: 1;
-  word-break: break-word;
-}
-.raffle-live-sub {
-  margin-top: 10px;
-  color: #888;
-  font-size: 12px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-}
-.raffle-live.is-landed .raffle-live-sub {
-  color: #FEF105;
-  letter-spacing: 0.28em;
-}
-.raffle-live.is-landed .raffle-live-sub::before,
-.raffle-live.is-landed .raffle-live-sub::after {
-  content: "—";
-  padding: 0 8px;
-  opacity: 0.7;
-}
-@keyframes raffleFlashIn {
-  0% { opacity: 0; background: rgba(254,241,5,0.22); }
-  35% { opacity: 1; }
-  100% { opacity: 1; background: #000; }
-}
-.raffle-live.is-landed { animation: raffleWinFlash 0.5s ease-out; }
-@keyframes raffleWinFlash {
-  0% { background: #3a3100; }
-  100% { background: #000; }
-}
-@keyframes raffleTicketSlam {
-  0% { transform: scale(0.82); }
-  48% { transform: scale(1.1); }
-  100% { transform: scale(1); }
-}
-.raffle-live.is-landed .raffle-live-name {
-  color: #FEF105;
-  text-shadow:
-    0 0 14px rgba(254,241,5,0.9),
-    0 0 36px rgba(254,241,5,0.5);
-}
-@keyframes raffleNameSlam {
-  0% { transform: scale(0.42); opacity: 0.35; }
-  55% { transform: scale(1.16); opacity: 1; }
-  100% { transform: scale(1); }
-}
-.raffle-live.is-landed .raffle-live-prize {
-  animation: raffleWinLabel 0.55s ease-out both, raffleWinnerParty 1.8s ease-in-out 0.55s infinite;
-}
-@keyframes raffleWinnerParty {
-  0%, 100% { transform: scale(1); filter: brightness(1); }
-  50% { transform: scale(1.04); filter: brightness(1.18); }
-}
-.raffle-live.is-landed .raffle-live-kicker {
-  animation: brotherNamePulse var(--tb-breathe);
-}
-.raffle-live.is-landed .raffle-live-window {
-  animation: raffleTicketSlam 0.55s cubic-bezier(0.18, 1.4, 0.28, 1) both, raffleTicketBreathe 2.2s ease-in-out 0.55s infinite;
-}
-@keyframes raffleTicketBreathe {
-  0%, 100% { box-shadow: 0 0 0 1px #FEF105, 0 0 24px rgba(254,241,5,0.28), inset 0 0 0 1px rgba(254,241,5,0.25); }
-  50% { box-shadow: 0 0 0 1px #FEF105, 0 0 36px rgba(254,241,5,0.5), inset 0 0 0 1px rgba(254,241,5,0.45); }
-}
-.raffle-live.is-landed .raffle-live-name {
-  animation: raffleNameSlam 0.7s cubic-bezier(0.18, 1.55, 0.28, 1) both, raffleNameParty 1.6s ease-in-out 0.7s infinite;
-}
-@keyframes raffleNameParty {
-  0%, 100% { text-shadow: 0 0 14px rgba(254,241,5,0.9), 0 0 36px rgba(254,241,5,0.5); }
-  50% { text-shadow: 0 0 22px rgba(254,241,5,1), 0 0 48px rgba(254,241,5,0.7); }
-}
-.raffle-live.is-landed .raffle-live-host {
-  animation: raffleHostNod 1.15s ease-in-out 1 both, raffleHostParty 2.2s ease-in-out 1.15s infinite;
-}
-@keyframes raffleHostParty {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  40% { transform: translateY(-8px) rotate(-4deg); }
-  70% { transform: translateY(-3px) rotate(5deg); }
-}
-@keyframes raffleWinLabel {
-  0% { transform: scale(0.7); opacity: 0.4; }
-  60% { transform: scale(1.08); opacity: 1; }
-  100% { transform: scale(1); }
-}
-
-body.tb-raffle-live #thunder-fab {
-  opacity: 0 !important;
-  pointer-events: none !important;
-  visibility: hidden;
-}
-.raffle-live-host {
-  position: absolute;
-  bottom: 4%;
-  left: 50%;
-  width: 132px;
-  height: 132px;
-  margin-left: -66px;
-  object-fit: contain;
-  z-index: 4;
-  pointer-events: none;
-  animation: raffleHostEnter 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
-  filter: drop-shadow(0 0 16px rgba(254,241,5,0.35));
-}
-@keyframes raffleHostEnter {
-  0% { transform: translate(38vw, 12vh) scale(0.42); opacity: 0.25; }
-  62% { transform: translate(-4px, -8px) scale(1.08); opacity: 1; }
-  100% { transform: translate(0, 0) scale(1); opacity: 1; }
-}
-@keyframes raffleHostNod {
-  0% { transform: rotate(0deg) translateY(0) scale(1); }
-  32% { transform: rotate(16deg) translateY(10px) scale(1.08); }
-  68% { transform: rotate(-6deg) translateY(-4px) scale(1.04); }
-  100% { transform: rotate(0deg) translateY(0) scale(1); }
-}
-.raffle-cast {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-}
-.raffle-cast-face {
-  position: absolute;
-  width: 72px;
-  height: 72px;
-  object-fit: contain;
-  opacity: 0;
-  animation: raffleCastIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  filter: drop-shadow(0 0 8px rgba(254,241,5,0.25));
-}
-.raffle-cast-face[data-slot="laugh"] { left: 2%; top: 28%; animation-delay: 0.18s; }
-.raffle-cast-face[data-slot="cigar"] { left: 1%; top: 48%; animation-delay: 0.26s; }
-.raffle-cast-face[data-slot="hat"] { left: 6%; bottom: 22%; animation-delay: 0.12s; }
-.raffle-cast-face[data-slot="beard"] { right: 2%; top: 26%; animation-delay: 0.22s; }
-.raffle-cast-face[data-slot="grin"] { right: 1%; top: 48%; animation-delay: 0.34s; }
-.raffle-cast-face[data-slot="wink"] { right: 6%; bottom: 22%; animation-delay: 0.4s; }
-@keyframes raffleCastIn {
-  from { opacity: 0; transform: scale(0.4) translateY(18px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
-}
-.raffle-live.is-landed .raffle-cast-face[data-slot="laugh"] { animation: raffleCelebrateLaugh 0.55s ease-in-out infinite; }
-.raffle-live.is-landed .raffle-cast-face[data-slot="cigar"] { animation: raffleCelebrateCigar 1.35s ease-in-out infinite; }
-.raffle-live.is-landed .raffle-cast-face[data-slot="hat"] { animation: raffleCelebrateHat 0.95s ease-in-out infinite; }
-.raffle-live.is-landed .raffle-cast-face[data-slot="beard"] { animation: raffleCelebrateBeard 1.15s ease-in-out infinite; }
-.raffle-live.is-landed .raffle-cast-face[data-slot="grin"] { animation: raffleCelebrateGrin 0.75s ease-in-out infinite; }
-.raffle-live.is-landed .raffle-cast-face[data-slot="wink"] { animation: raffleCelebrateWink 1.2s ease-in-out infinite; }
-@keyframes raffleCelebrateLaugh {
-  0%, 100% { transform: rotate(-12deg) scale(1) translateY(0); }
-  50% { transform: rotate(14deg) scale(1.12) translateY(-6px); }
-}
-@keyframes raffleCelebrateCigar {
-  0%, 100% { transform: rotate(-8deg) translateY(0); }
-  50% { transform: rotate(10deg) translateY(-10px); }
-}
-@keyframes raffleCelebrateHat {
-  0%, 100% { transform: rotate(-16deg) translateY(0); }
-  50% { transform: rotate(12deg) translateY(-8px); }
-}
-@keyframes raffleCelebrateBeard {
-  0%, 100% { transform: translateY(0) rotate(-3deg); }
-  50% { transform: translateY(-12px) rotate(6deg); }
-}
-@keyframes raffleCelebrateGrin {
-  0%, 100% { transform: scale(1) rotate(-4deg); }
-  50% { transform: scale(1.18) rotate(8deg); }
-}
-@keyframes raffleCelebrateWink {
-  0%, 45%, 55%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.35; transform: scale(0.92) rotate(-8deg); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .raffle-live-host, .raffle-cast-face,
-  .raffle-live.is-landed .raffle-cast-face[data-slot="laugh"],
-  .raffle-live.is-landed .raffle-cast-face[data-slot="cigar"],
-  .raffle-live.is-landed .raffle-cast-face[data-slot="hat"],
-  .raffle-live.is-landed .raffle-cast-face[data-slot="beard"],
-  .raffle-live.is-landed .raffle-cast-face[data-slot="grin"],
-  .raffle-live.is-landed .raffle-cast-face[data-slot="wink"],
-  .raffle-live.is-landed .raffle-live-window,
-  .raffle-live.is-landed .raffle-live-name,
-  .raffle-live.is-landed .raffle-live-prize {
-    animation: none !important;
-    opacity: 1 !important;
-    transform: none !important;
-  }
-  body.tb-raffle-live #thunder-fab { opacity: 0 !important; }
-}
-
-
-/* TOUR CROP FIX 20260820-tourfit1
-   Root cause: .bottom-nav z-index 40000 sat ON TOP of the tour (12000),
-   plus Thunder at 200px * 1.22 scale blew the card past the Safari viewport.
-   Slide 1 must fit: progress, titles, Thunder, bubble, LET'S GO — no crop. */
-body.tb-tour-open .bottom-nav,
-body.tb-tour-open .thunder-fab,
-body.tb-tour-open #thunder-fab {
-  visibility: hidden !important;
-  pointer-events: none !important;
-  z-index: 1 !important;
-}
-body.tb-tour-open #splash {
-  display: none !important;
-}
-.tb-tour.tb-tour-slides,
-#tb-tour.tb-tour {
-  z-index: 50000 !important;
-  inset: 0 !important;
-  height: 100svh !important;
-  max-height: 100svh !important;
-  padding: max(8px, env(safe-area-inset-top, 8px)) 10px max(8px, env(safe-area-inset-bottom, 8px)) !important;
-  align-items: stretch !important;
-  justify-content: center !important;
-  background: #000 !important;
-  box-sizing: border-box;
-}
-.tb-tour-boards .tb-tour-stage,
-.tb-tour-stage {
-  width: 100% !important;
-  max-width: 430px !important;
-  height: 100% !important;
-  max-height: 100% !important;
-  margin: 0 auto;
-  border-radius: 18px !important;
-  overflow: hidden !important;
-  display: flex !important;
-  flex-direction: column !important;
-  box-sizing: border-box;
-}
-.tb-tour-boards .tb-tour-headline,
-.tb-tour-boards .tb-tour-sub,
-.tb-tour-boards .tb-tour-progress {
-  opacity: 1 !important;
-  flex-shrink: 0;
-}
-.tb-tour-boards .tb-tour-headline {
-  font-size: clamp(22px, 6.4vw, 32px) !important;
-}
-.tb-tour-boards .tb-tour-sub {
-  font-size: clamp(16px, 5vw, 24px) !important;
-  margin: 2px 0 8px !important;
-}
-.tb-tour-hero {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: visible;
-}
-.tb-tour-actions {
-  flex-shrink: 0 !important;
-  position: relative !important;
-  bottom: auto !important;
-  margin-top: auto !important;
-  background: #000 !important;
-  z-index: 20 !important;
-  padding: 8px 12px 12px !important;
-}
-.tb-tour-dots { flex-shrink: 0; }
-
-/* Slide 1: Thunder fits above the bubble. No 200px giant. */
-.tb-tour-stage[data-board="0"] .tb-phone {
-  display: none !important;
-}
-.tb-tour-stage[data-board="0"] .tb-tour-hero {
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 10px !important;
-}
-.tb-tour-stage[data-board="0"] #tb-tour-host.tb-guide-thunder,
-.tb-tour-stage[data-board="0"] #tb-tour-host.tb-guide-thunder.tb-host-alive {
-  width: min(34vw, 128px) !important;
-  max-width: 128px !important;
-  max-height: 26vh !important;
-  height: auto !important;
-}
-.tb-tour-stage[data-board="0"] .tb-guide-bubble {
-  width: calc(100% - 8px) !important;
-  max-width: 340px !important;
-  flex-shrink: 0;
-}
-@keyframes tbHostZoomTip {
-  0%   { transform: scale(0.4) rotateX(0deg) rotateZ(0deg); opacity: 0.25; }
-  30%  { transform: scale(1) rotateX(0deg) rotateZ(0deg); opacity: 1; }
-  50%  { transform: scale(1.06) rotateX(-18deg) rotateZ(-4deg); }
-  78%  { transform: scale(1.06) rotateX(-18deg) rotateZ(-4deg); }
-  100% { transform: scale(1) rotateX(0deg) rotateZ(0deg); }
-}
-@keyframes tbHostFloatNotice {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-8px) scale(1.03); }
-}
-
-/* LAYER LAW 20260820-layers1
-   Nav was z-index 40000 and sat on top of tour, Ask Thunder, raffle,
-   auth, memories, brother detail, announcements, Axum, install, calendar.
-   Stack: content < nav 300 < FAB 350 < sheets 5000+ < tour 50000. */
-.bottom-nav { z-index: 300 !important; }
-.thunder-fab, #thunder-fab { z-index: 350 !important; }
-.modal { z-index: 5000 !important; }
-.thunder-modal { z-index: 5200 !important; }
-.axum-drop, .axum-card { z-index: 5100 !important; }
-.memory-viewer { z-index: 5300 !important; }
-.brother-detail { z-index: 5400 !important; }
-.info-detail { z-index: 5500 !important; }
-.auth-gate { z-index: 5600 !important; }
-.cal-confirm-sheet { z-index: 5700 !important; }
-.ios-install-overlay { z-index: 5800 !important; }
-.welcome { z-index: 5900 !important; }
-.raffle-live { z-index: 20000 !important; }
-.tb-tour.tb-tour-slides, #tb-tour.tb-tour { z-index: 50000 !important; }
-
-body.tb-tour-open .bottom-nav,
-body.tb-ask-open .bottom-nav,
-body.tb-raffle-live .bottom-nav,
-body:has(#tb-tour:not(.hidden)) .bottom-nav,
-body:has(#thunder-modal:not(.hidden)) .bottom-nav,
-body:has(#raffle-live:not(.hidden)) .bottom-nav,
-body:has(#auth-gate:not(.hidden)) .bottom-nav,
-body:has(.memory-viewer:not(.hidden)) .bottom-nav,
-body:has(.brother-detail:not(.hidden)) .bottom-nav,
-body:has(.info-detail:not(.hidden)) .bottom-nav,
-body:has(#install-modal:not(.hidden)) .bottom-nav,
-body:has(#axum-drop:not(.hidden)) .bottom-nav,
-body:has(#axum-card:not(.hidden)) .bottom-nav,
-body:has(.welcome:not(.hidden)) .bottom-nav,
-body:has(.cal-confirm-sheet:not(.hidden)) .bottom-nav,
-body:has(.ios-install-overlay:not(.hidden)) .bottom-nav,
-body:has(#splash:not(.splash-done):not(.hidden)) .bottom-nav {
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
-
-/* Tour hosts never blow the Safari viewport on any slide */
-.tb-tour-boards #tb-tour-host.tb-guide-thunder,
-.tb-tour-boards #tb-tour-host.tb-guide-thunder.tb-host-alive,
-.tb-tour-stage[data-board="5"] #tb-tour-host.tb-guide-thunder,
-.tb-tour-stage[data-board="5"] #tb-tour-host.tb-host-bond {
-  max-height: 28vh !important;
-  max-width: min(42vw, 148px) !important;
-  width: min(42vw, 148px) !important;
-}
-
-body.tb-imin-a2hs-open .bottom-nav,
-body:has(#imin-a2hs-sheet:not(.hidden)) .bottom-nav {
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
-#home-a2hs { display: none !important; }
-#imin-a2hs-sheet { z-index: 5750 !important; }
-#imin-a2hs-label {
-  animation: brotherNamePulse var(--tb-breathe);
-}
-
-/* PROFILE CARD — one column, never a split crop */
-.brother-detail {
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-}
-.brother-detail-panel {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  width: min(100%, 360px) !important;
-  max-width: 100% !important;
-  margin: 12px auto 24px !important;
-  overflow: visible !important;
-}
-#brother-share-contact,
-.brother-detail .btn-share {
-  display: block !important;
-  width: calc(100% - 36px) !important;
-  margin: 8px 18px 12px !important;
-  box-sizing: border-box !important;
-}
-.brother-qr-wrap {
-  width: 100% !important;
-  max-width: 100% !important;
-  margin: 4px auto 18px !important;
-  padding: 0 16px 8px !important;
-  float: none !important;
-  position: relative !important;
-}
-.qr-stage-inline,
-.qr-stage-inline .qr-code-target {
-  width: 200px !important;
-  height: 200px !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-}
-
-.qr-stage-inline {
-  width: 240px !important;
-  height: 240px !important;
-  padding: 14px !important;
-  box-sizing: content-box !important;
-  background: #fff !important;
-}
-.qr-stage-inline .qr-code-target {
-  width: 240px !important;
-  height: 240px !important;
-}
-.qr-stage-inline .qr-code-target img,
-.qr-stage-inline .qr-code-target canvas,
-.qr-stage-inline .qr-code-target table {
-  max-width: 240px !important;
-  max-height: 240px !important;
-  width: 240px !important;
-  height: 240px !important;
-}
-.qr-stage-inline .qr-bolt-pad {
-  width: 34px !important;
-  height: 34px !important;
-}
-
-/* POPOUT FIT LAW — every overlay is one column on a 375px phone. Nothing crops off-screen. */
-.brother-detail,
-.info-detail,
-.modal,
-.auth-gate,
-.cal-confirm-sheet,
-.ios-install-overlay,
-.memory-viewer,
-#imin-a2hs-sheet {
-  flex-direction: column !important;
-  align-items: center !important;
-  overflow-x: hidden !important;
-  box-sizing: border-box !important;
-  max-width: 100vw !important;
-}
-.brother-detail-panel,
-.info-detail-panel,
-.auth-card,
-.cal-confirm-panel,
-.ios-install-panel,
-.axum-drop-sheet {
-  width: min(100%, 400px) !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-  margin-left: auto !important;
-  margin-right: auto !important;
-}
-.modal-content {
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
-.qr-stage,
-.qr-stage-inline,
-.brother-qr-wrap,
-.axum-qr,
-#axum-qr,
-#brother-qr-wrap {
-  max-width: 100% !important;
-  float: none !important;
-  left: auto !important;
-  right: auto !important;
-}
-.file-row,
-.home-a2hs-actions,
-.install-card-actions,
-.ios-coach-actions,
-.auth-actions {
-  flex-wrap: wrap !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
-.brother-detail .btn-share,
-.brother-detail .btn-contact,
-#brother-share-contact {
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-/* I'M IN vault — live coal, bolt strike, yellow settle. Button is the trophy. */
-#rsvp-btn.btn-rsvp {
-  position: relative;
-  overflow: visible;
-}
-#rsvp-btn.btn-rsvp:not(.confirmed) {
-  background: #E30600;
-  animation: iminCoal 4s ease-in-out infinite;
-}
-@keyframes iminCoal {
-  0%, 100% { box-shadow: 0 0 8px rgba(227,6,0,0.28), inset 0 0 10px rgba(254,241,5,0.06); }
-  50% { box-shadow: 0 0 22px rgba(227,6,0,0.55), inset 0 0 16px rgba(254,241,5,0.2); }
-}
-#rsvp-btn.btn-rsvp.imin-strike::after {
-  content: "";
-  position: absolute;
-  left: 38%;
-  right: 38%;
-  top: -18%;
-  bottom: -18%;
-  background: linear-gradient(180deg, transparent 0%, #FEF105 35%, #fff6c2 50%, #FEF105 65%, transparent 100%);
-  clip-path: polygon(48% 0%, 62% 32%, 54% 32%, 72% 100%, 40% 52%, 50% 52%, 36% 0%);
-  mix-blend-mode: screen;
-  animation: iminBolt 0.45s ease-out forwards;
-  pointer-events: none;
-  z-index: 2;
-}
-@keyframes iminBolt {
-  0% { opacity: 0; transform: translateY(-24%) scaleY(0.35); }
-  32% { opacity: 1; transform: translateY(0) scaleY(1); }
-  100% { opacity: 0; transform: translateY(18%) scaleY(1.08); }
-}
-#rsvp-btn.btn-rsvp.confirmed {
-  background: #FEF105 !important;
-  color: #000 !important;
-  border: none !important;
-  animation: iminLockedBreathe 4s ease-in-out infinite !important;
-}
-@keyframes iminLockedBreathe {
-  0%, 100% { box-shadow: 0 0 12px rgba(254,241,5,0.28); }
-  50% { box-shadow: 0 0 22px rgba(254,241,5,0.5); }
-}
-#rsvp-btn.btn-rsvp.confirmed.imin-afterglow {
-  animation: iminVault 1.1s ease-out forwards !important;
-}
-@keyframes iminVault {
-  0% { box-shadow: 0 0 8px rgba(254,241,5,0.2); }
-  40% { box-shadow: 0 0 34px rgba(254,241,5,0.72); }
-  100% { box-shadow: 0 0 16px rgba(254,241,5,0.38); }
-}
-@media (prefers-reduced-motion: reduce) {
-  #rsvp-btn.btn-rsvp:not(.confirmed),
-  #rsvp-btn.btn-rsvp.confirmed,
-  #rsvp-btn.btn-rsvp.confirmed.imin-afterglow {
-    animation: none !important;
-  }
-  #rsvp-btn.btn-rsvp.imin-strike::after { display: none !important; }
-}
-
-/* More — invite + share cards: copy and red CTAs centered */
-#view-about .install-card-more,
-#view-about .invite-card {
-  text-align: center;
-}
-#view-about .install-card-more .install-card-row,
-#view-about .invite-card .install-card-row {
-  justify-content: center;
-  text-align: center;
-}
-#view-about .install-card-more .install-card-body,
-#view-about .invite-card .install-card-body {
-  width: 100%;
-  text-align: center;
-}
-#view-about .install-card-more .install-card-title,
-#view-about .install-card-more .install-card-sub,
-#view-about .invite-card .install-card-title,
-#view-about .invite-card .install-card-sub {
-  text-align: center;
-}
-#view-about .install-card-more .install-card-actions,
-#view-about .invite-card .install-card-actions {
-  display: flex !important;
-  flex-direction: column;
-  align-items: stretch;
-  grid-template-columns: none !important;
-  width: 100%;
-}
-#view-about .install-card-more .install-card-btn,
-#view-about .invite-card .install-card-btn {
-  width: 100% !important;
-  text-align: center;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* More is the tool room. Thunder stays off TAKE THE TOUR. */
-body.tb-view-about #thunder-fab,
-body.tb-view-about #fab-bubble {
-  display: none !important;
-}
-
-/* 1) Splash hide always wins */
-.splash.splash-done,
-.splash.hidden,
-#splash.splash-done {
-  display: none !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-  opacity: 0 !important;
-}
-
-/* 4) Full bio. Sticky wordmark cannot punch through the sheet. */
-.brother-detail-bio {
-  max-height: none !important;
-  overflow: visible !important;
-  -webkit-line-clamp: unset !important;
-}
-body:has(.brother-detail:not(.hidden)) #main-header {
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
-
-/* 6) Sticky mark stays in its bar. Home cards read clean. */
-#main-header.header,
-#main-header {
-  overflow: hidden !important;
-  background: #000 !important;
-}
-#view-home,
-#view-home .feed,
-#view-home .announcement-card {
-  position: relative;
-  z-index: 1;
-}
-
-

@@ -3,7 +3,7 @@
 
 [build]
   # No-op so Netlify never invents `npm run build` and fails with exit code 2.
-  command = "node scripts/netlify-build.js"
+  command = "echo 'Thunder Board: static publish (no compile step)'"
   publish = "."
   functions = "netlify/functions"
 
@@ -13,32 +13,9 @@
   SECRETS_SCAN_ENABLED = "false"
   SECRETS_SCAN_OMIT_PATHS = "js/config.js,js/app.js,index.html,README.md,package-lock.json"
   SECRETS_SCAN_OMIT_KEYS = "SUPABASE_ANON_KEY,VAPID_PUBLIC_KEY,LEADER_PIN,SUPABASE_URL"
-  CI = "false"
-  NODE_VERSION = "18"
-  NETLIFY_NEXT_PLUGIN_SKIP = "true"
 
 [functions]
   node_bundler = "esbuild"
-
-[functions."push-gathering-tick"]
-  schedule = "0 * * * *"
-
-[[redirects]]
-  from = "/gathering.ics"
-  to = "/.netlify/functions/gathering-ics"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/tap"
-  to = "/index.html"
-  status = 200
-
-[[redirects]]
-  from = "/tap/*"
-  to = "/index.html"
-  status = 200
-
 
 [[headers]]
   for = "/*"
@@ -46,7 +23,7 @@
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "camera=(self), microphone=(self), geolocation=(), payment=()"
+    Permissions-Policy = "camera=(), microphone=(self), geolocation=(), payment=()"
     Content-Security-Policy = "frame-ancestors 'none'"
 
 # Static assets — long cache (filenames are versioned by deploy)
@@ -72,14 +49,6 @@
     Cache-Control = "public, max-age=0, must-revalidate"
 
 [[headers]]
-  for = "/build.json"
-  [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate, no-store"
-
-[[headers]]
   for = "/index.html"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
-
-[functions."honor-sms-retry"]
-  schedule = "0 * * * *"

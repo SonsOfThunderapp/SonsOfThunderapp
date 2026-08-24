@@ -98,7 +98,6 @@ On every future session touching this app:
 - `netlify/functions/thunder-ai.js` `push-*.js`
 - `supabase-schema.sql`
 - `THUNDER-CONSTITUTION.md` `THUNDER-DECISIONS.md` `SOURCE-OF-TRUTH.md`
-- `HOUSEKEEPING.md` `RELEASE-GUARDIAN.md` `DEPLOY-NOTES.md` `README.md`
 - Assets under `assets/` (official bolt, logos, install-explainer.mp4)
 
 ---

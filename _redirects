@@ -1,6 +1,3 @@
-# Pretty calendar URL must beat the SPA catch-all.
-/gathering.ics  /.netlify/functions/gathering-ics  200!
-
 # Existing files are served as-is. This rewrite only runs when no file matches.
 # Do NOT use ! (force) — that can shadow functions and assets.
 # Netlify Functions (/.netlify/functions/*) are handled before redirects.

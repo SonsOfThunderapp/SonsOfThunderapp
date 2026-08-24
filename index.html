@@ -8,35 +8,18 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Thunder Board" />
   <title>Thunder Board | Sons of Thunder</title>
-  <style>
-    html, body { background: #000 !important; color: #fff; margin: 0; }
-  </style>
-  <meta property="og:type" content="website" />
-  <meta property="og:title" content="Thunder Board | Sons of Thunder" />
-  <meta property="og:description" content="Thunder doesn’t dull. Put this on your Home Screen." />
-  <meta property="og:url" content="https://sonsofthunder.netlify.app/" />
-  <meta property="og:image" content="https://sonsofthunder.netlify.app/assets/og-share.jpg" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Thunder Board | Sons of Thunder" />
-  <meta name="twitter:description" content="Thunder doesn’t dull. Put this on your Home Screen." />
-  <meta name="twitter:image" content="https://sonsofthunder.netlify.app/assets/og-share.jpg" />
-  <meta name="description" content="Sons of Thunder — Thunder doesn’t dull. Private brotherhood board." />
   
   <!-- App Icons -->
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png" />
-  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon-v3.png" />
-  <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192-v3.png" />
-  <link rel="icon" type="image/png" sizes="512x512" href="assets/icon-512-v3.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="assets/icon-512.png" />
   
   <!-- Web App Manifest -->
   <link rel="manifest" href="manifest.json" />
-  <link rel="preload" as="image" href="assets/logo@2x.png?v=20260821-sixfix1" />
-  <link rel="preload" as="image" href="assets/thunder-cool-fab@2x.png?v=20260819-nogold2" />
   
-  <link rel="stylesheet" href="css/styles.css?v=20260821-sixfix1" />
+  <link rel="stylesheet" href="css/styles.css?v=20260816-MASTER-LABELBOLT" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -46,36 +29,38 @@
   <div id="splash" class="splash" aria-hidden="true">
     <div class="splash-inner">
       <div class="splash-logo-wrap">
-        <img src="assets/logo@2x.png?v=20260821-sixfix1"
-             srcset="assets/logo@2x.png?v=20260821-sixfix1 1200w, assets/logo@3x.png?v=20260821-sixfix1 1800w"
+        <img src="assets/logo@2x.png"
+             srcset="assets/logo@2x.png 503w, assets/logo@3x.png 755w"
              sizes="min(82vw, 340px)"
              alt="Sons of Thunder"
              class="splash-mark splash-logo"
-             width="1200"
-             height="831" />
-        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260821-sixfix1" alt="" aria-hidden="true" width="1200" height="831" />
+             width="503"
+             height="291" />
+        <span class="splash-logo-bolt-glimmer" aria-hidden="true"></span>
       </div>
-      <p class="splash-line hidden" aria-hidden="true">THUNDER DOESN’T DULL</p>
+      <p class="splash-line">THUNDER DOESN’T DULL</p>
     </div>
   </div>
 
-  <!-- OLD welcome popup and retired product tour physically deleted -->
+  <!-- OLD welcome popup REMOVED — Follow the Bolt tour is the only first-run system -->
 
   <div id="app">
     <header id="main-header" class="header">
-      <div class="logo-wrap">
+      <div class="logo-glimmer-wrap">
         <img
-          src="assets/logo@2x.png?v=20260821-sixfix1"
-          srcset="assets/logo@2x.png?v=20260821-sixfix1 1200w, assets/logo@3x.png?v=20260821-sixfix1 1800w"
-          sizes="(max-width: 480px) 72vw, 320px"
+          src="assets/logo@2x.png"
+          srcset="assets/logo@2x.png 503w, assets/logo@3x.png 755w"
+          sizes="(max-width: 480px) 94vw, 420px"
           alt="Sons of Thunder"
           class="logo"
           id="header-logo"
-          width="1200"
-          height="831"
+          width="503"
+          height="291"
           decoding="async"
         />
-        <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260821-sixfix1" alt="" aria-hidden="true" width="1200" height="831" />
+        <!-- Rectangular glimmer stays dead. Living pulse = bolt-only asset on bolt region. -->
+        <span class="logo-bolt-glimmer" aria-hidden="true"></span>
+        <img src="assets/logo-bolt-pulse.png" alt="" class="header-bolt-live bolt-glow" width="102" height="222" decoding="async" aria-hidden="true" />
       </div>
     </header>
 
@@ -85,13 +70,6 @@
         <div class="container">
           <p class="identity-line">Thunder doesn’t dull</p>
           <p id="home-personal" class="home-personal hidden" aria-live="polite"></p>
-          <div id="home-a2hs" class="home-a2hs hidden" role="region" aria-label="Add to Home Screen">
-            <p class="home-a2hs-copy">Put Thunder on your Home Screen. That’s how the 7-day ping lands.</p>
-            <div class="home-a2hs-actions">
-              <button type="button" class="home-a2hs-put" id="home-a2hs-put">PUT IT ON</button>
-              <button type="button" class="home-a2hs-later" id="home-a2hs-later">NOT NOW</button>
-            </div>
-          </div>
 
           <div class="next-meeting card">
             <div class="card-label" id="meeting-phase-label">NEXT GATHERING</div>
@@ -102,25 +80,16 @@
             <p id="rsvp-prompt" class="rsvp-prompt">Your seat is open. Lock it in.</p>
             <button id="rsvp-btn" class="btn-rsvp">I'M IN</button>
             <div id="rsvp-status" class="rsvp-status hidden">⚡ YOU'RE LOCKED IN</div>
-            <div id="in-count" class="in-count hidden" aria-live="polite">
-              <div id="in-count-num" class="in-count-num"></div>
-              <div id="in-count-names" class="in-count-names"></div>
-            </div>
             <!-- Who's In removed: local-only roster read as group presence. Personal LOCKED IN stays. -->
-            <button type="button" id="here-btn" class="btn-here hidden">I'M HERE</button>
-            <div id="here-status" class="here-status hidden">IN THE BEER RAFFLE · PIZZA'S ON</div>
-            <label for="memory-cam" id="drop-shot-btn" class="btn-drop-shot hidden">DROP A PIC</label>
-            <div id="raffle-board" class="raffle-board hidden"></div>
-            <button type="button" id="axum-chip" class="axum-chip hidden">FREE AXUM COFFEE</button>
-            <button id="reminder-btn" class="btn-reminder btn-reminder-compact">SET REMINDER</button>
+            <button id="reminder-btn" class="btn-reminder btn-reminder-compact">ADD TO CALENDAR</button>
             <div id="reminder-status" class="reminder-status hidden"></div>
             <button type="button" id="text-leader-btn" class="btn-text-leader">HAVE A QUESTION? TEXT A LEADER</button>
           </div>
 
           <!-- Last Fire: one photo + one line between gatherings -->
-          <div id="last-fire" class="last-fire card hidden" role="button" tabindex="0" aria-label="Tonight">
-            <div class="card-label last-fire-label" id="last-fire-label">TONIGHT</div>
-            <div class="last-fire-media last-fire-strip" id="last-fire-media"></div>
+          <div id="last-fire" class="last-fire card hidden" role="button" tabindex="0" aria-label="Last Fire">
+            <div class="card-label last-fire-label">🔥 LAST FIRE</div>
+            <div class="last-fire-media" id="last-fire-media"></div>
             <div class="last-fire-cap" id="last-fire-cap"></div>
           </div>
 
@@ -137,7 +106,7 @@
           <div class="section-title" id="announcements-title">Announcements</div>
           <div id="announcements" class="feed"></div>
           <!-- Sharpening Iron KILLED permanently — replaced by member sign-in CTA -->
-          <button type="button" id="home-member-cta" class="home-member-cta" aria-label="Already a member? Sign in" onclick="if(window.startMemberSignIn)window.startMemberSignIn();">
+          <button type="button" id="home-member-cta" class="home-member-cta" aria-label="Already a member? Sign in">
             <span class="home-member-cta-title">Already a Member?</span>
             <span class="home-member-cta-sub">Sign in for shared roster &amp; memories</span>
           </button>
@@ -149,15 +118,16 @@
         <div class="container">
           <div class="section-header">
             <h1 id="brothers-section-title">Brothers</h1>
-            <button type="button" id="edit-profile-btn" class="btn-brothers-seat hidden">EDIT PROFILE</button>
+            <button id="edit-profile-btn" class="btn-secondary">Add / Edit My Profile</button>
           </div>
+          <!-- Account: high on Brothers (shared roster / memories identity) -->
           <div id="auth-session-bar" class="auth-session-bar auth-session-bar-brothers hidden">
             <span class="auth-who" id="auth-who"></span>
             <button type="button" id="auth-signout-btn">Sign out</button>
           </div>
           <button type="button" id="auth-entry-btn" class="btn-auth-entry">
             SIGN IN
-            <span class="btn-auth-entry-sub">Email unlocks the whole experience</span>
+            <span class="btn-auth-entry-sub">Shared roster &amp; memories</span>
           </button>
           <div id="brothers-grid" class="brothers-grid"></div>
         </div>
@@ -166,24 +136,9 @@
       <!-- EVENTS -->
       <section id="view-events" class="view">
         <div class="container">
-          <div class="memories-block" id="memories-block">
-            <div class="card-label" id="memories-section-title">MEMORIES</div>
-            <p class="memories-lead">The patio. The night. The proof.</p>
-            <label for="memory-cam" id="memories-drop-btn" class="btn-rsvp">DROP A PIC</label>
-            <button type="button" id="memories-signin-shot" class="btn-rsvp hidden">SIGN IN TO DROP A PIC</button>
-            <button type="button" id="memories-library-btn" class="btn-mem-lib">From the camera roll</button>
-            <div id="media-hero" class="media-hero hidden"></div>
-            <div id="media-feed" class="media-feed">
-              <button type="button" class="empty-state empty-memories empty-memories-cta" id="empty-memories-cta-static" aria-label="Drop a pic">
-                <div class="empty-memories-plus" aria-hidden="true">+</div>
-                <div class="empty-memories-title">No shots yet.</div>
-                <div class="empty-memories-sub">Drop one from the camera.<br>Build the history.</div>
-              </button>
-            </div>
-          </div>
-          <div class="section-header events-subhead">
-            <h1>Events</h1>
-            <button type="button" id="upload-media-btn" class="hidden" tabindex="-1" aria-hidden="true">DROP A PIC</button>
+          <div class="section-header">
+            <h1>Events & Memories</h1>
+            <button id="upload-media-btn" class="btn-secondary">+ Add Memory</button>
           </div>
           <div class="activity-tags" id="activity-tags" role="tablist" aria-label="Activity feeds">
             <button type="button" class="activity-tag" data-feed="range" role="tab" aria-selected="false">RANGE</button>
@@ -204,13 +159,30 @@
             <div class="mission-detail" id="mission-detail">Details dropping at the September gathering. Be ready.</div>
             <div class="mission-cta">OPEN</div>
           </div>
+          <div class="section-title" id="memories-section-title">Past Gatherings</div>
+          <div id="media-feed" class="media-feed">
+            <button type="button" class="empty-state empty-memories empty-memories-cta" id="empty-memories-cta-static" aria-label="Add a memory">
+              <div class="empty-memories-plus" aria-hidden="true">+</div>
+              <div class="empty-memories-title">No memories yet.</div>
+              <div class="empty-memories-sub">Be the first to drop a photo.<br>Build the history.</div>
+            </button>
+          </div>
         </div>
       </section>
 
       <!-- MORE -->
       <section id="view-about" class="view">
         <div class="container about-container">
-          <!-- about-logo removed: sticky header is the only SONS mark -->
+          <img
+            src="assets/logo@2x.png"
+            srcset="assets/logo@2x.png 503w, assets/logo@3x.png 755w"
+            sizes="(max-width: 480px) 94vw, 420px"
+            alt="Sons of Thunder"
+            class="about-logo"
+            width="503"
+            height="291"
+            decoding="async"
+          />
           <h1 class="about-title">WHO WE ARE</h1>
           <p class="about-text">
             Jesus named James and John <em>Boanerges</em> — Sons of Thunder (Mark 3:17) — wild men who wanted to call down fire. That’s us: men who want to lead, know we can be hotheads, and need brothers who keep us sharp.
@@ -238,7 +210,7 @@
               <div class="alerts-card-top">
                 <div>
                   <div class="alerts-card-title">GATHERING ALERTS</div>
-                  <div class="alerts-card-sub">Gathering, leadership line, that’s it. Off anytime.</div>
+                  <div class="alerts-card-sub">New announcements only. Off anytime.</div>
                 </div>
                 <label class="alerts-switch" title="Gathering alerts">
                   <input type="checkbox" id="gathering-alerts-toggle" />
@@ -277,22 +249,21 @@
             <div id="install-toast" class="install-toast hidden" role="status"></div>
 
             <div class="refresh-card refresh-card-compact" id="replay-tour-card">
-              <button type="button" id="replay-tour-btn" class="refresh-app-btn">TAKE THE TOUR</button>
+              <button type="button" id="replay-tour-btn" class="refresh-app-btn">REPLAY APP TOUR</button>
+            </div>
+            <div class="refresh-card refresh-card-compact" id="refresh-app-card">
+              <button type="button" id="refresh-app-btn" class="refresh-app-btn">REFRESH APP</button>
             </div>
 
             <div class="admin-zone admin-zone-bottom">
               <button id="leader-unlock-btn" class="btn-secondary btn-leadership" style="width:100%;margin-top:0;">Leadership</button>
               <div id="leader-tools" class="leader-tools hidden">
-                <button id="admin-room-btn" class="btn-rsvp" style="width:100%;margin-top:12px;">THE ROOM</button>
-                <p class="leader-push-hint">Who’s in. Alerts. Birthdays. Phones.</p>
                 <button id="admin-announcements-btn" class="btn-secondary" style="width:100%;margin-top:10px;">Edit Announcements</button>
                 <button id="admin-lastfire-btn" class="btn-secondary" style="width:100%;margin-top:10px;">Edit Last Fire</button>
                 <button id="admin-events-btn" class="btn-secondary" style="width:100%;margin-top:10px;">Edit Events / Mission</button>
                 <button id="admin-code-btn" class="btn-secondary" style="width:100%;margin-top:10px;">Edit The Code</button>
                 <button id="admin-push-btn" class="btn-rsvp" style="width:100%;margin-top:12px;">SEND ALERT TO EVERYONE</button>
                 <p class="leader-push-hint">Only brothers who turned on Gathering Alerts. Keep it short.</p>
-                <button id="admin-sms-club-btn" class="btn-secondary" style="width:100%;margin-top:10px;">TEXT THE CLUB</button>
-                <p class="leader-push-hint">Opens your Messages. They see you. They reply to you.</p>
                 <button id="leader-lock-btn" class="btn-secondary" style="width:100%;margin-top:10px;opacity:0.7;">Lock</button>
               </div>
             </div>
@@ -320,12 +291,9 @@
       </button>
     </nav>
 
-    <button id="thunder-fab" class="thunder-fab" aria-label="Thunder">
-      <img src="assets/thunder-cool-fab.png?v=20260819-nogold2"
-           srcset="assets/thunder-cool-fab.png?v=20260819-nogold2 256w, assets/thunder-cool-fab@2x.png?v=20260819-nogold2 512w"
-           sizes="80px"
-           alt="" class="thunder-fab-img" width="80" height="80" decoding="async" />
-      <span id="fab-bubble" class="fab-bubble hidden" aria-live="polite"></span>
+    <button id="thunder-fab" class="thunder-fab" aria-label="Ask Thunder">
+      <img src="assets/thunder-cool-fab.png" alt="" class="thunder-fab-img" width="44" height="44" decoding="async" />
+      <span class="thunder-fab-aura" aria-hidden="true"></span>
     </button>
   </div>
 
@@ -371,111 +339,37 @@
 
   
 
-  <div id="imin-a2hs-sheet" class="cal-confirm-sheet hidden" role="dialog" aria-modal="true" aria-labelledby="imin-a2hs-title" aria-hidden="true">
-    <button type="button" class="axum-drop-backdrop" id="imin-a2hs-backdrop" aria-label="Close"></button>
-    <div class="cal-confirm-panel">
-      <button type="button" class="cal-confirm-close" id="imin-a2hs-close" aria-label="Close">×</button>
-      <div class="card-label" id="imin-a2hs-label">HOME SCREEN</div>
-      <h2 id="imin-a2hs-title" class="cal-confirm-title">PUT IT ON</h2>
-      <p class="cal-confirm-hint" id="imin-a2hs-hint">So we can tap you 7 days out.</p>
-      <button type="button" class="cal-confirm-primary" id="imin-a2hs-put">PUT IT ON</button>
-      <button type="button" class="cal-confirm-secondary" id="imin-a2hs-later">NOT NOW</button>
-    </div>
-  </div>
-
   <!-- RSVP calendar handoff (not a success claim until OS adds) -->
   <div id="cal-confirm-sheet" class="cal-confirm-sheet hidden" role="dialog" aria-modal="true" aria-labelledby="cal-confirm-title" aria-hidden="true">
     <div class="cal-confirm-panel">
-      <button type="button" class="cal-confirm-close" id="cal-confirm-close" aria-label="Close">×</button>
-      <div class="card-label" id="cal-confirm-label">CALENDAR</div>
-      <h2 id="cal-confirm-title" class="cal-confirm-title">YOU’RE IN</h2>
-      <div class="tb-cal" id="tb-inapp-cal">
-        <div class="tb-cal-month" id="tb-cal-month">—</div>
-        <div class="tb-cal-dows" aria-hidden="true"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
-        <div class="tb-cal-grid" id="tb-cal-grid"></div>
-      </div>
-      <p class="tb-cal-when" id="tb-cal-when"></p>
-      <p class="tb-cal-loc" id="tb-cal-loc"></p>
-      <p class="tb-cal-alarms" id="tb-cal-alarms"></p>
-      <button type="button" class="cal-confirm-primary" id="cal-confirm-native">ADD TO PHONE CALENDAR</button>
-      <button type="button" class="cal-confirm-primary cal-a2hs-btn hidden" id="cal-confirm-a2hs">PUT ON HOME SCREEN</button>
-      <button type="button" class="cal-confirm-secondary" id="cal-confirm-add">GOT IT</button>
-      <p class="cal-confirm-hint" id="cal-confirm-hint">Phone calendar holds the 7-day alarm. GOT IT stays here.</p>
+      <h2 id="cal-confirm-title" class="cal-confirm-title">YOU’RE IN ⚡</h2>
+      <p class="cal-confirm-body">Your seat is locked on this phone.<br>Put it on your calendar — everything’s filled in.</p>
+      <button type="button" class="cal-confirm-primary" id="cal-confirm-add">ADD TO CALENDAR</button>
+      <button type="button" class="cal-confirm-secondary" id="cal-confirm-later">NOT NOW</button>
+      <p class="cal-confirm-hint">One more tap. Your phone confirms the event.</p>
     </div>
   </div>
 
-  
-  <!-- PRODUCT TOUR — 7 boards matching the poster spec. Official Thunder. -->
-  <div id="tb-tour" class="tb-tour tb-tour-slides tb-tour-boards hidden" aria-hidden="true">
-    <div class="tb-tour-stage" role="dialog" aria-modal="true" aria-labelledby="tb-tour-headline" data-board="0">
+  <!-- PRODUCT TOUR — SLIDE-BASED (canonical 2026-08-18). OLD floating/bouncing tour RETIRED. -->
+  <div id="tb-tour" class="tb-tour tb-tour-slides hidden" aria-hidden="true">
+    <div class="tb-tour-stage" role="dialog" aria-modal="true" aria-labelledby="tb-tour-headline">
       <button type="button" class="tb-tour-close" id="tb-tour-close" aria-label="Close tour">×</button>
-      <p class="tb-tour-progress" id="tb-tour-progress">1 OF 6</p>
-      <h2 id="tb-tour-headline" class="tb-tour-headline">FOLLOW ME</h2>
-      <p id="tb-tour-sub" class="tb-tour-sub">I’LL SHOW YOU THE ROOM</p>
-      <div class="tb-phone" id="tb-tour-phone">
-        <div class="tb-tour-slide-frame" id="tb-tour-live">
-          <div class="tb-live-slide is-on" data-slide="0">
-            <div class="tb-live-logo-wrap">
-              <img class="tb-live-logo" src="assets/logo@2x.png?v=20260821-sixfix1" alt="Sons of Thunder" width="1200" height="831" />
-              <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260821-sixfix1" alt="" aria-hidden="true" width="1200" height="831" />
-            </div>
-          </div>
-          <div class="tb-live-slide" data-slide="1">
-            <div class="tb-live-card tb-live-imin-only">
-              <div class="tb-live-label">NEXT GATHERING</div>
-              <div class="tb-live-date">Mon · 6:30 PM</div>
-              <div class="tb-live-loc">Crooked Can Brewery</div>
-              <div class="tb-live-im-in">I'M IN</div>
-            </div>
-          </div>
-          <div class="tb-live-slide" data-slide="2">
-            <div class="tb-live-bros tb-live-bros-grid tb-live-bros-full">
-              <div class="tb-live-bro"><img class="tb-live-face" data-persona="cool" src="assets/tour-faces/thunder-smirk.png" alt="" /></div>
-              <div class="tb-live-bro"><img class="tb-live-face" data-persona="cool" src="assets/tour-faces/thunder-hat.png" alt="" /></div>
-              <div class="tb-live-bro"><img class="tb-live-face" data-persona="cool" src="assets/tour-faces/thunder-cigar.png" alt="" /></div>
-              <div class="tb-live-bro"><img class="tb-live-face" data-persona="tough" src="assets/tour-faces/thunder-beard-eyes.png" alt="" /></div>
-              <div class="tb-live-bro"><img class="tb-live-face" data-persona="dad" src="assets/tour-faces/thunder-stache-eyes.png" alt="" /></div>
-              <div class="tb-live-bro"><img class="tb-live-face" data-persona="hippie" src="assets/tour-faces/thunder-bandana.png" alt="" /></div>
-              <div class="tb-live-bro"><img class="tb-live-face" data-persona="soldier" src="assets/tour-faces/thunder-patrol.png" alt="" /></div>
-              <div class="tb-live-bro"><img class="tb-live-face" data-persona="goof" src="assets/tour-faces/thunder-grin-eyes.png" alt="" /></div>
-              <div class="tb-live-bro"><img class="tb-live-face" data-persona="goof" src="assets/tour-faces/thunder-laugh.png" alt="" /></div>
-            </div>
-          </div>
-          <div class="tb-live-slide" data-slide="3">
-            <div class="tb-live-label">MEMORIES</div>
-            <div class="tb-live-mem-row tb-live-mem-real">
-              <img class="tb-live-mem tb-live-mem-shot" src="assets/tour-memories/real-patio.jpg?v=20260821-sixfix1" alt="" />
-              <img class="tb-live-mem tb-live-mem-shot" src="assets/tour-memories/real-bowl.jpg?v=20260821-sixfix1" alt="" />
-              <img class="tb-live-mem tb-live-mem-shot" src="assets/tour-memories/real-tree.jpg?v=20260821-sixfix1" alt="" />
-            </div>
-            <div class="tb-live-drop">DROP A PIC</div>
-          </div>
-          <div class="tb-live-slide" data-slide="4">
-            <div class="tb-live-label">TEXT A LEADER</div>
-            <div class="tb-live-text-leader">Text a Leader</div>
-            <p class="tb-live-muted">Confidential. Always.</p>
-          </div>
-          <div class="tb-live-slide" data-slide="5">
-            <div class="tb-live-ask">ASK THUNDER</div>
-            <p class="tb-live-muted">Tap when you’re ready. I don’t listen until you do.</p>
-            <p class="tb-live-allset">YOU’RE READY, BROTHER.</p>
-          </div>
-        </div>
+      <div class="tb-tour-slide-frame">
+        <img id="tb-tour-slide-img" class="tb-tour-slide-img" src="assets/tour-01.png" alt="" decoding="async" />
       </div>
-      <div class="tb-tour-hero">
-        <img id="tb-tour-host" class="tb-guide-thunder"
-             src="assets/thunder-tour-host.png?v=20260819-nogold2"
-             srcset="assets/thunder-tour-host.png?v=20260819-nogold2 400w, assets/thunder-tour-host@2x.png?v=20260819-nogold2 800w"
-             sizes="96px"
-             alt="" />
-        <div class="tb-guide-bubble">
-          <p id="tb-tour-body" class="tb-tour-body"></p>
+      <div class="tb-tour-caption">
+        <div class="tb-tour-bolt-row" aria-hidden="true">
+          <span class="tb-tour-follow">FOLLOW THE BOLT</span>
+          <span class="tb-tour-progress" id="tb-tour-progress">1 of 7</span>
         </div>
+        <h2 id="tb-tour-headline" class="tb-tour-headline"></h2>
+        <p id="tb-tour-body" class="tb-tour-body"></p>
+        <p id="tb-tour-body-full" class="tb-tour-body-full sr-only"></p>
       </div>
       <div class="tb-tour-dots" id="tb-tour-dots" aria-hidden="true"></div>
       <div class="tb-tour-actions">
         <button type="button" class="tb-tour-back" id="tb-tour-back">BACK</button>
-        <button type="button" class="tb-tour-next" id="tb-tour-next">LET’S GO</button>
+        <button type="button" class="tb-tour-next" id="tb-tour-next">NEXT</button>
         <button type="button" class="tb-tour-skip" id="tb-tour-skip">SKIP TOUR</button>
       </div>
     </div>
@@ -491,7 +385,9 @@
       <div class="modal-body install-modal-body">
         <video id="install-gif" class="install-video install-gif" src="assets/install-explainer.mp4" poster="assets/install-poster.jpg" width="540" height="804" playsinline loop preload="auto" webkit-playsinline data-tb-explainer-lock="capcut-vo" aria-label="How to add Thunder Board to your home screen"></video>
         <p class="install-tap-hint">Tap to play / replay · loops automatically</p>
-        <span id="install-live-link" class="install-live-link">sonsofthunder.netlify.app</span>
+        <a id="install-live-link" class="install-live-link" href="https://sonsofthunder.netlify.app/" target="_blank" rel="noopener noreferrer">
+          sonsofthunder.netlify.app
+        </a>
         <p class="install-link-hint">Open in Safari or Chrome → Share → Add to Home Screen</p>
         <div class="install-steps-static">
           <p><strong>iPhone</strong> — Safari → Share → Add to Home Screen</p>
@@ -507,11 +403,12 @@
     <div class="brother-detail-panel">
       <button type="button" class="brother-detail-close" id="brother-detail-close" aria-label="Close">×</button>
       <div class="brother-detail-photo" id="brother-detail-photo"></div>
-      <div id="brother-birthday-header" class="happy-birthday-label hidden"></div>
       <div class="brother-detail-name" id="brother-detail-name"></div>
       <div class="brother-detail-bio" id="brother-detail-bio"></div>
-      <button type="button" id="brother-text-him" class="btn-primary hidden">TEXT HIM</button>
-      <button type="button" class="btn-contact btn-share" id="brother-share-contact">SHARE CONTACT</button>
+      <button type="button" class="btn-edit-profile hidden" id="brother-edit-profile">EDIT PROFILE</button>
+      <div class="brother-contact-actions hidden" id="brother-contact-actions">
+        <button type="button" class="btn-contact btn-share" id="brother-share-contact">SHARE CONTACT</button>
+      </div>
       <div class="brother-qr-wrap hidden" id="brother-qr-wrap">
         <div class="qr-stage qr-stage-inline" id="brother-qr-stage">
           <div id="brother-qr-target" class="qr-code-target" aria-hidden="true"></div>
@@ -553,23 +450,6 @@
         <p class="profile-phone-help" id="profile-phone-help">
           Add a number so brothers can save you with one scan — like Cash App, but for the brotherhood.
         </p>
-
-<label class="field-label" for="profile-birthday">
-          Birthday (MM-DD)
-          <span class="field-hint">(optional)</span>
-        </label>
-        <input type="text"
-               id="profile-birthday"
-               placeholder="e.g. 04-24"
-               maxlength="5"
-               inputmode="numeric"
-               autocomplete="bday"
-               aria-label="Birthday month and day">
-
-
-
-
-        
         <button type="button" class="btn-text-link" id="profile-qr-why">Why a contact QR?</button>
         <button id="save-profile" class="btn-primary">Save Profile</button>
         <button type="button" id="profile-my-qr" class="btn-secondary profile-my-qr hidden">MY QR</button>
@@ -635,65 +515,22 @@
     <div class="memory-viewer-caption" id="memory-viewer-caption"></div>
   </div>
 
-  <!-- LIVE RAFFLE — locked win poster IMG_7854. THE WIN / WINNER / ticket / host / cast. -->
-  <div id="raffle-live" class="raffle-live hidden" role="dialog" aria-modal="true" aria-hidden="true">
-    <button type="button" id="raffle-live-close" class="raffle-live-close" aria-label="Close">×</button>
-    <div class="raffle-cast" id="raffle-cast" aria-hidden="true"></div>
-    <div class="raffle-live-inner">
-      <div class="raffle-live-kicker" id="raffle-live-kicker">THE WIN</div>
-      <div class="raffle-live-prize" id="raffle-live-prize">WINNER</div>
-      <div class="raffle-live-window">
-        <div class="raffle-live-name" id="raffle-live-name">—</div>
-        <div class="raffle-live-sub" id="raffle-live-sub">Drawing…</div>
-      </div>
-    </div>
-    <img id="raffle-live-host" class="raffle-live-host" src="assets/thunder-cool-fab.png?v=20260821-sixfix1" alt="" width="160" height="160" decoding="async" />
-  </div>
-
-  <!-- AXUM FIRST-SIGN-IN COFFEE -->
-  <div id="axum-drop" class="axum-drop hidden" role="dialog" aria-modal="true">
-    <button type="button" class="axum-drop-backdrop" id="axum-drop-backdrop" aria-label="Close"></button>
-    <div class="axum-drop-sheet">
-      <img src="assets/thunder-cool-fab.png" alt="" class="axum-drop-thunder" width="72" height="72" />
-      <div class="axum-drop-kicker">FIRST SIGN-IN</div>
-      <div class="axum-drop-title">FREE COFFEE</div>
-      <div class="axum-drop-sub">AXUM · WINTER GARDEN</div>
-      <p class="axum-drop-line">One cup. One time. Then it’s gone.</p>
-      <button type="button" id="axum-show-btn" class="btn-rsvp">SHOW AT THE COUNTER</button>
-      <p class="axum-drop-addr">146 W Plant St</p>
-    </div>
-  </div>
-  <div id="axum-card" class="axum-card hidden" role="dialog" aria-modal="true">
-    <button type="button" class="axum-card-close" id="axum-card-close" aria-label="Close">×</button>
-    <div class="axum-card-kicker" id="axum-card-kicker">FIRST SIGN-IN</div>
-    <div class="axum-card-title">FREE COFFEE</div>
-    <div class="axum-card-place">AXUM COFFEE</div>
-    <div class="axum-card-city">DOWNTOWN WINTER GARDEN</div>
-    <div id="axum-qr" class="axum-qr"></div>
-    <div class="axum-code" id="axum-code">—</div>
-    <div class="axum-name" id="axum-name"></div>
-    <p class="axum-hint" id="axum-hint">Show this. Tap REDEEM in front of them.</p>
-    <button type="button" id="axum-redeem-btn" class="btn-rsvp">REDEEM AT AXUM</button>
-    <p class="axum-fine">One brother. One cup. Then it’s gone.</p>
-  </div>
-
+  <!-- AUTH MODAL (email / password — minimal) -->
   <div id="auth-gate" class="auth-gate hidden" role="dialog" aria-modal="true" aria-labelledby="auth-title">
     <div class="auth-card">
-      <h2 id="auth-title">LOCK YOUR SEAT</h2>
-      <p class="auth-sub hidden" id="auth-sub"></p>
-      <input type="text" id="auth-name" placeholder="First name" autocomplete="given-name" maxlength="40" />
-      <input type="email" id="auth-email" placeholder="Email" autocomplete="email" inputmode="email" />
-      <input type="tel" id="auth-phone" placeholder="Phone" autocomplete="tel" inputmode="tel" maxlength="20" />
-      <input type="password" id="auth-password" class="hidden" hidden tabindex="-1" autocomplete="off" aria-hidden="true" />
+      <h2 id="auth-title">THUNDER BOARD</h2>
+      <p class="auth-sub" id="auth-sub">Browse without an account. Shared roster &amp; memories need a login Leadership issues — not open public signup.</p>
+      <input type="email" id="auth-email" placeholder="Email" autocomplete="email" />
+      <input type="password" id="auth-password" placeholder="Password" autocomplete="current-password" />
       <p class="auth-error" id="auth-error" aria-live="polite"></p>
       <div class="auth-actions">
-        <button type="button" id="auth-signin-btn" class="btn-primary">LOCK MY SEAT</button>
-        <button type="button" id="auth-magic-btn" class="btn-secondary hidden" hidden tabindex="-1" aria-hidden="true">Email unlocks the whole experience</button>
-        <button type="button" id="auth-signup-btn" class="btn-secondary hidden">Use Invite Login</button>
-        <p class="auth-hint hidden" id="auth-hint"></p>
+        <button type="button" id="auth-signin-btn" class="btn-primary">Sign In</button>
+        <button type="button" id="auth-signup-btn" class="btn-secondary">Use Invite Login</button>
+        <p class="auth-hint" id="auth-hint">Invite-only access. Sign in with the email leadership set up for you.</p>
       </div>
       <div class="auth-link-row">
-        <button type="button" id="auth-forgot-btn" class="hidden" hidden>Forgot password</button>
+        <button type="button" id="auth-forgot-btn">Forgot password</button>
+        ·
         <button type="button" id="auth-cancel-btn">Cancel</button>
       </div>
     </div>
@@ -707,10 +544,7 @@
         <button class="modal-close" data-close="media-modal">×</button>
       </div>
       <div class="modal-body">
-        <div class="file-row">
-          <label class="file-label">Library<input type="file" id="media-file" accept="image/*,video/*" /></label>
-          <label class="file-label file-label-cam">Camera<input type="file" id="media-file-cam" accept="image/*" capture="environment" /></label>
-        </div>
+        <label class="file-label"><input type="file" id="media-file" accept="image/*,video/*" />Choose Photo or Video</label>
         <input type="text" id="media-caption" placeholder="Short caption (optional)" maxlength="100" />
         <button id="save-media" class="btn-primary">Add to Memories</button>
       </div>
@@ -721,18 +555,8 @@
   <div id="thunder-modal" class="modal thunder-modal hidden">
     <div class="modal-content thunder-content">
       <div class="modal-header thunder-header">
-        <div class="thunder-title">
-          <img src="assets/thunder-cool-fab.png?v=20260819-nogold2"
-               srcset="assets/thunder-cool-fab.png?v=20260819-nogold2 256w, assets/thunder-cool-fab@2x.png?v=20260819-nogold2 512w"
-               sizes="28px"
-               alt="" class="thunder-title-img" width="28" height="28" />
-          Ask Thunder
-        </div>
+        <div class="thunder-title"><img src="assets/thunder-cool-fab.png" alt="" class="thunder-title-img" width="28" height="28" /> Ask Thunder</div>
         <button class="modal-close" data-close="thunder-modal">×</button>
-      </div>
-      <!-- OVERRIDE 20260818: tuxedo Thunder hero on Ask Thunder page only -->
-      <div class="thunder-ask-hero" aria-hidden="true">
-        <img src="assets/thunder-bond-hero.png?v=20260819-nogold2" alt="" class="thunder-ask-hero-img" width="280" height="360" decoding="async" />
       </div>
       <div class="thunder-messages" id="thunder-messages">
         <div class="thunder-msg system">
@@ -740,11 +564,11 @@
         </div>
       </div>
       <div class="thunder-voice-bar" id="thunder-voice-bar">
-        <button type="button" id="thunder-voice-btn" class="thunder-voice-btn" aria-label="Ask Thunder a question">
+        <button type="button" id="thunder-voice-btn" class="thunder-voice-btn" aria-label="Talk to Thunder">
           <span class="thunder-voice-dot" aria-hidden="true"></span>
-          <span id="thunder-voice-label">ASK THUNDER</span>
+          <span id="thunder-voice-label">TAP TO SPEAK</span>
         </button>
-        <p class="thunder-voice-hint" id="thunder-voice-hint">Tap when you’re ready to speak</p>
+        <p class="thunder-voice-hint" id="thunder-voice-hint">Voice mode — speak your question</p>
       </div>
       <div class="thunder-input-row">
         <input type="text" id="thunder-input" placeholder="Or type…" autocomplete="off" />
@@ -754,43 +578,6 @@
   </div>
 
     <!-- Admin Announcements Modal -->
-  <div id="admin-room-modal" class="modal hidden">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>The Room</h2>
-        <button class="modal-close" data-close="admin-room-modal" type="button">✕</button>
-      </div>
-      <div class="modal-body">
-        <p class="card-label" id="room-label">FOUNDER</p>
-        <div id="room-stats" class="room-stats">Loading the room…</div>
-        <div class="room-draws">
-          <button type="button" id="patio-toggle-btn" class="btn-rsvp">OPEN THE PATIO</button>
-          <p class="leader-push-hint" id="patio-toggle-hint">Opens I’M HERE on Home. Men who check in are in the beer and hat raffle.</p>
-          <button type="button" id="draw-beer-btn" class="btn-rsvp">DRAW BEER</button>
-          <button type="button" id="draw-hat-btn" class="btn-secondary" style="width:100%;margin-top:8px;">DRAW HAT</button>
-        </div>
-        <button data-close="admin-room-modal" type="button" class="btn-secondary" style="width:100%;margin-top:14px;">CLOSE</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="admin-sms-modal" class="modal hidden">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Text the Club</h2>
-        <button class="modal-close" data-close="admin-sms-modal" type="button">✕</button>
-      </div>
-      <div class="modal-body">
-        <p class="admin-push-note">Goes out from <strong>your</strong> phone. They can text you back. Write the line, then Send in Messages.</p>
-        <textarea id="admin-sms-body" placeholder="Monday. 6:30. Crooked Can. Be there." maxlength="160" rows="3"></textarea>
-        <button id="admin-sms-send" class="btn-rsvp" type="button" style="width:100%;margin-top:12px;">OPEN MY MESSAGES</button>
-        <p class="admin-push-status" id="admin-sms-status" aria-live="polite"></p>
-        <button data-close="admin-sms-modal" type="button" class="btn-secondary" style="width:100%;margin-top:10px;">CANCEL</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Admin Announcements Modal -->
   <div id="admin-ann-modal" class="modal hidden">
     <div class="modal-content" style="max-height:90vh;overflow-y:auto;">
       <div class="modal-header">
@@ -848,6 +635,14 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/qrcode.min.js?v=20260816LOCKED6"></script>
+  <script src="js/app.js?v=20260816-MASTER-LABELBOLT"></script>
+</div>
+
+
+  <!-- LEADER PUSH ALERT -->
   <div id="admin-push-modal" class="modal hidden">
     <div class="modal-content">
       <div class="modal-header">
@@ -865,11 +660,5 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <input type="file" id="memory-cam" class="memory-cam-input" accept="image/*" capture="environment" tabindex="-1" aria-hidden="true" />
-  <input type="file" id="memory-lib" class="memory-cam-input" accept="image/*" tabindex="-1" aria-hidden="true" />
-  <script src="js/config.js?v=20260821-sixfix1"></script>
-  <script src="js/qrcode.min.js?v=20260816LOCKED6"></script>
-  <script src="js/app.js?v=20260821-sixfix1"></script>
 </body>
 </html>
