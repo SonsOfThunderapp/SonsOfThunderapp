@@ -138,6 +138,32 @@ body:has(#auth-gate:not(.hidden)) #main-header {
   box-shadow: 0 0 0 1000px #f3edd4 inset;
 }
 
+/* CONTACT CARD — full overlay above the header. Locked Cash App card. */
+#brother-detail.brother-detail,
+.brother-detail:not(.hidden) {
+  z-index: 21000 !important;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  padding-top: max(12px, env(safe-area-inset-top, 0px)) !important;
+  background: rgba(0, 0, 0, 0.94) !important;
+}
+#brother-detail .brother-detail-panel {
+  margin-top: 8px !important;
+  background: #0a0a0a !important;
+  border: 1px solid #2a2a2a !important;
+  border-radius: 18px !important;
+}
+#brother-detail .btn-share,
+#brother-detail #brother-share-contact {
+  display: block !important;
+  width: calc(100% - 36px) !important;
+}
+#brother-detail #brother-qr-wrap:not(.hidden) {
+  display: block !important;
+}
+
+
 
 @media (max-width: 480px) {
   #app > #main-header.header,

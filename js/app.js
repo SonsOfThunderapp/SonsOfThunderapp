@@ -4406,22 +4406,14 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
 
     
     // Contact actions — phone is opt-in only (SHARE CONTACT + inline QR; no CALL/TEXT chips)
-    const actions = $('#brother-contact-actions');
     const shareBtn = $('#brother-share-contact');
     if (shareBtn && !shareBtn.dataset.tbPress) {
       shareBtn.dataset.tbPress = '1';
       shareBtn.addEventListener('click', () => { try { tbFeedback.press(shareBtn); } catch (e) {} }, true);
     }
-    const phone = digitsOnly(b.phone);
-    if (actions) {
-      if (phone) {
-        actions.classList.remove('hidden');
-        if (shareBtn) {
-          shareBtn.onclick = () => shareContact(b);
-        }
-      } else {
-        actions.classList.add('hidden');
-      }
+    if (shareBtn) {
+      shareBtn.onclick = () => shareContact(b);
+      shareBtn.classList.toggle('hidden', !(b.name || '').trim());
     }
 
     detail.classList.remove('hidden');

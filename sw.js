@@ -1,4 +1,4 @@
-/* 20260823-roundtable1: tour slide 3 is the approved Round Table — locked faces, no grid */
+/* 20260823-contact1: brother profile is the locked contact card — overlay, SHARE, inline QR */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
