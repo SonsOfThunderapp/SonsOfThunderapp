@@ -1,4 +1,4 @@
-/* 20260824-goose2: Grok/webview is not Safari. TAP SHARE only in real Safari. Home first. */
+/* 20260824-askex1: Ask Thunder examples — tap a question, don’t stare at empty space */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

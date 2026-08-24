@@ -5185,6 +5185,28 @@ h1.code-title-glow,
   flex: 1;
   min-height: 0;
 }
+.thunder-examples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 4px 14px 12px;
+  position: relative;
+  z-index: 7;
+}
+.thunder-examples button {
+  background: #111;
+  border: 1px solid #2a2a2a;
+  color: #f2f2f2;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 10px 12px;
+  border-radius: 12px;
+}
+.thunder-examples.hidden,
+#thunder-modal.tb-ask-has-reply .thunder-examples {
+  display: none !important;
+}
 
 /* ===== 7-SLIDE PRODUCT TOUR — restored 20260818, glow + motion ===== */
 .tb-tour.tb-tour-slides {

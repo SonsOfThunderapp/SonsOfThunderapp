@@ -7954,6 +7954,19 @@ $('#edit-profile-btn').addEventListener('click', () => {
       }, true);
     }
     $('#thunder-send').addEventListener('click', handleThunderSend);
+    const ex = document.getElementById('thunder-examples');
+    if (ex && !ex.dataset.tbBound) {
+      ex.dataset.tbBound = '1';
+      ex.addEventListener('click', function (e) {
+        const btn = e.target && e.target.closest && e.target.closest('[data-ask]');
+        if (!btn) return;
+        const q = btn.getAttribute('data-ask') || '';
+        const input = document.getElementById('thunder-input');
+        if (input) input.value = q;
+        ex.classList.add('hidden');
+        try { handleThunderSend(); } catch (err) {}
+      });
+    }
     const voiceBtn = $('#thunder-voice-btn');
     if (voiceBtn) {
       voiceBtn.addEventListener('click', () => {
@@ -10100,7 +10113,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       id: 'ask-thunder',
       headline: 'ASK THUNDER',
       sub: 'WHAT I CAN DO',
-      body: 'Tap me in the corner. I know this board \u2014 gathering, your seat, brothers, memories. Ask me anything else and I\u2019ll go get it. I don\u2019t listen until you tap. Heavy night? That\u2019s a leader, not me.',
+      body: 'Tap a question or type anything. I know this board. I\u2019ll go get the rest. I don\u2019t listen until you tap. Heavy night? That\u2019s a leader, not me.',
       nextLabel: 'LET\u2019S GO'
     }
   ];
