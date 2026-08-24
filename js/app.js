@@ -9169,13 +9169,14 @@ $('#thunder-input').addEventListener('keydown', (e) => {
         el.style.setProperty('display', 'none', 'important');
         el.style.setProperty('visibility', 'hidden', 'important');
         el.style.setProperty('pointer-events', 'none', 'important');
+        try { window.__tbLaunchMs = Math.round(performance.now()); } catch (eM) {}
       };
       el.addEventListener('transitionend', hide, { once: true });
-      setTimeout(hide, 220);
+      setTimeout(hide, (cfg().LAUNCH && cfg().LAUNCH.splashFadeMs) || 160);
     };
 
     try { tbFeedback.thunderImpact(); } catch (e) {}
-    setTimeout(finish, 280);
+    setTimeout(finish, (cfg().LAUNCH && cfg().LAUNCH.splashHoldMs) || 200);
 
     const img = el.querySelector('.splash-mark');
     if (img) {

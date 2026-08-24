@@ -1,4 +1,4 @@
-/* 20260824-ios1: iOS launch — no 1.4MB video, no 3x/4x logo, companions idle */
+/* 20260824-ios2: launch budget — room in under 600ms */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

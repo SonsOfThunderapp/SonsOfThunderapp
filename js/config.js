@@ -1,6 +1,14 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260824-ios1',
+  APP_BUILD: '20260824-ios2',
+  LAUNCH: {
+    splashHoldMs: 200,
+    splashFadeMs: 160,
+    splashWatchMs: 500,
+    extraCssMs: 800,
+    extraJsMs: 900,
+    roomBudgetMs: 600
+  },
   /* HEADER MARK — ETERNAL 2026-08-23. Phone-approved (IMG_7978).
      White SONS + gold 3D bolt through O + red OF THUNDER.
      Sticky top of Home / Brothers / Memories / More. z-index 8000.
@@ -146,7 +154,7 @@ window.TB_CONFIG = {
       addCss('css/tour-roundtable.css');
     }
     if ('requestIdleCallback' in window) requestIdleCallback(loadCompanions, { timeout: 800 });
-    else setTimeout(loadCompanions, 400);
+    else setTimeout(loadCompanions, (window.TB_CONFIG.LAUNCH && window.TB_CONFIG.LAUNCH.extraCssMs) || 800);
 
     try {
       var ev = document.querySelector('.nav-item[data-view="events"] span');
@@ -235,7 +243,7 @@ window.TB_CONFIG = {
     (document.body || document.documentElement).appendChild(s);
   } catch (e2) {}
   }
-  setTimeout(loadExtraJs, 550);
+  setTimeout(loadExtraJs, (window.TB_CONFIG.LAUNCH && window.TB_CONFIG.LAUNCH.extraJsMs) || 900);
 })();
 
 /* 20260823-auto1: old Home Screen copies fetch live build on open and retarget extras. */
