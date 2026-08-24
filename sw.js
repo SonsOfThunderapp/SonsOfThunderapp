@@ -1,4 +1,4 @@
-/* 20260824-stack1: kill leftover CSS that hid the live tour and boosted nav over it */
+/* 20260824-hunt1: empty contact card was forced visible by CSS; hunter heals on launch */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

@@ -138,8 +138,8 @@ body:has(#auth-gate:not(.hidden)) #main-header {
   box-shadow: 0 0 0 1000px #f3edd4 inset;
 }
 
-/* CONTACT CARD — full overlay above the header. Locked Cash App card. */
-#brother-detail.brother-detail,
+/* CONTACT CARD — only while open. .hidden must win or the empty shell paints on Home. */
+#brother-detail.brother-detail:not(.hidden),
 .brother-detail:not(.hidden) {
   z-index: 21000 !important;
   display: flex !important;
@@ -147,6 +147,12 @@ body:has(#auth-gate:not(.hidden)) #main-header {
   justify-content: center !important;
   padding-top: max(12px, env(safe-area-inset-top, 0px)) !important;
   background: rgba(0, 0, 0, 0.94) !important;
+}
+#brother-detail.hidden,
+#brother-detail.brother-detail.hidden,
+.brother-detail.hidden {
+  display: none !important;
+  pointer-events: none !important;
 }
 #brother-detail .brother-detail-panel {
   margin-top: 8px !important;

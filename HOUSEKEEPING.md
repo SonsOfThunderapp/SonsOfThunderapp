@@ -12,8 +12,9 @@ No polling. No auto-reload. No auto-delete of brothers, memories, or announcemen
 ## What it does
 | Trigger | Action |
 |---|---|
-| Launch | Stamp `APP_BUILD` in session; strip ghost `#rsvp-add-cal`; refresh I’m In |
-| Resume / Online | Reconcile Gathering Alerts with real PushManager; quiet `auth.getSession()` |
+| Launch | Stamp `APP_BUILD`; strip ghost `#rsvp-add-cal`; **huntGhosts** (empty contact card, leftover tour CSS, stuck overflow) |
+| Resume / Online / pageshow | huntGhosts + alerts + session |
+| Tour open / close | huntGhosts — tour receives taps, stray sheets die |
 | Memory upload | If Storage succeeds and the DB insert fails, **remove that one storage object** |
 
 ## Forbidden
