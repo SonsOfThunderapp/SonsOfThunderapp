@@ -9117,4 +9117,30 @@ body:has(.brother-detail:not(.hidden)) #main-header {
   z-index: 1;
 }
 
-
+/* === HEADER SCALE — slight shrink, more stage (20260824-header-scale1) ===
+   Logo stays sticky anchor on every page. Modest only — not a redesign. */
+#main-header.header,
+#main-header {
+  padding: calc(6px + env(safe-area-inset-top, 0px)) 12px 4px !important;
+}
+.logo-wrap {
+  width: min(66vw, 292px) !important;
+  max-width: min(66vw, 292px) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+.header .logo,
+.header img.logo,
+#header-logo,
+.logo-wrap .logo {
+  width: min(66vw, 292px) !important;
+  max-width: min(66vw, 292px) !important;
+  height: auto !important;
+  max-height: none !important;
+}
+#views {
+  padding-top: 2px;
+}
+.container {
+  padding-top: max(4px, var(--space-2, 8px));
+}
