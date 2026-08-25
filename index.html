@@ -391,14 +391,12 @@
     <div class="ios-install-panel">
       <button type="button" class="ios-install-close" id="inapp-install-close" aria-label="Close">×</button>
       <h2 id="inapp-install-title" class="ios-install-title">OPEN IN SAFARI</h2>
-      <p class="ios-install-sub">Home Screen only works from Safari. Tap ⋯ and Open in Safari.</p>
-      <ol class="ios-install-steps">
-        <li><span class="ios-step-num">1</span> Tap the <strong>⋯</strong> or share menu</li>
-        <li><span class="ios-step-num">2</span> Choose <strong>Open in Safari</strong> (or Chrome)</li>
-        <li><span class="ios-step-num">3</span> Then: Share → Add to Home Screen</li>
+      <p class="ios-install-sub" hidden></p>
+      <ol class="ios-install-steps ios-install-steps-tight">
+        <li><span class="ios-step-num">1</span> <strong>⋯</strong> → Open in Safari</li>
+        <li><span class="ios-step-num">2</span> Share → Add to Home Screen</li>
       </ol>
       <button type="button" class="ios-install-share" id="inapp-copy-link">COPY LINK</button>
-      <button type="button" class="ios-install-gotit" id="inapp-install-gotit">GOT IT</button>
     </div>
   </div>
 
@@ -509,10 +507,11 @@
         <video id="install-gif" class="install-video install-gif" src="assets/install-explainer.mp4" poster="assets/install-poster.jpg" width="540" height="804" playsinline loop preload="auto" webkit-playsinline data-tb-explainer-lock="capcut-vo" aria-label="How to add Thunder Board to your home screen"></video>
         <p class="install-tap-hint">Tap to play / replay · loops automatically</p>
         <span id="install-live-link" class="install-live-link">sonsofthunderboard.com</span>
-        <p class="install-link-hint">Open in Safari or Chrome → Share → Add to Home Screen</p>
+        <p class="install-link-hint">Fastest: scan QR with Camera · or paste link in Safari</p>
         <div class="install-steps-static">
           <p><strong>iPhone</strong> — Safari → Share → Add to Home Screen</p>
-          <p><strong>Android</strong> — Chrome → Menu → Add to Home screen</p>
+          <p><strong>Android</strong> — Chrome → Menu → Install app</p>
+          <p><strong>Stuck in Messages?</strong> — COPY LINK → paste in Safari</p>
         </div>
       </div>
     </div>

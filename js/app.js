@@ -8147,12 +8147,13 @@ $('#edit-profile-btn').addEventListener('click', () => {
       if (howBtn) howBtn.classList.remove('hidden');
 
       if (state === 'IN_APP_BROWSER') {
-        if (installShareBtn) installShareBtn.textContent = isAndroid() ? 'OPEN IN CHROME' : 'OPEN IN SAFARI';
-        if (title) title.textContent = 'ONE MORE MOVE';
-        if (sub) sub.textContent = 'Leave this app browser first';
+        /* Easiest path Apple/Android allow from Messages/IG: copy → real browser */
+        if (installShareBtn) installShareBtn.textContent = 'COPY LINK';
+        if (title) title.textContent = 'GET IT ON YOUR PHONE';
+        if (sub) sub.textContent = 'Paste in Safari or Chrome';
         if (tip) tip.textContent = isAndroid()
-          ? 'Open in Chrome → Install app'
-          : 'Open in Safari → Share → Add to Home Screen';
+          ? 'Paste in Chrome → Menu → Install app'
+          : 'Paste in Safari → Share → Add to Home Screen';
       } else if (state === 'ANDROID_NATIVE' || deferredInstallPrompt) {
         if (installShareBtn) installShareBtn.textContent = 'INSTALL THUNDER BOARD';
         if (title) title.textContent = 'PUT THUNDER ON YOUR PHONE';
@@ -8185,10 +8186,18 @@ $('#edit-profile-btn').addEventListener('click', () => {
     });
 
     async function runSmartInstall() {
-      // Trapped in Instagram / Messenger / etc.
+      // Trapped in Instagram / Messenger / etc. — one-tap COPY is shortest path
       if (isInAppBrowser() || (isIos() && !isIosSafariBrowser())) {
         setInstallProgress('WRONG_BROWSER');
-        openInAppInstallOverlay();
+        const url = publicUrl('/');
+        try {
+          await navigator.clipboard.writeText(url);
+          showInstallToast(isAndroid()
+            ? 'Link copied — paste in Chrome → Install'
+            : 'Link copied — paste in Safari → Share → Add to Home Screen');
+        } catch (e) {
+          openInAppInstallOverlay();
+        }
         return;
       }
       // Android Chrome native install when available
@@ -8314,7 +8323,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
         const url = publicUrl('/');
         const payload = {
           title: 'Thunder Board',
-          text: 'Sons of Thunder — Thunder doesn’t dull. Put this on your Home Screen.',
+          text: 'Sons of Thunder — Thunder doesn’t dull.\nScan with Camera or open in Safari → Share → Add to Home Screen.',
           url
         };
         try {
@@ -9516,12 +9525,25 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     if (typeof isTourComplete === 'function' && !isTourComplete()) return;
     const title = document.getElementById('inapp-install-title');
     const sub = el.querySelector('.ios-install-sub');
+    const steps = el.querySelector('.ios-install-steps');
+    if (sub) {
+      sub.textContent = '';
+      sub.hidden = true;
+    }
     if (isAndroid()) {
       if (title) title.textContent = 'OPEN IN CHROME';
-      if (sub) sub.innerHTML = 'Install only works in Chrome.<br>Leave this in-app browser first.';
+      if (steps) {
+        steps.innerHTML =
+          '<li><span class="ios-step-num">1</span> <strong>⋮</strong> → Open in Chrome</li>' +
+          '<li><span class="ios-step-num">2</span> Menu → Install app</li>';
+      }
     } else {
       if (title) title.textContent = 'OPEN IN SAFARI';
-      if (sub) sub.innerHTML = 'Home Screen only works in Safari.<br>Leave this in-app browser first.';
+      if (steps) {
+        steps.innerHTML =
+          '<li><span class="ios-step-num">1</span> <strong>⋯</strong> → Open in Safari</li>' +
+          '<li><span class="ios-step-num">2</span> Share → Add to Home Screen</li>';
+      }
     }
     el.classList.remove('hidden');
     el.setAttribute('aria-hidden', 'false');

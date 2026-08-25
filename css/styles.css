@@ -2660,10 +2660,17 @@ h1.code-title-glow {
   font-size: 15px;
   line-height: 1.45;
 }
+.ios-install-sub[hidden] {
+  display: none !important;
+  margin: 0;
+}
 .ios-install-steps {
   list-style: none;
-  margin: 0 0 18px;
+  margin: 8px 0 20px;
   padding: 0;
+}
+.ios-install-steps-tight li {
+  margin-bottom: 12px;
 }
 .ios-install-steps li {
   display: flex;
