@@ -1,5 +1,12 @@
-# Thunder Board — Netlify redirects
-# SPA: all app routes serve index.html
-/*    /index.html   200
+# Thunder Board — SPA + deep links (Netlify)
+# Explicit deep links first, then catch-all
+
+/tap    /index.html   200
+/tap/*  /index.html   200
+/share-memory  /index.html  200
+/share-memory/*  /index.html  200
 
 /.well-known/security.txt    /security.txt   200
+
+# SPA: all app routes serve index.html
+/*    /index.html   200

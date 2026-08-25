@@ -1,33 +1,35 @@
 {
   "name": "Thunder Board",
   "short_name": "Thunder",
-  "description": "Sons of Thunder — private brotherhood app",
+  "description": "Sons of Thunder \u2014 private brotherhood app",
   "start_url": "/",
+  "scope": "/",
+  "id": "/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "assets/icon-192-v4.png",
+      "src": "/assets/icon-192-v4.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "assets/icon-512-v4.png",
+      "src": "/assets/icon-512-v4.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "assets/icon-512-maskable-v4.png",
+      "src": "/assets/icon-512-maskable-v4.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "assets/apple-touch-icon-v4.png",
+      "src": "/assets/apple-touch-icon-v4.png",
       "sizes": "180x180",
       "type": "image/png"
     }
@@ -38,41 +40,52 @@
       "short_name": "I'm In",
       "description": "Lock your seat",
       "url": "/?view=home&imin=1",
-      "icons": [{ "src": "assets/icon-192-v3.png", "sizes": "192x192", "type": "image/png" }]
+      "icons": [
+        {
+          "src": "/assets/icon-192-v4.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     },
     {
       "name": "Next Gathering",
       "short_name": "Gathering",
       "description": "Open Home",
       "url": "/?view=home",
-      "icons": [{ "src": "assets/icon-192-v3.png", "sizes": "192x192", "type": "image/png" }]
+      "icons": [
+        {
+          "src": "/assets/icon-192-v4.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     },
     {
       "name": "Add Memory",
       "short_name": "Memory",
       "description": "Drop a photo",
       "url": "/?view=events&add=1",
-      "icons": [{ "src": "assets/icon-192-v3.png", "sizes": "192x192", "type": "image/png" }]
+      "icons": [
+        {
+          "src": "/assets/icon-192-v4.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     },
     {
       "name": "Ask Thunder",
       "short_name": "Ask",
       "description": "Open Ask Thunder",
       "url": "/?ask=1",
-      "icons": [{ "src": "assets/icon-192-v3.png", "sizes": "192x192", "type": "image/png" }]
-    }
-  ],
-  "share_target": {
-    "action": "/share-memory",
-    "method": "POST",
-    "enctype": "multipart/form-data",
-    "params": {
-      "title": "title",
-      "text": "text",
-      "url": "url",
-      "files": [
-        { "name": "media", "accept": ["image/*", "video/*"] }
+      "icons": [
+        {
+          "src": "/assets/icon-192-v4.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
       ]
     }
-  }
+  ]
 }
