@@ -1,6 +1,15 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260825-leader-room1',
+  APP_BUILD: '20260825-whosin-seed1',
+  /* Public "who's in" presence — floor so no brother is ever alone on the card.
+     seedFloor: minimum count shown once anyone locks in.
+     anchorName: always listed first (leadership presence). */
+  RSVP_PRESENCE: {
+    publicOnHome: true,
+    seedFloor: 3,
+    anchorName: 'Obie'
+  },
+
   /* HEADER MARK — ETERNAL 2026-08-23. Phone-approved (IMG_7978).
      White SONS + gold 3D bolt through O + red OF THUNDER.
      Sticky top of Home / Brothers / Memories / More. z-index 8000.
@@ -111,7 +120,7 @@ window.TB_CONFIG = {
   },
   INSTALL_EXPLAINER: {
     src: 'assets/install-explainer.mp4',
-    keepAudio: true,
+    keepAudio: false,  /* a2hs short silent tutorial 20260825 */
     loop: true,
     noNativeControls: true
   },

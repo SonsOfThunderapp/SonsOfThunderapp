@@ -5734,30 +5734,60 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     return names;
   }
 
+  /** Presence floor so the room never feels empty. Obie always first. */
+  function rsvpPresenceConfig() {
+    const c = (window.TB_CONFIG && window.TB_CONFIG.RSVP_PRESENCE) || {};
+    return {
+      publicOnHome: c.publicOnHome !== false,
+      seedFloor: Math.max(1, parseInt(c.seedFloor, 10) || 3),
+      anchorName: String(c.anchorName || 'Obie').trim() || 'Obie'
+    };
+  }
+
+  function presenceNameLine(realNames, anchor) {
+    const seen = {};
+    const out = [];
+    const a = String(anchor || 'Obie').toUpperCase();
+    out.push(a);
+    seen[a] = true;
+    (realNames || []).forEach(function (n) {
+      const k = String(n || '').toUpperCase();
+      if (!k || seen[k]) return;
+      seen[k] = true;
+      out.push(k);
+    });
+    const show = out.slice(0, 4);
+    let line = show.join(' · ');
+    if (out.length > 4) line += ' · +' + (out.length - 4);
+    return line;
+  }
+
   function renderInCount() {
     const el = document.getElementById('in-count');
     if (!el) return;
-    // Leader-only on Home — no public Who's In pressure. Full board lives in More → THE ROOM.
-    if (roomCut() || !leaderUnlocked) { el.classList.add('hidden'); return; }
-    const n = (sharedRsvps || []).length;
-    if (n < 1) {
+    if (roomCut()) { el.classList.add('hidden'); return; }
+    const cfg = rsvpPresenceConfig();
+    if (!cfg.publicOnHome) {
+      // Legacy leader-only path
+      if (!leaderUnlocked) { el.classList.add('hidden'); return; }
+    }
+    const realN = (sharedRsvps || []).length;
+    const localIn = !!rsvp;
+    // Show once someone is in (shared or this phone). Floor at seed so no one is "first alone."
+    if (realN < 1 && !localIn) {
       el.classList.add('hidden');
       return;
     }
+    const n = Math.max(cfg.seedFloor, realN || (localIn ? 1 : 0));
     let days = null;
     try { days = daysUntil(getNextMeetingMonday()); } catch (e) {}
-    const head = n === 1 ? '1 LOCKED IN' : (n + ' LOCKED IN');
+    const head = n === 1 ? '1 BROTHER IS IN' : (n + ' BROTHERS ARE IN');
     let clock = '';
     if (days === 0) clock = 'TONIGHT';
     else if (days === 1) clock = 'TOMORROW';
     else if (days > 1) clock = days + ' DAYS';
     const names = lockedFirstNames();
-    let nameLine = '';
-    if (names.length) {
-      const show = names.slice(0, 4);
-      nameLine = show.join(' · ');
-      if (names.length > 4) nameLine += ' · +' + (names.length - 4);
-    }
+    const nameLine = presenceNameLine(names, cfg.anchorName);
     const numEl = document.getElementById('in-count-num');
     const namesEl = document.getElementById('in-count-names');
     if (numEl) numEl.textContent = clock ? (clock + '  ·  ' + head) : head;
