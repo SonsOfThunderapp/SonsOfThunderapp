@@ -3,7 +3,7 @@
   "private": true,
   "description": "Sons of Thunder — Thunder Board PWA (static + Netlify Functions)",
   "scripts": {
-    "build": "echo 'static site — nothing to compile'"
+    "build": "echo \"Thunder Board: static publish (no compile step)\""
   },
   "dependencies": {
     "web-push": "^3.6.7"
