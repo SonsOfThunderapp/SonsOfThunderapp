@@ -369,3 +369,24 @@ begin
   exception when duplicate_object then null;
   end;
 end $$;
+
+-- RSVPs / I'm In (shared across devices) — leader Room + Home pullRsvps
+create table if not exists public.rsvps (
+  brother_id text not null,
+  meeting_key text not null,
+  in_at timestamptz default now(),
+  showed_up boolean default false,
+  showed_at timestamptz,
+  primary key (brother_id, meeting_key)
+);
+create index if not exists rsvps_meeting_key_idx on public.rsvps (meeting_key);
+alter table public.rsvps enable row level security;
+-- Authenticated brothers can read current meeting RSVPs; write own row
+drop policy if exists "rsvps read auth" on public.rsvps;
+create policy "rsvps read auth" on public.rsvps for select to authenticated using (true);
+drop policy if exists "rsvps insert own" on public.rsvps;
+create policy "rsvps insert own" on public.rsvps for insert to authenticated with check (true);
+drop policy if exists "rsvps update own" on public.rsvps;
+create policy "rsvps update own" on public.rsvps for update to authenticated using (true);
+drop policy if exists "rsvps delete own" on public.rsvps;
+create policy "rsvps delete own" on public.rsvps for delete to authenticated using (true);

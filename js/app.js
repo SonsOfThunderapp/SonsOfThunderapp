@@ -5519,14 +5519,57 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         el.textContent = 'Sign in on Brothers (leader account).';
         return;
       }
-      const res = await fetch('/.netlify/functions/leader-room', {
-        method: 'GET',
-        headers: { Authorization: 'Bearer ' + accessToken }
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        el.textContent = data.error || 'Couldn’t load the room.';
-        return;
+      // Prefer server leader-room; fall back to client sharedRsvps so count still works.
+      let data = null;
+      try {
+        const key = (typeof meetingKey === 'function') ? meetingKey() : '';
+        const url = '/.netlify/functions/leader-room' + (key ? ('?meeting_key=' + encodeURIComponent(key)) : '');
+        const res = await fetch(url, {
+          method: 'GET',
+          headers: { Authorization: 'Bearer ' + accessToken }
+        });
+        const body = await res.json().catch(() => ({}));
+        if (res.ok) data = body;
+        else if (res.status === 403) {
+          el.textContent = 'Leaders only — your account needs leader role in app_members.';
+          return;
+        }
+      } catch (eFetch) {}
+      if (!data) {
+        try { await pullRsvps(); } catch (ePull) {}
+        const key = (typeof meetingKey === 'function') ? meetingKey() : '';
+        const inIds = {};
+        (sharedRsvps || []).forEach(function (r) {
+          if (r && r.brother_id) inIds[r.brother_id] = r;
+        });
+        const people = (brothers || []).map(function (b) {
+          const r = inIds[b.id];
+          return {
+            id: b.id,
+            name: b.name || 'Brother',
+            phone: !!(b.phone && String(b.phone).trim()),
+            birthday: b.birthday || null,
+            updatedAt: b.updated_at || null,
+            in: !!r,
+            inAt: (r && (r.in_at || r.inAt)) || null,
+            showed: !!(r && r.showed_up)
+          };
+        });
+        people.sort(function (a, b) {
+          if (a.in !== b.in) return a.in ? -1 : 1;
+          return String(a.name).localeCompare(String(b.name));
+        });
+        data = {
+          lockedIn: people.filter(function (p) { return p.in; }).length,
+          roster: people.length,
+          alerts: 0,
+          phones: people.filter(function (p) { return p.phone; }).length,
+          people: people,
+          birthdays: [],
+          memories: [],
+          meeting_key: key || null,
+          source: 'client-fallback'
+        };
       }
       const bday = (data.birthdays || []).map(function (b) {
         return esc(b.name) + ' · ' + esc(b.birthday);
@@ -5694,7 +5737,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   function renderInCount() {
     const el = document.getElementById('in-count');
     if (!el) return;
-    if (roomCut()) { el.classList.add('hidden'); return; }
+    // Leader-only on Home — no public Who's In pressure. Full board lives in More → THE ROOM.
+    if (roomCut() || !leaderUnlocked) { el.classList.add('hidden'); return; }
     const n = (sharedRsvps || []).length;
     if (n < 1) {
       el.classList.add('hidden');
@@ -8277,23 +8321,11 @@ $('#edit-profile-btn').addEventListener('click', () => {
 
     refreshInstallCta();
 
-    // Facebook / IG: never interrupt splash or the product tour.
+    // In-app browser: mark state only. Do NOT auto-popup install gate on open.
+    // Overlay opens only when brother taps install / PUT IT ON / Share path.
     try {
       if (getInstallState() === 'IN_APP_BROWSER') {
         setInstallProgress('WRONG_BROWSER');
-        if (!sessionStorage.getItem('tb_inapp_gate')) {
-          sessionStorage.setItem('tb_inapp_gate', '1');
-          const launchInappGate = function () {
-            try {
-              if (__tourActive) return;
-              const splash = document.getElementById('splash');
-              if (splash && !splash.classList.contains('splash-done') && !splash.classList.contains('hidden')) return;
-              if (typeof isTourComplete === 'function' && !isTourComplete()) return;
-              openInAppInstallOverlay();
-            } catch (e) {}
-          };
-          setTimeout(launchInappGate, 600);
-        }
       } else if (getInstallState() !== 'INSTALLED') {
         const prog = getInstallProgress();
         if ((prog === 'INSTALL_ATTEMPTED' || prog === 'READY_TO_INSTALL') && !sessionStorage.getItem('tb_rescue_toast')) {
@@ -9522,28 +9554,24 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     if (splash && !splash.classList.contains('splash-done') && splash.style.display !== 'none') {
       if (!splash.classList.contains('hidden')) return;
     }
-    if (typeof isTourComplete === 'function' && !isTourComplete()) return;
     const title = document.getElementById('inapp-install-title');
-    const sub = el.querySelector('.ios-install-sub');
+    const sub = el.querySelector('.ios-install-sub') || document.getElementById('inapp-install-sub');
     const steps = el.querySelector('.ios-install-steps');
+    // Chrome-first. Never lead with Safari — most brothers live in Chrome.
+    if (title) title.textContent = 'PUT IT ON HOME SCREEN';
     if (sub) {
-      sub.textContent = '';
-      sub.hidden = true;
+      if (isAndroid()) {
+        sub.textContent = 'Copy the link → open in Chrome → Install app / Add to Home screen.';
+      } else {
+        sub.textContent = 'Copy the link → open in Chrome → Share → Add to Home Screen.';
+      }
+      sub.hidden = false;
     }
-    if (isAndroid()) {
-      if (title) title.textContent = 'OPEN IN CHROME';
-      if (steps) {
-        steps.innerHTML =
-          '<li><span class="ios-step-num">1</span> <strong>⋮</strong> → Open in Chrome</li>' +
-          '<li><span class="ios-step-num">2</span> Menu → Install app</li>';
-      }
-    } else {
-      if (title) title.textContent = 'OPEN IN SAFARI';
-      if (steps) {
-        steps.innerHTML =
-          '<li><span class="ios-step-num">1</span> <strong>⋯</strong> → Open in Safari</li>' +
-          '<li><span class="ios-step-num">2</span> Share → Add to Home Screen</li>';
-      }
+    if (steps) {
+      steps.innerHTML = '';
+      steps.classList.add('hidden');
+      steps.hidden = true;
+      steps.setAttribute('aria-hidden', 'true');
     }
     el.classList.remove('hidden');
     el.setAttribute('aria-hidden', 'false');
