@@ -9144,3 +9144,109 @@ body:has(.brother-detail:not(.hidden)) #main-header {
 .container {
   padding-top: max(4px, var(--space-2, 8px));
 }
+
+
+/* ---- Pull to refresh (under header logo) ---- */
+.ptr-indicator {
+  position: sticky;
+  top: calc(env(safe-area-inset-top, 0px) + 4px);
+  z-index: 7500;
+  margin: 0 auto 4px;
+  width: max-content;
+  max-width: 90vw;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: #111;
+  border: 1px solid rgba(254, 241, 5, 0.45);
+  color: #FEF105;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+}
+.ptr-indicator.ptr-pulling,
+.ptr-indicator.ptr-ready,
+.ptr-indicator.ptr-loading,
+.ptr-indicator.ptr-done {
+  opacity: 1;
+}
+.ptr-indicator:not(.hidden) {
+  opacity: 0.9;
+}
+.ptr-indicator.ptr-ready {
+  border-color: #FEF105;
+  box-shadow: 0 0 16px rgba(254, 241, 5, 0.35);
+}
+.ptr-indicator.ptr-loading {
+  border-color: #E30600;
+  color: #fff;
+  animation: ptrPulse 0.9s ease-in-out infinite;
+}
+.ptr-indicator.ptr-done {
+  border-color: #FEF105;
+  color: #FEF105;
+}
+@keyframes ptrPulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ptr-indicator.ptr-loading { animation: none; }
+}
+
+
+/* PATIO MODE — gathering night emphasis (additive) */
+body.patio-live .next-meeting.card {
+  box-shadow: 0 0 0 1px rgba(254, 241, 5, 0.22), 0 8px 28px rgba(0, 0, 0, 0.45);
+}
+body.patio-live #meeting-phase-label {
+  color: #FEF105;
+}
+body.patio-live .iron-feed,
+body.patio-live #install-home-card,
+body.patio-live .home-mission {
+  opacity: 0.72;
+}
+body.patio-live .last-fire:not(.hidden) {
+  box-shadow: 0 0 0 1px rgba(227, 6, 0, 0.25);
+}
+body.patio-live .btn-rsvp:not(.confirmed) {
+  box-shadow: 0 0 18px rgba(227, 6, 0, 0.35);
+}
+
+
+/* Brother brief + patio tap QR (ROI5) */
+.brother-detail-skills {
+  color: #FEF105;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-align: center;
+  margin: 6px 16px 0;
+  line-height: 1.35;
+}
+.brother-detail-skills.hidden { display: none; }
+#profile-skills {
+  width: 100%;
+  background: #111;
+  color: #fff;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 16px;
+  margin-top: 6px;
+}
+.patio-tap-block {
+  margin-top: 16px;
+  text-align: center;
+}
+.patio-tap-block canvas {
+  display: block;
+  margin: 10px auto;
+  background: #fff;
+  border-radius: 8px;
+}

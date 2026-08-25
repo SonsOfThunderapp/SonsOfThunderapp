@@ -4348,6 +4348,26 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     };
     img.src = 'assets/bolt-for-qr.png';
   }
+
+  function patioTapUrl() {
+    try {
+      const origin = (window.location && window.location.origin) ? window.location.origin : 'https://sonsofthunderboard.com';
+      return origin.replace(/\/+$/, '') + '/tap/showup?checkin=1';
+    } catch (e) {
+      return 'https://sonsofthunderboard.com/tap/showup?checkin=1';
+    }
+  }
+
+  function paintPatioTapQr() {
+    const url = patioTapUrl();
+    const hint = document.getElementById('patio-tap-url');
+    if (hint) hint.textContent = url;
+    const canvas = document.getElementById('patio-tap-qr');
+    if (canvas && typeof paintThunderQr === 'function') {
+      try { paintThunderQr(canvas, url, 200); } catch (e) {}
+    }
+  }
+
   function paintThunderQr(target, text, dim) {
     if (!target || !text || typeof QRCode === 'undefined') return false;
     const hold = document.createElement('div');
@@ -4489,6 +4509,12 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     if (nameEl) nameEl.textContent = b.name || '';
     const bioEl = $('#brother-detail-bio');
     if (bioEl) bioEl.textContent = b.bio || '';
+    const skillsLine = $('#brother-detail-skills');
+    if (skillsLine) {
+      const sk = String(b.skills || '').trim();
+      skillsLine.textContent = sk ? ('CAN HELP · ' + sk) : '';
+      skillsLine.classList.toggle('hidden', !sk);
+    }
 
   
 
@@ -4608,10 +4634,9 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
 
       const bdayEl = $('#profile-birthday');
       if (bdayEl) bdayEl.value = (me && me.birthday) ? me.birthday : '';
+      const skillsEl = $('#profile-skills');
+      if (skillsEl) skillsEl.value = me.skills || '';
 
-
-
-      
       if (me.photo) {
         pendingPhotoData = me.photo;
         const preview = $('#photo-preview');
@@ -4631,8 +4656,10 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       if (bioEl) bioEl.value = '';
       if (phoneEl) phoneEl.value = '';
 
-            const bdayEl = $('#profile-birthday');
-      if (bdayEl) bdayEl.value = '';
+      const bdayElEmpty = $('#profile-birthday');
+      if (bdayElEmpty) bdayElEmpty.value = '';
+      const skillsEmpty = $('#profile-skills');
+      if (skillsEmpty) skillsEmpty.value = '';
 
 
       
@@ -5091,6 +5118,10 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       else drop.classList.add('hidden');
     }
     try { syncDropShotAuth(); } catch (e) {}
+    // Patio Mode visual only — never override Living Home phase labels
+    try {
+      document.body.classList.toggle('patio-live', !!night);
+    } catch (eP) {}
   }
 
   function openLibraryShot() {
@@ -5953,7 +5984,22 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
           return '<img src="' + esc(m.data) + '" alt="">';
         }).join('');
       }
-      if (cap) cap.textContent = night ? (roll.length + ' from the patio') : 'Last Monday.';
+      if (cap) {
+        var n = roll.length;
+        var who = 0;
+        try {
+          who = (sharedRsvps || []).filter(function (r) { return r && r.in; }).length;
+        } catch (eW) {}
+        if (night) {
+          cap.textContent = n === 1
+            ? 'One shot from the patio. The night is live.'
+            : (n + ' shots from the patio. The night is live.');
+        } else if (who > 0) {
+          cap.textContent = who + ' brothers showed up. The next mission is ahead.';
+        } else {
+          cap.textContent = n === 1 ? 'One frame from last gathering.' : (n + ' frames from last gathering.');
+        }
+      }
       el.classList.remove('hidden');
       updateAllNewBadges();
       return;
@@ -6436,10 +6482,41 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       };
     }
 
-    if (query.includes('who can help') || query.includes('need someone') || query.includes('who knows') || query.includes('hvac') || query.includes('electrical') || query.includes('construction')) {
+    if (query.includes('who can help') || query.includes('need someone') || query.includes('who knows') || query.includes('hvac') || query.includes('electrical') || query.includes('construction') || query.includes('who can i ask')) {
+      const stop = { who:1, can:1, help:1, with:1, knows:1, someone:1, need:1, the:1, and:1, for:1, what:1, does:1, again:1, about:1 };
+      const terms = query.replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(function (w) { return w.length > 2 && !stop[w]; });
+      const hits = (brothers || []).filter(function (b) {
+        if (!b || !(b.name || '').trim()) return false;
+        const hay = String(b.skills || '') + ' ' + String(b.bio || '');
+        const h = hay.toLowerCase();
+        if (!h.trim()) return false;
+        return !terms.length || terms.some(function (t) { return h.indexOf(t) !== -1; });
+      }).slice(0, 4);
+      if (hits.length) {
+        const lines = hits.map(function (b) {
+          const sk = String(b.skills || '').trim();
+          return '• ' + String(b.name).split(' ')[0] + (sk ? (' — ' + sk) : '');
+        }).join('\n');
+        return {
+          text: "From what brothers chose to share:\n\n" + lines + "\n\nOpen Brothers to share contact. Or **Text a Leader** if you need a hand tonight.",
+          source: 'Brother Profiles'
+        };
+      }
       return {
-        text: "Once brothers fill profiles, I can match skills. For now: ask in the room, or **Have a question? Text a Leader** and we’ll point you to the right guy.",
+        text: "Nobody has listed that skill yet. Ask in the room, or **Text a Leader** and we’ll point you to the right guy.",
         source: 'Brother Profiles'
+      };
+    }
+
+    if (query.includes('this year') || query.includes('what have we done') || query.includes('how many brothers') || query.includes('how many memories') || query.includes('what did we do')) {
+      const nB = (brothers || []).filter(function (b) { return b && (b.name || '').trim(); }).length;
+      const nM = (typeof media !== 'undefined' && media && media.length) ? media.length : 0;
+      const nA = (typeof announcements !== 'undefined' && announcements && announcements.length) ? announcements.length : 0;
+      let next = '';
+      try { next = formatMeetingDate(getNextMeetingMonday()) + ' · ' + meetingTime(); } catch (eN) {}
+      return {
+        text: "What the board actually holds right now:\n\n• Brothers on this phone / roster: **" + nB + "**\n• Memories saved: **" + nM + "**\n• Announcements: **" + nA + "**\n• Next gathering: **" + (next || 'see Home') + "**\n\nI only count what’s in the room — I don’t invent a yearbook.",
+        source: 'Room Record'
       };
     }
 
@@ -6838,7 +6915,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
         phone,
         birthday: birthday || null,
         photo: pendingPhotoData || (existing >= 0 ? brothers[existing].photo : null),
-        skills: '',
+        skills: (($('#profile-skills') && $('#profile-skills').value) || '').trim().slice(0, 80),
         available: true,
         updatedAt: Date.now()
       };
@@ -8075,9 +8152,13 @@ $('#edit-profile-btn').addEventListener('click', () => {
         ask: { dest: 'ask', voice: true },
         thunder: { dest: 'ask', voice: true },
         voice: { dest: 'ask', voice: true },
-        gathering: { dest: 'home' },
+        gathering: { dest: 'home', checkin: true },
         home: { dest: 'home' },
-        showup: { dest: 'home' },
+        showup: { dest: 'home', checkin: true },
+        checkin: { dest: 'home', checkin: true },
+        patio: { dest: 'home', checkin: true },
+        here: { dest: 'home', checkin: true },
+        imhere: { dest: 'home', checkin: true },
         install: { dest: 'install' },
         welcome: { dest: 'install' },
         brothers: { dest: 'brothers' },
@@ -8160,7 +8241,10 @@ $('#edit-profile-btn').addEventListener('click', () => {
         } else if (spec.dest === 'home' || spec.dest === 'brothers' || spec.dest === 'events' || spec.dest === 'more') {
           setTimeout(() => {
             try { if (typeof showView === 'function') showView(spec.dest); } catch (e) {}
-          }, 350);
+            try {
+              if (spec.checkin && typeof checkInHere === 'function') checkInHere();
+            } catch (eC) {}
+          }, 400);
         }
         cleanUrl();
         return true;
@@ -8577,6 +8661,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
         openModal('admin-room-modal');
         loadFounderRoom();
         try { syncPatioToggle(); } catch (e) {}
+        try { paintPatioTapQr(); } catch (e) {}
       });
     }
     const patioToggle = document.getElementById('patio-toggle-btn');
@@ -9891,6 +9976,46 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     } catch (e) {}
   }
 
+  /** Silent board soft-refresh on resume — no marketing, no wipe of member data. */
+  var __tbLastSoftDataAt = 0;
+  var __tbSoftDataInFlight = false;
+  var TB_SOFT_DATA_MIN_MS = 45000; // don't hammer Supabase on every tab focus
+
+  function softRefreshBlocked() {
+    try {
+      if (document.body.classList.contains('tb-tour-open')) return true;
+      if (document.body.classList.contains('tb-modal-open')) return true;
+      if (window.__ptrBusy) return true;
+      if (window.__tbThunderInFlight) return true;
+      // Mid-edit / upload surfaces
+      var busyIds = ['profile-modal', 'media-modal', 'memory-viewer', 'auth-gate', 'thunder-modal'];
+      for (var i = 0; i < busyIds.length; i++) {
+        var el = document.getElementById(busyIds[i]);
+        if (el && !el.classList.contains('hidden')) return true;
+      }
+    } catch (e) {}
+    return false;
+  }
+
+  function scheduleSoftDataOnWake(reason) {
+    if (__tbSoftDataInFlight) return;
+    if (softRefreshBlocked()) return;
+    var now = Date.now();
+    if (__tbLastSoftDataAt && (now - __tbLastSoftDataAt) < TB_SOFT_DATA_MIN_MS) return;
+    __tbSoftDataInFlight = true;
+    Promise.resolve()
+      .then(function () {
+        if (typeof softRefreshSharedData === 'function') return softRefreshSharedData();
+      })
+      .catch(function (e) {
+        try { console.warn('soft data wake', reason, e && e.message ? e.message : e); } catch (e2) {}
+      })
+      .then(function () {
+        __tbLastSoftDataAt = Date.now();
+        __tbSoftDataInFlight = false;
+      });
+  }
+
   function reconcileOnWake() {
     try { huntGhosts(); } catch (e0) {}
     try { refreshAlertsToggleUI(); } catch (e) {}
@@ -9900,6 +10025,8 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     } catch (e) {}
     try { pingServiceWorkerUpdate(); } catch (e) {}
     try { checkStaleBuild(); } catch (e) {}
+    // Primary freshness path: quiet shared-data pull. Profile/auth stay put.
+    try { scheduleSoftDataOnWake('resume'); } catch (eS) {}
   }
 
   function runLaunchHousekeeping() {
@@ -10082,6 +10209,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
   async function forceRefreshApp(silent) {
     // Cache/SW only. Never delete sb-* / supabase keys or IndexedDB auth.
+    // localStorage profile / RSVP / prefs survive. Only SW + Cache Storage are cleared.
     if (!silent) {
       try { tbToast('Updating… hang tight', 4000); } catch (e) {}
     }
@@ -10106,6 +10234,170 @@ $('#thunder-input').addEventListener('keydown', (e) => {
         window.location.reload(true);
       }
     }, 280);
+  }
+
+  /** Soft data refresh — never wipes member profile, auth, or local RSVP. */
+  async function softRefreshSharedData() {
+    const jobs = [];
+    try { if (typeof pullAnnouncements === 'function') jobs.push(pullAnnouncements()); } catch (e) {}
+    try { if (typeof pullEventsBoard === 'function') jobs.push(pullEventsBoard()); } catch (e) {}
+    try { if (typeof pullBrothers === 'function') jobs.push(pullBrothers()); } catch (e) {}
+    try { if (typeof pullRsvps === 'function') jobs.push(pullRsvps()); } catch (e) {}
+    try {
+      if (typeof isSignedIn === 'function' && isSignedIn() && typeof pullMemories === 'function') {
+        jobs.push(pullMemories());
+      }
+    } catch (e) {}
+    try { await Promise.all(jobs.map(function (p) { return Promise.resolve(p).catch(function () {}); })); } catch (e) {}
+    try { if (typeof renderAnnouncements === 'function') renderAnnouncements(); } catch (e) {}
+    try { if (typeof renderMission === 'function') renderMission(); } catch (e) {}
+    try { if (typeof renderEventsNote === 'function') renderEventsNote(); } catch (e) {}
+    try { if (typeof renderBrothers === 'function') renderBrothers(); } catch (e) {}
+    try { if (typeof renderRsvp === 'function') renderRsvp(); } catch (e) {}
+    try { if (typeof renderInCount === 'function') renderInCount(); } catch (e) {}
+    try { if (typeof renderMedia === 'function') renderMedia(); } catch (e) {}
+    try { if (typeof renderLastFire === 'function') renderLastFire(); } catch (e) {}
+    try { if (typeof renderHere === 'function') renderHere(); } catch (e) {}
+    try { if (typeof updateMeetingUI === 'function') updateMeetingUI(); } catch (e) {}
+    try { if (typeof updateAllNewBadges === 'function') updateAllNewBadges(); } catch (e) {}
+  }
+
+  /**
+   * Pull-to-refresh from top (logo / home).
+   * 1) Soft-refresh shared board data (keep all member data)
+   * 2) If a newer APP_BUILD is live, SW/cache refresh only — localStorage stays
+   */
+  let __ptrBusy = false;
+  async function runPullToRefresh() {
+    if (__ptrBusy) return;
+    __ptrBusy = true;
+    const bar = document.getElementById('ptr-indicator');
+    try {
+      if (bar) {
+        bar.classList.add('ptr-loading');
+        bar.textContent = 'UPDATING…';
+      }
+      try { tbFeedback && tbFeedback.selection && tbFeedback.selection(); } catch (e) {}
+      await softRefreshSharedData();
+      let needHard = false;
+      try {
+        const r = await fetch('build.json?_=' + Date.now(), { cache: 'no-store' });
+        if (r.ok) {
+          const j = await r.json();
+          const live = String(j.APP_BUILD || '');
+          const here = String((cfg() && cfg().APP_BUILD) || '');
+          if (live && here && live !== here) needHard = true;
+        }
+      } catch (e) {}
+      if (needHard) {
+        if (bar) bar.textContent = 'NEW BUILD…';
+        await forceRefreshApp(true);
+        return;
+      }
+      if (bar) {
+        bar.textContent = "YOU'RE CURRENT";
+        bar.classList.remove('ptr-loading');
+        bar.classList.add('ptr-done');
+      }
+      try { tbToast('Board updated — your profile stays put', 2600); } catch (e) {}
+      setTimeout(function () {
+        if (bar) {
+          bar.classList.remove('ptr-done', 'ptr-pulling', 'ptr-ready');
+          bar.textContent = 'PULL TO REFRESH';
+          bar.classList.add('hidden');
+        }
+      }, 900);
+    } catch (e) {
+      try { tbToast("Couldn't refresh — try again", 2400); } catch (e2) {}
+      if (bar) {
+        bar.classList.remove('ptr-loading', 'ptr-ready');
+        bar.classList.add('hidden');
+      }
+    } finally {
+      __ptrBusy = false;
+    }
+  }
+
+  function setupPullToRefresh() {
+    if (window.__tbPtrBound) return;
+    window.__tbPtrBound = true;
+    const THRESH = 72;
+    let startY = 0;
+    let pulling = false;
+    const bar = document.getElementById('ptr-indicator');
+
+    function atTop() {
+      try {
+        if (window.scrollY > 4) return false;
+        const views = document.getElementById('views');
+        if (views && views.scrollTop > 4) return false;
+        const active = document.querySelector('.view.active');
+        if (active && active.scrollTop > 4) return false;
+        return true;
+      } catch (e) {
+        return window.scrollY < 4;
+      }
+    }
+
+    function onStart(e) {
+      if (__ptrBusy) return;
+      if (document.body.classList.contains('tb-modal-open')) return;
+      if (document.querySelector('.modal:not(.hidden), .ios-install-overlay:not(.hidden), #tb-tour:not(.hidden)')) return;
+      if (!atTop()) return;
+      const t = e.touches && e.touches[0];
+      if (!t) return;
+      startY = t.clientY;
+      pulling = true;
+    }
+
+    function onMove(e) {
+      if (!pulling || __ptrBusy) return;
+      const t = e.touches && e.touches[0];
+      if (!t) return;
+      const dy = t.clientY - startY;
+      if (dy < 8 || !atTop()) {
+        if (bar) bar.classList.add('hidden');
+        return;
+      }
+      if (e.cancelable) e.preventDefault();
+      if (bar) {
+        bar.classList.remove('hidden', 'ptr-done');
+        bar.classList.add('ptr-pulling');
+        if (dy >= THRESH) {
+          bar.classList.add('ptr-ready');
+          bar.textContent = 'RELEASE TO REFRESH';
+        } else {
+          bar.classList.remove('ptr-ready');
+          bar.textContent = 'PULL TO REFRESH';
+        }
+        const p = Math.min(1, dy / THRESH);
+        bar.style.transform = 'translateY(' + Math.round(p * 28) + 'px)';
+        bar.style.opacity = String(0.35 + p * 0.65);
+      }
+    }
+
+    function onEnd(e) {
+      if (!pulling) return;
+      pulling = false;
+      const t = (e.changedTouches && e.changedTouches[0]) || null;
+      const dy = t ? (t.clientY - startY) : 0;
+      if (bar) {
+        bar.style.transform = '';
+        bar.style.opacity = '';
+        bar.classList.remove('ptr-pulling');
+      }
+      if (dy >= THRESH && atTop() && !__ptrBusy) {
+        runPullToRefresh();
+      } else if (bar) {
+        bar.classList.add('hidden');
+        bar.classList.remove('ptr-ready');
+      }
+    }
+
+    document.addEventListener('touchstart', onStart, { passive: true });
+    document.addEventListener('touchmove', onMove, { passive: false });
+    document.addEventListener('touchend', onEnd, { passive: true });
+    document.addEventListener('touchcancel', onEnd, { passive: true });
   }
 
   function setupGatheringAlerts() {
@@ -10928,5 +11220,6 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     }
   }
 
+  try { setupPullToRefresh(); } catch (e) { console.warn('ptr setup', e); }
   try { init(); } catch (e) { console.error('Thunder Board init', e); }
 })();

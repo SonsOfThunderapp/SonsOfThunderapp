@@ -110,6 +110,8 @@
         <img class="logo-bolt-life" src="assets/logo-bolt-isolated.png?v=20260824-splash1" alt="" aria-hidden="true" width="1200" height="831" />
       </div>
     </header>
+    <div id="ptr-indicator" class="ptr-indicator hidden" aria-live="polite" aria-hidden="true">PULL TO REFRESH</div>
+
 
     <main id="views">
       <!-- HOME -->
@@ -523,6 +525,7 @@
       <div id="brother-birthday-header" class="happy-birthday-label hidden"></div>
       <div class="brother-detail-name" id="brother-detail-name"></div>
       <div class="brother-detail-bio" id="brother-detail-bio"></div>
+      <div class="brother-detail-skills hidden" id="brother-detail-skills"></div>
       <button type="button" id="brother-text-him" class="btn-primary hidden">TEXT HIM</button>
       <button type="button" class="btn-contact btn-share" id="brother-share-contact">SHARE CONTACT</button>
       <div class="brother-qr-wrap hidden" id="brother-qr-wrap">
@@ -576,6 +579,8 @@
         <label class="file-label"><input type="file" id="profile-photo" accept="image/*" />Choose Photo</label>
         <input type="text" id="profile-name" placeholder="First name" maxlength="30" />
         <textarea id="profile-bio" placeholder="One-line identity (occupation, family, what you bring)" maxlength="120" rows="3"></textarea>
+        <label class="field-label" for="profile-skills">What I can help with <span class="field-hint">(optional — HVAC, legal, kids, trucks)</span></label>
+        <input type="text" id="profile-skills" placeholder="e.g. electrical · real estate · prayer" maxlength="80" />
         <label class="field-label" for="profile-phone">Phone <span class="field-hint">(optional — only shared if you add it)</span></label>
         <input type="tel" id="profile-phone" placeholder="Mobile number" maxlength="20" inputmode="tel" autocomplete="tel" />
         <p class="profile-phone-help" id="profile-phone-help">
@@ -782,6 +787,12 @@
         <div class="room-draws">
           <button type="button" id="patio-toggle-btn" class="btn-rsvp">OPEN THE PATIO</button>
           <p class="leader-push-hint" id="patio-toggle-hint">Opens I’M HERE on Home. Men who check in are in the beer and hat raffle.</p>
+          <div class="patio-tap-block" id="patio-tap-block">
+            <p class="card-label">PATIO TAP</p>
+            <p class="leader-push-hint">NFC sticker or printed code. Same URL forever — the app decides what the tap does.</p>
+            <canvas id="patio-tap-qr" width="200" height="200" aria-label="Patio tap QR"></canvas>
+            <p class="leader-push-hint" id="patio-tap-url"></p>
+          </div>
           <button type="button" id="draw-beer-btn" class="btn-rsvp">DRAW BEER</button>
           <button type="button" id="draw-hat-btn" class="btn-secondary" style="width:100%;margin-top:8px;">DRAW HAT</button>
         </div>
