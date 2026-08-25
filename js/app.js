@@ -3,6 +3,19 @@
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => document.querySelectorAll(s);
 
+  function publicOrigin() {
+    try {
+      if (window.TB_CONFIG && window.TB_CONFIG.PUBLIC_ORIGIN) return String(window.TB_CONFIG.PUBLIC_ORIGIN).replace(/\/$/, '');
+    } catch (e) {}
+    try {
+      if (location && location.origin && /^https?:/.test(location.origin)) return location.origin;
+    } catch (e2) {}
+    return 'https://sonsofthunderboard.com';
+  }
+  function publicUrl(path) {
+    return publicOrigin() + (path || '/');
+  }
+
   // Escape user text before any innerHTML use
   function esc(str) {
     if (str == null) return '';
@@ -15,7 +28,7 @@
   }
 
   // Soft, non-blocking feedback (replaces some abrupt alerts)
-  function tbToast(msg, ms) {
+  function tbToast(msg, ms, onTap) {
     let t = document.getElementById('install-toast');
     if (!t) {
       t = document.createElement('div');
@@ -26,6 +39,8 @@
     }
     t.textContent = msg || '';
     t.classList.remove('hidden');
+    t.onclick = typeof onTap === 'function' ? function () { onTap(); } : null;
+    t.style.cursor = typeof onTap === 'function' ? 'pointer' : '';
     clearTimeout(tbToast._timer);
     tbToast._timer = setTimeout(() => t.classList.add('hidden'), ms || 3200);
   }
@@ -41,8 +56,90 @@
   }
 
   // ---------- DATA ----------
-  const DEFAULT_BROTHERS = [];
+  /* Locked founder seat — Obie's profile. Never wipe this seed on an empty roster.
+     If Supabase/local already has an Obie row, we do not duplicate it. */
+  const FOUNDER_OBIE = {
+    id: 'founder-obie',
+    name: 'OBIE',
+    bio: 'Jesus follower, Radio ninja & Family circus ringmaster. Life isn’t occasion, and we MUST rise to it.',
+    photo: '',
+    phone: '',
+    birthday: '',
+    skills: '',
+    available: true,
+    updatedAt: 0
+  };
+  const DEFAULT_BROTHERS = [FOUNDER_OBIE];
+  function hasObieSeat(list) {
+    return (list || []).some(function (b) {
+      return b && /^obie$/i.test(String(b.name || '').trim());
+    });
+  }
+  function ensureFounderSeat() {
+    if (!Array.isArray(brothers)) brothers = [];
+    if (hasObieSeat(brothers)) return;
+    brothers = [Object.assign({}, FOUNDER_OBIE)].concat(brothers);
+    try { save('brothers', brothers); } catch (e) {}
+  }
+  function brotherScore(b) {
+    if (!b) return -1;
+    let s = 0;
+    if (b.photo) s += 10;
+    if (String(b.bio || '').trim()) s += 5;
+    if (String(b.phone || '').trim()) s += 2;
+    if (b.birthday) s += 1;
+    if (b.updatedAt) s += 1;
+    return s;
+  }
+  function collapseDuplicateBrothers() {
+    if (!Array.isArray(brothers)) return;
+    const out = [];
+    const idxByName = {};
+    brothers.forEach(function (b) {
+      if (!b) return;
+      const key = String(b.name || '').trim().toLowerCase();
+      if (!key) return;
+      if (idxByName[key] == null) {
+        idxByName[key] = out.length;
+        out.push(b);
+        return;
+      }
+      const i = idxByName[key];
+      if (brotherScore(b) > brotherScore(out[i])) out[i] = b;
+    });
+    brothers = out;
+  }
+function isTodayBirthday(bday) {
+  if (!bday || typeof bday !== 'string') return false;
+  const cleaned = bday.trim().replace(/[^0-9-]/g, '');
+  if (!/^\d{2}-\d{2}$/.test(cleaned)) return false;
+  const now = new Date();
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const dd = String(now.getDate()).padStart(2, '0');
+  return cleaned === (mm + '-' + dd);
+}
 
+function normalizeBirthday(val) {
+  if (!val) return null;
+  const cleaned = String(val).trim().replace(/[^0-9-]/g, '');
+  if (/^\d{2}-\d{2}$/.test(cleaned)) return cleaned;
+  const parts = cleaned.split(/[-/]/);
+  if (parts.length === 2) {
+    const m = parts[0].padStart(2, '0');
+    const d = parts[1].padStart(2, '0');
+    if (+m >= 1 && +m <= 12 && +d >= 1 && +d <= 31) return m + '-' + d;
+  }
+  return null;
+}
+
+const BIRTHDAY_THUNDER_LINE = "We're ALL celebrating you being born, my friend!";
+const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
+
+
+
+
+
+  
   function buildUpcoming() {
     const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
     const list = [];
@@ -138,6 +235,7 @@
   // Last Fire — one caption + optional photo; leadership updates when worth remembering
   let lastFire = load('lastFire') || null;
   let leaderUnlocked = false;
+  let chairUnlocked = false;
 
   const SCRIPTURE = {
     'mark 3:17': {
@@ -194,10 +292,17 @@
     });
   }
 
-  let brothers = load('brothers') || DEFAULT_BROTHERS;
+  let brothers = load('brothers') || DEFAULT_BROTHERS.slice();
+  try { if (!hasObieSeat(brothers)) ensureFounderSeat(); } catch (e) {}
+  try {
+    collapseDuplicateBrothers();
+    save('brothers', brothers);
+  } catch (e) {}
   // Shared memories live in Supabase when configured — not localStorage primary
   let media = [];
   let rsvp = load('rsvp') || false;
+  let sharedRsvps = [];
+  let prevRsvpIds = null;
   let myProfileId = load('myProfileId') || null;
   let pendingPhotoData = null;
   let sbClient = null;
@@ -244,13 +349,13 @@
       return d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + 'T' +
         pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds());
     }
-    const uid = 'thunder-gathering-' + start.getFullYear() + pad(start.getMonth() + 1) + pad(start.getDate()) + '@sonsofthunder.netlify.app';
+    const uid = 'thunder-gathering-' + start.getFullYear() + pad(start.getMonth() + 1) + pad(start.getDate()) + '@sonsofthunderboard.com';
     const title = 'Sons of Thunder — Next Gathering';
     const loc = venueName();
     const desc = [
       'Sons of Thunder monthly gathering. Show up.',
       'Check Thunder Board for the latest gathering details.',
-      'https://sonsofthunder.netlify.app/'
+      publicUrl('/')
     ].join('\\n');
     const lines = [
       'BEGIN:VCALENDAR',
@@ -266,7 +371,7 @@
       'SUMMARY:' + icsEscape(title),
       'DESCRIPTION:' + icsEscape(desc),
       'LOCATION:' + icsEscape(loc),
-      'URL:https://sonsofthunder.netlify.app/',
+      'URL:' + publicUrl('/'),
       // 7 days before
       'BEGIN:VALARM',
       'TRIGGER:-P7D',
@@ -292,81 +397,110 @@
   }
 
   let __calBlobUrl = null;
-  /**
-   * Open native calendar with next gathering prefilled.
-   * PWA cannot silently write to Calendar — OS requires user Save/Add.
-   * Strategy: data: ICS (iOS often hands to Calendar) → blob download → Google Calendar template.
-   */
-  function launchGatheringCalendar() {
+
+  function setCalAlarmsLine(msg) {
+    const el = document.getElementById('tb-cal-alarms');
+    if (el && msg) el.textContent = msg;
+  }
+
+  function lockInAppReminder() {
+    try { save('reminderSet', true); } catch (e) {}
+    try { save('reminderMeeting', meetingKey()); } catch (e) {}
+    armGatheringPings();
+    return true;
+  }
+
+  async function armGatheringPings() {
+    try { save('reminderSet', true); } catch (e) {}
+    try { save('reminderMeeting', meetingKey()); } catch (e) {}
+    let perm = 'default';
+    try { perm = await requestNotifyPermission(); } catch (e) {}
+    if (perm !== 'granted') {
+      setCalAlarmsLine('Allow alerts — that’s how the 7-day ping lands.');
+      return false;
+    }
+    try { checkAndFireMeetingNotifications(); } catch (e) {}
+    if (typeof isIos === 'function' && isIos() && typeof isStandalonePwa === 'function' && !isStandalonePwa()) {
+      setCalAlarmsLine('Put the Board on your Home Screen so the 7-day ping can reach you.');
+    }
+    if (typeof enableGatheringAlerts === 'function') {
+      try {
+        const ok = await enableGatheringAlerts();
+        try { if (typeof refreshAlertsToggleUI === 'function') refreshAlertsToggleUI(); } catch (e) {}
+        if (ok) {
+          setCalAlarmsLine('Locked. We’ll ping this phone: 7 days · 1 day · 2 hours.');
+          return true;
+        }
+      } catch (e) {}
+    }
+    setCalAlarmsLine('Reminder on this phone. Gathering Alerts = ping even if the app is closed.');
+    return false;
+  }
+
+  function paintInAppCalendar() {
+    const next = getNextMeetingMonday();
+    const monthEl = document.getElementById('tb-cal-month');
+    const grid = document.getElementById('tb-cal-grid');
+    const whenEl = document.getElementById('tb-cal-when');
+    const locEl = document.getElementById('tb-cal-loc');
+    if (!grid) return;
+    const y = next.getFullYear();
+    const m = next.getMonth();
+    if (monthEl) {
+      monthEl.textContent = next.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }).toUpperCase();
+    }
+    const startDow = new Date(y, m, 1).getDay();
+    const daysIn = new Date(y, m + 1, 0).getDate();
+    const meetD = next.getDate();
+    let html = '';
+    for (let i = 0; i < startDow; i++) html += '<span class="tb-cal-cell is-empty"></span>';
+    for (let d = 1; d <= daysIn; d++) {
+      html += '<span class="tb-cal-cell' + (d === meetD ? ' is-gathering' : '') + '">' + d + '</span>';
+    }
+    grid.innerHTML = html;
+    if (whenEl) {
+      whenEl.textContent = next.toLocaleDateString('en-US', {
+        weekday: 'long', month: 'short', day: 'numeric'
+      }) + ' · ' + meetingTime();
+    }
+    if (locEl) locEl.textContent = venueName();
+    try { paintCalA2hs(); } catch (e) {}
+  }
+
+  function offerCalendarNow() {
+    lockInAppReminder();
+    try { renderRsvp(); } catch (e) {}
+    return true;
+  }
+  function addToNativeCalendar() {
+    const host = location.host || 'sonsofthunderboard.com';
+    const icsPath = '/.netlify/functions/gathering-ics';
+    const httpsUrl = location.origin + icsPath;
+    try {
+      if (typeof isIos === 'function' && isIos()) {
+        location.href = 'webcal://' + host + icsPath;
+        return true;
+      }
+    } catch (e) {}
     try {
       const next = getNextMeetingMonday();
-      const ics = buildGatheringIcs(next);
       const mt = parseMeetingHours();
       const start = new Date(next);
       start.setHours(mt.h, mt.m, 0, 0);
       const end = new Date(start.getTime() + 2 * 60 * 60 * 1000);
-      function pad(n) { return String(n).padStart(2, '0'); }
-      function gStamp(d) {
-        return d.getUTCFullYear() + pad(d.getUTCMonth() + 1) + pad(d.getUTCDate()) + 'T' +
-          pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + pad(d.getUTCSeconds()) + 'Z';
-      }
-      const gTitle = encodeURIComponent('Sons of Thunder — Next Gathering');
-      const gDetails = encodeURIComponent('Sons of Thunder monthly gathering. Show up.\nCheck Thunder Board for the latest gathering details.\nhttps://sonsofthunder.netlify.app/');
-      const gLoc = encodeURIComponent(venueName());
-      const googleUrl = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
-        + '&text=' + gTitle
-        + '&dates=' + gStamp(start) + '/' + gStamp(end)
-        + '&details=' + gDetails
-        + '&location=' + gLoc;
-
-      // 1) data: URI — best chance for iPhone Safari/PWA to open Calendar with Save
-      try {
-        const dataUrl = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
-        const a1 = document.createElement('a');
-        a1.href = dataUrl;
-        a1.setAttribute('download', 'sons-of-thunder-gathering.ics');
-        a1.rel = 'noopener';
-        document.body.appendChild(a1);
-        a1.click();
-        setTimeout(function () { try { a1.remove(); } catch (e) {} }, 800);
-      } catch (e1) {}
-
-      // 2) Blob download — Android / desktop Chrome
-      try {
-        if (__calBlobUrl) {
-          try { URL.revokeObjectURL(__calBlobUrl); } catch (e) {}
-        }
-        const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-        __calBlobUrl = URL.createObjectURL(blob);
-        const a2 = document.createElement('a');
-        a2.href = __calBlobUrl;
-        a2.download = 'sons-of-thunder-gathering.ics';
-        a2.rel = 'noopener';
-        document.body.appendChild(a2);
-        a2.click();
-        setTimeout(function () {
-          try { a2.remove(); } catch (e) {}
-          try { URL.revokeObjectURL(__calBlobUrl); __calBlobUrl = null; } catch (e) {}
-        }, 2500);
-      } catch (e2) {}
-
-      // 3) Google Calendar template in new tab — always works as hard fallback
-      try {
-        setTimeout(function () {
-          try { window.open(googleUrl, '_blank', 'noopener'); } catch (e3) {
-            try { window.location.href = googleUrl; } catch (e4) {}
-          }
-        }, 350);
-      } catch (e3) {}
-
+      const title = encodeURIComponent('Sons of Thunder — Next Gathering');
+      const loc = encodeURIComponent(venueName());
+      location.href = 'intent://vnd.android.cursor.dir/event#Intent;action=android.intent.action.INSERT;S.title=' +
+        title + ';S.eventLocation=' + loc + ';l.beginTime=' + start.getTime() +
+        ';l.endTime=' + end.getTime() + ';end';
       return true;
-    } catch (e) {
-      console.warn('Calendar launch failed', e);
-      return false;
-    }
+    } catch (e) {}
+    try { location.href = httpsUrl; } catch (e2) {}
+    return true;
   }
 
   function openCalConfirmSheet() {
+    if (roomCut()) return;
     try { document.body.classList.add('cal-sheet-open'); } catch (e) {}
     const el = document.getElementById('cal-confirm-sheet');
     if (!el) return;
@@ -393,6 +527,163 @@
     return (cfg().MEMORIES_BUCKET || 'Sons Of Thunder Memories').trim();
   }
 
+  const TB_AUTH_DB = 'tb-sot-auth';
+  const TB_AUTH_STORE = 'kv';
+  let __tbAuthRestoreDone = false;
+
+  function isTbAuthKey(key) {
+    const k = String(key || '');
+    return k.indexOf('sb-') === 0 || /supabase/i.test(k);
+  }
+
+  function tbIdbReq() {
+    return new Promise(function (resolve) {
+      try {
+        if (!window.indexedDB) { resolve(null); return; }
+        const req = indexedDB.open(TB_AUTH_DB, 1);
+        req.onupgradeneeded = function () {
+          try {
+            if (!req.result.objectStoreNames.contains(TB_AUTH_STORE)) {
+              req.result.createObjectStore(TB_AUTH_STORE);
+            }
+          } catch (e) {}
+        };
+        req.onsuccess = function () { resolve(req.result); };
+        req.onerror = function () { resolve(null); };
+      } catch (e) { resolve(null); }
+    });
+  }
+
+  function tbIdbGet(key) {
+    return tbIdbReq().then(function (db) {
+      if (!db) return null;
+      return new Promise(function (resolve) {
+        try {
+          const tx = db.transaction(TB_AUTH_STORE, 'readonly');
+          const r = tx.objectStore(TB_AUTH_STORE).get(key);
+          r.onsuccess = function () { resolve(r.result == null ? null : r.result); };
+          r.onerror = function () { resolve(null); };
+        } catch (e) { resolve(null); }
+      });
+    });
+  }
+
+  function tbIdbSet(key, val) {
+    return tbIdbReq().then(function (db) {
+      if (!db) return;
+      return new Promise(function (resolve) {
+        try {
+          const tx = db.transaction(TB_AUTH_STORE, 'readwrite');
+          tx.objectStore(TB_AUTH_STORE).put(val, key);
+          tx.oncomplete = function () { resolve(); };
+          tx.onerror = function () { resolve(); };
+        } catch (e) { resolve(); }
+      });
+    });
+  }
+
+  function tbIdbDel(key) {
+    return tbIdbReq().then(function (db) {
+      if (!db) return;
+      return new Promise(function (resolve) {
+        try {
+          const tx = db.transaction(TB_AUTH_STORE, 'readwrite');
+          tx.objectStore(TB_AUTH_STORE).delete(key);
+          tx.oncomplete = function () { resolve(); };
+          tx.onerror = function () { resolve(); };
+        } catch (e) { resolve(); }
+      });
+    });
+  }
+
+  async function restoreAuthFromIdb() {
+    if (__tbAuthRestoreDone) return;
+    __tbAuthRestoreDone = true;
+    try {
+      let hasLocal = false;
+      try {
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (isTbAuthKey(k) && localStorage.getItem(k)) { hasLocal = true; break; }
+        }
+      } catch (e) {}
+      if (hasLocal) return;
+      const db = await tbIdbReq();
+      if (!db) return;
+      await new Promise(function (resolve) {
+        try {
+          const tx = db.transaction(TB_AUTH_STORE, 'readonly');
+          const req = tx.objectStore(TB_AUTH_STORE).openCursor();
+          req.onsuccess = function () {
+            const c = req.result;
+            if (!c) { resolve(); return; }
+            try {
+              if (isTbAuthKey(c.key) && c.value != null && !localStorage.getItem(c.key)) {
+                localStorage.setItem(c.key, typeof c.value === 'string' ? c.value : String(c.value));
+              }
+            } catch (e2) {}
+            c.continue();
+          };
+          req.onerror = function () { resolve(); };
+        } catch (e3) { resolve(); }
+      });
+    } catch (e) {}
+  }
+
+  const tbAuthStorage = {
+    getItem: function (key) {
+      try {
+        const v = window.localStorage.getItem(key);
+        if (v != null) return v;
+      } catch (e) {}
+      return tbIdbGet(key);
+    },
+    setItem: function (key, value) {
+      try { window.localStorage.setItem(key, value); } catch (e) {}
+      try { tbIdbSet(key, value); } catch (e) {}
+    },
+    removeItem: function (key) {
+      try { window.localStorage.removeItem(key); } catch (e) {}
+      try { tbIdbDel(key); } catch (e) {}
+    }
+  };
+
+  function requestPersistentStorage() {
+    try {
+      if (navigator.storage && navigator.storage.persist) {
+        navigator.storage.persist().catch(function () {});
+      }
+    } catch (e) {}
+  }
+
+  function noteInAppBrowserHome() {
+    try {
+      if (typeof isInAppBrowser === 'function' && isInAppBrowser()) {
+        if (typeof isStandalonePwa === 'function' && isStandalonePwa()) return;
+        if (sessionStorage.getItem('tb_inapp_stay_toast')) return;
+        sessionStorage.setItem('tb_inapp_stay_toast', '1');
+        const msg = 'Open Thunder from your Home Screen so you stay signed in.';
+        if (typeof showInstallToast === 'function') showInstallToast(msg);
+        else if (typeof tbToast === 'function') tbToast(msg, 4200);
+      }
+    } catch (e) {}
+  }
+
+  async function clearTbAuthIdb() {
+    try {
+      const db = await tbIdbReq();
+      if (!db) return;
+      await new Promise(function (resolve) {
+        try {
+          const tx = db.transaction(TB_AUTH_STORE, 'readwrite');
+          tx.objectStore(TB_AUTH_STORE).clear();
+          tx.oncomplete = function () { resolve(); };
+          tx.onerror = function () { resolve(); };
+        } catch (e) { resolve(); }
+      });
+    } catch (e) {}
+  }
+
   function getSb() {
     if (!supabaseEnabled()) return null;
     if (sbClient) return sbClient;
@@ -401,7 +692,7 @@
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true,
-        storage: window.localStorage
+        storage: tbAuthStorage
       },
       realtime: {
         params: { eventsPerSecond: 5 }
@@ -460,6 +751,16 @@
               if (typeof renderEventsNote === 'function') renderEventsNote();
             })
             .catch((e) => console.warn('realtime events_board pull', e && e.message ? e.message : e))
+        );
+      }
+      if (!kind || kind === 'rsvps' || kind === 'all') {
+        tasks.push(
+          pullRsvps().catch((e) => console.warn('realtime rsvps pull', e && e.message ? e.message : e))
+        );
+      }
+      if (!kind || kind === 'raffle' || kind === 'all') {
+        tasks.push(
+          pullRaffle().catch((e) => console.warn('realtime raffle pull', e && e.message ? e.message : e))
         );
       }
       if ((!kind || kind === 'memories' || kind === 'all') && typeof isSignedIn === 'function' && isSignedIn()) {
@@ -584,6 +885,22 @@
       );
       ch.on(
         'postgres_changes',
+        { event: '*', schema: 'public', table: 'rsvps' },
+        () => {
+          try { scheduleRealtimeRefresh('rsvps'); }
+          catch (e) { console.warn('Thunder realtime rsvps handler', e && e.message ? e.message : e); }
+        }
+      );
+      ch.on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'raffle_draws' },
+        () => {
+          try { scheduleRealtimeRefresh('raffle'); }
+          catch (e) { console.warn('Thunder realtime raffle handler', e && e.message ? e.message : e); }
+        }
+      );
+      ch.on(
+        'postgres_changes',
         { event: '*', schema: 'public', table: 'memories' },
         () => {
           try {
@@ -645,8 +962,236 @@
     }
   }
 
+  function roomCut() {
+    try { return !!(window.TB_CONFIG && window.TB_CONFIG.ROOM_CUT); } catch (e) { return false; }
+  }
+
+  /* Screen Wake Lock (Safari 18.4+ / iOS Home Screen). Patio raffle, Axum QR, tour. */
+  const __tbWakeReasons = new Set();
+  let __tbWakeSentinel = null;
+  async function tbKeepAwake(reason) {
+    if (reason) __tbWakeReasons.add(reason);
+    if (!__tbWakeReasons.size) return;
+    try {
+      if (!navigator.wakeLock || !navigator.wakeLock.request) return;
+      if (__tbWakeSentinel && __tbWakeSentinel.released === false) return;
+      __tbWakeSentinel = await navigator.wakeLock.request('screen');
+      __tbWakeSentinel.addEventListener('release', function () { __tbWakeSentinel = null; });
+    } catch (e) {}
+  }
+  function tbAllowSleep(reason) {
+    if (reason) __tbWakeReasons.delete(reason);
+    if (__tbWakeReasons.size) return;
+    try { if (__tbWakeSentinel && __tbWakeSentinel.release) __tbWakeSentinel.release(); } catch (e) {}
+    __tbWakeSentinel = null;
+  }
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && __tbWakeReasons.size) {
+      tbKeepAwake();
+    }
+  });
+
   function currentUser() {
     return (sbSession && sbSession.user) || null;
+  }
+
+  function fireSignedInWelcome() {
+    if (roomCut()) return;
+    if (load('signedInWelcomeSent')) return;
+    try { save('signedInWelcomeSent', 1); } catch (e) {}
+    const title = 'You’re in the room.';
+    const body = 'You’re in. Monday knows your name.';
+    try { fireLocalNotification(title, body, 'thunder-signedin', '/?view=home'); } catch (e) {}
+  }
+
+  function axumCoffeeState() {
+    return load('axumCoffee') || null;
+  }
+
+  function saveAxumCoffee(c) {
+    save('axumCoffee', c);
+    return c;
+  }
+
+  function makeAxumCode() {
+    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let s = '';
+    for (let i = 0; i < 4; i++) s += alphabet[Math.floor(Math.random() * alphabet.length)];
+    let initial = 'T';
+    try {
+      const n = (typeof knownFirstName === 'function' && knownFirstName()) || '';
+      if (n) initial = n.charAt(0).toUpperCase();
+    } catch (e) {}
+    return initial + '-' + s;
+  }
+
+  function issueAxumCoffee() {
+    const existing = axumCoffeeState();
+    if (existing && existing.code) return existing;
+    const uid = currentUser() && currentUser().id;
+    const name = (typeof knownFirstName === 'function' && knownFirstName()) || '';
+    const row = {
+      code: makeAxumCode(),
+      name: name,
+      userId: uid || '',
+      issuedAt: Date.now(),
+      redeemedAt: null,
+      shownDrop: false
+    };
+    saveAxumCoffee(row);
+    if (supabaseEnabled() && isSignedIn()) {
+      const sb = getSb();
+      if (sb) {
+        sb.from('axum_coffee').insert({
+          user_id: uid,
+          code: row.code,
+          name: row.name
+        }).then(function (res) {
+          if (res && res.error && String(res.error.message || '').indexOf('duplicate') === -1) {
+            console.warn('axum issue', res.error);
+          }
+        }).catch(function () {});
+      }
+    }
+    return row;
+  }
+
+  async function pullAxumCoffee() {
+    if (!supabaseEnabled() || !isSignedIn()) return axumCoffeeState();
+    const sb = getSb();
+    const uid = currentUser() && currentUser().id;
+    if (!sb || !uid) return axumCoffeeState();
+    try {
+      const { data, error } = await sb.from('axum_coffee').select('code,name,issued_at,redeemed_at').eq('user_id', uid).maybeSingle();
+      if (error || !data) return axumCoffeeState();
+      const local = axumCoffeeState() || {};
+      const merged = {
+        code: data.code || local.code,
+        name: data.name || local.name || '',
+        userId: uid,
+        issuedAt: data.issued_at ? Date.parse(data.issued_at) : (local.issuedAt || Date.now()),
+        redeemedAt: data.redeemed_at ? Date.parse(data.redeemed_at) : (local.redeemedAt || null),
+        shownDrop: !!local.shownDrop
+      };
+      saveAxumCoffee(merged);
+      return merged;
+    } catch (e) {
+      return axumCoffeeState();
+    }
+  }
+
+  function paintAxumQr(code) {
+    const target = document.getElementById('axum-qr');
+    if (!target) return;
+    target.innerHTML = '';
+    if (!code) return;
+    paintThunderQr(target, 'SOT-AXUM-' + String(code), 200);
+  }
+
+  function renderAxumChip() {
+    const chip = document.getElementById('axum-chip');
+    if (!chip) return;
+    const c = axumCoffeeState();
+    if (c && c.code && !c.redeemedAt) {
+      chip.classList.remove('hidden');
+      chip.textContent = 'FREE AXUM COFFEE';
+    } else {
+      chip.classList.add('hidden');
+    }
+  }
+
+  function closeAxumDrop() {
+    const el = document.getElementById('axum-drop');
+    if (el) el.classList.add('hidden');
+    document.body.classList.remove('tb-axum-open');
+    try { tbAllowSleep('axum'); } catch (e) {}
+  }
+
+  function closeAxumCard() {
+    const el = document.getElementById('axum-card');
+    if (el) el.classList.add('hidden');
+    document.body.classList.remove('tb-axum-open');
+    renderAxumChip();
+    try { tbAllowSleep('axum'); } catch (e) {}
+  }
+
+  function openAxumCard() {
+    const c = axumCoffeeState();
+    if (!c || !c.code) return;
+    closeAxumDrop();
+    const card = document.getElementById('axum-card');
+    if (!card) return;
+    const redeemed = !!c.redeemedAt;
+    card.classList.toggle('is-used', redeemed);
+    const kicker = document.getElementById('axum-card-kicker');
+    const codeEl = document.getElementById('axum-code');
+    const nameEl = document.getElementById('axum-name');
+    const hint = document.getElementById('axum-hint');
+    const btn = document.getElementById('axum-redeem-btn');
+    if (kicker) kicker.textContent = redeemed ? 'USED' : 'FIRST SIGN-IN';
+    if (codeEl) codeEl.textContent = c.code;
+    if (nameEl) nameEl.textContent = (c.name || (typeof knownFirstName === 'function' && knownFirstName()) || '').toUpperCase();
+    if (hint) {
+      hint.textContent = redeemed
+        ? ("You're in the room. Coffee's on us — once.")
+        : 'Show this. Tap REDEEM in front of them.';
+    }
+    if (btn) {
+      btn.classList.toggle('hidden', redeemed);
+      btn.textContent = 'REDEEM AT AXUM';
+      btn.dataset.armed = '0';
+    }
+    paintAxumQr(c.code);
+    card.classList.remove('hidden');
+    document.body.classList.add('tb-axum-open');
+    try { tbKeepAwake('axum'); } catch (e) {}
+  }
+
+  function openAxumDrop() {
+    const c = axumCoffeeState();
+    if (!c || !c.code || c.redeemedAt) return;
+    const drop = document.getElementById('axum-drop');
+    if (!drop) return;
+    drop.classList.remove('hidden');
+    document.body.classList.add('tb-axum-open');
+    try { tbKeepAwake('axum'); } catch (e) {}
+  }
+
+  function maybeShowAxumCoffee() {
+    const c = axumCoffeeState();
+    if (!c || !c.code) {
+      renderAxumChip();
+      return;
+    }
+    if (c.redeemedAt) {
+      renderAxumChip();
+      return;
+    }
+    if (!c.shownDrop) {
+      c.shownDrop = true;
+      saveAxumCoffee(c);
+      openAxumDrop();
+    }
+    renderAxumChip();
+  }
+
+  async function redeemAxumCoffee() {
+    const c = axumCoffeeState();
+    if (!c || !c.code || c.redeemedAt) return false;
+    c.redeemedAt = Date.now();
+    saveAxumCoffee(c);
+    if (supabaseEnabled() && isSignedIn()) {
+      try {
+        const sb = getSb();
+        const uid = currentUser() && currentUser().id;
+        if (sb && uid) {
+          await sb.from('axum_coffee').update({ redeemed_at: new Date().toISOString() }).eq('user_id', uid).is('redeemed_at', null);
+        }
+      } catch (e) {}
+    }
+    openAxumCard();
+    try { tbFeedback.confirm(); } catch (e) {}
+    return true;
   }
 
   function isSignedIn() {
@@ -677,70 +1222,283 @@
     if (el) el.textContent = msg || '';
   }
 
+  function captureImInSignal() {
+    const signal = {
+      key: '',
+      at: new Date().toISOString(),
+      tz: '',
+      hour: new Date().getHours(),
+      standalone: false,
+      platform: 'web',
+      alerts: 'unknown',
+      signed: false,
+      name: '',
+      lang: (navigator.language || '').slice(0, 12),
+      persist: false
+    };
+    try { signal.key = meetingKey(); } catch (e) {}
+    try { signal.tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
+    try {
+      signal.standalone = !!(window.navigator.standalone || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches));
+    } catch (e) {}
+    const ua = navigator.userAgent || '';
+    signal.platform = /iPhone|iPad|iPod/.test(ua) ? 'ios' : (/Android/.test(ua) ? 'android' : 'web');
+    try { signal.alerts = Notification.permission; } catch (e) {}
+    try { signal.signed = !!isSignedIn(); } catch (e) {}
+    try { signal.name = (typeof knownFirstName === 'function' && knownFirstName()) || ''; } catch (e) {}
+    try { save('lastImInSignal', signal); } catch (e) {}
+    try {
+      const log = load('imInSignalLog') || [];
+      log.push(signal);
+      save('imInSignalLog', log.slice(-24));
+    } catch (e) {}
+    return signal;
+  }
+
+  function stashSeatFromGate() {
+    const name = (($('#auth-name') && $('#auth-name').value) || '').trim();
+    const email = (($('#auth-email') && $('#auth-email').value) || '').trim();
+    const phone = (($('#auth-phone') && $('#auth-phone').value) || '').trim();
+    try {
+      save('pendingSeat', {
+        name: name,
+        email: email,
+        phone: phone,
+        at: Date.now(),
+        key: (typeof meetingKey === 'function' && meetingKey()) || ''
+      });
+    } catch (e) {}
+    return { name: name, email: email, phone: phone };
+  }
+
+  async function flushPendingSeat() {
+    const p = load('pendingSeat');
+    if (!p || (!p.name && !p.phone && !p.email)) return;
+    if (!isSignedIn()) return;
+    try {
+      const id = (typeof ensureBrotherId === 'function') ? ensureBrotherId() : myProfileId;
+      if (!id) return;
+      const entry = (brothers || []).find(function (b) { return b && b.id === id; }) || { id: id };
+      if (p.name) entry.name = p.name;
+      if (p.phone) entry.phone = p.phone;
+      if (p.email && !entry.email) entry.email = p.email;
+      const i = (brothers || []).findIndex(function (b) { return b && b.id === id; });
+      if (i >= 0) brothers[i] = Object.assign({}, brothers[i], entry);
+      else brothers.push(entry);
+      try { save('brothers', brothers); } catch (e) {}
+      if (typeof pushBrother === 'function') await pushBrother(entry);
+      save('pendingSeat', null);
+    } catch (e) {}
+  }
+
+  function openImInSignIn() {
+    const gate = document.getElementById('auth-gate');
+    const title = document.getElementById('auth-title');
+    const sub = document.getElementById('auth-sub');
+    const hint = document.getElementById('auth-hint');
+    const signBtn = document.getElementById('auth-signin-btn');
+    const magic = document.getElementById('auth-magic-btn');
+    const invite = document.getElementById('auth-signup-btn');
+    const pass = document.getElementById('auth-password');
+    const forgot = document.getElementById('auth-forgot-btn');
+    if (gate) gate.classList.add('auth-gate-imin');
+    if (title) title.textContent = 'LOCK YOUR SEAT';
+    if (sub) { sub.textContent = ''; sub.classList.add('hidden'); }
+    if (hint) hint.classList.add('hidden');
+    if (signBtn) {
+      signBtn.classList.remove('hidden');
+      signBtn.textContent = 'LOCK MY SEAT';
+    }
+    if (magic) {
+      magic.classList.add('hidden');
+      magic.setAttribute('hidden', 'hidden');
+      magic.setAttribute('aria-hidden', 'true');
+    }
+    if (invite) invite.classList.add('hidden');
+    if (pass) pass.classList.add('hidden');
+    if (forgot) forgot.classList.add('hidden');
+    try {
+      const nm = document.getElementById('auth-name');
+      const em = document.getElementById('auth-email');
+      const ph = document.getElementById('auth-phone');
+      const me = (brothers || []).find(function (b) { return b && b.id === myProfileId; });
+      if (nm && me && me.name && !nm.value) nm.value = me.name;
+      if (em && me && me.email && !em.value) em.value = me.email;
+      if (ph && me && me.phone && !ph.value) ph.value = me.phone;
+    } catch (e) {}
+    openAuthGate('');
+    try {
+      const nm = document.getElementById('auth-name');
+      if (nm) setTimeout(function () { try { nm.focus(); } catch (e2) {} }, 80);
+    } catch (e) {}
+    return true;
+  }
+
+  async function authMagicLink(email) {
+    const sb = getSb();
+    if (!sb) throw new Error('Supabase is not configured.');
+    const ok = await inviteAllowed(email);
+    if (!ok) throw new Error('Ask a leader for an invite.');
+    const redirectTo = (window.location && window.location.origin) ? (window.location.origin + '/') : '/';
+    const { error } = await sb.auth.signInWithOtp({
+      email: email,
+      options: { emailRedirectTo: redirectTo }
+    });
+    if (error) throw error;
+  }
+
   function openAuthGate(reason) {
     const gate = $('#auth-gate');
+    if (gate) gate.classList.add('auth-gate-imin');
     const sub = $('#auth-sub');
-    if (sub) {
-      sub.textContent = reason || 'Sign in for shared roster, memories, and leadership publish. Browse the rest without an account. New accounts are invite-only — ask a leader.';
-    }
+    if (sub) { sub.textContent = ''; sub.classList.add('hidden'); }
+    const pass = document.getElementById('auth-password');
+    const forgot = document.getElementById('auth-forgot-btn');
+    const invite = document.getElementById('auth-signup-btn');
+    if (pass) { pass.classList.add('hidden'); pass.value = ''; }
+    if (forgot) forgot.classList.add('hidden');
+    if (invite) invite.classList.add('hidden');
     setAuthError('');
     if (gate) {
       gate.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
+      if (gate.dataset.backdropBound !== '1') {
+        gate.dataset.backdropBound = '1';
+        gate.addEventListener('click', function (e) {
+          if (e.target === gate) closeAuthGate();
+        });
+      }
     }
-    // Focus email for fewer taps
     try {
+      const nm = $('#auth-name');
       const em = $('#auth-email');
-      if (em) setTimeout(() => em.focus(), 80);
+      const target = (nm && !nm.classList.contains('hidden')) ? nm : em;
+      if (target) setTimeout(() => target.focus(), 80);
     } catch (e) {}
   }
 
   function closeAuthGate() {
     const gate = $('#auth-gate');
-    if (gate) gate.classList.add('hidden');
+    if (gate) {
+      gate.classList.add('hidden');
+      gate.classList.remove('auth-gate-imin');
+    }
+    const sub = document.getElementById('auth-sub');
+    const hint = document.getElementById('auth-hint');
+    const pass = document.getElementById('auth-password');
+    const forgot = document.getElementById('auth-forgot-btn');
+    const invite = document.getElementById('auth-signup-btn');
+    const magic = document.getElementById('auth-magic-btn');
+    if (sub) { sub.textContent = ''; sub.classList.add('hidden'); }
+    if (hint) { hint.textContent = ''; hint.classList.add('hidden'); }
+    if (pass) pass.classList.add('hidden');
+    if (forgot) forgot.classList.add('hidden');
+    if (invite) invite.classList.add('hidden');
+    if (magic) magic.textContent = 'Email unlocks the whole experience';
     setAuthError('');
     releaseFocusAndZoom();
     if (typeof unlockBodyIfClear === 'function') unlockBodyIfClear();
     else document.body.style.overflow = '';
+    if (window.__tbA2hsAfterAuth) {
+      window.__tbA2hsAfterAuth = false;
+      setTimeout(function () { try { maybeOfferImInA2hs(); } catch (e) {} }, 450);
+    }
+  }
+
+  function syncBrothersSeatBtn() {
+    const btn = document.getElementById('edit-profile-btn');
+    const entry = document.getElementById('auth-entry-btn');
+    const me = (brothers || []).find(function (b) { return b && b.id === myProfileId && (b.name || '').trim(); });
+    if (!isSignedIn()) {
+      if (btn) {
+        btn.classList.add('hidden');
+        btn.textContent = 'EDIT PROFILE';
+      }
+      if (entry) {
+        entry.classList.remove('hidden');
+        entry.removeAttribute('hidden');
+        entry.setAttribute('aria-hidden', 'false');
+      }
+    } else {
+      if (btn) {
+        btn.classList.remove('hidden');
+        btn.textContent = me ? 'EDIT PROFILE' : 'YOUR SEAT';
+      }
+      if (entry) {
+        entry.classList.add('hidden');
+        entry.setAttribute('hidden', 'hidden');
+        entry.setAttribute('aria-hidden', 'true');
+      }
+    }
   }
 
   function updateAuthSessionBar() {
+    try { syncDropShotAuth(); } catch (e) {}
+    try { syncBrothersSeatBtn(); } catch (e) {}
     const bar = $('#auth-session-bar');
     const who = $('#auth-who');
     const entry = $('#auth-entry-btn');
+    const homeCta = document.getElementById('home-member-cta');
+    if (entry) {
+      if (isSignedIn()) {
+        entry.classList.add('hidden');
+        entry.setAttribute('hidden', 'hidden');
+      } else {
+        entry.classList.remove('hidden');
+        entry.removeAttribute('hidden');
+      }
+    }
     if (!supabaseEnabled()) {
       if (bar) bar.classList.add('hidden');
-      if (entry) entry.classList.add('hidden');
+      if (homeCta) homeCta.classList.add('hidden');
       return;
     }
     if (isSignedIn()) {
       const email = (currentUser().email || 'Brother').trim();
       if (who) who.textContent = email;
       if (bar) bar.classList.remove('hidden');
-      if (entry) entry.classList.add('hidden');
+      if (homeCta) homeCta.classList.add('hidden');
     } else {
       if (bar) bar.classList.add('hidden');
-      if (entry) entry.classList.remove('hidden');
+      if (homeCta) homeCta.classList.remove('hidden');
     }
   }
 
+  function startMemberSignIn() {
+    if (isSignedIn()) {
+      try { openProfileEditor(); } catch (e) {}
+      return;
+    }
+    openImInSignIn();
+  }
+  try { window.startMemberSignIn = startMemberSignIn; } catch (e) {}
+
   function bindHomeMemberCta() {
-    const cta = document.getElementById('home-member-cta');
-    if (!cta || cta.dataset.tbBound) return;
-    cta.dataset.tbBound = '1';
-    cta.addEventListener('click', function () {
-      try {
-        if (typeof openAuthGate === 'function') openAuthGate('Already a member? Sign in for shared roster and memories.');
-      } catch (e) {}
-    });
+    if (document.documentElement.dataset.tbAuthEntryBound === '1') return;
+    document.documentElement.dataset.tbAuthEntryBound = '1';
+    document.addEventListener('click', function (e) {
+      const t = e.target && e.target.closest && e.target.closest('#home-member-cta, #auth-entry-btn, #memories-signin-shot');
+      if (!t) return;
+      e.preventDefault();
+      e.stopPropagation();
+      try { tbFeedback.press(t); } catch (err) {}
+      startMemberSignIn();
+    }, true);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindHomeMemberCta);
+  } else {
+    try { bindHomeMemberCta(); } catch (e) {}
   }
 
   async function initAuth() {
     if (!supabaseEnabled()) {
       authReady = true;
       updateAuthSessionBar();
+      try { Promise.resolve(refreshChairMode()); } catch (eC) {}
       return;
     }
+    try { await restoreAuthFromIdb(); } catch (eR) {}
     const sb = getSb();
     try {
       const { data, error } = await sb.auth.getSession();
@@ -750,11 +1508,40 @@
       console.warn('auth session', e);
       sbSession = null;
     }
-    sb.auth.onAuthStateChange((_event, session) => {
+    if (sbSession) {
+      try { requestPersistentStorage(); } catch (eP) {}
+    }
+    try { noteInAppBrowserHome(); } catch (eB) {}
+    try { Promise.resolve(refreshChairMode()); } catch (eC) {}
+    sb.auth.onAuthStateChange((event, session) => {
       sbSession = session;
       updateAuthSessionBar();
+      try { Promise.resolve(refreshChairMode()); } catch (eC) {}
       if (session) {
         closeAuthGate();
+        try { flushPendingRsvp(); } catch (e) {}
+        try { flushPendingShot(); } catch (e) {}
+        try { lockInAppReminder(); } catch (e) {}
+        if (event === 'SIGNED_IN') {
+          try { requestPersistentStorage(); } catch (eP) {}
+          try { fireSignedInWelcome(); } catch (e) {}
+          try {
+            Promise.resolve(claimBrotherOnSignIn()).then(function () {
+              try { flushPendingSeat(); } catch (e2) {}
+            });
+          } catch (e) {}
+          try { markInviteUsed(); } catch (e) {}
+          try {
+            const me = (brothers || []).find(function (b) { return b && b.id === myProfileId && (b.name || '').trim(); });
+            const coffee = axumCoffeeState();
+            const showingCoffee = !!(coffee && coffee.code && !coffee.redeemedAt);
+            const pending = load('pendingSeat') || {};
+            const hasName = !!(me || (pending && String(pending.name || '').trim()));
+            if (!hasName && !showingCoffee) {
+              setTimeout(function () { try { openProfileEditor(); } catch (e2) {} }, 350);
+            }
+          } catch (e) {}
+        }
         pullMemories().then(() => {
           renderMedia();
           if (typeof renderLastFire === 'function') renderLastFire();
@@ -770,6 +1557,7 @@
   }
 
   function softRefreshApp(reason) {
+    // Cache/SW only. Never delete sb-* / supabase keys or IndexedDB auth.
     try {
       if (typeof showInstallToast === 'function') showInstallToast(reason || 'Updating… hang tight');
     } catch (e) {}
@@ -798,12 +1586,58 @@
     }, 400);
   }
 
+  async function claimBrotherOnSignIn() {
+    if (!supabaseEnabled() || !isSignedIn()) return;
+    const uid = currentUser() && currentUser().id;
+    if (!uid) return;
+    const sb = getSb();
+    if (!sb) return;
+    try {
+      const { data } = await sb.from('brothers').select('id,name').eq('owner_id', uid).limit(1);
+      if (data && data[0] && data[0].id) {
+        myProfileId = data[0].id;
+        save('myProfileId', myProfileId);
+        return;
+      }
+    } catch (e) {}
+    try {
+      const id = (typeof ensureBrotherId === 'function') ? ensureBrotherId() : myProfileId;
+      if (!id) return;
+      await sb.from('brothers').update({ owner_id: uid }).eq('id', id);
+    } catch (e) {}
+  }
+
+  async function markInviteUsed() {
+    if (!supabaseEnabled() || !isSignedIn()) return;
+    const user = currentUser();
+    const email = user && user.email;
+    if (!email) return;
+    try {
+      await getSb().from('invites').update({
+        used_at: new Date().toISOString(),
+        used_by: user.id
+      }).eq('email', email.toLowerCase().trim());
+    } catch (e) {}
+  }
+
+  async function inviteAllowed(email) {
+    if (!supabaseEnabled() || !email) return false;
+    try {
+      const { data, error } = await getSb().rpc('invite_ok', { e: String(email).trim() });
+      if (error) return false;
+      return !!data;
+    } catch (e) {
+      return false;
+    }
+  }
+
   async function authSignIn(email, password) {
     const sb = getSb();
     if (!sb) throw new Error('Supabase is not configured.');
     const { data, error } = await sb.auth.signInWithPassword({ email, password });
     if (error) throw error;
     sbSession = data.session;
+    try { requestPersistentStorage(); } catch (eP) {}
     try { softRefreshApp('Signed in — refreshing Thunder Board…'); } catch (e) {}
     return data;
   }
@@ -811,9 +1645,11 @@
   async function authSignUp(email, password) {
     const sb = getSb();
     if (!sb) throw new Error('Supabase is not configured.');
+    const ok = await inviteAllowed(email);
+    if (!ok) throw new Error('Ask a leader for an invite.');
     const redirectTo = (typeof window !== 'undefined' && window.location && window.location.origin)
       ? (window.location.origin + '/')
-      : 'https://sonsofthunder.netlify.app/';
+      : publicUrl('/');
     const { data, error } = await sb.auth.signUp({
       email,
       password,
@@ -843,11 +1679,13 @@
     const sb = getSb();
     if (!sb) return;
     await sb.auth.signOut();
+    try { await clearTbAuthIdb(); } catch (eA) {}
     sbSession = null;
     media = [];
     updateAuthSessionBar();
     renderMedia();
     if (typeof renderLastFire === 'function') renderLastFire();
+    try { await refreshChairMode(); } catch (eC) {}
   }
 
   async function signedUrlFor(path) {
@@ -870,11 +1708,26 @@
       return false;
     }
     const sb = getSb();
-    const { data: rows, error } = await sb
-      .from('memories')
-      .select('id,user_id,storage_path,caption,uploader_name,created_at')
-      .order('created_at', { ascending: false })
-      .limit(60);
+    let rows = null;
+    let error = null;
+    {
+      const full = await sb
+        .from('memories')
+        .select('id,user_id,storage_path,original_path,display_path,card_path,enhance_status,caption,uploader_name,created_at,meeting_key')
+        .order('created_at', { ascending: false })
+        .limit(60);
+      rows = full.data;
+      error = full.error;
+    }
+    if (error) {
+      const legacy = await sb
+        .from('memories')
+        .select('id,user_id,storage_path,caption,uploader_name,created_at,meeting_key')
+        .order('created_at', { ascending: false })
+        .limit(60);
+      rows = legacy.data;
+      error = legacy.error;
+    }
     if (error) throw new Error(error.message || 'Could not load memories.');
     if (!Array.isArray(rows)) {
       media = [];
@@ -882,30 +1735,82 @@
     }
     const mapped = [];
     for (const r of rows) {
-      const path = r.storage_path;
+      const original = r.original_path || r.storage_path;
+      const display = r.display_path || original;
+      const card = r.card_path || display;
       let url = null;
-      try {
-        url = await signedUrlFor(path);
-      } catch (e) {
-        console.warn('sign fail', e);
+      let cardUrl = null;
+      try { url = await signedUrlFor(display); } catch (e) {}
+      if (!url && original && original !== display) {
+        try { url = await signedUrlFor(original); } catch (e) {}
       }
       if (!url) continue;
-      const lower = String(path || '').toLowerCase();
+      try { cardUrl = (card && card !== display) ? (await signedUrlFor(card)) : url; } catch (e) { cardUrl = url; }
+      const lower = String(original || display || '').toLowerCase();
       const isVideo = /\.(mp4|webm|mov)(\?|$)/i.test(lower);
       mapped.push({
         id: r.id,
-        data: url,
-        storage_path: path,
+        data: cardUrl || url,
+        full: url,
+        original_path: original,
+        display_path: r.display_path || '',
+        storage_path: r.storage_path || original,
         type: isVideo ? 'video' : 'image',
         caption: r.caption || '',
         uploader_name: r.uploader_name || '',
         date: r.created_at || new Date().toISOString(),
-        user_id: r.user_id || null
+        user_id: r.user_id || null,
+        meeting_key: r.meeting_key || ''
       });
     }
     media = mapped;
-    // Do not persist memory blobs to localStorage
     return true;
+  }
+
+  function memoryAccessToken() {
+    try { return (sbSession && sbSession.access_token) || ''; } catch (e) { return ''; }
+  }
+
+  function kickMemoryEnhance(memoryId) {
+    if (!memoryId) return;
+    const token = memoryAccessToken();
+    if (!token) return;
+    fetch('/.netlify/functions/enhance-memory', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + token
+      },
+      body: JSON.stringify({ id: memoryId })
+    }).then(function (res) {
+      if (!res.ok) return;
+      return res.json().catch(function () { return {}; });
+    }).then(function (body) {
+      if (!body || !body.ok) return;
+      setTimeout(function () {
+        Promise.resolve(pullMemories()).then(function () {
+          try { renderMedia(); } catch (e) {}
+          try { if (typeof renderLastFire === 'function') renderLastFire(); } catch (e) {}
+        }).catch(function () {});
+      }, 200);
+    }).catch(function (e) {
+      console.warn('enhance skip', e);
+    });
+  }
+
+  function extFromMemoryFile(item) {
+    const name = String((item && item.filename) || '');
+    const m = name.toLowerCase().match(/\.([a-z0-9]+)$/);
+    if (m && /^(jpe?g|png|webp|heic|heif|gif|mp4|webm|mov)$/.test(m[1])) {
+      return m[1] === 'jpeg' ? 'jpg' : m[1];
+    }
+    if (item && item.type === 'video') return 'mp4';
+    const t = (item && item.blob && item.blob.type) || '';
+    if (/png/i.test(t)) return 'png';
+    if (/webp/i.test(t)) return 'webp';
+    if (/heic|heif/i.test(t)) return 'heic';
+    if (/mp4/i.test(t)) return 'mp4';
+    return 'jpg';
   }
 
   async function pushMemory(item) {
@@ -920,44 +1825,70 @@
     }
     if (!blob) throw new Error('No image to upload.');
 
-    const fname = safeFilename(item.filename || 'memory', isVideo);
-    const storagePath = 'private/' + user.id + '/' + Date.now() + '-' + fname;
+    const id = (typeof crypto !== 'undefined' && crypto.randomUUID)
+      ? crypto.randomUUID()
+      : (Date.now().toString(16) + '-tbmem');
+    const ext = extFromMemoryFile(item);
+    const originalPath = 'private/' + user.id + '/' + id + '/original.' + ext;
+    const contentType = isVideo
+      ? (blob.type || 'video/mp4')
+      : (blob.type || 'image/jpeg');
 
     const { error: upErr } = await sb.storage
       .from(memoriesBucket())
-      .upload(storagePath, blob, {
-        contentType: isVideo ? 'video/mp4' : 'image/jpeg',
+      .upload(originalPath, blob, {
+        contentType: contentType,
         upsert: false
       });
     if (upErr) throw new Error('Upload failed: ' + (upErr.message || 'storage error'));
 
-    const row = {
+    const baseRow = {
+      id: id,
       user_id: user.id,
-      storage_path: storagePath,
+      storage_path: originalPath,
       caption: item.caption || '',
-      uploader_name: item.uploader_name || myDisplayName() || (user.email || '').split('@')[0] || ''
+      uploader_name: item.uploader_name || myDisplayName() || (user.email || '').split('@')[0] || '',
+      meeting_key: (typeof meetingKey === 'function' ? meetingKey() : '')
     };
+    const fullRow = Object.assign({}, baseRow, {
+      original_path: originalPath,
+      display_path: null,
+      card_path: null,
+      enhance_status: isVideo ? 'skipped' : 'pending'
+    });
 
-    const { data: saved, error: insErr } = await sb
-      .from('memories')
-      .insert(row)
-      .select('id,user_id,storage_path,caption,uploader_name,created_at')
-      .single();
+    let saved = null;
+    let insErr = null;
+    {
+      const first = await sb.from('memories').insert(fullRow).select('id,user_id,storage_path,original_path,display_path,caption,uploader_name,created_at,meeting_key').single();
+      saved = first.data;
+      insErr = first.error;
+    }
+    if (insErr) {
+      const second = await sb.from('memories').insert(baseRow).select('id,user_id,storage_path,caption,uploader_name,created_at,meeting_key').single();
+      saved = second.data;
+      insErr = second.error;
+    }
 
     if (insErr) {
-      // Storage object may remain; surface the DB failure clearly
+      try { await sb.storage.from(memoriesBucket()).remove([originalPath]); } catch (e) {}
       throw new Error('Photo uploaded but could not save the record: ' + (insErr.message || 'database error'));
     }
 
     let url = null;
-    try { url = await signedUrlFor(storagePath); } catch (e) {}
+    try { url = await signedUrlFor(originalPath); } catch (e) {}
+    if (!isVideo) {
+      try { kickMemoryEnhance((saved && saved.id) || id); } catch (e) {}
+    }
     return {
       id: saved && saved.id,
       data: url || item.data,
-      storage_path: storagePath,
+      full: url || item.data,
+      original_path: originalPath,
+      storage_path: originalPath,
       type: isVideo ? 'video' : 'image',
       caption: (saved && saved.caption) || item.caption || '',
-      uploader_name: (saved && saved.uploader_name) || row.uploader_name,
+      uploader_name: (saved && saved.uploader_name) || baseRow.uploader_name,
       date: (saved && saved.created_at) || new Date().toISOString(),
       user_id: user.id
     };
@@ -1092,9 +2023,13 @@
     const sb = getSb();
     if (!sb) return false;
     try {
+      const signed = !!(typeof isSignedIn === 'function' && isSignedIn());
+      const cols = signed
+        ? 'id,name,bio,photo_url,skills,available,updated_at,birthday,phone'
+        : 'id,name,bio,photo_url,skills,available,updated_at,birthday';
       const { data, error } = await sb
         .from('brothers')
-        .select('id,name,bio,photo_url,phone,skills,available,updated_at')
+        .select(cols)
         .order('updated_at', { ascending: false });
       if (error) {
         console.warn('brothers pull', error);
@@ -1112,7 +2047,8 @@
           id: row.id,
           name: row.name || (local && local.name) || '',
           bio: row.bio || (local && local.bio) || '',
-          phone: row.phone || (local && local.phone) || '',
+          phone: signed ? (row.phone || (local && local.phone) || '') : '',
+          birthday: row.birthday || (local && local.birthday) || '',
           photo,
           skills: row.skills || (local && local.skills) || '',
           available: row.available !== false,
@@ -1123,6 +2059,8 @@
       const remoteIds = new Set(remote.map(b => b.id));
       const localOnly = (brothers || []).filter(b => b && b.id && !remoteIds.has(b.id));
       brothers = remote.concat(localOnly);
+      try { ensureFounderSeat(); } catch (e) {}
+      try { collapseDuplicateBrothers(); } catch (e) {}
       save('brothers', brothers);
       return true;
     } catch (e) {
@@ -1153,6 +2091,11 @@
       if (typeof renderBrothers === 'function') renderBrothers();
     } catch (e) {
       console.warn('Brothers sync failed', e);
+    }
+    try {
+      await pullRsvps();
+    } catch (e) {
+      console.warn('Rsvps sync failed', e);
     }
     if (!isSignedIn()) {
       media = [];
@@ -1197,6 +2140,7 @@
         photo_url: photoUrl,
         skills: entry.skills || '',
         available: entry.available !== false,
+        birthday: entry.birthday || null,
         updated_at: new Date().toISOString(),
         owner_id: uid || null
       };
@@ -1322,6 +2266,36 @@
     return Math.round((target - now) / 86400000);
   }
 
+  function parkFabByImin(force) {
+    const fab = document.getElementById('thunder-fab');
+    const btn = document.getElementById('rsvp-btn');
+    if (!fab) return;
+    const home = currentViewName === 'home';
+    let week = false;
+    try {
+      const d = daysUntil(getNextMeetingMonday());
+      week = d >= 0 && d <= 7;
+    } catch (e) {}
+    const busy = document.body.classList.contains('tb-ask-open') || document.body.classList.contains('tb-tour-open');
+    if (!home || !week || !btn || busy || (!force && rsvp)) {
+      fab.classList.remove('tb-fab-by-imin');
+      fab.style.left = '';
+      fab.style.top = '';
+      fab.style.right = '';
+      fab.style.bottom = '';
+      return;
+    }
+    const r = btn.getBoundingClientRect();
+    const w = 88;
+    let left = r.right + 6;
+    if (left + w > window.innerWidth - 8) left = Math.max(8, r.left - w - 6);
+    fab.classList.add('tb-fab-by-imin');
+    fab.style.left = left + 'px';
+    fab.style.top = (r.top + (r.height / 2) - (w / 2)) + 'px';
+    fab.style.right = 'auto';
+    fab.style.bottom = 'auto';
+  }
+
   function formatMeetingDate(d) {
     return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
   }
@@ -1419,11 +2393,14 @@
   // ---------- LOCAL NOTIFICATIONS (client-side) ----------
   // Fires when the brother opens the app (or keeps it open).
   // Key windows: 7 days, 3 days, 1 day, morning of meeting.
+  // Local notifications when the PWA is awake.
+  // Locked: 7 days, 1 day, optional 2 hours. No 3-day. No nags.
   const NOTIFY_KEYS = {
     d7: 'tb_notified_7d',
-    d3: 'tb_notified_3d',
     d1: 'tb_notified_1d',
-    morning: 'tb_notified_morning'
+    h2: 'tb_notified_2h',
+    morning: 'tb_notified_morning',
+    bday: 'tb_notified_bday'
   };
 
   function canNotify() {
@@ -1437,33 +2414,114 @@
     return Notification.requestPermission();
   }
 
-  function fireLocalNotification(title, body, tag) {
+  function wantsGatheringPing() {
+    return !!(load('reminderSet') || load('gatheringAlertsOn'));
+  }
+
+  function fireLocalNotification(title, body, tag, url) {
     if (!canNotify()) return;
+    const target = url || '/?view=home';
+    const opts = {
+      body: body || '',
+      icon: 'assets/icon-192-v3.png',
+      badge: 'assets/icon-official.png',
+      tag: tag || 'thunder-gathering',
+      renotify: false,
+      data: { url: target },
+      actions: [
+        { action: 'imin', title: "I'M IN" },
+        { action: 'open', title: 'OPEN' }
+      ]
+    };
+    const go = function () {
+      try { applyDeepLink(target); } catch (e) {}
+    };
     try {
-      const n = new Notification(title, {
-        body,
-        icon: 'assets/icon-192.png',
-        badge: 'assets/icon-192.png',
-        tag: tag || 'thunder-meeting',
-        requireInteraction: false
-      });
-      n.onclick = () => {
-        window.focus();
-        n.close();
-      };
-    } catch (e) {
-      console.warn('Notification failed', e);
+      if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+        navigator.serviceWorker.ready.then(function (reg) {
+          return reg.showNotification(title, opts);
+        }).catch(function () {
+          const n = new Notification(title, opts);
+          n.onclick = function () { window.focus(); go(); n.close(); };
+        });
+        return;
+      }
+    } catch (e) {}
+    try {
+      const n = new Notification(title, opts);
+      n.onclick = function () { window.focus(); go(); n.close(); };
+    } catch (e2) {
+      console.warn('Notification failed', e2);
     }
   }
 
+  function applyDeepLink(raw) {
+    try {
+      const u = new URL(raw, location.origin);
+      const view = u.searchParams.get('view');
+      if (view && typeof showView === 'function' && ['home', 'brothers', 'events', 'about'].indexOf(view) !== -1) {
+        showView(view, { silent: true });
+      }
+      if (u.searchParams.get('imin') === '1') {
+        if (typeof isTourMandatory === 'function' && isTourMandatory()) return;
+        if (typeof showView === 'function') showView('home', { silent: true });
+        if (!rsvp) {
+          setTimeout(function () {
+            const btn = document.getElementById('rsvp-btn');
+            if (btn && !rsvp) btn.click();
+          }, 450);
+        }
+      }
+      if (u.searchParams.get('add') === '1' || u.searchParams.get('shared') === '1') {
+        if (typeof showView === 'function') showView('events', { silent: true });
+        setTimeout(function () {
+          try { openModal('media-modal'); } catch (e) {}
+          if (u.searchParams.get('shared') === '1') consumeSharedMemory();
+        }, 350);
+      }
+    } catch (e) {}
+  }
+
+  async function consumeSharedMemory() {
+    try {
+      const cache = await caches.open('tb-share');
+      const res = await cache.match('/__shared_memory');
+      if (!res) return;
+      const blob = await res.blob();
+      const name = (res.headers && res.headers.get('X-Filename')) || 'shared.jpg';
+      const file = new File([blob], name, { type: blob.type || 'image/jpeg' });
+      const input = document.getElementById('media-file');
+      if (input && typeof DataTransfer !== 'undefined') {
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        input.files = dt.files;
+        try { input.dispatchEvent(new Event('change', { bubbles: true })); } catch (e) {}
+      }
+      await cache.delete('/__shared_memory');
+    } catch (e) {}
+  }
+
+  function updateOsBadge() {
+    try {
+      if (!navigator.setAppBadge && !navigator.clearAppBadge) return;
+      const d = daysUntil(getNextMeetingMonday());
+      let n = 0;
+      if ((d === 0 || d === 1) && !rsvp) n = 1;
+      else if (typeof hasNewAnnouncements === 'function' && hasNewAnnouncements()) n = 1;
+      else if (typeof hasNewLastFire === 'function' && hasNewLastFire()) n = 1;
+      if (n && navigator.setAppBadge) navigator.setAppBadge(n);
+      else if (navigator.clearAppBadge) navigator.clearAppBadge();
+    } catch (e) {}
+  }
+
   function checkAndFireMeetingNotifications() {
+    if (!wantsGatheringPing()) return;
     const next = getNextMeetingMonday();
     const days = daysUntil(next);
     const now = new Date();
     const hour = now.getHours();
-
-    // Only fire each window once per meeting cycle
-    const meetingKey = next.toISOString().slice(0, 10); // YYYY-MM-DD of meeting
+    const mt = parseMeetingHours();
+    const meetingKey = next.getFullYear() + '-' + String(next.getMonth() + 1).padStart(2, '0') + '-' + String(next.getDate()).padStart(2, '0');
 
     function alreadyFired(key) {
       return load(key) === meetingKey;
@@ -1472,42 +2530,37 @@
       save(key, meetingKey);
     }
 
+    const when = meetingTime() + ' · ' + venueName();
+
     if (days === 7 && !alreadyFired(NOTIFY_KEYS.d7)) {
-      fireLocalNotification(
-        '⚡ 7 Days Out',
-        'Sons of Thunder gathers in one week. Lock it in.',
-        'thunder-7d'
-      );
+      fireLocalNotification('Gathering in 7 days', when + '. Lock it in.', 'thunder-7d', '/?view=home');
       markFired(NOTIFY_KEYS.d7);
     }
-
-    if (days === 3 && !alreadyFired(NOTIFY_KEYS.d3)) {
-      fireLocalNotification(
-        '⚡ 3 Days Out',
-        'Three days. Show up. Carry weight.',
-        'thunder-3d'
-      );
-      markFired(NOTIFY_KEYS.d3);
-    }
-
     if (days === 1 && !alreadyFired(NOTIFY_KEYS.d1)) {
-      fireLocalNotification(
-        '⚡ Tomorrow',
-        'Gathering is tomorrow at ' + meetingTime() + ' — ' + venueName() + '.',
-        'thunder-1d'
-      );
+      fireLocalNotification('Tomorrow night', when + '.', 'thunder-1d', '/?view=home');
       markFired(NOTIFY_KEYS.d1);
     }
-
-    // Morning of meeting (between 7am – 11am local)
+    // ~2 hours before (meeting hour minus 2, one-hour window)
+    if (days === 0 && hour === Math.max(0, (mt.h || 18) - 2) && !alreadyFired(NOTIFY_KEYS.h2)) {
+      fireLocalNotification('Two hours', 'Sons of Thunder. ' + when + '.', 'thunder-2h', '/?view=home');
+      markFired(NOTIFY_KEYS.h2);
+    }
     if (days === 0 && hour >= 7 && hour < 11 && !alreadyFired(NOTIFY_KEYS.morning)) {
-      fireLocalNotification(
-        '⚡ Tonight',
-        'Sons of Thunder. ' + meetingTime() + '. ' + venueName() + '. Be there.',
-        'thunder-morning'
-      );
+      fireLocalNotification('Tonight', when + '. See you there.', 'thunder-morning', '/?view=home');
       markFired(NOTIFY_KEYS.morning);
     }
+  }
+
+  function checkBirthdayHonorsNotify() {
+    if (!leaderUnlocked) return;
+    const hits = (brothers || []).filter(function (b) { return b && isTodayBirthday(b.birthday); });
+    if (!hits.length) return;
+    const today = new Date();
+    const key = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+    if (load(NOTIFY_KEYS.bday) === key) return;
+    const names = hits.map(function (b) { return (b.name || 'A brother').split(' ')[0]; }).slice(0, 3).join(', ');
+    fireLocalNotification('Birthday', names + (hits.length > 1 ? ' — honor them.' : ' — honor him.'), 'thunder-bday', '/?view=brothers');
+    save(NOTIFY_KEYS.bday, key);
   }
 
   function setupNotificationSystem() {
@@ -1518,6 +2571,7 @@
 
     // Check immediately on load
     checkAndFireMeetingNotifications();
+    try { checkBirthdayHonorsNotify(); } catch (e) {}
 
     // Re-check every 30 minutes while the app is open
     setInterval(checkAndFireMeetingNotifications, 30 * 60 * 1000);
@@ -1526,6 +2580,7 @@
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
         checkAndFireMeetingNotifications();
+        try { checkBirthdayHonorsNotify(); } catch (e) {}
       }
     });
   }
@@ -1588,27 +2643,23 @@
 
     if (load('reminderSet')) {
       btn.classList.add('set');
-      btn.textContent = 'ON CALENDAR';
+      btn.textContent = 'REMINDER ON';
       if (status) {
-        status.textContent = 'Opened calendar — hit Save in your calendar app.';
+        status.textContent = 'We’ll ping this phone.';
         status.classList.remove('hidden');
       }
     }
 
     btn.addEventListener('click', () => {
-      try { launchGatheringCalendar(); } catch (e) {}
+      try { offerCalendarNow(); } catch (e) {}
       btn.classList.add('set');
-      btn.textContent = 'ON CALENDAR';
-      save('reminderSet', true);
+      btn.textContent = 'REMINDER ON';
       try { renderRsvp(); } catch (e) {}
       try { tbGlowHit(btn, 'yellow'); } catch (e) {}
       if (status) {
-        status.textContent = 'Opened calendar — hit Save so 7-day / 1-day / 2-hour alerts can fire.';
+        status.textContent = 'We’ll ping this phone before the gathering.';
         status.classList.remove('hidden');
       }
-      requestNotifyPermission().then((perm) => {
-        if (perm === 'granted') checkAndFireMeetingNotifications();
-      });
     });
   }
 
@@ -1758,6 +2809,7 @@
     setNavDot('home', hasNewAnnouncements() || hasNewLastFire());
     setNavDot('brothers', hasNewBrothers());
     setNavDot('events', hasNewEvents() || hasNewMedia());
+    try { updateOsBadge(); } catch (e) {}
   }
 
   // First install of this feature: don't mark all existing content NEW
@@ -1786,11 +2838,14 @@
   function renderAnnouncements() {
     const el = $('#announcements');
     if (!el) return;
+    const title = $('#announcements-title');
     if (!announcements.length) {
-      el.innerHTML = '<div class="empty-state" style="padding:16px 0;color:#666;">No announcements yet.</div>';
+      el.innerHTML = '';
+      if (title) title.classList.add('hidden');
       updateAllNewBadges();
       return;
     }
+    if (title) title.classList.remove('hidden');
     el.innerHTML = announcements.map((a, i) => {
       const isNew = isAnnouncementNew(a);
       return `
@@ -1873,6 +2928,48 @@
 
   // ---------- INFO DETAIL (tap-to-expand cards) ----------
   
+  async function inviteOpenChair() {
+    const url = (window.location.origin || '') + '/';
+    const payload = {
+      title: 'Sons of Thunder',
+      text: 'There’s an open chair at the table. Thunder doesn’t dull.',
+      url: url
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(payload);
+        try { honorFirst('share'); } catch (e) {}
+        return;
+      }
+    } catch (e) {
+      if (e && e.name === 'AbortError') return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      showInstallToast('Link copied. Send it to a brother.');
+      try { honorFirst('share'); } catch (e) {}
+    } catch (e2) {
+      showInstallToast('Share the app link with a brother.');
+    }
+  }
+
+  function honorFirst(kind) {
+    const key = 'tb_first_' + kind;
+    try { if (localStorage.getItem(key)) return; } catch (e) { return; }
+    const lines = {
+      imin: 'First lock. The table knows your name.',
+      share: 'First brother reached. That’s the round table.'
+    };
+    const line = lines[kind];
+    if (!line) return;
+    try { localStorage.setItem(key, '1'); } catch (e) {}
+    setTimeout(function () {
+      try {
+        if (typeof window.tbFabSay === 'function') window.tbFabSay(line, 8000);
+      } catch (e) {}
+    }, 1400);
+  }
+
   /* LOCKED: ~3s reward on profile / memory save — reads TB_CONFIG.SAVE_REWARD */
   function rewardSaveSuccess(kind) {
     try {
@@ -1941,6 +3038,8 @@
      Never claim the phone vibrated on iOS. */
   const tbFeedback = (function () {
     const last = Object.create(null);
+    let audioCtx = null;
+    let audioReady = false;
     function sensoryCfg() {
       try { return (window.TB_CONFIG && window.TB_CONFIG.SENSORY) || {}; } catch (e) { return {}; }
     }
@@ -1962,7 +3061,6 @@
     function pulse(pattern) {
       if (!canVibrate()) return;
       try {
-        // Optional-call safe: WebKit has no vibrate — never throw
         if (typeof navigator.vibrate === 'function') {
           navigator.vibrate(0);
           navigator.vibrate(pattern);
@@ -1974,14 +3072,77 @@
         return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
       } catch (e) { return false; }
     }
+    function getAudio() {
+      const S = sensoryCfg();
+      if (S.soundEnabled === false) return null;
+      if (reduced()) return null;
+      try {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return null;
+        if (!audioCtx) audioCtx = new AC();
+        if (audioCtx.state === 'suspended') audioCtx.resume().catch(function () {});
+        audioReady = true;
+        return audioCtx;
+      } catch (e) { return null; }
+    }
+    function tone(freq, dur, type, gain, slide) {
+      const ctx = getAudio();
+      if (!ctx) return;
+      try {
+        const t0 = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.type = type || 'sine';
+        osc.frequency.setValueAtTime(freq, t0);
+        if (slide) osc.frequency.exponentialRampToValueAtTime(Math.max(20, slide), t0 + dur);
+        g.gain.setValueAtTime(0.0001, t0);
+        g.gain.exponentialRampToValueAtTime(gain || 0.07, t0 + 0.008);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+        osc.connect(g);
+        g.connect(ctx.destination);
+        osc.start(t0);
+        osc.stop(t0 + dur + 0.02);
+      } catch (e) {}
+    }
+    function noiseBurst(dur, gain) {
+      const ctx = getAudio();
+      if (!ctx) return;
+      try {
+        const n = Math.floor(ctx.sampleRate * dur);
+        const buf = ctx.createBuffer(1, n, ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < n; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / n);
+        const src = ctx.createBufferSource();
+        src.buffer = buf;
+        const bp = ctx.createBiquadFilter();
+        bp.type = 'bandpass';
+        bp.frequency.value = 180;
+        bp.Q.value = 0.7;
+        const g = ctx.createGain();
+        const t0 = ctx.currentTime;
+        g.gain.setValueAtTime(gain || 0.04, t0);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+        src.connect(bp);
+        bp.connect(g);
+        g.connect(ctx.destination);
+        src.start(t0);
+        src.stop(t0 + dur + 0.02);
+      } catch (e) {}
+    }
+    try {
+      document.addEventListener('touchstart', function () { getAudio(); }, { once: true, passive: true });
+      document.addEventListener('click', function () { getAudio(); }, { once: true });
+    } catch (e) {}
     return {
       /** Splash-only. Strongest. Visual already owned by CSS; optional 40ms buzz. */
       thunderImpact: function () {
         if (debounced('thunderImpact')) return;
-        if (reduced()) return; // no jolt/buzz under reduced motion
+        if (reduced()) return;
         const S = sensoryCfg();
         const ms = typeof S.thunderImpactMs === 'number' ? S.thunderImpactMs : 40;
-        pulse(ms);
+        pulse([ms, 50, 18]);
+        tone(52, 0.12, 'sine', 0.08, 36);
+        setTimeout(function () { noiseBurst(0.05, 0.035); }, 40);
       },
       /** Signature wake: short THUD … crack-crack. Android only if vibrate exists. */
       thunderWake: function (level) {
@@ -1989,9 +3150,12 @@
         if (reduced()) return;
         if (level === 'soft') {
           pulse([12, 40, 18]);
+          tone(62, 0.07, 'sine', 0.05, 40);
           return;
         }
         pulse([28, 55, 14, 40, 18]);
+        tone(48, 0.14, 'sine', 0.09, 32);
+        setTimeout(function () { noiseBurst(0.06, 0.04); }, 55);
       },
       /** Primary CTAs: I'm In, Save, Add Memory, Share, Text a Leader */
       press: function (el) {
@@ -2007,7 +3171,9 @@
       confirm: function () {
         if (debounced('confirm')) return;
         const S = sensoryCfg();
-        pulse(typeof S.confirmMs === 'number' ? S.confirmMs : 25);
+        pulse([12, 36, 22]);
+        tone(70, 0.09, 'sine', 0.07, 44);
+        noiseBurst(0.04, 0.03);
       },
       /** Failed save / missing field / upload error */
       warningOrError: function (el) {
@@ -2021,6 +3187,7 @@
         const S = sensoryCfg();
         const pat = Array.isArray(S.warningPattern) ? S.warningPattern : [25, 60, 35];
         pulse(pat);
+        tone(160, 0.11, 'triangle', 0.045, 90);
       },
       /** Discrete selects: chips, toggles, swipe commit */
       selection: function () {
@@ -2237,36 +3404,28 @@
       },
       /** Level 3 signature — I'm In lock (caller must confirm save succeeded first) */
       lockedIn: function (el, card) {
-        /* Signature path — ONE animation on the button.
-           Do NOT stack lock-pulse + commit-strike (both set `animation` → last wins, other dies).
-           Do NOT tbGlowHit the same node (also sets `animation`).
-           Clear tb-press first — its transform:!important kills scale keyframes. */
+        /* Vault close — bolt through the button, then yellow. No card box-glow. */
         try { tbFeedback.confirm(); } catch (e) {}
+        try { if (window.tbFeedback) tbFeedback.thunderImpact(); } catch (e) {}
         if (el && !reduced()) {
           try {
-            el.classList.remove('tb-press', 'lock-pulse', 'commit-strike', 'tfx-ios-boost', 'tb-glow-hit', 'tb-glow-hit-yellow');
+            el.classList.remove('tb-press', 'lock-pulse', 'commit-strike', 'tfx-ios-boost', 'tb-glow-hit', 'tb-glow-hit-yellow', 'imin-strike', 'imin-afterglow');
             void el.offsetWidth;
           } catch (e) {}
-          // Single signature motion only
-          el.classList.add('commit-strike');
-          try {
-            if (typeof navigator === 'undefined' || typeof navigator.vibrate !== 'function') {
-              el.classList.add('tfx-ios-boost');
-            }
-          } catch (e) {}
-          setTimeout(() => {
-            try { el.classList.remove('commit-strike', 'tfx-ios-boost'); } catch (e) {}
-          }, 900);
+          el.classList.add('imin-strike');
+          setTimeout(function () {
+            try { el.classList.remove('imin-strike'); } catch (e) {}
+          }, 480);
+          setTimeout(function () {
+            try {
+              el.classList.add('imin-afterglow');
+              setTimeout(function () { try { el.classList.remove('imin-afterglow'); } catch (e2) {} }, 1100);
+            } catch (e) {}
+          }, 400);
         }
+        try { if (typeof window.tbFabImInLock === 'function') window.tbFabImInLock(); } catch (e) {}
         if (card && !reduced()) {
-          try {
-            card.classList.remove('tb-glow-hit', 'tb-glow-hit-yellow');
-            void card.offsetWidth;
-          } catch (e) {}
-          card.classList.add('commit-flash', 'commit-energized');
-          // Glow on CARD only — not on the button fighting commit-strike
-          visualGlow(card, 'yellow');
-          setTimeout(() => { try { card.classList.remove('commit-flash'); } catch (e) {} }, 750);
+          try { card.classList.add('commit-energized'); } catch (e) {}
         }
       },
       /** Level 2/3 — real success only (memory, profile, alerts) */
@@ -2414,6 +3573,9 @@
   }
 
   function elasticSnapHome(el) {
+    try {
+      document.querySelectorAll('.nav-item.nav-peek').forEach(function (n) { n.classList.remove('nav-peek'); });
+    } catch (e) {}
     if (!el) return;
     el.classList.remove('elastic-dragging');
     el.classList.add('elastic-settling');
@@ -2446,8 +3608,21 @@
     const VELOCITY = opts.velocity != null ? opts.velocity : 0.42;
     const MAX = opts.maxDrag != null ? opts.maxDrag : 72;
     const EDGE = opts.edgeMax != null ? opts.edgeMax : 28;
+    const FOLLOW = opts.follow != null ? opts.follow : 0.55;
+    const DOWN = opts.onDownDist != null ? opts.onDownDist : 64;
 
-    let sx = 0, sy = 0, st = 0, lx = 0, lt = 0, tracking = false, axis = null;
+    let sx = 0, sy = 0, st = 0, lx = 0, lt = 0, tracking = false, axis = null, felt = false;
+
+    function swallowClick() {
+      const eat = function (ev) {
+        if (ev.target && ev.target.closest && ev.target.closest('.bottom-nav, .nav-item, #thunder-fab')) return;
+        ev.preventDefault();
+        ev.stopPropagation();
+        document.removeEventListener('click', eat, true);
+      };
+      document.addEventListener('click', eat, true);
+      setTimeout(function () { document.removeEventListener('click', eat, true); }, 480);
+    }
 
     function moveEl() {
       return (typeof opts.getEl === 'function' ? opts.getEl() : null) || root;
@@ -2464,8 +3639,12 @@
     root.addEventListener('touchstart', (e) => {
       if (!e.touches || e.touches.length !== 1) { tracking = false; return; }
       if (typeof opts.blocked === 'function' && opts.blocked(e.target)) { tracking = false; return; }
+      if (root.classList && root.classList.contains('is-zoomed')) { tracking = false; return; }
+      const moving = (typeof opts.getEl === 'function' ? opts.getEl() : null) || root;
+      if (moving && moving.classList && moving.classList.contains('is-zoomed')) { tracking = false; return; }
       tracking = true;
       axis = null;
+      felt = false;
       sx = lx = e.touches[0].clientX;
       sy = e.touches[0].clientY;
       st = lt = Date.now();
@@ -2483,20 +3662,23 @@
       lx = x; lt = Date.now();
       const dx = x - sx;
       const dy = y - sy;
-      if (axis == null && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) {
-        axis = Math.abs(dx) > Math.abs(dy) * 0.9 ? 'x' : 'y';
+      if (axis == null && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) {
+        axis = Math.abs(dx) > Math.abs(dy) * 1.15 ? 'x' : 'y';
+      }
+      if (axis === 'x' && Math.abs(dx) > 18 && e.cancelable) {
+        try { e.preventDefault(); } catch (e2) {}
       }
       if (prefersReducedMotion()) return;
       const el = moveEl();
       if (!el) return;
       // Vertical dismiss preview when onDown is wired (sheet follows finger)
       if (opts.onDown && axis === 'y' && dy > 0) {
+        if (typeof opts.canDown === 'function' && !opts.canDown()) return;
         el.classList.add('elastic-dragging');
-        const ty = Math.min(160, dy * 0.72);
-        const op = Math.max(0.35, 1 - ty / 220);
+        const ty = Math.min(240, dy * 0.88);
+        const op = Math.max(0.28, 1 - ty / 280);
         el.style.transform = 'translate3d(0,' + ty + 'px,0)';
         el.style.opacity = String(op);
-        // Foreground follows finger; underlay eases back slightly
         setUnderlayDepth(true, Math.min(1, ty / 140));
         return;
       }
@@ -2506,10 +3688,22 @@
       let tx = dx;
       if (dx > 0 && !canPrev()) tx = Math.min(EDGE, dx * 0.28);
       else if (dx < 0 && !canNext()) tx = Math.max(-EDGE, dx * 0.28);
-      else tx = Math.max(-MAX, Math.min(MAX, dx * 0.55));
+      else tx = Math.max(-MAX, Math.min(MAX, dx * FOLLOW));
       el.style.opacity = '';
       el.style.transform = 'translate3d(' + tx + 'px,0,0)';
-    }, { passive: true });
+      if (!felt && Math.abs(dx) > 16) {
+        felt = true;
+        try { tbFeedback.selection(); } catch (e2) {}
+      }
+      if (typeof opts.onDrag === 'function') {
+        try { opts.onDrag(tx, dx); } catch (e2) {}
+      }
+    }, { passive: false });
+
+    root.addEventListener('touchcancel', () => {
+      tracking = false;
+      try { elasticSnapHome(moveEl()); } catch (e) {}
+    });
 
     root.addEventListener('touchend', (e) => {
       if (!tracking) return;
@@ -2524,14 +3718,18 @@
       const dt = Math.max(1, (lt || Date.now()) - st);
       const vx = absX / dt;
 
-      // vertical dismiss with momentum handoff
-      if (opts.onDown && dy > 80 && absY > absX) {
+      const canDown = typeof opts.canDown === 'function' ? opts.canDown() : true;
+      const vy = absY / dt;
+      const flickDown = !!(opts.onDown && canDown && dy > 0 && vy >= 0.38 && absY > 24 && absY > absX * 0.85);
+      const pullDown = !!(opts.onDown && canDown && dy >= DOWN && absY > absX);
+      if (flickDown || pullDown) {
+        try { tbFeedback.selection(); } catch (e) {}
         if (el && !prefersReducedMotion()) {
           el.classList.add('overlay-dismissing');
-          el.style.transition = 'transform 0.2s cubic-bezier(0.4, 0, 1, 1), opacity 0.18s ease';
-          el.style.transform = 'translate3d(0, 24%, 0)';
-          el.style.opacity = '0.3';
-          setTimeout(() => { elasticClear(el); opts.onDown(); }, 190);
+          el.style.transition = 'transform 0.22s cubic-bezier(0.4, 0, 1, 1), opacity 0.18s ease';
+          el.style.transform = 'translate3d(0, 32%, 0)';
+          el.style.opacity = '0.15';
+          setTimeout(() => { elasticClear(el); opts.onDown(); }, 200);
         } else {
           elasticClear(el);
           opts.onDown();
@@ -2549,12 +3747,13 @@
       }
 
       if (dx < 0 && canNext() && typeof opts.onNext === 'function') {
-        try { tbFeedback.selection(); } catch (e) {}
-        // brief finish bump then clear + action
+        try { swallowClick(); } catch (e) {}
+        try { tbFeedback.confirm(); } catch (e) {}
         if (el && !prefersReducedMotion()) {
-          el.style.transition = 'transform 0.14s ease-out';
-          el.style.transform = 'translate3d(-28px,0,0)';
-          setTimeout(() => { elasticClear(el); opts.onNext(); }, 130);
+          el.style.transition = 'transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.14s ease';
+          el.style.transform = 'translate3d(-18%,0,0)';
+          el.style.opacity = '0.35';
+          setTimeout(() => { elasticClear(el); opts.onNext(); }, 140);
         } else {
           elasticClear(el);
           opts.onNext();
@@ -2562,11 +3761,13 @@
         return;
       }
       if (dx > 0 && canPrev() && typeof opts.onPrev === 'function') {
-        try { tbFeedback.selection(); } catch (e) {}
+        try { swallowClick(); } catch (e) {}
+        try { tbFeedback.confirm(); } catch (e) {}
         if (el && !prefersReducedMotion()) {
-          el.style.transition = 'transform 0.14s ease-out';
-          el.style.transform = 'translate3d(28px,0,0)';
-          setTimeout(() => { elasticClear(el); opts.onPrev(); }, 130);
+          el.style.transition = 'transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.14s ease';
+          el.style.transform = 'translate3d(18%,0,0)';
+          el.style.opacity = '0.35';
+          setTimeout(() => { elasticClear(el); opts.onPrev(); }, 140);
         } else {
           elasticClear(el);
           opts.onPrev();
@@ -2583,10 +3784,74 @@
     }, { passive: true });
   }
 
+  /**
+   * Double-tap zoom on a photo. Second tap restores. Blocks swipe while live.
+   */
+  function bindDoubleTapZoom(root, getImg) {
+    if (!root || root.dataset.dtZoom === '1') return;
+    root.dataset.dtZoom = '1';
+    let lastT = 0, lastX = 0, lastY = 0, zoomed = false;
+    function imgEl() {
+      return typeof getImg === 'function' ? getImg() : (root.querySelector && root.querySelector('img'));
+    }
+    function resetZoom() {
+      zoomed = false;
+      root.classList.remove('is-zoomed');
+      const img = imgEl();
+      if (img) {
+        img.style.transition = 'transform 0.2s cubic-bezier(0.22, 1, 0.36, 1)';
+        img.style.transform = 'scale(1)';
+        setTimeout(function () {
+          if (!zoomed && img) {
+            img.style.transition = '';
+            img.style.transform = '';
+            img.style.transformOrigin = '';
+          }
+        }, 220);
+      }
+    }
+    root.__tbResetZoom = resetZoom;
+    root.addEventListener('touchend', function (e) {
+      if (!e.changedTouches || e.changedTouches.length !== 1) return;
+      if (e.target && e.target.closest && e.target.closest('button, a, input, textarea, video, .memory-viewer-close')) return;
+      const t = e.changedTouches[0];
+      const now = Date.now();
+      const dt = now - lastT;
+      const dist = Math.hypot(t.clientX - lastX, t.clientY - lastY);
+      lastT = now;
+      lastX = t.clientX;
+      lastY = t.clientY;
+      if (!(dt > 40 && dt < 320 && dist < 40)) return;
+      try { e.preventDefault(); } catch (err) {}
+      const img = imgEl();
+      if (!img || (img.tagName && img.tagName.toLowerCase() === 'video')) return;
+      if (zoomed) {
+        resetZoom();
+        try { tbFeedback.selection(); } catch (err) {}
+        return;
+      }
+      if (prefersReducedMotion()) return;
+      const r = img.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      let px = ((t.clientX - r.left) / r.width) * 100;
+      let py = ((t.clientY - r.top) / r.height) * 100;
+      px = Math.max(8, Math.min(92, px));
+      py = Math.max(8, Math.min(92, py));
+      img.style.transformOrigin = px + '% ' + py + '%';
+      img.style.transition = 'transform 0.22s cubic-bezier(0.22, 1, 0.36, 1)';
+      img.style.transform = 'scale(2.2)';
+      zoomed = true;
+      root.classList.add('is-zoomed');
+      try { tbFeedback.selection(); } catch (err) {}
+    }, { passive: false });
+  }
+
 
   function openInfoDetail(payload) {
     const detail = $('#info-detail');
     if (!detail) return;
+    payload = payload || {};
+    if (!(payload.title || '').trim() && !(payload.body || '').trim()) return;
     const label = $('#info-detail-label');
     const title = $('#info-detail-title');
     const meta = $('#info-detail-meta');
@@ -2632,7 +3897,10 @@
     });
     // Permanent: every window supports swipe-down dismiss (same elastic path as brother/memory)
     bindElasticSwipe(detail, {
+      getEl: () => detail.querySelector('.info-detail-panel') || detail,
       onDown: () => closeInfoDetail(),
+      onDownDist: 52,
+      follow: 0.88,
       blocked: (t) => !!(t && t.closest && t.closest('.info-detail-close, button, a, input, textarea'))
     });
     document.addEventListener('keydown', (e) => {
@@ -2645,6 +3913,12 @@
    * X + backdrop + Escape still work. Inputs/buttons block gesture start.
    * Tour tip is NOT a dismissible window — excluded.
    */
+  function overlayPanel(el) {
+    if (!el) return el;
+    return el.querySelector(
+      '.cal-confirm-panel, .brother-detail-panel, .info-detail-panel, .modal-content, .ios-install-panel, .auth-card, .auth-gate-card'
+    ) || el.firstElementChild || el;
+  }
   function bindSwipeCloseAllWindows() {
     const specs = [
       { id: 'install-modal', close: () => closeModal('install-modal') },
@@ -2657,6 +3931,8 @@
       { id: 'admin-events-modal', close: () => closeModal('admin-events-modal') },
       { id: 'admin-code-modal', close: () => closeModal('admin-code-modal') },
       { id: 'admin-push-modal', close: () => closeModal('admin-push-modal') },
+      { id: 'admin-room-modal', close: () => closeModal('admin-room-modal') },
+      { id: 'admin-sms-modal', close: () => closeModal('admin-sms-modal') },
       { id: 'admin-lastfire-modal', close: () => closeModal('admin-lastfire-modal') },
       { id: 'auth-gate', close: () => { try { closeAuthGate(); } catch (e) {} } },
       { id: 'ios-install-overlay', close: () => {
@@ -2667,14 +3943,22 @@
         const el = document.getElementById('inapp-install-overlay');
         if (el) { el.classList.add('hidden'); el.setAttribute('aria-hidden', 'true'); unlockBodyIfClear(); }
       }},
-      { id: 'cal-confirm-sheet', close: () => { try { closeCalConfirmSheet(); } catch (e) {} } }
+      { id: 'cal-confirm-sheet', close: () => { try { closeCalConfirmSheet(); } catch (e) {} } },
+      { id: 'imin-a2hs-sheet', close: () => { try { closeImInA2hsSheet(); } catch (e) {} } },
+      { id: 'axum-drop', close: () => { try { closeAxumDrop(); } catch (e) {} } },
+      { id: 'axum-card', close: () => { try { closeAxumCard(); } catch (e) {} } },
+      { id: 'raffle-live', close: () => { try { closeRaffleLive(); } catch (e) {} } },
+      { id: 'contact-swap', close: () => { try { closeContactSwap(); } catch (e) {} } }
     ];
     specs.forEach(({ id, close }) => {
       const el = document.getElementById(id);
       if (!el || el.dataset.swipeClose === '1') return;
       el.dataset.swipeClose = '1';
       bindElasticSwipe(el, {
+        getEl: () => overlayPanel(el),
         onDown: close,
+        onDownDist: 52,
+        follow: 0.88,
         blocked: (t) => !!(t && t.closest && t.closest(
           'input, textarea, select, button, a, video, .modal-close, [data-close]'
         ))
@@ -2752,32 +4036,64 @@
     }
   }
 
-  function requireLeader() {
-    if (leaderUnlocked) return true;
-    const pin = (cfg().LEADER_PIN || '').trim();
-    if (!pin) {
-      alert('LEADER_PIN is not set in config.');
-      return false;
+  function applyChairVisibility(on) {
+    chairUnlocked = !!on;
+    leaderUnlocked = !!on;
+    const zone = document.querySelector('.admin-zone');
+    const tools = document.getElementById('leader-tools');
+    const unlockBtn = document.getElementById('leader-unlock-btn');
+    if (on) {
+      if (zone) zone.classList.remove('hidden');
+      if (tools) tools.classList.remove('hidden');
+      if (unlockBtn) unlockBtn.classList.add('hidden');
+    } else {
+      if (zone) zone.classList.add('hidden');
+      if (tools) tools.classList.add('hidden');
+      if (unlockBtn) unlockBtn.classList.add('hidden');
     }
-    const entered = window.prompt('Leadership PIN');
-    if (entered == null) return false;
-    if (String(entered) !== String(pin)) {
-      alert('Wrong PIN');
-      return false;
-    }
-    leaderUnlocked = true;
-    const tools = $('#leader-tools');
-    if (tools) tools.classList.remove('hidden');
-    // One-shot honesty: shared vs this-phone edits
-    if (!requireLeader._told) {
-      requireLeader._told = true;
-      if (typeof supabaseEnabled === 'function' && !supabaseEnabled()) {
-        setTimeout(function () {
-          alert('Leadership is unlocked on this phone.\n\nEdits save here first. Shared publish needs Supabase configured so every brother sees the same announcements and events.');
-        }, 50);
+  }
+
+  async function refreshChairMode() {
+    try {
+      if (typeof isSignedIn !== 'function' || !isSignedIn()) {
+        applyChairVisibility(false);
+        return false;
       }
+      const sb = typeof getSb === 'function' ? getSb() : null;
+      const user = typeof currentUser === 'function' ? currentUser() : null;
+      if (!sb || !user || !user.id) {
+        applyChairVisibility(false);
+        return false;
+      }
+      let ok = false;
+      try {
+        const rpc = await sb.rpc('is_sot_leader');
+        if (!rpc.error && rpc.data === true) ok = true;
+      } catch (e0) {}
+      if (!ok) {
+        try {
+          const q = await sb.from('app_members').select('role,active').eq('user_id', user.id).maybeSingle();
+          if (!q.error && q.data) {
+            const role = String(q.data.role || '').toLowerCase();
+            const active = q.data.active !== false && q.data.active !== 0;
+            if (active && (role === 'leader' || role === 'admin')) ok = true;
+          }
+        } catch (e1) {}
+      }
+      applyChairVisibility(ok);
+      return ok;
+    } catch (e) {
+      applyChairVisibility(false);
+      return false;
     }
-    return true;
+  }
+
+  function requireLeader() {
+    if (chairUnlocked) return true;
+    try {
+      if (typeof showInstallToast === 'function') showInstallToast('Sign in on Brothers');
+    } catch (e) {}
+    return false;
   }
 
   function renderAdminAnnouncements() {
@@ -2820,9 +4136,18 @@
       'FN:' + name,
       'N:;' + name + ';;;'
     ];
-    if (phone) lines.push('TEL;TYPE=CELL:' + phone);
+    if (phone) {
+      let tel = phone;
+      if (tel.length === 10) tel = '1' + tel;
+      if (tel.charAt(0) !== '+') tel = '+' + tel;
+      lines.push('TEL;TYPE=CELL:' + tel);
+    }
+    if (brother && brother.id) lines.push('UID:sot-' + String(brother.id).replace(/[^\w\-]+/g, '').slice(0, 36));
     lines.push('ORG:Sons of Thunder');
-    if (bio && !forQr) lines.push('NOTE:' + bio.replace(/,/g, '\\,'));
+    lines.push('URL:' + publicUrl('/'));
+    if (!forQr) {
+      if (bio) lines.push('NOTE:' + bio.replace(/,/g, '\\,'));
+    }
     lines.push('END:VCARD');
     return lines.join('\r\n');
   }
@@ -2849,7 +4174,8 @@
 
   async function shareContact(brother) {
     if (!brother || !digitsOnly(brother.phone)) {
-      alert('No phone on this profile yet.\n\nEdit My Profile and add a number to share.');
+      try { showInstallToast('Add a number, then share.'); } catch (e) {}
+      try { openProfileEditor(); } catch (e) {}
       return false;
     }
     const file = vcardFile(brother);
@@ -2859,6 +4185,8 @@
     try {
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({ files: [file], title, text });
+        try { honorFirst('share'); } catch (e) {}
+        try { offerContactSwap(brother); } catch (e2) {}
         return true;
       }
     } catch (e) {
@@ -2871,6 +4199,7 @@
           title,
           text: text + '\n\nSons of Thunder contact'
         });
+        try { offerContactSwap(brother); } catch (e2) {}
         return true;
       }
     } catch (e) {
@@ -2879,8 +4208,81 @@
     }
     // Fallback: download .vcf so they can AirDrop / Nearby Share from Files
     downloadVCard(brother);
-    alert('Contact file saved. Open it or share from Files (AirDrop / Nearby Share).');
+    try { offerContactSwap(brother); } catch (e2) {}
     return true;
+  }
+
+  function myBrotherRecord() {
+    const id = myProfileId;
+    if (!id) return null;
+    return (brothers || []).find(function (b) { return b && b.id === id; }) || null;
+  }
+
+  function closeContactSwap() {
+    const el = document.getElementById('contact-swap');
+    if (!el) return;
+    try { clearQrTarget(document.getElementById('swap-qr-target')); } catch (e) {}
+    el.classList.add('hidden');
+    el.setAttribute('aria-hidden', 'true');
+    try { unlockBodyIfClear(); } catch (e2) {}
+  }
+
+  function offerContactSwap(shared) {
+    const me = myBrotherRecord();
+    if (shared && me && shared.id && shared.id === me.id) return;
+    const el = document.getElementById('contact-swap');
+    if (!el) return;
+    const title = document.getElementById('contact-swap-title');
+    const hint = document.getElementById('contact-swap-hint');
+    const shareBtn = document.getElementById('contact-swap-share');
+    const stage = document.getElementById('swap-qr-stage');
+    const target = document.getElementById('swap-qr-target');
+    const ready = !!(me && (me.name || '').trim() && digitsOnly(me.phone));
+    if (title) title.textContent = ready ? 'Let him scan you.' : 'Put your number on.';
+    if (hint) hint.textContent = ready ? 'Your code. Hand him the phone.' : 'Then he can scan you back.';
+    if (shareBtn) {
+      shareBtn.textContent = ready ? 'SHARE MY CONTACT' : 'ADD MY NUMBER';
+      shareBtn.onclick = function () {
+        if (ready) shareContact(me);
+        else {
+          closeContactSwap();
+          try { openProfileEditor(); } catch (e) {}
+        }
+      };
+    }
+    el.classList.remove('hidden');
+    el.setAttribute('aria-hidden', 'false');
+    if (stage) stage.classList.toggle('hidden', !ready);
+    if (ready && target) {
+      const vcard = buildVCard(me, { forQr: true });
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          renderBrotherQR(vcard, target, 220);
+        });
+      });
+    } else if (target) {
+      try { clearQrTarget(target); } catch (e) {}
+    }
+  }
+
+  function bindContactSwap() {
+    const el = document.getElementById('contact-swap');
+    if (!el || el.dataset.bound === '1') return;
+    el.dataset.bound = '1';
+    const close = function (e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      closeContactSwap();
+    };
+    const x = document.getElementById('contact-swap-close');
+    const skip = document.getElementById('contact-swap-skip');
+    if (x) x.addEventListener('click', close);
+    if (skip) skip.addEventListener('click', close);
+    el.addEventListener('click', function (e) {
+      if (e.target === el) closeContactSwap();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && el && !el.classList.contains('hidden')) closeContactSwap();
+    });
   }
 
   // Contact QR: remote PNG first (reliable fingerprint), local lib fallback,
@@ -2908,95 +4310,117 @@
       'QR unavailable right now.<br><strong>Use SHARE CONTACT</strong> below.</div>';
   }
 
-  function paintLocalQr(target, vcard, dim) {
-    if (typeof QRCode === 'undefined') return false;
+  /* QR LAW: the only painter. Profile, contact modal, Axum, anything future.
+     Unique vCard per brother. Official bolt stamped in the center (Cash App). */
+  let __tbQrBolt = null;
+  function stampBoltOnQr(canvas) {
+    if (!canvas) return;
+    function draw(img) {
+      try {
+        const ctx = canvas.getContext('2d');
+        const w = canvas.width;
+        const pad = Math.max(36, Math.round(w * 0.22));
+        const x = Math.round((w - pad) / 2);
+        const y = x;
+        const r = Math.max(6, Math.round(pad * 0.16));
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(x - 2, y - 2, pad + 4, pad + 4, r + 2);
+        else ctx.rect(x - 2, y - 2, pad + 4, pad + 4);
+        ctx.fill();
+        ctx.fillStyle = '#000000';
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(x, y, pad, pad, r);
+        else ctx.rect(x, y, pad, pad);
+        ctx.fill();
+        const inset = Math.round(pad * 0.16);
+        ctx.drawImage(img, x + inset, y + inset, pad - inset * 2, pad - inset * 2);
+      } catch (e) {}
+    }
+    if (__tbQrBolt && __tbQrBolt.complete && __tbQrBolt.naturalWidth) {
+      draw(__tbQrBolt);
+      return;
+    }
+    const img = new Image();
+    img.onload = function () {
+      __tbQrBolt = img;
+      draw(img);
+    };
+    img.src = 'assets/bolt-for-qr.png';
+  }
+  function paintThunderQr(target, text, dim) {
+    if (!target || !text || typeof QRCode === 'undefined') return false;
+    const hold = document.createElement('div');
+    hold.style.cssText = 'position:absolute;left:-9999px;top:0;width:8px;height:8px;overflow:hidden;';
+    document.body.appendChild(hold);
     try {
-      target.innerHTML = '';
-      target.style.cssText = 'width:' + dim + 'px;height:' + dim + 'px;min-width:' + dim +
-        'px;min-height:' + dim + 'px;background:#ffffff;display:block;margin:0 auto;position:relative;z-index:1;';
-      qrcodeInstance = new QRCode(target, {
-        text: vcard,
-        width: dim,
-        height: dim,
+      const inst = new QRCode(hold, {
+        text: String(text),
+        width: 8,
+        height: 8,
         colorDark: '#000000',
         colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.M
+        correctLevel: QRCode.CorrectLevel.H
       });
-      const painted = target.querySelector('canvas, img, table');
-      return !!painted;
+      const matrix = inst._oQRCode;
+      if (!matrix || typeof matrix.getModuleCount !== 'function') {
+        hold.remove();
+        return false;
+      }
+      const n = matrix.getModuleCount();
+      const quiet = 4;
+      const modules = n + quiet * 2;
+      const px = Math.max(4, Math.floor((dim * (window.devicePixelRatio || 2)) / modules));
+      const size = modules * px;
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      canvas.style.cssText = 'width:' + dim + 'px;height:' + dim + 'px;display:block;image-rendering:pixelated;';
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = '#000000';
+      for (let r = 0; r < n; r++) {
+        for (let c = 0; c < n; c++) {
+          if (matrix.isDark(r, c)) {
+            ctx.fillRect((c + quiet) * px, (r + quiet) * px, px, px);
+          }
+        }
+      }
+      stampBoltOnQr(canvas);
+      target.innerHTML = '';
+      target.style.cssText = 'width:' + dim + 'px;height:' + dim + 'px;background:#fff;display:block;margin:0 auto;position:relative;z-index:1;';
+      target.appendChild(canvas);
+      hold.remove();
+      qrcodeInstance = inst;
+      return true;
     } catch (e) {
-      console.warn('Local QR failed', e);
+      try { hold.remove(); } catch (e2) {}
+      console.warn('Thunder QR failed', e);
       return false;
     }
+  }
+  try { window.paintThunderQr = paintThunderQr; } catch (e) {}
+
+  function paintLocalQr(target, vcard, dim) {
+    return paintThunderQr(target, vcard, dim);
   }
 
   function renderBrotherQR(vcard, targetEl, size) {
     const target = targetEl || $('#qr-code-target') || $('#brother-qr-target');
     if (!target) return false;
-    const dim = size || 200;
-
-    // Cancel any prior load timer on this target
+    const dim = size || 240;
     const prev = qrLoadTimers.get(target);
     if (prev) clearTimeout(prev);
-
-    target.innerHTML =
-      '<div class="qr-loading" style="display:flex;align-items:center;justify-content:center;' +
-      'width:100%;height:100%;min-height:' + dim + 'px;background:#fff;color:#666;font-size:12px;' +
-      'letter-spacing:0.06em;text-transform:uppercase;">Building QR…</div>';
-    target.style.cssText = 'width:' + dim + 'px;height:' + dim + 'px;min-width:' + dim +
-      'px;min-height:' + dim + 'px;background:#ffffff;display:block;margin:0 auto;position:relative;z-index:1;';
-
-    let settled = false;
-    function settleOk() {
-      settled = true;
-      const t = qrLoadTimers.get(target);
-      if (t) {
-        clearTimeout(t);
-        qrLoadTimers.delete(target);
-      }
-    }
-    function settleFail() {
-      if (settled) return;
-      settled = true;
-      const t = qrLoadTimers.get(target);
-      if (t) {
-        clearTimeout(t);
-        qrLoadTimers.delete(target);
-      }
-      // Try local lib before giving up
-      if (!paintLocalQr(target, vcard, dim)) {
-        qrFailMessage(target);
-      }
-    }
-
-    // Timeout: blank/hung network must not last forever
-    const timer = setTimeout(settleFail, 5000);
-    qrLoadTimers.set(target, timer);
-
-    const img = document.createElement('img');
-    img.width = dim;
-    img.height = dim;
-    img.alt = 'Contact QR';
-    img.decoding = 'async';
-    img.style.cssText = 'width:' + dim + 'px;height:' + dim + 'px;display:block;';
-    img.onload = function () {
-      if (settled) return;
-      settleOk();
-      target.innerHTML = '';
-      target.appendChild(img);
-    };
-    img.onerror = function () {
-      settleFail();
-    };
-    img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=' + dim + 'x' + dim +
-      '&ecc=M&margin=1&color=000000&bgcolor=ffffff&data=' + encodeURIComponent(vcard);
-
-    return true;
+    if (paintThunderQr(target, vcard, dim)) return true;
+    qrFailMessage(target);
+    return false;
   }
 
   function showContactQR(brother) {
     if (!brother || !digitsOnly(brother.phone)) {
-      alert('No phone on this profile yet.\n\nEdit My Profile and add a number first.');
+      try { showInstallToast('Add a number, then share.'); } catch (e) {}
+      try { openProfileEditor(); } catch (e) {}
       return;
     }
     const vcard = buildVCard(brother, { forQr: true });
@@ -3027,7 +4451,7 @@
     // Wait until panel is laid out (was hidden) so canvas gets real dimensions
     requestAnimationFrame(function () {
       requestAnimationFrame(function () {
-        renderBrotherQR(vcard, target, 200);
+        renderBrotherQR(vcard, target, 240);
       });
     });
   }
@@ -3044,9 +4468,11 @@
   let brotherDetailIndex = -1;
 
   function openBrotherDetail(index) {
+    if (document.body.classList.contains('tb-tour-open')) return;
     const list = brothers || [];
     if (!list.length || index < 0 || index >= list.length) return;
     const b = list[index];
+    if (!b || !(b.name || '').trim()) return;
     brotherDetailIndex = index;
     const detail = $('#brother-detail');
     if (!detail) return;
@@ -3064,45 +4490,54 @@
     const bioEl = $('#brother-detail-bio');
     if (bioEl) bioEl.textContent = b.bio || '';
 
+  
+
+
+     // Birthday Honors
+    const isBday = isTodayBirthday(b.birthday);
+    const bdayHeader = $('#brother-birthday-header');
+    const textHimBtn = $('#brother-text-him');
+
+    if (bdayHeader) {
+      if (isBday) {
+        bdayHeader.textContent = 'HAPPY BIRTHDAY';
+        bdayHeader.classList.remove('hidden');
+      } else {
+        bdayHeader.textContent = '';
+        bdayHeader.classList.add('hidden');
+      }
+    }
+
+    if (textHimBtn) {
+      if (isBday && digitsOnly(b.phone)) {
+        textHimBtn.classList.remove('hidden');
+        textHimBtn.onclick = () => {
+          try { tbFeedback.press(textHimBtn); } catch (e) {}
+          const body = encodeURIComponent(BIRTHDAY_SMS_PREFILL);
+          window.location.href = `sms:${digitsOnly(b.phone)}?body=${body}`;
+        };
+      } else {
+        textHimBtn.classList.add('hidden');
+        textHimBtn.onclick = null;
+      }
+    }
+
+
+    
     // Contact actions — phone is opt-in only (SHARE CONTACT + inline QR; no CALL/TEXT chips)
-    const actions = $('#brother-contact-actions');
     const shareBtn = $('#brother-share-contact');
     if (shareBtn && !shareBtn.dataset.tbPress) {
       shareBtn.dataset.tbPress = '1';
       shareBtn.addEventListener('click', () => { try { tbFeedback.press(shareBtn); } catch (e) {} }, true);
     }
-    const phone = digitsOnly(b.phone);
-    if (actions) {
-      if (phone) {
-        actions.classList.remove('hidden');
-        if (shareBtn) {
-          shareBtn.onclick = () => shareContact(b);
-        }
-      } else {
-        actions.classList.add('hidden');
-      }
-    }
-
-    // Own profile only — EDIT PROFILE opens the existing editor (photo, name, bio, phone)
-    const editBtn = $('#brother-edit-profile');
-    const isOwn = !!(myProfileId && b && b.id === myProfileId);
-    if (editBtn) {
-      if (isOwn) {
-        editBtn.classList.remove('hidden');
-        editBtn.onclick = () => {
-          try { tbFeedback.press(editBtn); } catch (e) {}
-          try { if (typeof tbGlowHit === 'function') tbGlowHit(editBtn, 'red'); } catch (e) {}
-          closeBrotherDetail();
-          openProfileEditor();
-        };
-      } else {
-        editBtn.classList.add('hidden');
-        editBtn.onclick = null;
-      }
+    if (shareBtn) {
+      shareBtn.onclick = () => shareContact(b);
+      shareBtn.classList.toggle('hidden', !(b.name || '').trim());
     }
 
     detail.classList.remove('hidden');
     detail.setAttribute('aria-hidden', 'false');
+    detail.style.removeProperty('display');
     document.body.style.overflow = 'hidden';
     bindBrotherDetail(); // ensure X is wired
     // Inline Cash App–style QR with bolt center — ready as soon as profile opens
@@ -3148,7 +4583,13 @@
       onPrev: () => openBrotherDetail(brotherDetailIndex - 1),
       onNext: () => openBrotherDetail(brotherDetailIndex + 1),
       onDown: () => closeBrotherDetail(),
+      onDownDist: 52,
+      follow: 0.88,
       blocked: (t) => !!(t && t.closest && t.closest('.brother-detail-close, button, a, input, textarea'))
+    });
+    bindDoubleTapZoom(detail, function () {
+      const p = document.getElementById('brother-detail-photo');
+      return p ? p.querySelector('img') : null;
     });
     document.addEventListener('keydown', (e) => {
       if (!detail.classList.contains('hidden') && e.key === 'Escape') closeBrotherDetail();
@@ -3164,6 +4605,13 @@
       if (nameEl) nameEl.value = me.name || '';
       if (bioEl) bioEl.value = me.bio || '';
       if (phoneEl) phoneEl.value = me.phone || '';
+
+      const bdayEl = $('#profile-birthday');
+      if (bdayEl) bdayEl.value = (me && me.birthday) ? me.birthday : '';
+
+
+
+      
       if (me.photo) {
         pendingPhotoData = me.photo;
         const preview = $('#photo-preview');
@@ -3182,6 +4630,12 @@
       if (nameEl) nameEl.value = '';
       if (bioEl) bioEl.value = '';
       if (phoneEl) phoneEl.value = '';
+
+            const bdayEl = $('#profile-birthday');
+      if (bdayEl) bdayEl.value = '';
+
+
+      
       pendingPhotoData = null;
       const preview = $('#photo-preview');
       if (preview) { preview.innerHTML = ''; preview.classList.remove('visible'); }
@@ -3193,12 +4647,13 @@
   function renderBrothers() {
     const grid = $('#brothers-grid');
     if (!grid) return;
+    try { collapseDuplicateBrothers(); } catch (e) {}
     if (!brothers.length) {
       grid.innerHTML = `
         <button type="button" class="empty-state empty-brothers empty-brothers-cta" id="empty-brothers-cta" aria-label="Add your profile">
           <div class="empty-brothers-plus" aria-hidden="true">+</div>
-          <div class="empty-brothers-title">No brothers listed yet.</div>
-          <div class="empty-brothers-sub">Be the first.<br>Add your profile.</div>
+          <div class="empty-brothers-title">The room is waiting.</div>
+          <div class="empty-brothers-sub">Add your name.<br>Take your seat.</div>
         </button>`;
       const cta = $('#empty-brothers-cta');
       if (cta) {
@@ -3218,23 +4673,28 @@
         ? `<img class="brother-photo" src="${esc(b.photo)}" alt="${esc(b.name)}" />`
         : `<div class="brother-photo">${esc(initials)}</div>`;
       const isNew = (typeof b.updatedAt === 'number' && b.updatedAt > (brothersSeenAt || 0));
+      
+      const isBday = isTodayBirthday(b.birthday);
+      const nameClass = isBday ? 'brother-name birthday-today' : 'brother-name';
+      const todayBadge = isBday ? '<span class="today-badge">TODAY</span>' : '';
+      
+      
       return `
         <button type="button" class="brother-card${isNew ? ' card-new' : ''}" data-brother-index="${i}" aria-label="View ${esc(b.name || 'brother')} profile">
           ${isNew ? '<span class="new-badge new-badge-overlay">NEW</span>' : ''}
           ${photoHtml}
           <div class="brother-info">
-            <div class="brother-name">${esc(b.name)}</div>
+            <div class="${nameClass}">${esc(b.name || '')}${todayBadge}</div>
             <div class="brother-bio">${esc(b.bio || '')}</div>
           </div>
         </button>`;
     }).join('');
-    // Next open slot — invites another brother to claim a seat
     const inviteHtml = `
-      <button type="button" class="brother-card brother-slot-invite" id="brother-slot-invite" aria-label="Add your profile">
-        <div class="brother-slot-plus" aria-hidden="true">+</div>
-        <div class="brother-slot-copy">
-          <div class="brother-slot-title">Your seat</div>
-          <div class="brother-slot-sub">Tap to add your profile</div>
+      <button type="button" class="brother-card brother-chair" id="brother-open-chair" aria-label="Invite a brother">
+        <div class="brother-chair-seat" aria-hidden="true"></div>
+        <div class="brother-info">
+          <div class="brother-chair-title">OPEN CHAIR</div>
+          <div class="brother-slot-sub">Bring a brother</div>
         </div>
       </button>`;
     grid.innerHTML = cardsHtml + inviteHtml;
@@ -3245,12 +4705,12 @@
         openBrotherDetail(idx);
       });
     });
-    const slot = $('#brother-slot-invite');
-    if (slot) {
-      slot.addEventListener('click', () => {
-        if (typeof tbGlowHit === 'function') tbGlowHit(slot, 'yellow');
+    const chair = $('#brother-open-chair');
+    if (chair) {
+      chair.addEventListener('click', function () {
+        if (typeof tbGlowHit === 'function') tbGlowHit(chair, 'yellow');
         try { tbFeedback.selection(); } catch (e) {}
-        openProfileEditor();
+        inviteOpenChair();
       });
     }
     updateAllNewBadges();
@@ -3362,6 +4822,7 @@
   function closeMemoryViewer() {
     const viewer = $('#memory-viewer');
     if (!viewer) return;
+    try { if (viewer.__tbResetZoom) viewer.__tbResetZoom(); } catch (e) {}
     releaseFocusAndZoom();
     setUnderlayDepth(false);
     memoryFlipOrigin = null;
@@ -3377,6 +4838,8 @@
   }
 
   function paintMemoryViewer() {
+    const viewer = $('#memory-viewer');
+    try { if (viewer && viewer.__tbResetZoom) viewer.__tbResetZoom(); } catch (e) {}
     const list = viewableMemories();
     if (!list.length) { closeMemoryViewer(); return; }
     if (memoryViewerIndex < 0) memoryViewerIndex = 0;
@@ -3391,7 +4854,7 @@
       const prev = stage.querySelector('video');
       if (prev) { try { prev.pause(); } catch (e) {} }
       // Only allow data: or https: sources (never javascript: / arbitrary)
-      const src = String(m.data || '');
+      const src = String(m.full || m.data || '');
       const safe = src.startsWith('data:') || src.startsWith('https://') || src.startsWith('http://');
       if (!safe) {
         stage.textContent = 'Could not display this memory.';
@@ -3452,7 +4915,13 @@
       onPrev: () => memoryViewerStep(-1),
       onNext: () => memoryViewerStep(1),
       onDown: () => closeMemoryViewer(),
+      onDownDist: 52,
+      follow: 0.88,
       blocked: (t) => !!(t && t.closest && t.closest('.memory-viewer-close, video, button'))
+    });
+    bindDoubleTapZoom(viewer, function () {
+      const s = document.getElementById('memory-viewer-stage');
+      return s ? s.querySelector('img') : null;
     });
     document.addEventListener('keydown', (e) => {
       if (!$('#memory-viewer') || $('#memory-viewer').classList.contains('hidden')) return;
@@ -3462,84 +4931,798 @@
     });
   }
 
-  function renderMedia() {
-    const el = $('#media-feed');
-    if (!el) return;
-    updateAuthSessionBar();
-    /* Auth lives on Brothers — no Sign In wall on Events / Past Gatherings */
-    if (supabaseEnabled() && !isSignedIn()) {
-      el.innerHTML = `
-        <button type="button" class="empty-state empty-memories empty-memories-cta" id="empty-memories-cta" aria-label="Add a memory">
-          <div class="empty-memories-plus" aria-hidden="true">+</div>
-          <div class="empty-memories-title">No memories yet.</div>
-          <div class="empty-memories-sub">Be the first to drop a photo.<br>Shared album: Sign In under Brothers.</div>
-        </button>`;
-      const cta = $('#empty-memories-cta');
-      if (cta) {
-        cta.addEventListener('click', () => {
-          if (typeof tbGlowHit === 'function') tbGlowHit(cta, 'yellow');
-          try { tbFeedback.selection(); } catch (e) {}
-          const up = $('#upload-media-btn');
-          if (up) up.click();
-        });
-      }
-      updateAllNewBadges();
-      return;
-    }
-    if (!media.length) {
-      el.innerHTML = `
-        <button type="button" class="empty-state empty-memories empty-memories-cta" id="empty-memories-cta" aria-label="Add a memory">
-          <div class="empty-memories-plus" aria-hidden="true">+</div>
-          <div class="empty-memories-title">No memories yet.</div>
-          <div class="empty-memories-sub">Be the first to drop a photo.<br>Build the history.</div>
-        </button>`;
-      const cta = $('#empty-memories-cta');
-      if (cta) {
-        cta.addEventListener('click', () => {
-          if (typeof tbGlowHit === 'function') tbGlowHit(cta, 'yellow');
-          try { tbFeedback.selection(); } catch (e) {}
-          const up = $('#upload-media-btn');
-          if (up) up.click();
-        });
-      }
-      updateAllNewBadges();
-      return;
-    }
-    el.innerHTML = media.map((m, i) => {
-      const isVideo = m.type === 'video';
-      const src = m.data ? esc(m.data) : '';
-      const mediaTag = isVideo
-        ? `<video src="${src}" muted playsinline preload="metadata"></video><div class="media-thumb-play">▶</div>`
-        : `<img src="${src}" alt="" loading="lazy" />`;
-      const who = m.uploader_name ? esc(m.uploader_name) : '';
-      const capText = m.caption ? esc(m.caption) : '';
-      const cap = (capText || who)
-        ? `<div class="media-thumb-cap">${capText}${who ? (capText ? ' · ' : '') + who : ''}</div>`
-        : '';
-      const t = m.date ? Date.parse(m.date) : 0;
-      const isNew = t > 0 && t > (mediaSeenAt || 0);
-      return `<button type="button" class="media-thumb${isNew ? ' card-new' : ''}" data-media-index="${i}" aria-label="View memory">${isNew ? '<span class="new-badge new-badge-overlay">NEW</span>' : ''}${mediaTag}${cap}</button>`;
-    }).join('');
-    el.querySelectorAll('.media-thumb').forEach((btn, i) => {
+  function memoryThumbHtml(m, i, hero) {
+    const isVideo = m.type === 'video';
+    const src = m.data ? esc(m.data) : '';
+    const mediaTag = isVideo
+      ? '<video src="' + src + '" muted playsinline preload="metadata"></video><div class="media-thumb-play">▶</div>'
+      : '<img src="' + src + '" alt="" loading="lazy" />';
+    const who = m.uploader_name ? esc(m.uploader_name) : '';
+    const capText = m.caption ? esc(m.caption) : '';
+    const cap = (capText || who)
+      ? '<div class="media-thumb-cap">' + capText + (who ? (capText ? ' · ' : '') + who : '') + '</div>'
+      : '';
+    const t = m.date ? Date.parse(m.date) : 0;
+    const isNew = t > 0 && t > (mediaSeenAt || 0);
+    return '<button type="button" class="media-thumb' + (hero ? ' media-thumb-hero' : '') + (isNew ? ' card-new' : '') + '" data-media-index="' + i + '" aria-label="View memory">' +
+      (isNew ? '<span class="new-badge new-badge-overlay">NEW</span>' : '') + mediaTag + cap + '</button>';
+  }
+
+  function bindMediaThumbs(root) {
+    if (!root) return;
+    root.querySelectorAll('.media-thumb').forEach(function (btn, i) {
       btn.style.animationDelay = (Math.min(i, 8) * 0.04) + 's';
       btn.classList.add('media-enter');
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', function () {
         tbGlowHit(btn, 'yellow');
         const idx = parseInt(btn.getAttribute('data-media-index'), 10) || 0;
         openMemoryViewer(idx, btn);
         markMediaSeen();
       });
     });
+  }
+
+  function renderMedia() {
+    const el = $('#media-feed');
+    const hero = document.getElementById('media-hero');
+    if (!el) return;
+    updateAuthSessionBar();
+    if (hero) { hero.innerHTML = ''; hero.classList.add('hidden'); }
+    /* Auth lives on Brothers — no Sign In wall on Events / Past Gatherings */
+    if (supabaseEnabled() && !isSignedIn()) {
+      el.innerHTML =
+        '<button type="button" class="empty-state empty-memories empty-memories-cta" id="empty-memories-cta" aria-label="Drop a pic">' +
+        '<div class="empty-memories-plus" aria-hidden="true">+</div>' +
+        '<div class="empty-memories-title">Drop a pic when the night starts.</div>' +
+        '<div class="empty-memories-sub"></div>' +
+        '</button>';
+      const cta = $('#empty-memories-cta');
+      if (cta) {
+        cta.addEventListener('click', function () {
+          if (typeof tbGlowHit === 'function') tbGlowHit(cta, 'yellow');
+          try { tbFeedback.selection(); } catch (e) {}
+          openDropShot();
+        });
+      }
+      updateAllNewBadges();
+      return;
+    }
+    if (!media.length) {
+      el.innerHTML =
+        '<button type="button" class="empty-state empty-memories empty-memories-cta" id="empty-memories-cta" aria-label="Drop a pic">' +
+        '<div class="empty-memories-plus" aria-hidden="true">+</div>' +
+        '<div class="empty-memories-title">Drop a pic when the night starts.</div>' +
+        '<div class="empty-memories-sub"></div>' +
+        '</button>';
+      const cta = $('#empty-memories-cta');
+      if (cta) {
+        cta.addEventListener('click', function () {
+          if (typeof tbGlowHit === 'function') tbGlowHit(cta, 'yellow');
+          try { tbFeedback.selection(); } catch (e) {}
+          openDropShot();
+        });
+      }
+      updateAllNewBadges();
+      return;
+    }
+    if (hero) {
+      hero.innerHTML = memoryThumbHtml(media[0], 0, true);
+      hero.classList.remove('hidden');
+      bindMediaThumbs(hero);
+    }
+    el.innerHTML = media.slice(1).map(function (m, i) {
+      return memoryThumbHtml(m, i + 1, false);
+    }).join('');
+    bindMediaThumbs(el);
     updateAllNewBadges();
+    try { syncDropShotAuth(); } catch (e) {}
   }
 
   function meetingKey() {
     try {
       const d = getNextMeetingMonday();
-      return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return d.getFullYear() + '-' + m + '-' + day;
     } catch (e) {
       return 'default';
     }
+  }
+
+  let raffleDraws = [];
+  let patioOverride = null;
+
+  function isGatheringDay() {
+    try { return daysUntil(getNextMeetingMonday()) === 0; } catch (e) { return false; }
+  }
+
+  function isPatioLive() {
+    if (patioOverride === true) return true;
+    if (patioOverride === false) return false;
+    return isGatheringDay();
+  }
+
+  function syncPatioToggle() {
+    const btn = document.getElementById('patio-toggle-btn');
+    const hint = document.getElementById('patio-toggle-hint');
+    const live = isPatioLive();
+    if (btn) btn.textContent = live ? 'CLOSE THE PATIO' : 'OPEN THE PATIO';
+    if (hint) {
+      hint.textContent = live
+        ? 'Patio is live. Brothers tap I’M HERE on Home. Then DRAW BEER / DRAW HAT.'
+        : 'Opens I’M HERE on Home. Men who check in are in the beer and hat raffle.';
+    }
+  }
+
+  function iShowedUp() {
+    const id = myProfileId || (currentUser() && currentUser().id);
+    if (!id) return false;
+    return (sharedRsvps || []).some(function (r) { return r && r.brother_id === id && r.showed_up; });
+  }
+
+  function renderHere() {
+    const btn = document.getElementById('here-btn');
+    const st = document.getElementById('here-status');
+    const board = document.getElementById('raffle-board');
+    const night = isPatioLive();
+    try { syncPatioToggle(); } catch (e) {}
+    try { if (night) startPatioWatch(); else stopPatioWatch(); } catch (e) {}
+    if (btn) {
+      if (night && !iShowedUp()) btn.classList.remove('hidden');
+      else btn.classList.add('hidden');
+    }
+    if (st) {
+      if (night && iShowedUp()) st.classList.remove('hidden');
+      else st.classList.add('hidden');
+    }
+    if (board) {
+      const lines = (raffleDraws || []).map(function (d) {
+        const prize = 'WINNER';
+        return prize + ' · ' + String(d.winner_name || 'Brother').toUpperCase();
+      });
+      if (lines.length) {
+        board.textContent = lines.join('   ·   ');
+        board.classList.remove('hidden');
+      } else board.classList.add('hidden');
+    }
+    const drop = document.getElementById('drop-shot-btn');
+    if (drop) {
+      if (night && iShowedUp()) drop.classList.remove('hidden');
+      else drop.classList.add('hidden');
+    }
+    try { syncDropShotAuth(); } catch (e) {}
+  }
+
+  function openLibraryShot() {
+    if (!isSignedIn()) {
+      try { startMemberSignIn(); } catch (e) {}
+      return;
+    }
+    const lib = document.getElementById('memory-lib');
+    if (!lib) return;
+    try { lib.value = ''; } catch (e) {}
+    lib.click();
+  }
+
+  function syncDropShotAuth() {
+    const on = typeof isSignedIn === 'function' && isSignedIn();
+    const lab = document.getElementById('memories-drop-btn');
+    const sign = document.getElementById('memories-signin-shot');
+    if (lab) lab.classList.toggle('hidden', !on);
+    if (sign) sign.classList.toggle('hidden', on);
+  }
+
+  function openDropShot() {
+    if (!isSignedIn()) {
+      try { save('pendingShot', { at: Date.now() }); } catch (e) {}
+      try { startMemberSignIn(); } catch (e) {}
+      return;
+    }
+    const cam = document.getElementById('memory-cam') || document.getElementById('media-file-cam');
+    if (!cam) return;
+    try { cam.value = ''; } catch (e) {}
+    cam.click();
+  }
+
+  function flushPendingShot() {
+    let p = null;
+    try { p = load('pendingShot'); } catch (e) {}
+    if (!p) return;
+    try { save('pendingShot', null); } catch (e) {}
+    if (!isSignedIn()) return;
+    try { showView('events'); } catch (e) {}
+    try { showInstallToast('Tap DROP A PIC. Camera’s ready.'); } catch (e) {}
+    const lab = document.getElementById('memories-drop-btn');
+    if (lab) {
+      try { lab.classList.remove('hidden'); } catch (e) {}
+      try { if (typeof tbGlowHit === 'function') tbGlowHit(lab, 'red'); } catch (e) {}
+    }
+    try { syncDropShotAuth(); } catch (e) {}
+  }
+
+  async function ingestMemoryFile(file) {
+    if (!file) return;
+    if (supabaseEnabled() && !isSignedIn()) {
+      try { startMemberSignIn(); } catch (e) {}
+      return;
+    }
+    if (!String(file.type || '').startsWith('image')) {
+      alert('Photo only from the camera.');
+      return;
+    }
+    if (file.size > 12 * 1024 * 1024) {
+      alert('File is too large. Try another shot.');
+      return;
+    }
+    try { showInstallToast('Uploading…'); } catch (e) {}
+    try {
+      const item = {
+        blob: file,
+        filename: file.name || 'patio.jpg',
+        type: 'image',
+        caption: '',
+        date: new Date().toISOString(),
+        uploader_name: (typeof myDisplayName === 'function' && myDisplayName()) || ''
+      };
+      if (!supabaseEnabled()) throw new Error('Shared memories are not configured on this app yet.');
+      try { showInstallToast('Polishing…'); } catch (e) {}
+      const saved = await pushMemory(item);
+      media.unshift(saved);
+      renderMedia();
+      renderLastFire();
+      try { showView('events'); } catch (e) {}
+      try { rewardSaveSuccess('memory'); } catch (e) {}
+    } catch (err) {
+      console.error(err);
+      alert('Could not save memory. ' + ((err && err.message) || 'Try again.'));
+    }
+  }
+
+  async function pullRaffle() {
+    if (!supabaseEnabled()) return;
+    try {
+      const { data, error } = await getSb().from('raffle_draws').select('prize,winner_name,winner_id,meeting_key,drawn_at').eq('meeting_key', meetingKey());
+      if (error) return;
+      raffleDraws = Array.isArray(data) ? data : [];
+      renderHere();
+      try { maybePlayLiveRaffle(); } catch (e) {}
+    } catch (e) {}
+  }
+
+  async function checkInHere() {
+    if (!isPatioLive()) return;
+    if (!isSignedIn()) {
+      try { openImInSignIn(); } catch (e) { startMemberSignIn(); }
+      return;
+    }
+    const id = (typeof ensureBrotherId === 'function' ? ensureBrotherId() : myProfileId) || (currentUser() && currentUser().id);
+    if (!id) return;
+    try { await pushRsvp(true); } catch (e) {}
+    try {
+      const sb = getSb();
+      const { error } = await sb.from('rsvps').upsert({
+        brother_id: id,
+        meeting_key: meetingKey(),
+        in_at: new Date().toISOString(),
+        showed_up: true,
+        showed_at: new Date().toISOString()
+      }, { onConflict: 'brother_id,meeting_key' });
+      if (error) throw error;
+    } catch (e) {
+      alert('Could not check you in. Sign in and try again.');
+      return;
+    }
+    try { await pullRsvps(); } catch (e) {}
+    renderHere();
+    try { showInstallToast("YOU'RE IN THE RAFFLE. PIZZA'S ON.", { success: true }); } catch (e) {}
+    try { tbFeedback.confirm(); } catch (e) {}
+    setTimeout(function () {
+      try { renderLastFire(); } catch (e) {}
+    }, 400);
+  }
+
+  async function drawRaffle(prize) {
+    if (!supabaseEnabled() || !isSignedIn()) {
+      alert('Sign in as a leader to draw.');
+      return;
+    }
+    const sb = getSb();
+    const key = meetingKey();
+    let pool = [];
+    try {
+      const { data: rows, error } = await sb.from('rsvps').select('brother_id').eq('meeting_key', key).eq('showed_up', true);
+      if (error) throw error;
+      const ids = (rows || []).map(function (r) { return r.brother_id; }).filter(Boolean);
+      if (!ids.length) {
+        alert('Nobody checked in yet.');
+        return;
+      }
+      const { data: bros } = await sb.from('brothers').select('id,name');
+      pool = ids.map(function (id) {
+        const b = (bros || []).find(function (x) { return x.id === id; });
+        const local = (brothers || []).find(function (x) { return x.id === id; });
+        return { id: id, name: (b && b.name) || (local && local.name) || 'Brother' };
+      });
+    } catch (e) {
+      alert('Could not load who showed.');
+      return;
+    }
+    const pick = pool[Math.floor(Math.random() * pool.length)];
+    try {
+      const sb = getSb();
+      const { error } = await sb.from('raffle_draws').upsert({
+        meeting_key: meetingKey(),
+        prize: prize,
+        winner_id: pick.id,
+        winner_name: pick.name || 'Brother',
+        drawn_at: new Date().toISOString()
+      }, { onConflict: 'meeting_key,prize' });
+      if (error) throw error;
+    } catch (e) {
+      alert('Could not lock the draw. Run the raffle SQL.');
+      return;
+    }
+    try { await pullRaffle(); } catch (e) {}
+    try { playRaffleLive(prize, pick.name || 'Brother'); } catch (e) {}
+  }
+
+  let raffleSeen = {};
+  let raffleAnimTimer = null;
+  let patioWatch = null;
+
+  function patioPoolNames() {
+    const ids = (sharedRsvps || []).filter(function (r) { return r && r.showed_up; }).map(function (r) { return r.brother_id; });
+    const names = [];
+    ids.forEach(function (id) {
+      const b = (brothers || []).find(function (x) { return x && x.id === id; });
+      const n = (b && b.name) || firstNameForId(id) || '';
+      if (n) names.push(n);
+    });
+    if (names.length) return names;
+    return (brothers || []).map(function (b) { return b && b.name; }).filter(Boolean);
+  }
+
+  function closeRaffleLive() {
+    if (raffleAnimTimer) { clearTimeout(raffleAnimTimer); raffleAnimTimer = null; }
+    const overlay = document.getElementById('raffle-live');
+    if (overlay) {
+      overlay.classList.add('hidden');
+      overlay.classList.remove('is-landed');
+      overlay.setAttribute('aria-hidden', 'true');
+    }
+    document.body.classList.remove('tb-raffle-live');
+    try { tbAllowSleep('raffle'); } catch (e) {}
+  }
+
+  const RAFFLE_CAST = [
+    { slot: 'hat', file: 'thunder-hat.png' },
+    { slot: 'beard', file: 'thunder-beard.png' },
+    { slot: 'laugh', file: 'thunder-laugh.png' },
+    { slot: 'cigar', file: 'thunder-cigar.png' },
+    { slot: 'grin', file: 'thunder-grin.png' },
+    { slot: 'wink', file: 'thunder-wink.png' }
+  ];
+
+  function paintRaffleCast() {
+    const wrap = document.getElementById('raffle-cast');
+    if (!wrap || wrap.dataset.painted === '1') return;
+    wrap.innerHTML = RAFFLE_CAST.map(function (c) {
+      return '<img class="raffle-cast-face" data-slot="' + c.slot + '" src="assets/tour-faces/' + c.file + '" alt="" width="64" height="64" decoding="async" />';
+    }).join('');
+    wrap.dataset.painted = '1';
+  }
+
+  function playRaffleLive(prize, winner, names) {
+    const overlay = document.getElementById('raffle-live');
+    const nameEl = document.getElementById('raffle-live-name');
+    const prizeEl = document.getElementById('raffle-live-prize');
+    const sub = document.getElementById('raffle-live-sub');
+    if (!overlay || !nameEl) return;
+    if (raffleAnimTimer) { clearTimeout(raffleAnimTimer); raffleAnimTimer = null; }
+    const win = String(winner || 'Brother').trim() || 'Brother';
+    raffleSeen[prize] = win;
+    const pool = (Array.isArray(names) && names.length ? names : patioPoolNames()).slice();
+    if (pool.indexOf(win) === -1) pool.push(win);
+    if (prizeEl) prizeEl.textContent = 'WINNER';
+    const kicker = document.getElementById('raffle-live-kicker');
+    if (kicker) kicker.textContent = 'THE WIN';
+    if (sub) sub.textContent = 'Drawing…';
+    try { paintRaffleCast(); } catch (e) {}
+    overlay.classList.remove('hidden', 'is-landed');
+    overlay.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('tb-raffle-live');
+    try { tbKeepAwake('raffle'); } catch (e) {}
+    const host = document.getElementById('raffle-live-host');
+    if (host) {
+      host.style.animation = 'none';
+      void host.offsetWidth;
+      host.style.animation = '';
+    }
+    const reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    function land() {
+      nameEl.textContent = win.toUpperCase();
+      overlay.classList.add('is-landed');
+      if (sub) sub.textContent = "HE'S GOT IT";
+      try { tbFeedback.confirm(); } catch (e) {}
+    }
+    if (reduce || pool.length < 2) {
+      land();
+      return;
+    }
+    let i = 0;
+    const start = Date.now();
+    function tick() {
+      if (Date.now() - start < 2400) {
+        nameEl.textContent = String(pool[i % pool.length] || 'Brother').toUpperCase();
+        i += 1;
+        raffleAnimTimer = setTimeout(tick, 75 + Math.floor(Math.random() * 45));
+        if (i % 4 === 0) { try { tbFeedback.selection(); } catch (e) {} }
+      } else {
+        land();
+      }
+    }
+    tick();
+  }
+  try { window.playRaffleLive = playRaffleLive; } catch (e) {}
+
+  function maybePlayLiveRaffle() {
+    (raffleDraws || []).forEach(function (d) {
+      if (!d || !d.prize || !d.winner_name) return;
+      const t = d.drawn_at ? Date.parse(d.drawn_at) : 0;
+      if (t && (Date.now() - t) > 90000) {
+        raffleSeen[d.prize] = d.winner_name;
+        return;
+      }
+      if (raffleSeen[d.prize] === d.winner_name) return;
+      playRaffleLive(d.prize, d.winner_name);
+    });
+  }
+
+  function startPatioWatch() {
+    if (patioWatch) return;
+    patioWatch = setInterval(function () {
+      if (!isPatioLive()) { stopPatioWatch(); return; }
+      try { pullRaffle(); } catch (e) {}
+      try { pullRsvps(); } catch (e) {}
+    }, 1400);
+  }
+  function stopPatioWatch() {
+    if (patioWatch) { clearInterval(patioWatch); patioWatch = null; }
+  }
+
+  function firstNameForId(id) {
+    const b = (brothers || []).find(function (x) { return x && x.id === id; });
+    const n = b && (b.name || b.displayName || b.display_name);
+    if (!n) return '';
+    return String(n).trim().split(/\s+/)[0];
+  }
+
+  function toastBrotherIn(first) {
+    if (!first) return;
+    try {
+      showInstallToast(String(first).toUpperCase() + ' LOCKED IN', { success: true });
+    } catch (e) {}
+  }
+
+  async function pullLastFire() {
+    if (!supabaseEnabled()) return false;
+    const sb = getSb();
+    if (!sb) return false;
+    try {
+      const { data, error } = await sb.from('last_fire').select('caption,photo,updated_at').eq('id', 'current').maybeSingle();
+      if (error || !data) return false;
+      if (!String(data.caption || '').trim() && !String(data.photo || '').trim()) return false;
+      lastFire = {
+        caption: data.caption || '',
+        photo: data.photo || '',
+        updatedAt: data.updated_at ? Date.parse(data.updated_at) : Date.now()
+      };
+      save('lastFire', lastFire);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  async function pushLastFire() {
+    if (!supabaseEnabled() || !isSignedIn() || !lastFire) return false;
+    const sb = getSb();
+    if (!sb) return false;
+    try {
+      const uid = currentUser() && currentUser().id;
+      const { error } = await sb.from('last_fire').upsert({
+        id: 'current',
+        caption: lastFire.caption || '',
+        photo: lastFire.photo || '',
+        updated_at: new Date().toISOString(),
+        updated_by: uid || null
+      });
+      return !error;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  async function pullRsvps() {
+    if (!supabaseEnabled()) return false;
+    const sb = getSb();
+    if (!sb) return false;
+    try {
+      const { data, error } = await sb
+        .from('rsvps')
+        .select('brother_id,meeting_key,in_at,showed_up')
+        .eq('meeting_key', meetingKey());
+      if (error) {
+        const retry = await sb.from('rsvps').select('brother_id,meeting_key,in_at').eq('meeting_key', meetingKey());
+        if (retry.error) {
+          console.warn('rsvps pull', retry.error);
+          return false;
+        }
+        sharedRsvps = Array.isArray(retry.data) ? retry.data : [];
+      } else {
+        sharedRsvps = Array.isArray(data) ? data : [];
+      }
+      const nextIds = sharedRsvps.map(function (r) { return r && r.brother_id; }).filter(Boolean);
+      try { renderInCount(); } catch (e) {}
+      try { renderHere(); } catch (e) {}
+      if (prevRsvpIds) {
+        nextIds.forEach(function (id) {
+          if (prevRsvpIds.indexOf(id) !== -1) return;
+          if (id === myProfileId) return;
+          const first = firstNameForId(id);
+          if (first) toastBrotherIn(first);
+        });
+      }
+      prevRsvpIds = nextIds;
+      return true;
+    } catch (e) {
+      console.warn('rsvps pull failed', e);
+      return false;
+    }
+  }
+
+  function openDeviceSmsClub(message) {
+    const nums = [];
+    const seen = {};
+    (brothers || []).forEach(function (b) {
+      const d = digitsOnly(b && b.phone);
+      const e164 = (d.length === 10) ? ('1' + d) : d;
+      if (e164.length < 10 || seen[e164]) return;
+      seen[e164] = true;
+      nums.push(e164);
+    });
+    if (!nums.length) {
+      alert('No phones on the roster yet.');
+      return;
+    }
+    const body = encodeURIComponent(message || 'Sons of Thunder — ');
+    const list = nums.join(',');
+    try { navigator.clipboard && navigator.clipboard.writeText(nums.join('\n')); } catch (e) {}
+    const ios = typeof isIos === 'function' && isIos();
+    window.location.href = ios
+      ? ('sms:/open?addresses=' + list + '&body=' + body)
+      : ('sms:' + list + '?body=' + body);
+  }
+
+  async function loadFounderRoom() {
+    const el = document.getElementById('room-stats');
+    if (!el) return;
+    el.innerHTML = 'Loading the room…';
+    try {
+      const sb = getSb && getSb();
+      let accessToken = '';
+      if (sb && sb.auth && sb.auth.getSession) {
+        const { data } = await sb.auth.getSession();
+        accessToken = (data && data.session && data.session.access_token) || '';
+      }
+      if (!accessToken) {
+        el.textContent = 'Sign in on Brothers (leader account).';
+        return;
+      }
+      const res = await fetch('/.netlify/functions/leader-room', {
+        method: 'GET',
+        headers: { Authorization: 'Bearer ' + accessToken }
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        el.textContent = data.error || 'Couldn’t load the room.';
+        return;
+      }
+      const bday = (data.birthdays || []).map(function (b) {
+        return esc(b.name) + ' · ' + esc(b.birthday);
+      }).join('<br>');
+      function when(iso) {
+        if (!iso) return '';
+        try {
+          return new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+        } catch (e) { return ''; }
+      }
+      window.__tbRoomPeople = data.people || [];
+      const people = (data.people || []).map(function (p) {
+        const bits = [];
+        if (p.in) bits.push('LOCKED IN' + (p.inAt ? ' · ' + when(p.inAt) : ''));
+        else bits.push('Not in');
+        if (p.showed) bits.push('SHOWED');
+        if (p.phone) bits.push('phone');
+        if (p.birthday) bits.push(p.birthday);
+        if (p.updatedAt && !p.in) bits.push(when(p.updatedAt));
+        return '<div class="room-person' + (p.in ? ' is-in' : '') + (p.showed ? ' is-showed' : '') + '" data-bid="' + esc(p.id) + '">' +
+          '<div class="room-person-name">' + esc(p.name) + '</div>' +
+          '<div class="room-person-meta">' + esc(bits.join(' · ')) + '</div>' +
+          (p.in && !p.showed ? '<button type="button" class="room-showed" data-showed="' + esc(p.id) + '">SHOWED UP</button>' : '') +
+          '</div>';
+      }).join('');
+      const mems = (data.memories || []).map(function (m) {
+        return '<div class="room-mem">' + esc(m.name) + (m.at ? ' · ' + when(m.at) : '') +
+          (m.caption ? ' — ' + esc(m.caption) : '') + '</div>';
+      }).join('');
+      el.innerHTML =
+        '<div class="room-grid">' +
+          '<div class="room-stat"><b>' + (data.lockedIn || 0) + '</b><span>LOCKED IN</span></div>' +
+          '<div class="room-stat"><b>' + (data.roster || 0) + '</b><span>ROSTER</span></div>' +
+          '<div class="room-stat"><b>' + (data.alerts || 0) + '</b><span>ALERTS ON</span></div>' +
+          '<div class="room-stat"><b>' + (data.phones || 0) + '</b><span>PHONES</span></div>' +
+        '</div>' +
+        '<p class="room-origin">' + esc(publicOrigin().replace(/^https?:\/\//, '')) + (data.meeting_key ? ' · ' + esc(data.meeting_key) : '') + '</p>' +
+        (people ? '<div class="room-list">' + people + '</div>' : '<p class="room-in">Nobody on the roster yet.</p>') +
+        (bday ? '<p class="room-bday"><span class="card-label">BIRTHDAYS</span><br>' + bday + '</p>' : '') +
+        (mems ? '<p class="room-bday"><span class="card-label">MEMORIES</span></p><div class="room-mems">' + mems + '</div>' : '');
+      el.querySelectorAll('[data-showed]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          const id = btn.getAttribute('data-showed');
+          if (id) markShowedUp(id, btn);
+        });
+      });
+    } catch (e) {
+      el.textContent = 'Couldn’t load the room.';
+    }
+  }
+
+  async function markShowedUp(brotherId, btn) {
+    if (!supabaseEnabled() || !isSignedIn() || !brotherId) return;
+    try {
+      const sb = getSb();
+      const { error } = await sb.from('rsvps').update({
+        showed_up: true,
+        showed_at: new Date().toISOString()
+      }).eq('brother_id', brotherId).eq('meeting_key', meetingKey());
+      if (error) throw error;
+      if (btn) {
+        btn.textContent = 'SHOWED';
+        btn.disabled = true;
+      }
+      try { loadFounderRoom(); } catch (e) {}
+    } catch (e) {
+      alert('Could not mark showed up.');
+    }
+  }
+
+  function utilizeImInBackground() {
+    try { save('rsvpMeeting', meetingKey()); } catch (e) {}
+    try { save('lastImInAt', Date.now()); } catch (e) {}
+    try { lockInAppReminder(); } catch (e) {}
+    try { captureImInSignal(); } catch (e) {}
+    try {
+      if (!isSignedIn()) save('pendingRsvp', { on: true, key: meetingKey(), at: Date.now() });
+    } catch (e) {}
+    try {
+      if (navigator.storage && navigator.storage.persist) {
+        navigator.storage.persist().then(function (ok) {
+          try {
+            const s = load('lastImInSignal') || {};
+            s.persist = !!ok;
+            save('lastImInSignal', s);
+          } catch (e) {}
+        }).catch(function () {});
+      }
+    } catch (e) {}
+    try {
+      if (navigator.clearAppBadge) navigator.clearAppBadge();
+    } catch (e) {}
+    try { updateOsBadge(); } catch (e) {}
+    try {
+      if (navigator.serviceWorker && navigator.serviceWorker.ready) navigator.serviceWorker.ready.catch(function () {});
+    } catch (e) {}
+    try { fetch('/.netlify/functions/gathering-ics', { cache: 'reload' }).catch(function () {}); } catch (e) {}
+    try { if (typeof pullRsvps === 'function') pullRsvps(); } catch (e) {}
+    try { if (typeof pullAnnouncements === 'function') pullAnnouncements(); } catch (e) {}
+    try { if (typeof syncSelfToRoster === 'function') syncSelfToRoster(true); } catch (e) {}
+  }
+
+  async function flushPendingRsvp() {
+    try {
+      const p = load('pendingRsvp');
+      if (!p || !p.on) return;
+      if (!supabaseEnabled() || !isSignedIn()) return;
+      const ok = await pushRsvp(true);
+      if (ok) save('pendingRsvp', null);
+    } catch (e) {}
+  }
+
+  async function pushRsvp(inFlag) {
+    if (!supabaseEnabled() || !isSignedIn()) return false;
+    const id = myProfileId || (currentUser() && currentUser().id);
+    if (!id) return false;
+    const sb = getSb();
+    if (!sb) return false;
+    const key = meetingKey();
+    try {
+      if (inFlag) {
+        const now = new Date().toISOString();
+        const { data: existing, error: lookErr } = await sb
+          .from('rsvps')
+          .select('brother_id')
+          .eq('brother_id', id)
+          .eq('meeting_key', key)
+          .maybeSingle();
+        if (lookErr) { console.warn('rsvps lookup', lookErr); return false; }
+        let error = null;
+        if (existing) {
+          const res = await sb.from('rsvps').update({ in_at: now }).eq('brother_id', id).eq('meeting_key', key);
+          error = res.error;
+        } else {
+          const res = await sb.from('rsvps').insert({ brother_id: id, meeting_key: key, in_at: now });
+          error = res.error;
+        }
+        if (error) { console.warn('rsvps push', error); return false; }
+      } else {
+        const { error } = await sb.from('rsvps').delete().eq('brother_id', id).eq('meeting_key', key);
+        if (error) { console.warn('rsvps delete', error); return false; }
+      }
+      await pullRsvps();
+      return true;
+    } catch (e) {
+      console.warn('rsvps push failed', e);
+      return false;
+    }
+  }
+
+  function lockedFirstNames() {
+    const names = [];
+    const seen = {};
+    (sharedRsvps || []).forEach(function (r) {
+      const f = firstNameForId(r && r.brother_id);
+      if (!f) return;
+      const key = f.toUpperCase();
+      if (seen[key]) return;
+      seen[key] = true;
+      names.push(key);
+    });
+    return names;
+  }
+
+  function renderInCount() {
+    const el = document.getElementById('in-count');
+    if (!el) return;
+    if (roomCut()) { el.classList.add('hidden'); return; }
+    const n = (sharedRsvps || []).length;
+    if (n < 1) {
+      el.classList.add('hidden');
+      return;
+    }
+    let days = null;
+    try { days = daysUntil(getNextMeetingMonday()); } catch (e) {}
+    const head = n === 1 ? '1 LOCKED IN' : (n + ' LOCKED IN');
+    let clock = '';
+    if (days === 0) clock = 'TONIGHT';
+    else if (days === 1) clock = 'TOMORROW';
+    else if (days > 1) clock = days + ' DAYS';
+    const names = lockedFirstNames();
+    let nameLine = '';
+    if (names.length) {
+      const show = names.slice(0, 4);
+      nameLine = show.join(' · ');
+      if (names.length > 4) nameLine += ' · +' + (names.length - 4);
+    }
+    const numEl = document.getElementById('in-count-num');
+    const namesEl = document.getElementById('in-count-names');
+    if (numEl) numEl.textContent = clock ? (clock + '  ·  ' + head) : head;
+    else el.textContent = head;
+    if (namesEl) {
+      namesEl.textContent = nameLine;
+      namesEl.classList.toggle('hidden', !nameLine);
+    }
+    el.classList.remove('hidden');
   }
 
   function myInitials() {
@@ -3608,6 +5791,10 @@
 
   function renderRsvp() {
     try { updatePersonalHome(); } catch (e) {}
+    try { updateOsBadge(); } catch (e) {}
+    try { parkFabByImin(); } catch (e) {}
+    try { renderInCount(); } catch (e) {}
+    try { renderHere(); } catch (e) {}
     const btn = $('#rsvp-btn');
     const status = $('#rsvp-status');
     const prompt = $('#rsvp-prompt');
@@ -3621,15 +5808,9 @@
       try { syncSelfToRoster(true); } catch (e) {}
       const calLocked = !!load('reminderSet');
       btn.classList.add('confirmed');
-      /* YOU'RE LOCKED IN only after successful calendar handoff */
-      btn.textContent = calLocked ? "YOU'RE LOCKED IN" : "I'M IN ✓";
+      btn.textContent = "YOU'RE LOCKED IN";
       if (status) {
-        let meta = calLocked ? 'On this phone' : 'Add to calendar to finish lock-in';
-        try {
-          const next = getNextMeetingMonday();
-          if (calLocked) meta = formatMeetingDate(next) + ' · ' + meetingTime() + ' · ' + venueName();
-          else meta = 'Next: ' + formatMeetingDate(next) + ' · Add to calendar';
-        } catch (e) {}
+        let meta = calLocked ? 'Reminder on · On this phone' : 'On this phone';
         status.textContent = meta;
         status.classList.remove('hidden');
       }
@@ -3649,30 +5830,72 @@
       const meetCardOff = document.querySelector('.next-meeting');
       if (meetCardOff) meetCardOff.classList.remove('commit-energized');
       if (prompt) {
-        prompt.textContent = "Your seat is open. Lock it in.";
+        const nIn = (sharedRsvps || []).length;
+        prompt.textContent = nIn >= 1
+          ? (nIn === 1 ? '1 already in. Your seat is open.' : (nIn + ' already in. Your seat is open.'))
+          : "Your seat is open. Lock it in.";
         prompt.classList.remove('hidden');
       }
     }
   }
 
+  function nightShots(key) {
+    const k = key || meetingKey();
+    return (media || []).filter(function (m) {
+      if (!m || m.type === 'video') return false;
+      return String(m.meeting_key || '') === String(k);
+    }).slice(0, 8);
+  }
+
   function renderLastFire() {
     const el = $('#last-fire');
     if (!el) return;
-    const media = $('#last-fire-media');
+    const mediaEl = $('#last-fire-media');
     const cap = $('#last-fire-cap');
+    const label = document.getElementById('last-fire-label');
+    const night = isGatheringDay();
+    const shots = nightShots(meetingKey());
+    let prevKey = '';
+    if (!night && !(shots && shots.length)) {
+      const keys = [];
+      (media || []).forEach(function (m) {
+        if (m && m.meeting_key && keys.indexOf(m.meeting_key) === -1) keys.push(m.meeting_key);
+      });
+      keys.sort();
+      prevKey = keys.filter(function (k) { return k < meetingKey(); }).pop() || '';
+    }
+    const roll = (shots && shots.length) ? shots : nightShots(prevKey);
+    if (label) label.textContent = night ? 'TONIGHT' : 'LAST FIRE';
+    if (night && (!roll || !roll.length)) {
+      if (mediaEl) mediaEl.innerHTML = '';
+      if (cap) cap.textContent = iShowedUp() ? "Drop a pic. That's tonight." : 'Check in. Then drop a pic.';
+      el.classList.remove('hidden');
+      updateAllNewBadges();
+      return;
+    }
+    if (roll && roll.length) {
+      if (mediaEl) {
+        mediaEl.innerHTML = roll.map(function (m) {
+          return '<img src="' + esc(m.data) + '" alt="">';
+        }).join('');
+      }
+      if (cap) cap.textContent = night ? (roll.length + ' from the patio') : 'Last Monday.';
+      el.classList.remove('hidden');
+      updateAllNewBadges();
+      return;
+    }
     const hasCap = lastFire && String(lastFire.caption || '').trim();
     const hasPhoto = lastFire && lastFire.photo;
     if (!hasCap && !hasPhoto) {
       el.classList.add('hidden');
-      if (media) media.innerHTML = '';
+      if (mediaEl) mediaEl.innerHTML = '';
       if (cap) cap.textContent = '';
       updateAllNewBadges();
       return;
     }
-    if (media) {
-      media.innerHTML = hasPhoto ? `<img src="${esc(lastFire.photo)}" alt="">` : '';
-    }
+    if (mediaEl) mediaEl.innerHTML = hasPhoto ? '<img src="' + esc(lastFire.photo) + '" alt="">' : '';
     if (cap) cap.textContent = hasCap ? String(lastFire.caption).trim() : '';
+    if (label) label.textContent = 'LAST FIRE';
     el.classList.remove('hidden');
     updateAllNewBadges();
   }
@@ -3701,7 +5924,12 @@
   function showView(name, opts) {
     if (!TAB_ORDER.includes(name)) return;
     const fromSwipe = opts && opts.fromSwipe;
-    $$('.view').forEach(v => v.classList.remove('active', 'view-swipe-in', 'view-enter'));
+    $$('.view').forEach(function (v) {
+      v.classList.remove('active', 'view-swipe-in', 'view-enter', 'view-swipe-in-prev', 'view-swipe-in-next', 'elastic-dragging', 'elastic-settling');
+      v.style.transform = '';
+      v.style.opacity = '';
+      v.style.transition = '';
+    });
     $$('.nav-item').forEach(n => n.classList.remove('active'));
     const view = $(`#view-${name}`);
     const nav = $(`.nav-item[data-view="${name}"]`);
@@ -3709,8 +5937,11 @@
       view.classList.add('active');
       view.classList.remove('view-enter');
       if (fromSwipe) {
-        view.classList.add('view-swipe-in');
-        setTimeout(() => view.classList.remove('view-swipe-in'), 180);
+        const dir = (opts && opts.swipeDir) || 'next';
+        view.classList.add(dir === 'prev' ? 'view-swipe-in-prev' : 'view-swipe-in-next');
+        setTimeout(() => {
+          view.classList.remove('view-swipe-in-prev', 'view-swipe-in-next', 'view-swipe-in');
+        }, 240);
       } else if (!(opts && opts.silent) && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
         // Level 4: one-shot arrive on tab tap — not on swipe, not on silent
         void view.offsetWidth;
@@ -3720,22 +5951,38 @@
     }
     if (nav) {
       nav.classList.add('active');
+      $$('.nav-item').forEach(n => n.classList.remove('nav-peek'));
       if (typeof tbGlowHit === 'function') tbGlowHit(nav, 'yellow');
     }
     currentViewName = name;
+    try {
+      document.body.classList.toggle('tb-view-about', name === 'about');
+    } catch (e) {}
+    try {
+      const app = document.getElementById('app');
+      if (app) {
+        app.classList.remove('tb-underlay-depth');
+        app.style.removeProperty('--tb-depth');
+      }
+    } catch (e) {}
     const header = $('#main-header');
-    if (header) header.style.display = name === 'about' ? 'none' : 'block';
+    if (header) {
+      header.style.display = 'block';
+      header.style.visibility = 'visible';
+      header.style.opacity = '1';
+      header.removeAttribute('hidden');
+    }
     // NEW no longer auto-clears on Home visit — only when items are opened
     if (name === 'brothers') {
       // Roster NEW clears when the brothers tab is opened
       markBrothersSeen();
     }
+    try { parkFabByImin(); } catch (e) {}
   }
 
   function isOverlayBlockingSwipe() {
     if ($('#memory-viewer') && !$('#memory-viewer').classList.contains('hidden')) return true;
     if ($('#auth-gate') && !$('#auth-gate').classList.contains('hidden')) return true;
-    if ($('#tb-tour') && !$('#tb-tour').classList.contains('hidden')) return true;
     if ($('#ios-install-overlay') && !$('#ios-install-overlay').classList.contains('hidden')) return true;
     if ($('#inapp-install-overlay') && !$('#inapp-install-overlay').classList.contains('hidden')) return true;
     const openModal = document.querySelector('.modal:not(.hidden)');
@@ -3750,36 +5997,38 @@
     if (target.closest('#auth-gate')) return true;
     if (target.closest('.modal')) return true;
     if (target.closest('#thunder-fab, .thunder-panel, .thunder-chat')) return true;
-    if (target.closest('button, a, input, textarea, select, label, video')) return true;
+    if (target.closest('input, textarea, select, video')) return true;
     return false;
   }
 
   function setupTabSwipe() {
-    const root = $('#app') || document.body;
-    if (!root || root.dataset.tabSwipeBound === '1') return;
-    root.dataset.tabSwipeBound = '1';
-
-    function activeViewEl() {
-      return document.querySelector('.view.active') || $('#views') || root;
-    }
-
-    bindElasticSwipe(root, {
-      getEl: activeViewEl,
-      canPrev: () => TAB_ORDER.indexOf(currentViewName) > 0,
-      canNext: () => {
-        const i = TAB_ORDER.indexOf(currentViewName);
-        return i >= 0 && i < TAB_ORDER.length - 1;
-      },
-      onPrev: () => {
-        const i = TAB_ORDER.indexOf(currentViewName);
-        if (i > 0) showView(TAB_ORDER[i - 1], { fromSwipe: true });
-      },
-      onNext: () => {
-        const i = TAB_ORDER.indexOf(currentViewName);
-        if (i >= 0 && i < TAB_ORDER.length - 1) showView(TAB_ORDER[i + 1], { fromSwipe: true });
-      },
-      blocked: (t) => isOverlayBlockingSwipe() || swipeStartBlocked(t)
-    });
+    const root = $('#views') || document.body;
+    if (!root || root.dataset.tabSwipeFlick === '1') return;
+    root.dataset.tabSwipeFlick = '1';
+    let sx = 0, sy = 0, tracking = false;
+    root.addEventListener('touchstart', function (e) {
+      if (!e.touches || e.touches.length !== 1) { tracking = false; return; }
+      if (swipeStartBlocked(e.target)) { tracking = false; return; }
+      tracking = true;
+      sx = e.touches[0].clientX;
+      sy = e.touches[0].clientY;
+    }, { passive: true });
+    root.addEventListener('touchend', function (e) {
+      if (!tracking) return;
+      tracking = false;
+      const t = e.changedTouches && e.changedTouches[0];
+      if (!t) return;
+      const dx = t.clientX - sx;
+      const dy = t.clientY - sy;
+      if (Math.abs(dx) < 72) return;
+      if (Math.abs(dx) < Math.abs(dy) * 1.6) return;
+      const i = TAB_ORDER.indexOf(currentViewName);
+      if (dx < 0 && i >= 0 && i < TAB_ORDER.length - 1) {
+        showView(TAB_ORDER[i + 1], { fromSwipe: true, swipeDir: 'next' });
+      } else if (dx > 0 && i > 0) {
+        showView(TAB_ORDER[i - 1], { fromSwipe: true, swipeDir: 'prev' });
+      }
+    }, { passive: true });
   }
 
   // ---------- MODALS ----------
@@ -3796,11 +6045,19 @@
 
   /** Unlock body scroll only when no overlay still claims it */
   function anyOverlayOpen() {
+    const ids = [
+      'brother-detail', 'info-detail', 'memory-viewer', 'auth-gate', 'contact-swap',
+      'tb-tour', 'raffle-live', 'cal-confirm-sheet', 'imin-a2hs-sheet',
+      'ios-install-overlay', 'inapp-install-overlay', 'axum-drop', 'axum-card',
+      'install-modal', 'thunder-modal', 'contact-qr-modal', 'profile-modal',
+      'media-modal', 'qr-explainer-modal'
+    ];
+    for (let i = 0; i < ids.length; i++) {
+      const el = document.getElementById(ids[i]);
+      if (el && !el.classList.contains('hidden')) return true;
+    }
     if (document.querySelector('.modal:not(.hidden)')) return true;
-    if ($('#brother-detail') && !$('#brother-detail').classList.contains('hidden')) return true;
-    if ($('#info-detail') && !$('#info-detail').classList.contains('hidden')) return true;
-    if ($('#memory-viewer') && !$('#memory-viewer').classList.contains('hidden')) return true;
-    if ($('#auth-gate') && !$('#auth-gate').classList.contains('hidden')) return true;
+    if (document.body.classList.contains('tb-tour-open')) return true;
     return false;
   }
   function unlockBodyIfClear() {
@@ -3898,6 +6155,9 @@
     if (!el) return;
     releaseFocusAndZoom();
     el.classList.add('hidden');
+    if (id === 'thunder-modal') {
+      try { document.body.classList.remove('tb-ask-open'); } catch (e) {}
+    }
     unlockBodyIfClear();
     if (id === 'install-modal') {
       stopInstallExplainer($('#install-gif'));
@@ -4246,7 +6506,13 @@
   // ---------- EVENTS ----------
   function bindEvents() {
     $$('.nav-item').forEach(btn => {
-      btn.addEventListener('click', () => showView(btn.dataset.view));
+      if (btn.dataset.navBound === '1') return;
+      btn.dataset.navBound = '1';
+      const go = function (e) {
+        if (e) { e.preventDefault(); e.stopPropagation(); }
+        showView(btn.dataset.view);
+      };
+      btn.addEventListener('click', go);
     });
     setupTabSwipe();
 
@@ -4259,6 +6525,17 @@
       }
       const wasIn = !!rsvp;
       const turningOn = !wasIn;
+
+      /* I'm In = consent. Same tap as the OS alert prompt. No extra screen. */
+      if (turningOn) {
+        try {
+          requestNotifyPermission().then(function (perm) {
+            if (perm === 'granted') {
+              try { checkAndFireMeetingNotifications(); } catch (e) {}
+            }
+          });
+        } catch (e) {}
+      }
 
       // Contact haptic only (no tb-press class on RSVP — that transform:!important
       // fights commit-strike). Use selection pulse + optional confirm later.
@@ -4278,13 +6555,19 @@
       if (!ok) {
         rsvp = wasIn;
         if (btn) {
-          btn.classList.remove('confirmed', 'is-locking', 'commit-strike');
+          btn.classList.remove('confirmed', 'is-locking', 'commit-strike', 'imin-strike', 'imin-afterglow');
           btn.textContent = "I'M IN";
           btn.dataset.busy = '0';
         }
         try { tbFeedback.warningOrError(btn); } catch (e) {}
         alert("We couldn’t lock that in. Try again.");
         return;
+      }
+      try { pushRsvp(!!rsvp); } catch (e) {}
+      if (rsvp) {
+        quietPushSubscribe()
+          .then(function () { return notifyImInBroadcast(); })
+          .catch(function () {});
       }
 
       if (!rsvp) {
@@ -4300,8 +6583,7 @@
         return;
       }
 
-      // Success path: ThunderFX.lockedIn → settle → calendar handoff
-      renderRsvp();
+      // Success path: strike on red → yellow vault → then the next sheet
       const meetCard = document.querySelector('.next-meeting');
       try {
         if (window.ThunderFX) ThunderFX.lockedIn(btn, meetCard);
@@ -4311,27 +6593,30 @@
       } catch (e) {
         try { tbFeedback.confirm(); } catch (e2) {}
       }
+      setTimeout(function () {
+        try { renderRsvp(); } catch (e) {}
+        if (btn) {
+          try { btn.classList.add('imin-afterglow'); } catch (e) {}
+        }
+      }, prefersReducedMotion() ? 0 : 420);
       if (btn) {
         setTimeout(() => {
           try {
-            btn.classList.remove('is-locking');
+            btn.classList.remove('is-locking', 'imin-strike');
             btn.dataset.busy = '0';
           } catch (e) {}
         }, 900);
       }
 
-      // Calendar handoff on same gesture — native/OS Save required (no silent insert)
-      // Strip intermediate confirm sheet: go straight to calendar so brother hits Save.
-      try {
-        launchGatheringCalendar();
-      } catch (e) {
-        try { openCalConfirmSheet(); } catch (e2) {}
-      }
-
-      if (typeof requestNotifyPermission === 'function') {
-        requestNotifyPermission().then((perm) => {
-          if (perm === 'granted') checkAndFireMeetingNotifications();
-        });
+      try { utilizeImInBackground(); } catch (e) {}
+      try { honorFirst('imin'); } catch (e) {}
+      if (!isSignedIn() && supabaseEnabled()) {
+        window.__tbA2hsAfterAuth = true;
+        setTimeout(function () {
+          try { openImInSignIn(); } catch (e) {}
+        }, prefersReducedMotion() ? 400 : 1650);
+      } else {
+        setTimeout(function () { try { maybeOfferImInA2hs(); } catch (e) {} }, prefersReducedMotion() ? 500 : 1650);
       }
     });
 
@@ -4340,20 +6625,43 @@
       const add = document.getElementById('cal-confirm-add');
       const later = document.getElementById('cal-confirm-later');
       const sheet = document.getElementById('cal-confirm-sheet');
+      const x = document.getElementById('cal-confirm-close');
+      const native = document.getElementById('cal-confirm-native');
+      if (native && !native.dataset.tbBound) {
+        native.dataset.tbBound = '1';
+        native.addEventListener('click', () => {
+          try { lockInAppReminder(); } catch (e) {}
+          try { addToNativeCalendar(); } catch (e) {}
+        });
+      }
+      const a2hsCal = document.getElementById('cal-confirm-a2hs');
+      if (a2hsCal && !a2hsCal.dataset.tbBound) {
+        a2hsCal.dataset.tbBound = '1';
+        a2hsCal.addEventListener('click', () => {
+          try { closeCalConfirmSheet(); } catch (e) {}
+          try { launchAddToHomeScreen(); } catch (e) {}
+        });
+      }
       if (add && !add.dataset.tbBound) {
         add.dataset.tbBound = '1';
         add.addEventListener('click', () => {
-          try { launchGatheringCalendar(); } catch (e) {}
-          try { save('reminderSet', true); } catch (e) {}
+          try { lockInAppReminder(); } catch (e) {}
           try { renderRsvp(); } catch (e) {}
           const rb = document.getElementById('reminder-btn');
-          if (rb) { rb.classList.add('set'); rb.textContent = 'ON CALENDAR'; }
+          if (rb) { rb.classList.add('set'); rb.textContent = 'REMINDER ON'; }
           closeCalConfirmSheet();
+          try {
+            if (!isStandalonePwa()) showHomeA2hs();
+          } catch (e) {}
         });
       }
       if (later && !later.dataset.tbBound) {
         later.dataset.tbBound = '1';
         later.addEventListener('click', () => closeCalConfirmSheet());
+      }
+      if (x && !x.dataset.tbBound) {
+        x.dataset.tbBound = '1';
+        x.addEventListener('click', () => closeCalConfirmSheet());
       }
       if (sheet && !sheet.dataset.tbBound) {
         sheet.dataset.tbBound = '1';
@@ -4391,18 +6699,20 @@
     }
 
 $('#edit-profile-btn').addEventListener('click', () => {
-      openProfileEditor();
+      if (typeof tbGlowHit === 'function') tbGlowHit($('#edit-profile-btn'), 'yellow');
+      if (!isSignedIn()) startMemberSignIn();
+      else openProfileEditor();
     });
     $('#upload-media-btn').addEventListener('click', () => {
       if (supabaseEnabled() && !isSignedIn()) {
-        openAuthGate('Sign in to add a memory the whole brotherhood can see.');
+        startMemberSignIn();
         return;
       }
       if (!supabaseEnabled()) {
         alert('Shared memories are not configured yet. Add Supabase URL and anon key.');
         return;
       }
-      openModal('media-modal');
+      openDropShot();
     });
 
     $$('[data-close]').forEach(btn => {
@@ -4413,6 +6723,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
     bindMemoryViewer();
     bindInfoDetail();
     bindSwipeCloseAllWindows();
+    try { bindContactSwap(); } catch (e) {}
 
     // Profile photo
     $('#profile-photo').addEventListener('change', (e) => {
@@ -4424,6 +6735,10 @@ $('#edit-profile-btn').addEventListener('click', () => {
         const preview = $('#photo-preview');
         preview.innerHTML = `<img src="${esc(pendingPhotoData)}">`;
         preview.classList.add('visible');
+
+
+
+        
       };
       reader.readAsDataURL(file);
     });
@@ -4437,11 +6752,17 @@ $('#edit-profile-btn').addEventListener('click', () => {
       if (!name) { try { tbFeedback.warningOrError($('#profile-name') || $('#save-profile')); } catch (e) {} return alert('Name required'); }
       const id = ensureBrotherId();
       const existing = brothers.findIndex(b => b.id === id);
+
+
+      const rawBday = ($('#profile-birthday') && $('#profile-birthday').value) || '';
+      const birthday = normalizeBirthday(rawBday);
+      
       let entry = {
         id,
         name,
         bio,
         phone,
+        birthday: birthday || null,
         photo: pendingPhotoData || (existing >= 0 ? brothers[existing].photo : null),
         skills: '',
         available: true,
@@ -4477,6 +6798,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
           save('brothersSeenAt', brothersSeenAt);
         }
         updateMyQrButtonVisibility();
+        try { syncBrothersSeatBtn(); } catch (e) {}
         renderBrothers();
         closeModal('profile-modal');
         pendingPhotoData = null;
@@ -4496,15 +6818,8 @@ $('#edit-profile-btn').addEventListener('click', () => {
           }, 300);
         } else if (entry._sharedPush === 'sign_in_required') {
           setTimeout(() => {
-            try {
-              const t = document.getElementById('install-toast');
-              if (t) {
-                t.textContent = 'Sign in to share your profile with the roster.';
-                t.classList.remove('hidden');
-                setTimeout(() => t.classList.add('hidden'), 3200);
-              }
-            } catch (e) {}
-          }, 300);
+            try { startMemberSignIn(); } catch (e) {}
+          }, 400);
         } else if (entry._sharedPush && entry._sharedPush !== 'ok') {
           setTimeout(() => {
             try {
@@ -4536,6 +6851,33 @@ $('#edit-profile-btn').addEventListener('click', () => {
     });
 
     // Media — shared Supabase when configured; requires signed-in session
+    const camInput = $('#media-file-cam');
+    if (camInput && camInput.dataset.tbBound !== '1') {
+      camInput.dataset.tbBound = '1';
+      camInput.addEventListener('change', function () {
+        const src = camInput.files && camInput.files[0];
+        if (src) ingestMemoryFile(src);
+        try { camInput.value = ''; } catch (e) {}
+      });
+    }
+    const liveCam = document.getElementById('memory-cam');
+    if (liveCam && liveCam.dataset.tbBound !== '1') {
+      liveCam.dataset.tbBound = '1';
+      liveCam.addEventListener('change', function () {
+        const src = liveCam.files && liveCam.files[0];
+        if (src) ingestMemoryFile(src);
+        try { liveCam.value = ''; } catch (e) {}
+      });
+    }
+    const liveLib = document.getElementById('memory-lib');
+    if (liveLib && liveLib.dataset.tbBound !== '1') {
+      liveLib.dataset.tbBound = '1';
+      liveLib.addEventListener('change', function () {
+        const src = liveLib.files && liveLib.files[0];
+        if (src) ingestMemoryFile(src);
+        try { liveLib.value = ''; } catch (e) {}
+      });
+    }
     $('#save-media').addEventListener('click', () => {
       try { tbFeedback.press($('#save-media')); } catch (e) {}
       const file = $('#media-file').files[0];
@@ -4543,7 +6885,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
 
       if (supabaseEnabled() && !isSignedIn()) {
         closeModal('media-modal');
-        openAuthGate('Sign in to add a memory the whole brotherhood can see.');
+        startMemberSignIn();
         return;
       }
 
@@ -4557,132 +6899,112 @@ $('#edit-profile-btn').addEventListener('click', () => {
 
       const isVideo = file.type.startsWith('video');
       const btn = $('#save-media');
-      if (btn) { btn.disabled = true; btn.textContent = 'Uploading…'; }
+      if (btn) { btn.disabled = true; btn.textContent = isVideo ? 'Uploading…' : 'Polishing…'; }
 
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const raw = ev.target.result;
-
-        const finish = async (dataUrl) => {
-          let payload = dataUrl;
-          try {
-            if (!isVideo && String(dataUrl).startsWith('data:image')) {
-              payload = await compressImageDataUrl(dataUrl, 1200, 0.72);
-            }
-          } catch (ce) {
-            if (btn) { btn.disabled = false; btn.textContent = 'Add to Memories'; }
-            return alert('Could not process that photo. Try another.');
+      const item = {
+        blob: file,
+        filename: file.name,
+        type: isVideo ? 'video' : 'image',
+        caption: ($('#media-caption').value || '').trim(),
+        date: new Date().toISOString(),
+        uploader_name: myDisplayName() || ''
+      };
+      (async function () {
+        try {
+          if (!supabaseEnabled()) {
+            throw new Error('Shared memories are not configured on this app yet.');
           }
-          const item = {
-            data: payload,
-            blob: dataUrlToBlob(payload),
-            filename: file.name,
-            type: isVideo ? 'video' : 'image',
-            caption: ($('#media-caption').value || '').trim(),
-            date: new Date().toISOString(),
-            uploader_name: myDisplayName() || ''
-          };
-          try {
-            if (!supabaseEnabled()) {
-              throw new Error('Shared memories are not configured on this app yet.');
-            }
-            const saved = await pushMemory(item);
-            media.unshift(saved);
-            renderMedia();
-            renderLastFire();
-            closeModal('media-modal');
-            $('#media-file').value = '';
-            $('#media-caption').value = '';
-            rewardSaveSuccess('memory');
-          } catch (err) {
-            console.error(err);
-            alert('Could not save memory. ' + (err.message || 'Try again.'));
-          } finally {
-            if (btn) { btn.disabled = false; btn.textContent = 'Add to Memories'; }
-          }
-        };
-
-        if (!isVideo && raw.startsWith('data:image')) {
-          const img = new Image();
-          img.onload = () => {
-            const maxW = 1200;
-            let w = img.width, h = img.height;
-            if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
-            const canvas = document.createElement('canvas');
-            canvas.width = w; canvas.height = h;
-            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-            finish(canvas.toDataURL('image/jpeg', 0.72));
-          };
-          img.onerror = () => finish(raw);
-          img.src = raw;
-        } else {
-          finish(raw);
+          const saved = await pushMemory(item);
+          media.unshift(saved);
+          renderMedia();
+          renderLastFire();
+          closeModal('media-modal');
+          $('#media-file').value = '';
+          $('#media-caption').value = '';
+          rewardSaveSuccess('memory');
+        } catch (err) {
+          console.error(err);
+          alert('Could not save memory. ' + (err.message || 'Try again.'));
+        } finally {
+          if (btn) { btn.disabled = false; btn.textContent = 'Add to Memories'; }
         }
-      };
-      reader.onerror = () => {
-        if (btn) { btn.disabled = false; btn.textContent = 'Add to Memories'; }
-        alert('Could not read that file.');
-      };
-      reader.readAsDataURL(file);
+      })();
     });
 
     // Auth gate actions
     const authEntryBtn = $('#auth-entry-btn');
-    if (authEntryBtn) {
-      authEntryBtn.addEventListener('click', () => {
-        openAuthGate('Sign in for shared roster and memories. Everything else works without an account.');
-      });
+    if (authEntryBtn && authEntryBtn.dataset.tbBound !== '1') {
+      authEntryBtn.dataset.tbBound = '1';
     }
     const authSignInBtn = $('#auth-signin-btn');
     const authSignUpBtn = $('#auth-signup-btn');
     const authForgotBtn = $('#auth-forgot-btn');
+    const authMagicBtn = $('#auth-magic-btn');
     const authCancelBtn = $('#auth-cancel-btn');
     const authSignOutBtn = $('#auth-signout-btn');
 
     if (authSignInBtn && authSignInBtn.dataset.bound !== '1') {
       authSignInBtn.dataset.bound = '1';
       authSignInBtn.addEventListener('click', async () => {
-        const email = ($('#auth-email') && $('#auth-email').value || '').trim();
-        const password = ($('#auth-password') && $('#auth-password').value || '');
-        if (!email || !password) return setAuthError('Email and password required.');
+        const seat = stashSeatFromGate();
+        const email = seat.email;
+        if (!seat.name || !email) return setAuthError('Name and email.');
         setAuthError('');
         authSignInBtn.disabled = true;
         try {
-          await authSignIn(email, password);
-          closeAuthGate();
-          await pullMemories();
-          renderMedia();
-          renderLastFire();
+          await authMagicLink(email);
+          setAuthError('Link sent.');
+          setTimeout(function () { try { closeAuthGate(); } catch (e2) {} }, 900);
         } catch (e) {
-          setAuthError((e && e.message) || 'Sign in failed.');
+          setAuthError((e && e.message) || 'Could not send the link.');
         } finally {
           authSignInBtn.disabled = false;
         }
       });
     }
+    const seatForm = document.getElementById('auth-seat-form');
+    if (seatForm && seatForm.dataset.bound !== '1') {
+      seatForm.dataset.bound = '1';
+      seatForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (authSignInBtn) authSignInBtn.click();
+      });
+    }
     if (authSignUpBtn && authSignUpBtn.dataset.bound !== '1') {
       authSignUpBtn.dataset.bound = '1';
       authSignUpBtn.addEventListener('click', async () => {
-        const email = ($('#auth-email') && $('#auth-email').value || '').trim();
-        const password = ($('#auth-password') && $('#auth-password').value || '');
-        if (!email || !password) return setAuthError('Email and password required.');
-        if (password.length < 6) return setAuthError('Password needs at least 6 characters.');
+        const seat = stashSeatFromGate();
+        const email = seat.email;
+        if (!seat.name || !email) return setAuthError('Name and email.');
         setAuthError('');
         authSignUpBtn.disabled = true;
         try {
-          const data = await authSignUp(email, password);
-          if (data && data.session) {
-            closeAuthGate();
-            await pullMemories();
-            renderMedia();
-            renderLastFire();
-          } else {
-            setAuthError('Account started. If nothing happens, check email — or ask leadership to turn off email confirm in Supabase Auth. Then Sign In.');
-          }
+          await authMagicLink(email);
+          setAuthError('Link sent.');
+          setTimeout(function () { try { closeAuthGate(); } catch (e2) {} }, 900);
         } catch (e) {
-          setAuthError((e && e.message) || 'Could not create account.');
+          setAuthError((e && e.message) || 'Could not send the link.');
         } finally {
           authSignUpBtn.disabled = false;
+        }
+      });
+    }
+    if (authMagicBtn && authMagicBtn.dataset.bound !== '1') {
+      authMagicBtn.dataset.bound = '1';
+      authMagicBtn.addEventListener('click', async () => {
+        const seat = stashSeatFromGate();
+        const email = seat.email;
+        if (!seat.name || !email) return setAuthError('Name and email.');
+        setAuthError('');
+        authMagicBtn.disabled = true;
+        try {
+          await authMagicLink(email);
+          setAuthError('Link sent.');
+          setTimeout(function () { try { closeAuthGate(); } catch (e2) {} }, 900);
+        } catch (e) {
+          setAuthError((e && e.message) || 'Could not send the link.');
+        } finally {
+          authMagicBtn.disabled = false;
         }
       });
     }
@@ -4702,13 +7024,28 @@ $('#edit-profile-btn').addEventListener('click', () => {
     }
     if (authCancelBtn && authCancelBtn.dataset.bound !== '1') {
       authCancelBtn.dataset.bound = '1';
-      authCancelBtn.addEventListener('click', () => closeAuthGate());
+      authCancelBtn.addEventListener('click', () => {
+        closeAuthGate();
+      });
     }
-    // Enter in password field = Sign In (fewer taps)
-    const authPw = $('#auth-password');
-    if (authPw && authPw.dataset.bound !== '1') {
-      authPw.dataset.bound = '1';
-      authPw.addEventListener('keydown', (e) => {
+    const authEmail = $('#auth-email');
+    const authPhone = $('#auth-phone');
+    const authName = $('#auth-name');
+    if (authName && authName.dataset.enterBound !== '1') {
+      authName.dataset.enterBound = '1';
+      authName.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && authSignInBtn) authSignInBtn.click();
+      });
+    }
+    if (authPhone && authPhone.dataset.enterBound !== '1') {
+      authPhone.dataset.enterBound = '1';
+      authPhone.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && authSignInBtn) authSignInBtn.click();
+      });
+    }
+    if (authEmail && authEmail.dataset.enterBound !== '1') {
+      authEmail.dataset.enterBound = '1';
+      authEmail.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && authSignInBtn) authSignInBtn.click();
       });
     }
@@ -4747,12 +7084,12 @@ $('#edit-profile-btn').addEventListener('click', () => {
         if (hint) hint.textContent = 'Voice not available on this browser — type your question';
       } else if (state === 'ready') {
         thunderListening = false;
-        if (label) label.textContent = 'TAP TO SPEAK';
-        if (hint) hint.textContent = 'Voice mode — speak your question';
+        if (label) label.textContent = 'ASK THUNDER';
+        if (hint) hint.textContent = 'Tap when you’re ready to speak';
       } else {
         thunderListening = false;
-        if (label) label.textContent = 'TAP TO SPEAK';
-        if (hint) hint.textContent = 'Voice mode — speak your question';
+        if (label) label.textContent = 'ASK THUNDER';
+        if (hint) hint.textContent = 'Tap when you’re ready to speak';
       }
     }
 
@@ -4823,11 +7160,8 @@ $('#edit-profile-btn').addEventListener('click', () => {
     function openThunderVoiceMode() {
       thunderVoiceMode = true;
       openModal('thunder-modal');
-      // Small delay so modal is visible before mic prompt
-      setTimeout(() => {
-        if (thunderSpeechSupported()) startThunderVoice();
-        else setThunderVoiceUI('unsupported');
-      }, 280);
+      try { document.body.classList.add('tb-ask-open'); } catch (e) {}
+      setThunderVoiceUI(thunderSpeechSupported() ? 'ready' : 'unsupported');
     }
 
 
@@ -4959,20 +7293,25 @@ $('#edit-profile-btn').addEventListener('click', () => {
         const modal = $('#thunder-modal');
         const alreadyOpen = modal && !modal.classList.contains('hidden');
         openModal('thunder-modal');
+        try { document.body.classList.add('tb-ask-open'); } catch (e) {}
         thunderVoiceMode = true;
-        // Do not stack a second recognition session if already listening
+        try {
+          const hero = document.querySelector('.thunder-ask-hero-img');
+          if (hero && !alreadyOpen) {
+            hero.classList.remove('tb-tux-in');
+            void hero.offsetWidth;
+            hero.classList.add('tb-tux-in');
+          }
+        } catch (e) {}
         if (alreadyOpen && thunderListening) return;
-        if (opts.voice !== false && isSupported()) {
+        // Never auto-listen. Brother taps ASK THUNDER to speak.
+        if (opts.voice === true && isSupported()) {
           setTimeout(() => {
             if (thunderListening) return;
             startThunderVoice();
           }, opts.delay != null ? opts.delay : 280);
         } else {
           setThunderVoiceUI(isSupported() ? 'ready' : 'unsupported');
-          setTimeout(() => {
-            const input = $('#thunder-input');
-            if (input) try { input.focus(); } catch (e) {}
-          }, 200);
         }
       }
 
@@ -5034,32 +7373,600 @@ $('#edit-profile-btn').addEventListener('click', () => {
     })();
     try { window.ThunderVoice = ThunderVoice; } catch (e) {}
 
-
-    // Thunder FAB — THUNDER WAKE then open (full once/session, soft after)
-    $('#thunder-fab').addEventListener('click', () => {
-      const fab = $('#thunder-fab');
-      const first = !window.__tbThunderWokeSession;
-      window.__tbThunderWokeSession = true;
-      try {
-        if (window.ThunderFX && ThunderFX.thunderWake) ThunderFX.thunderWake(fab, first ? 'full' : 'soft');
-        else {
-          try { tbFeedback.press(fab); } catch (e) {}
-          if (fab) {
-            fab.classList.remove('fab-hit');
-            void fab.offsetWidth;
-            fab.classList.add('fab-hit');
-            setTimeout(() => fab.classList.remove('fab-hit'), 480);
-          }
-        }
-      } catch (e) {}
-      try {
-        if (window.ThunderVoice) ThunderVoice.openAsk({ voice: true });
-        else openThunderVoiceMode();
-      } catch (e) {
-        openThunderVoiceMode();
+    let __fabBeatTimer = null;
+    let __fabMidTimer = null;
+    let __fabSigTimer = null;
+    let __fabHoldTimer = null;
+    let __fabOpenedAt = 0;
+    function fabJustOpened() {
+      return __fabOpenedAt && (Date.now() - __fabOpenedAt < 12000);
+    }
+    function fabWaitingLong() {
+      return !fabJustOpened() && (Date.now() - __fabQuietSince > 8000);
+    }
+    const FAB_DEFAULT = 'assets/thunder-cool-fab.png';
+    const FAB_FRAMES = {
+      watch: 'assets/thunder-idle-watch.png',
+      salute: 'assets/thunder-idle-salute.png',
+      bond: 'assets/thunder-idle-bond.png'
+    };
+    function fabImg() { return document.querySelector('#thunder-fab .thunder-fab-img'); }
+    window.__tbFabFrames = { watch: false, salute: false, bond: false };
+    function fabHasFrame(key) {
+      return !!(FAB_FRAMES[key] && window.__tbFabFrames && window.__tbFabFrames[key]);
+    }
+    let __fabFrameTimer = null;
+    function fabRestoreHead() {
+      const img = fabImg();
+      const fab = document.getElementById('thunder-fab');
+      if (!img) return;
+      img.setAttribute('src', FAB_DEFAULT + '?v=20260819-arms2');
+      img.setAttribute('srcset', 'assets/thunder-cool-fab.png?v=20260819-arms2 256w, assets/thunder-cool-fab@2x.png?v=20260819-arms2 512w');
+      img.classList.remove('tb-fab-act', 'tb-fab-inspect', 'tb-fab-look');
+      if (fab) fab.classList.remove('tb-fab-acting');
+    }
+    function fabPlayFrame(key, ms) {
+      const img = fabImg();
+      const fab = document.getElementById('thunder-fab');
+      if (!img || fabBusy()) return false;
+      const src = FAB_FRAMES[key];
+      if (!src || !fabHasFrame(key)) return false;
+      if (__fabFrameTimer) try { clearTimeout(__fabFrameTimer); } catch (e) {}
+      img.setAttribute('src', src + '?v=20260819-arms2');
+      img.removeAttribute('srcset');
+      if (fab) fab.classList.add('tb-fab-acting');
+      img.classList.add('tb-fab-act');
+      __fabFrameTimer = setTimeout(function () {
+        fabRestoreHead();
+        img.classList.add('tb-fab-alive');
+      }, ms || 1800);
+      return true;
+    }
+    function fabBusy() {
+      return document.body.classList.contains('tb-ask-open') || document.body.classList.contains('tb-tour-open');
+    }
+    function fabBaseline() {
+      const img = fabImg();
+      if (!img) return;
+      if (__fabFrameTimer) try { clearTimeout(__fabFrameTimer); } catch (e) {}
+      __fabFrameTimer = null;
+      img.style.setProperty('--fab-r', '0deg');
+      img.style.setProperty('--fab-s', '1');
+      img.style.setProperty('--fab-x', '0px');
+      img.style.setProperty('--fab-y', '0px');
+      fabRestoreHead();
+      img.classList.add('tb-fab-alive');
+    }
+    function fabInspect() {
+      const img = fabImg();
+      if (!img || fabBusy()) return false;
+      if (!fabPlayFrame('bond', 4500)) return false;
+      img.classList.add('tb-fab-inspect');
+      return true;
+    }
+    function stopThunderBackstageIdle() {
+      [__fabBeatTimer, __fabMidTimer, __fabSigTimer, __fabHoldTimer, __fabLineTimer].forEach(function (t) {
+        if (t) try { clearTimeout(t); } catch (e) {}
+      });
+      __fabBeatTimer = __fabMidTimer = __fabSigTimer = __fabHoldTimer = __fabLineTimer = null;
+      fabHideBubble();
+      fabStopMotion();
+      const img = fabImg();
+      if (img) img.classList.remove('tb-host-alive', 'tb-fab-alive', 'tb-fab-look');
+    }
+    let __fabLastMicro = '';
+    /* FAB_BUBBLES — 90-day refresh: THUNDER-DECISIONS.md “BUBBLE REFRESH”. Locked 10 stay. */
+    const FAB_ENCOURAGE = [
+      'Hey, brother—you’re doing better than you think.',
+      'Whatever today handed you, you’re strong enough to carry it.',
+      'Keep going. I’ve seen your kind—you don’t quit.',
+      'You’ve got this, brother. And your brothers have you.',
+      'Bad day? Maybe. Bad life? Not even close.',
+      'Just a reminder: you matter more than you realize.',
+      'Take a breath, reset, and bring the thunder.',
+      'Look at you—still showing up. That counts for something.',
+      'You don’t have to have it all figured out today.',
+      'Head up, brother. You were built for more than this moment.'
+    ];
+    const FEATURE_SELL = [
+      /* I'm In */
+      'Hit I’M IN. The room knows you’re coming.',
+      'Seat’s a rumor till you lock it.',
+      'I’M IN is the nod. One tap. Done.',
+      'Lock the seat. Forget it till Monday.',
+      'Your name on the patio starts with I’M IN.',
+      'Don’t ghost the count. Lock in.',
+      'Brothers watch that number climb. Be on it.',
+      'The reminder rides I’M IN. That’s the trick.',
+      'Open seat. Close it.',
+      'Monday doesn’t guess. I’M IN tells it.',
+      /* Calendar */
+      'I’M IN puts a 7-day tap on your phone.',
+      'Don’t trust your memory. Trust the lock.',
+      'Calendar stays in the app. You don’t leave.',
+      /* I'm Here / raffle */
+      'Patio night: I’M HERE. That’s the beer ticket.',
+      'Walk up. Check in. Pizza’s on. Hat’s in play.',
+      'Showed up? Prove it. I’M HERE.',
+      'Raffle’s for men who walked in. Not the maybe list.',
+      /* Memories / DROP A PIC */
+      'Drop a pic. That’s how Monday survives the week.',
+      'The night only lives if someone shoots it.',
+      'Camera. One frame. The boys keep it.',
+      'Memories isn’t homework. It’s the proof.',
+      'If it was worth laughing at, it’s on the roll.',
+      'Patio pics don’t live in your camera roll. Drop them.',
+      'Newest shot sits up top. Make it yours.',
+      'History doesn’t write itself. DROP A PIC.',
+      'One picture from tonight beats ten stories next month.',
+      'The room remembers what you drop. Not what you meant to.',
+      /* Brothers / round table */
+      'Brothers page. Round table. Your seat’s a face.',
+      'Names. Faces. A way to reach the man.',
+      'You’re not a roster number. Open Brothers.',
+      'Every man has a chair. That’s the round table.',
+      'Find a brother. Share the contact. That’s the app.',
+      'The storm has faces. They’re in Brothers.',
+      'Don’t be a name they can’t text. Fill the card.',
+      'Round table energy. No cheap seats.',
+      /* Text a leader */
+      'Rough week? Text a leader. It stays in the room.',
+      'Idea for the patio? Don’t sit on it.',
+      'Confidential. Always. That’s Text a Leader.',
+      'Leaders aren’t mind readers. Hit the line.',
+      'One text. No stage. No speech.',
+      'Got a hobby the fellas would ride for? Tell a leader.',
+      /* Ask Thunder */
+      'Tap me when you’re ready. I don’t eavesdrop.',
+      'Sports. Work. God. The weird one. I take it.',
+      'I’m in the corner. Not in your pocket till you tap.',
+      'World-sized question. Tiny tap.',
+      'I don’t listen until you do. That’s the deal.',
+      'Stuck? Ask. That’s why I’m here.',
+      /* Sign-in */
+      'Sign in. I’M IN actually counts.',
+      'Unsigned, you’re a ghost. The patio doesn’t know.',
+      'One sign-in. Then your name hits every phone.',
+      'Memories follow you. Sign in. Don’t leave nights on one phone.',
+      'Signed in is the backstage pass.',
+      'Already a Member. That’s how you join the count.',
+      /* Install / share */
+      'Put it on the Home Screen. That’s when it becomes a room.',
+      'Share Thunder with a brother. One link. He’s in.',
+      'Icon on the phone. That’s how you don’t forget Monday.',
+      /* The Code */
+      'The Code isn’t wallpaper. It’s why you’re here.',
+      'Read The Code once. Then live it on the patio.',
+      /* Gathering night */
+      'Patio’s lit. Drop a pic. That’s tonight.',
+      'Pizza’s here. Phone out. One frame.',
+      'If you showed, check in. Beer and a hat don’t guess.'
+    ];
+    const FAB_FACTS = [
+      'Golf. On the moon. 1971. Six-iron.',
+      'A baseball lasts seven pitches. Then it’s history.',
+      'Olympic gold is mostly silver.',
+      'Gretzky and his brother? Highest-scoring siblings in the NHL. Brent had four points.',
+      'Jordan got cut. Sophomore year. Varsity.',
+      'Hockey pucks go in the freezer first. Bounce less.',
+      'The marathon is 26.2 because a queen wanted a better view. London, 1908.',
+      'A golf ball’s dimples aren’t decoration. They’re the engine.',
+      'Secretariat won Belmont by 31 lengths. They still run the tape.',
+      'Football’s called pigskin. It’s cowhide.',
+      'Tour de France yellow? A newspaper was yellow. That’s it.',
+      'Ali’s rope-a-dope was a plan. Not panic.',
+      'Dolly kept Jolene from Elvis. She kept the publishing.',
+      'Bohemian Rhapsody. No chorus. Still won.',
+      'That old Nokia ring? Classical guitar.',
+      'Hendrix played a right-handed Strat upside down.',
+      'Cash flipped the bird at San Quentin. That’s the album cover.',
+      'Happy Birthday was under copyright until 2015. Wild.',
+      'A piano has about 12,000 parts. For 88 keys.',
+      'The Beatles’ last show. A roof. 42 minutes. Then the cops.',
+      'Funk Brothers played on more Motown hits than the names on the label.',
+      'Stallone wrote Rocky in three days. And kept the part.',
+      'Bond was offered to Cary Grant. He passed.',
+      'Harrison Ford was a carpenter on the Star Wars set. Then he was Han.',
+      'Jaws’ shark barely worked. That’s why you almost never see it.',
+      'Die Hard. Christmas movie. I’m not taking questions.',
+      'John Wick. The whole movie is the puppy.',
+      'Spielberg got rejected from film school. Twice.',
+      'The Wilhelm scream is in hundreds of movies. Same yell.',
+      'Terminator. First one. $6.4 million.',
+      'The Great Pyramid held the height record for 3,800 years.',
+      'Chrysler hid a 185-foot spire inside. Beat the rival overnight.',
+      'Empire State. 410 days. 3,400 men.',
+      'Roman concrete still laughs at seawater.',
+      'A 2x4 is not 2 by 4. Hasn’t been in a long time.',
+      'Phillips was designed to cam out at torque. On purpose.',
+      'Drywall showed up in 1916. Called Sackett Board.',
+      'World’s oldest wooden building is in Japan. 1,300 years standing.',
+      'London Bridge is in Arizona. They bought it in ’68.',
+      'About 200 hands touch a cigar before you do.',
+      'Men have fished for 40,000 years. You’re in a long line.',
+      'WD-40. Water Displacement, 40th formula.',
+      'Velcro. Dog burrs. Swiss engineer. 1941.',
+      'Duct tape started as duck tape. For boats.',
+      'Bubble wrap was supposed to be wallpaper.',
+      'Swiss Army knife. Original had two tools.',
+      'A compass points to magnetic north. True north is a different argument.',
+      'Cleopatra lived closer to us than to the pyramids.',
+      'Horned Vikings? Opera did that. Not history.',
+      'Napoleon wasn’t short. British cartoons were.',
+      'Shortest war. Britain and Zanzibar. 38 minutes.',
+      'The 300 at Thermopylae had thousands of friends. 300 sold better.',
+      'Titanic had a sister. Olympic. She made it.',
+      'SOS isn’t three letters. It’s a sound pattern.',
+      'A day on Venus is longer than its year.',
+      'Moon footprints. No wind. Still there.',
+      'More trees on Earth than stars in the Milky Way.',
+      'The first F-150 badge. 1975.',
+      'Jeep was GP. General purpose. The name stuck.',
+      'Ferrari’s horse was a WWI ace’s emblem.',
+      'The first Corvette was a six. Not a V8.',
+      'Checkered flag came from horse racing.',
+      'Honey doesn’t spoil. They’ve opened 3,000-year-old jars.',
+      'Worcestershire has anchovies. That’s the kick.',
+      'Tabasco ages in barrels. Like whiskey.',
+      'Ketchup was sold as medicine in the 1830s.',
+      'An octopus has three hearts. Two stop when it swims.',
+      'A shrimp’s heart is in its head.',
+      'Crocodiles can’t stick out their tongues.',
+      'Goats have rectangular pupils. Built-in perimeter scan.',
+      'A blue whale’s heart is the size of a golf cart.',
+      'Your knuckles don’t make that sound by breaking. Bubbles in the joint.',
+      'Hot water can freeze faster than cold. Mpemba. Still argued.',
+      'The Eiffel Tower grows about six inches in summer heat.',
+      'Alaska is the eastest, westest, and northest U.S. state.',
+      'Australia’s bigger than the moon’s face. Barely. But yes.',
+      'A lightning bolt is five times hotter than the sun’s surface. I know.',
+      'The average cloud weighs a million pounds. And it just sits there.',
+      'There are more possible chess games than atoms in the known universe.',
+      'The first product scanned at a grocery store. Wrigley’s gum. 1974.',
+      'A group of flamingos is a flamboyance. You’re welcome.',
+      'The inventor of the Pringles can is buried in one.',
+      'One of the Apollo 11 computers had less power than a cheap calculator.',
+      'The original London Stone. Nobody’s sure what it is. Still there.',
+      'Samurai tested swords on corpses. Not a movie thing. A job.',
+      'The Maginot Line worked. They went around it.',
+      'Cowboys hats? The crease told the ranch. Quiet ID.',
+      'A fathom is six feet. That’s why it’s a grave measure too.',
+      'The word “deadline” was a Civil War prison line. Cross it, you’re done.'
+    ];
+    let __fabDeck = [];
+    let __fabFeatureDeck = [];
+    let __fabFactDeck = [];
+    let __fabFeatureCount = 0;
+    function fabShuffle(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const t = a[i]; a[i] = a[j]; a[j] = t;
       }
-    });
+      return a;
+    }
+    function fabNextLine() {
+      const longStay = !!(__fabOpenedAt && (Date.now() - __fabOpenedAt >= 8 * 60 * 1000));
+      const opening = __fabFeatureCount < 4 && !longStay;
+      if (opening) {
+        if (!__fabFeatureDeck.length) __fabFeatureDeck = fabShuffle(FEATURE_SELL);
+        __fabFeatureCount += 1;
+        return __fabFeatureDeck.pop();
+      }
+      if (!__fabFactDeck.length) __fabFactDeck = fabShuffle([].concat(FAB_FACTS, FAB_ENCOURAGE));
+      return __fabFactDeck.pop();
+    }
+    let __fabBubbleTimer = null;
+    let __fabLineTimer = null;
+    function fabHideBubble() {
+      const b = document.getElementById('fab-bubble');
+      if (b) {
+        b.classList.remove('is-on');
+        setTimeout(function () {
+          if (!b.classList.contains('is-on')) {
+            b.classList.add('hidden');
+            b.textContent = '';
+          }
+        }, 380);
+      }
+      if (__fabBubbleTimer) try { clearTimeout(__fabBubbleTimer); } catch (e) {}
+      __fabBubbleTimer = null;
+    }
+    function fabMuted() {
+      try { return sessionStorage.getItem('tb_fab_mute') === '1'; } catch (e) { return !!window.__tbFabMuted; }
+    }
+    function fabMuteSession() {
+      try { window.__tbFabMuted = true; } catch (e) {}
+      try { sessionStorage.setItem('tb_fab_mute', '1'); } catch (e) {}
+      fabHideBubble();
+    }
+    function fabSay(text, ms) {
+      if (roomCut()) return;
+      if (fabMuted()) return;
+      const b = document.getElementById('fab-bubble');
+      if (!b) return;
+      b.textContent = text;
+      b.classList.remove('hidden');
+      b.classList.remove('is-on');
+      void b.offsetWidth;
+      b.classList.add('is-on');
+      try { window.tbFabSay = fabSay; } catch (e) {}
+      try { tbFeedback.selection(); } catch (e) {}
+      try { fabGo(0, -6, 6, 1.02); } catch (e) {}
+      fabAfter(1400, fabRestSmooth);
+      if (__fabBubbleTimer) try { clearTimeout(__fabBubbleTimer); } catch (e) {}
+      __fabBubbleTimer = setTimeout(fabHideBubble, ms || 8000);
+    }
+    window.tbFabSay = fabSay;
+    (function bindFabMute() {
+      const b = document.getElementById('fab-bubble');
+      if (!b || b.dataset.muteBound === '1') return;
+      b.dataset.muteBound = '1';
+      b.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (b.dataset.tourInvite === '1' || window.__tbTourInvite) {
+          b.dataset.tourInvite = '';
+          window.__tbTourInvite = false;
+          fabHideBubble();
+          try { save('tb_tour_offered', 1); } catch (err) {}
+          try {
+            if (typeof startTour === 'function') startTour({ replay: true });
+            else if (window.startTour) window.startTour({ replay: true });
+          } catch (err) {}
+          return;
+        }
+        fabMuteSession();
+      });
+    })();
+    function fabTwirl() {
+      const img = fabImg();
+      if (!img) return;
+      img.classList.remove('tb-fab-twirl');
+      void img.offsetWidth;
+      img.classList.add('tb-fab-twirl');
+      setTimeout(function () { img.classList.remove('tb-fab-twirl'); }, 1500);
+    }
+    function parkFabByImin(force) {
+      const fab = document.getElementById('thunder-fab');
+      const btn = document.getElementById('rsvp-btn');
+      if (!fab) return;
+      const home = currentViewName === 'home';
+      let week = false;
+      try {
+        const d = daysUntil(getNextMeetingMonday());
+        week = d >= 0 && d <= 7;
+      } catch (e) {}
+      if (!home || !week || !btn || fabBusy() || (!force && rsvp)) {
+        fab.classList.remove('tb-fab-by-imin');
+        fab.style.left = '';
+        fab.style.top = '';
+        fab.style.right = '';
+        fab.style.bottom = '';
+        return;
+      }
+      const r = btn.getBoundingClientRect();
+      const w = 88;
+      let left = r.right + 6;
+      if (left + w > window.innerWidth - 8) left = Math.max(8, r.left - w - 6);
+      fab.classList.add('tb-fab-by-imin');
+      fab.style.left = left + 'px';
+      fab.style.top = (r.top + (r.height / 2) - (w / 2)) + 'px';
+      fab.style.right = 'auto';
+      fab.style.bottom = 'auto';
+    }
+    let __fabRaf = 0;
+    let __fabT0 = Date.now();
+    let __fabPose = { x: 0, y: 0, r: 0, s: 1 };
+    let __fabTarget = { x: 0, y: 0, r: 0, s: 1 };
+    function fabLerp(a, b, k) { return a + (b - a) * k; }
+    function fabGo(x, y, r, s) {
+      __fabTarget = { x: x || 0, y: y || 0, r: r || 0, s: (s == null ? 1 : s) };
+    }
+    function fabRestSmooth() { fabGo(0, 0, 0, 1); }
+    function fabAfter(ms, fn) {
+      if (__fabHoldTimer) try { clearTimeout(__fabHoldTimer); } catch (e) {}
+      __fabHoldTimer = setTimeout(fn, ms);
+    }
+    function fabTick() {
+      __fabRaf = requestAnimationFrame(fabTick);
+      const img = fabImg();
+      if (!img) return;
+      if (fabBusy()) return;
+      const k = 0.049;
+      __fabPose.x = fabLerp(__fabPose.x, __fabTarget.x, k);
+      __fabPose.y = fabLerp(__fabPose.y, __fabTarget.y, k);
+      __fabPose.r = fabLerp(__fabPose.r, __fabTarget.r, k);
+      __fabPose.s = fabLerp(__fabPose.s, __fabTarget.s, k);
+      const t = (Date.now() - __fabT0) / 1000;
+      const bx = Math.sin(t * 0.65) * 3.1 + Math.sin(t * 0.29) * 1.45;
+      const by = Math.sin(t * 0.78 + 0.9) * -6.7 + Math.sin(t * 0.39) * -1.75;
+      const br = Math.sin(t * 0.51 + 0.3) * 2.05;
+      const bs = 1 + Math.sin(t * 0.72) * 0.022;
+      img.style.animation = 'none';
+      img.style.transformOrigin = '50% 82%';
+      img.style.transform = 'translate(' + (__fabPose.x + bx).toFixed(2) + 'px,' +
+        (__fabPose.y + by).toFixed(2) + 'px) rotate(' + (__fabPose.r + br).toFixed(2) +
+        'deg) scale(' + (__fabPose.s * bs).toFixed(3) + ')';
+    }
+    function fabStartMotion() {
+      if (__fabRaf) return;
+      __fabT0 = Date.now();
+      __fabPose = { x: 0, y: 0, r: 0, s: 1 };
+      __fabTarget = { x: 0, y: 0, r: 0, s: 1 };
+      __fabRaf = requestAnimationFrame(fabTick);
+    }
+    function fabStopMotion() {
+      if (__fabRaf) cancelAnimationFrame(__fabRaf);
+      __fabRaf = 0;
+      const img = fabImg();
+      if (img) img.style.transform = '';
+    }
+    function fabGlance() {
+      if (fabBusy()) return;
+      fabGo(0, -2.5, (Math.random() < 0.5 ? -1 : 1) * (7.5 + Math.random() * 2.6), 1);
+      fabAfter(2700, fabRestSmooth);
+    }
+    function fabLookAround() {
+      if (fabBusy()) return;
+      fabGo(-1.5, -2.5, -7.8, 1);
+      fabAfter(2300, function () {
+        fabGo(1.5, -2.5, 7.8, 1);
+        fabAfter(2300, fabRestSmooth);
+      });
+    }
+    function fabShift() {
+      if (fabBusy()) return;
+      fabGo((Math.random() < 0.5 ? -1 : 1) * 6.5, -1.5, (Math.random() < 0.5 ? -1 : 1) * 5, 1);
+      fabAfter(3100, fabRestSmooth);
+    }
+    function fabMicroNod() {
+      if (fabBusy()) return;
+      fabGo(0, 4, -8.5, 1.02);
+      fabAfter(1550, function () {
+        fabGo(0, -1.5, 1, 1);
+        fabAfter(1300, fabRestSmooth);
+      });
+    }
+    function fabDrift() {
+      if (fabBusy()) return;
+      fabGo((Math.random() < 0.5 ? -1 : 1) * 7, -5, 2.5, 1);
+      fabAfter(3400, fabRestSmooth);
+    }
+    function fabBob() {
+      if (fabBusy()) return;
+      fabGo(0, -9, 0, 1.04);
+      fabAfter(2800, fabRestSmooth);
+    }
+    function fabLean() {
+      if (fabBusy()) return;
+      const side = Math.random() < 0.5 ? -1 : 1;
+      fabGo(side * 6, -2.5, side * 7.5, 1);
+      fabAfter(3200, fabRestSmooth);
+    }
+    window.tbFabImInLock = function () {
+      try { parkFabByImin(true); } catch (e) {}
+      try { fabMicroNod(); } catch (e) {}
+      setTimeout(function () { try { parkFabByImin(); } catch (e) {} }, 2400);
+    };
+    function fabBubbleBeat() {
+      if (fabMuted()) return;
+      fabSay(fabNextLine(), 8000);
+    }
+    function fabBeat() {
+      if (fabBusy()) return;
+      const pool = ['glance', 'nod', 'shift', 'drift', 'bob', 'lean', 'look'].filter(function (x) {
+        return x !== __fabLastMicro;
+      });
+      const pick = pool[Math.floor(Math.random() * pool.length)];
+      __fabLastMicro = pick;
+      if (pick === 'glance') fabGlance();
+      else if (pick === 'nod') fabMicroNod();
+      else if (pick === 'shift') fabShift();
+      else if (pick === 'drift') fabDrift();
+      else if (pick === 'bob') fabBob();
+      else if (pick === 'lean') fabLean();
+      else fabLookAround();
+    }
+    function startThunderBackstageIdle() {
+      stopThunderBackstageIdle();
+      const img = fabImg();
+      if (!img) return;
+      fabHideBubble();
+      fabBaseline();
+      try { parkFabByImin(); } catch (e) {}
+      img.classList.add('tb-fab-alive');
+      fabStartMotion();
+      if (!__fabOpenedAt) __fabOpenedAt = Date.now();
+      function offerBackstageTour() {
+        try {
+          if (typeof isTourComplete === 'function' && isTourComplete()) return;
+          if (load('tb_tour_offered')) return;
+          if (fabBusy()) return;
+        } catch (e) { return; }
+        const b = document.getElementById('fab-bubble');
+        if (!b) return;
+        window.__tbTourInvite = true;
+        b.dataset.tourInvite = '1';
+        b.textContent = "New here? Tap me. I'll show you the room.";
+        b.classList.remove('hidden');
+        void b.offsetWidth;
+        b.classList.add('is-on');
+        try { tbFeedback.selection(); } catch (e) {}
+        if (__fabBubbleTimer) try { clearTimeout(__fabBubbleTimer); } catch (e) {}
+        __fabBubbleTimer = setTimeout(function () {
+          try { save('tb_tour_offered', 1); } catch (e) {}
+          window.__tbTourInvite = false;
+          if (b) b.dataset.tourInvite = '';
+          fabHideBubble();
+        }, 10000);
+      }
+      setTimeout(function () { try { offerBackstageTour(); } catch (e) {} }, 3500);
+      function lineTick() {
+        if (roomCut()) return;
+        if (!fabBusy()) fabBubbleBeat();
+        __fabLineTimer = setTimeout(lineTick, 150000);
+      }
+      if (!roomCut()) {
+        __fabLineTimer = setTimeout(lineTick, 40000);
+      }
+      function beatTick() {
+        if (fabBusy()) {
+          __fabBeatTimer = setTimeout(beatTick, 8000);
+          return;
+        }
+        fabBeat();
+        __fabBeatTimer = setTimeout(beatTick, 5300 + Math.floor(Math.random() * 4400));
+      }
+      __fabBeatTimer = setTimeout(beatTick, 1900);
+    }
+    try { startThunderBackstageIdle(); } catch (e) {}
+    window.addEventListener('resize', function () { try { parkFabByImin(); } catch (e) {} });
+
+    const fabBtn = document.getElementById('thunder-fab');
+    if (fabBtn && fabBtn.dataset.tbTap !== '1') {
+      fabBtn.dataset.tbTap = '1';
+      fabBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        if (document.body.classList.contains('tb-ask-open')) return;
+        if (window.__tbTourInvite) {
+          window.__tbTourInvite = false;
+          fabHideBubble();
+          try { save('tb_tour_offered', 1); } catch (err) {}
+          const b = document.getElementById('fab-bubble');
+          if (b) b.dataset.tourInvite = '';
+          try { tbFeedback.press(fabBtn); } catch (err) {}
+          try {
+            if (typeof startTour === 'function') startTour({ replay: true });
+            else if (window.startTour) window.startTour({ replay: true });
+          } catch (err) {}
+          return;
+        }
+        fabHideBubble();
+        try { tbFeedback.press(fabBtn); } catch (err) {}
+        try {
+          if (window.ThunderVoice) ThunderVoice.openAsk({ voice: false });
+          else openThunderVoiceMode();
+        } catch (err) {
+          openThunderVoiceMode();
+        }
+      }, true);
+    }
     $('#thunder-send').addEventListener('click', handleThunderSend);
+    const ex = document.getElementById('thunder-examples');
+    if (ex && !ex.dataset.tbBound) {
+      ex.dataset.tbBound = '1';
+      ex.addEventListener('click', function (e) {
+        const btn = e.target && e.target.closest && e.target.closest('[data-ask]');
+        if (!btn) return;
+        const q = btn.getAttribute('data-ask') || '';
+        const input = document.getElementById('thunder-input');
+        if (input) input.value = q;
+        ex.classList.add('hidden');
+        try { handleThunderSend(); } catch (err) {}
+      });
+    }
     const voiceBtn = $('#thunder-voice-btn');
     if (voiceBtn) {
       voiceBtn.addEventListener('click', () => {
@@ -5071,7 +7978,15 @@ $('#edit-profile-btn').addEventListener('click', () => {
     const thunderModal = $('#thunder-modal');
     if (thunderModal) {
       const obs = new MutationObserver(() => {
-        if (thunderModal.classList.contains('hidden')) stopThunderVoice();
+        if (thunderModal.classList.contains('hidden')) {
+          stopThunderVoice();
+          try { document.body.classList.remove('tb-ask-open'); } catch (e) {}
+          try { fabHideBubble(); } catch (e) {}
+          try { startThunderBackstageIdle(); } catch (e) {}
+          try { parkFabByImin(); } catch (e) {}
+        } else {
+          try { stopThunderBackstageIdle(); } catch (e) {}
+        }
       });
       obs.observe(thunderModal, { attributes: true, attributeFilter: ['class'] });
     }
@@ -5156,7 +8071,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
           const useVoice = info.voice || spec.voice;
           setTimeout(() => {
             try {
-              if (window.ThunderVoice) ThunderVoice.openAsk({ voice: !!useVoice, delay: 350 });
+              if (window.ThunderVoice) ThunderVoice.openAsk({ voice: false, delay: 350 });
               else if (typeof openThunderVoiceMode === 'function') openThunderVoiceMode();
             } catch (e) {}
           }, 450);
@@ -5223,13 +8138,8 @@ $('#edit-profile-btn').addEventListener('click', () => {
 
       if (state === 'INSTALLED') {
         markInstalledSuccessOnce();
-        // Installed: only "get a brother" — no install tutorial nag
-        installCard.classList.remove('hidden');
-        if (installShareBtn) installShareBtn.textContent = 'SHARE';
-        if (title) title.textContent = 'GET A BROTHER ON THUNDER';
-        if (sub) sub.textContent = 'Send the link · one tap';
-        if (tip) tip.textContent = 'They open it → put Thunder on their phone.';
-        if (howBtn) howBtn.classList.add('hidden');
+        /* Installed: invite card already shares. Don't paint a second SHARE. */
+        installCard.classList.add('hidden');
         return;
       }
 
@@ -5251,7 +8161,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
       } else if (state === 'IPHONE_SAFARI') {
         if (installShareBtn) installShareBtn.textContent = 'ADD TO HOME SCREEN';
         if (title) title.textContent = 'PUT THUNDER ON YOUR PHONE';
-        if (sub) sub.textContent = 'Safari will ask next — follow the bolt.';
+        if (sub) sub.textContent = 'Safari will ask next — add to Home Screen.';
         if (tip) tip.textContent = 'Share → Add to Home Screen → Add';
       } else {
         if (installShareBtn) installShareBtn.textContent = 'ADD TO HOME SCREEN';
@@ -5276,7 +8186,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
 
     async function runSmartInstall() {
       // Trapped in Instagram / Messenger / etc.
-      if (isInAppBrowser()) {
+      if (isInAppBrowser() || (isIos() && !isIosSafariBrowser())) {
         setInstallProgress('WRONG_BROWSER');
         openInAppInstallOverlay();
         return;
@@ -5358,13 +8268,22 @@ $('#edit-profile-btn').addEventListener('click', () => {
 
     refreshInstallCta();
 
-    // Facebook / IG: one clear gate (once per session) — no dead install path inside in-app browser
+    // Facebook / IG: never interrupt splash or the product tour.
     try {
       if (getInstallState() === 'IN_APP_BROWSER') {
         setInstallProgress('WRONG_BROWSER');
         if (!sessionStorage.getItem('tb_inapp_gate')) {
           sessionStorage.setItem('tb_inapp_gate', '1');
-          setTimeout(() => { try { openInAppInstallOverlay(); } catch (e) {} }, 600);
+          const launchInappGate = function () {
+            try {
+              if (__tourActive) return;
+              const splash = document.getElementById('splash');
+              if (splash && !splash.classList.contains('splash-done') && !splash.classList.contains('hidden')) return;
+              if (typeof isTourComplete === 'function' && !isTourComplete()) return;
+              openInAppInstallOverlay();
+            } catch (e) {}
+          };
+          setTimeout(launchInappGate, 600);
         }
       } else if (getInstallState() !== 'INSTALLED') {
         const prog = getInstallProgress();
@@ -5392,12 +8311,29 @@ $('#edit-profile-btn').addEventListener('click', () => {
     if (inviteShareBtn && !inviteShareBtn.dataset.tbInviteBound) {
       inviteShareBtn.dataset.tbInviteBound = '1';
       inviteShareBtn.addEventListener('click', async () => {
-        const url = 'https://sonsofthunder.netlify.app/';
+        const url = publicUrl('/');
         const payload = {
           title: 'Thunder Board',
           text: 'Sons of Thunder — Thunder doesn’t dull. Put this on your Home Screen.',
           url
         };
+        try {
+          const qrRes = await fetch('assets/qr-board.png');
+          const qrBlob = await qrRes.blob();
+          const qrFile = new File([qrBlob], 'thunder-board.png', { type: 'image/png' });
+          if (navigator.canShare && navigator.canShare({ files: [qrFile], url })) {
+            await navigator.share({ files: [qrFile], title: payload.title, text: payload.text, url });
+            showInstallToast('Shared with a brother.');
+            return;
+          }
+          if (navigator.canShare && navigator.canShare({ files: [qrFile] })) {
+            await navigator.share({ files: [qrFile], title: payload.title, text: payload.text + '\n' + url });
+            showInstallToast('Shared with a brother.');
+            return;
+          }
+        } catch (err) {
+          if (err && err.name === 'AbortError') return;
+        }
         if (navigator.share) {
           try {
             await navigator.share(payload);
@@ -5418,7 +8354,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
     const liveLink = $('#install-live-link');
     if (liveLink) {
       liveLink.addEventListener('click', () => {
-        const url = 'https://sonsofthunder.netlify.app/';
+        const url = publicUrl('/');
         try {
           if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(url).catch(() => {});
@@ -5485,7 +8421,7 @@ $('#edit-profile-btn').addEventListener('click', () => {
     if (inappGotit) inappGotit.addEventListener('click', closeInAppInstallOverlay);
     if (inappCopy) {
       inappCopy.addEventListener('click', async () => {
-        const url = 'https://sonsofthunder.netlify.app/';
+        const url = publicUrl('/');
         try {
           await navigator.clipboard.writeText(url);
           showInstallToast('Link copied — paste in Safari');
@@ -5522,6 +8458,10 @@ $('#edit-profile-btn').addEventListener('click', () => {
         if (typeof closeInfoDetail === 'function') closeInfoDetail();
         return;
       }
+      if ($('#cal-confirm-sheet') && !$('#cal-confirm-sheet').classList.contains('hidden')) {
+        try { closeCalConfirmSheet(); } catch (e) {}
+        return;
+      }
       const open = document.querySelector('.modal:not(.hidden)');
       if (open && open.id) closeModal(open.id);
     });
@@ -5531,62 +8471,76 @@ $('#edit-profile-btn').addEventListener('click', () => {
       if (document.visibilityState === 'visible') unlockBodyIfClear();
     });
 
-    // REFRESH APP — force fresh HTML/JS/CSS (More page, under Gathering Alerts)
-    const refreshBtn = $('#refresh-app-btn');
-    if (refreshBtn) {
-      refreshBtn.addEventListener('click', async () => {
-        showInstallToast('Updating… hang tight');
-        try {
-          if ('serviceWorker' in navigator) {
-            const regs = await navigator.serviceWorker.getRegistrations();
-            await Promise.all(regs.map((r) => r.unregister()));
-          }
-        } catch (e) {
-          console.warn('SW unregister', e);
-        }
-        try {
-          if (window.caches && caches.keys) {
-            const keys = await caches.keys();
-            await Promise.all(keys.map((k) => caches.delete(k)));
-          }
-        } catch (e) {
-          console.warn('cache clear', e);
-        }
-        setTimeout(() => {
-          try {
-            const u = new URL(window.location.href);
-            u.searchParams.set('_tb', String(Date.now()));
-            window.location.replace(u.toString());
-          } catch (e) {
-            window.location.reload(true);
-          }
-        }, 280);
-      });
-    }
+    // Auto-wipe handles new deploys. No leader refresh button.
 
 $('#thunder-input').addEventListener('keydown', (e) => {
       if (e.key === 'Enter') handleThunderSend();
     });
 
-    // Leadership unlock
+    // Leadership (chair account only — no PIN)
     const unlockBtn = $('#leader-unlock-btn');
     if (unlockBtn) {
       unlockBtn.addEventListener('click', () => {
-        if (requireLeader()) {
-          const tools = $('#leader-tools');
-          if (tools) tools.classList.remove('hidden');
-        }
+        if (!requireLeader()) return;
+        const tools = $('#leader-tools');
+        if (tools) tools.classList.remove('hidden');
+        unlockBtn.classList.add('hidden');
       });
     }
     const lockBtn = $('#leader-lock-btn');
     if (lockBtn) {
       lockBtn.addEventListener('click', () => {
-        leaderUnlocked = false;
         const tools = $('#leader-tools');
         if (tools) tools.classList.add('hidden');
+        if (unlockBtn) {
+          unlockBtn.textContent = 'Leadership';
+          unlockBtn.classList.remove('hidden');
+        }
       });
     }
 
+    const adminRoomBtn = $('#admin-room-btn');
+    if (adminRoomBtn) {
+      adminRoomBtn.addEventListener('click', () => {
+        if (!requireLeader()) return;
+        openModal('admin-room-modal');
+        loadFounderRoom();
+        try { syncPatioToggle(); } catch (e) {}
+      });
+    }
+    const patioToggle = document.getElementById('patio-toggle-btn');
+    if (patioToggle && patioToggle.dataset.bound !== '1') {
+      patioToggle.dataset.bound = '1';
+      patioToggle.addEventListener('click', function () {
+        if (!requireLeader()) return;
+        patioOverride = isPatioLive() ? false : true;
+        try { syncPatioToggle(); } catch (e) {}
+        try { renderHere(); } catch (e) {}
+      });
+    }
+    const adminSmsClub = $('#admin-sms-club-btn');
+    if (adminSmsClub) {
+      adminSmsClub.addEventListener('click', () => {
+        if (!requireLeader()) return;
+        const st = $('#admin-sms-status');
+        if (st) st.textContent = '';
+        openModal('admin-sms-modal');
+      });
+    }
+    const adminSmsSend = $('#admin-sms-send');
+    if (adminSmsSend) {
+      adminSmsSend.addEventListener('click', () => {
+        if (!requireLeader()) return;
+        const message = (($('#admin-sms-body') && $('#admin-sms-body').value) || '').trim();
+        const st = $('#admin-sms-status');
+        if (!message) {
+          if (st) st.textContent = 'Write the line first.';
+          return;
+        }
+        if (st) st.textContent = 'Opening your Messages…';
+        openDeviceSmsClub(message);
+      });
+    }
     const adminPushBtn = $('#admin-push-btn');
     if (adminPushBtn) {
       adminPushBtn.addEventListener('click', () => {
@@ -5656,6 +8610,11 @@ $('#thunder-input').addEventListener('keydown', (e) => {
         if (!trimmed) {
           lastFire = null;
           save('lastFire', null);
+          try {
+            lastFire = { caption: '', photo: '', updatedAt: Date.now() };
+            pushLastFire();
+            lastFire = null;
+          } catch (e) {}
           renderLastFire();
           updateAllNewBadges();
           alert('Last Fire cleared.');
@@ -5684,9 +8643,10 @@ $('#thunder-input').addEventListener('keydown', (e) => {
             }
             lastFire = { caption: trimmed, photo: photo || '', updatedAt: Date.now() };
             save('lastFire', lastFire);
+            try { pushLastFire(); } catch (e) {}
             renderLastFire();
             updateAllNewBadges();
-            alert('Last Fire saved on this phone.');
+            alert('Last Fire saved for the room.');
           };
           input.click();
         } else {
@@ -5696,9 +8656,10 @@ $('#thunder-input').addEventListener('keydown', (e) => {
             updatedAt: Date.now()
           };
           save('lastFire', lastFire);
+          try { pushLastFire(); } catch (e) {}
           renderLastFire();
           updateAllNewBadges();
-          alert('Last Fire saved on this phone.');
+          alert('Last Fire saved for the room.');
         }
       });
     }
@@ -5951,6 +8912,18 @@ $('#thunder-input').addEventListener('keydown', (e) => {
         collapseActivityFeed();
       });
     }
+    el.querySelectorAll('.activity-card').forEach(function (card) {
+      card.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        openInfoDetail({
+          label: 'STORY',
+          title: card.getAttribute('data-rss-title') || '',
+          meta: card.getAttribute('data-rss-meta') || '',
+          body: card.getAttribute('data-rss-body') || ''
+        });
+      });
+    });
   }
 
   function renderActivityItems(items, source) {
@@ -5964,11 +8937,11 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       let excerpt = decodeFeedText(item.description || '');
       if (excerpt.length > 120) excerpt = excerpt.slice(0, 117) + '…';
       excerpt = esc(excerpt);
-      return `<a class="activity-card" href="${link}" target="_blank" rel="noopener noreferrer">
+      return `<button type="button" class="activity-card" data-rss-title="${title}" data-rss-body="${excerpt}" data-rss-meta="${esc(source)}${date ? ' · ' + esc(date) : ''}">
         <div class="activity-card-meta">${esc(source)}${date ? ' · ' + esc(date) : ''}</div>
         <div class="activity-card-title">${title}</div>
         <div class="activity-card-excerpt">${excerpt}</div>
-      </a>`;
+      </button>`;
     }).join('');
   }
 
@@ -6128,7 +9101,8 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       canNext: () => feedIsOpen() && feedIndex() < FEED_ORDER.length - 1,
       onPrev: goPrevFeed,
       onNext: goNextFeed,
-      // Allow swipe on story cards — only ignore other Events sections
+      onDown: () => { try { collapseActivityFeed(); } catch (e) {} },
+      onDownDist: 56,
       blocked: (t) => !!(t && t.closest && (
         t.closest('#media-feed') ||
         t.closest('#upcoming-events') ||
@@ -6189,14 +9163,17 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     const finish = () => {
       if (finished) return;
       finished = true;
+      // Splash → tour with nothing in between (no home/welcome flash)
       el.classList.add('splash-out');
-      // Domino: welcome begins mid-zoom so it feels continuous, not a second scene
       setTimeout(() => {
         try { sessionStorage.setItem('tb_splash_done', '1'); } catch (e) {}
         runWelcome();
       }, 280);
       const hide = () => {
-        el.classList.add('splash-done');
+        el.classList.add('splash-done', 'hidden');
+        el.style.setProperty('display', 'none', 'important');
+        el.style.setProperty('visibility', 'hidden', 'important');
+        el.style.setProperty('pointer-events', 'none', 'important');
       };
       el.addEventListener('transitionend', hide, { once: true });
       setTimeout(hide, 1400); // cover full dramatic zoom duration
@@ -6210,7 +9187,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       setTimeout(() => { try { tbFeedback.thunderImpact(); } catch (e2) {} }, 300);
     }
     // Hold for bolt settle, then dramatic zoom → welcome
-    setTimeout(finish, 2200);
+    setTimeout(finish, 1100);
 
     const img = el.querySelector('.splash-mark');
     if (img) {
@@ -6219,252 +9196,9 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   }
 
 
-  // ---------- PRODUCT TOUR — SLIDE-BASED (canonical 2026-08-18) ----------
-  // OLD floating/bouncing Concierge tour RETIRED by Erica — DO NOT RESURRECT.
-  // Authority: assets/tour-01.png … tour-07.png + captions below.
-  const TB_TOUR_VERSION = 11; /* slide tour — invalidates V10 floating tour state */
-
-  function tourStorageKey() {
-    return 'thunderTourV' + TB_TOUR_VERSION;
-  }
-
-  function isTourComplete() {
-    try {
-      const s = load(tourStorageKey());
-      return !!(s && s.complete);
-    } catch (e) { return false; }
-  }
-
-  function setTourState(patch) {
-    try {
-      const cur = load(tourStorageKey()) || {};
-      save(tourStorageKey(), Object.assign({}, cur, patch, { v: TB_TOUR_VERSION }));
-    } catch (e) {}
-  }
-
-  function getTourState() {
-    try { return load(tourStorageKey()) || {}; } catch (e) { return {}; }
-  }
-
-  function tourReducedMotion() {
-    try {
-      return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-    } catch (e) { return false; }
-  }
-
-  /* Slide inventory — matches assets/tour-0N.png (Grok official slide set) */
-  const TB_TOUR_STEPS = [
-    {
-      id: 'welcome',
-      slide: 'assets/tour-01.png',
-      headline: 'FOLLOW ME',
-      body: 'I’m Thunder — your guide. The brotherhood between gatherings. Stick with me.',
-      nextLabel: 'LET’S GO'
-    },
-    {
-      id: 'home',
-      slide: 'assets/tour-02.png',
-      headline: 'HOME BASE',
-      body: 'Next Gathering lives here — date, time, Crooked Can. Always current.',
-      nextLabel: 'NEXT'
-    },
-    {
-      id: 'imin',
-      slide: 'assets/tour-03.png',
-      headline: 'LOCK YOUR SEAT',
-      body: 'Tap I’M IN when you’re coming. One commitment. Your phone remembers.',
-      nextLabel: 'NEXT'
-    },
-    {
-      id: 'brothers',
-      slide: 'assets/tour-04.png',
-      headline: 'THE BROTHERS',
-      body: 'Names, faces, who you are. Claim your spot when you’re ready.',
-      nextLabel: 'NEXT'
-    },
-    {
-      id: 'events',
-      slide: 'assets/tour-05.png',
-      headline: 'MISSIONS & MEMORIES',
-      body: 'Range. Lake. Bible. Gym. Photos that prove you showed up.',
-      nextLabel: 'NEXT'
-    },
-    {
-      id: 'code',
-      slide: 'assets/tour-06.png',
-      headline: 'THE CODE',
-      body: 'Who we are. How we roll. Intense, loyal, built for more.',
-      nextLabel: 'NEXT'
-    },
-    {
-      id: 'ask',
-      slide: 'assets/tour-07.png',
-      headline: 'OR JUST ASK',
-      body: 'Don’t hunt menus. Ask Thunder — next gathering, The Code, Scripture.',
-      nextLabel: 'DONE'
-    }
-  ];
-
-  let __tourIdx = 0;
-  let __tourActive = false;
-
-  function renderTourSlide() {
-    const step = TB_TOUR_STEPS[__tourIdx];
-    if (!step) return;
-    const img = document.getElementById('tb-tour-slide-img');
-    const headline = document.getElementById('tb-tour-headline');
-    const body = document.getElementById('tb-tour-body');
-    const bodyFull = document.getElementById('tb-tour-body-full');
-    const progress = document.getElementById('tb-tour-progress');
-    const next = document.getElementById('tb-tour-next');
-    const back = document.getElementById('tb-tour-back');
-    const dots = document.getElementById('tb-tour-dots');
-
-    if (img) {
-      img.src = step.slide;
-      img.alt = step.headline || '';
-      img.classList.remove('tb-tour-slide-in');
-      void img.offsetWidth;
-      if (!tourReducedMotion()) img.classList.add('tb-tour-slide-in');
-    }
-    if (headline) headline.textContent = step.headline || '';
-    if (body) body.textContent = step.body || '';
-    if (bodyFull) bodyFull.textContent = (step.headline || '') + '. ' + (step.body || '');
-    if (progress) progress.textContent = (__tourIdx + 1) + ' of ' + TB_TOUR_STEPS.length;
-    if (next) next.textContent = step.nextLabel || (__tourIdx >= TB_TOUR_STEPS.length - 1 ? 'DONE' : 'NEXT');
-    if (back) back.disabled = __tourIdx <= 0;
-    if (dots) {
-      dots.innerHTML = TB_TOUR_STEPS.map((_, i) =>
-        '<span class="' + (i === __tourIdx ? 'on' : '') + '"></span>'
-      ).join('');
-    }
-    setTourState({ step: step.id, complete: false });
-  }
-
-  function openTourUI() {
-    const root = document.getElementById('tb-tour');
-    if (!root) return;
-    root.classList.remove('hidden');
-    root.setAttribute('aria-hidden', 'false');
-    document.body.classList.add('tb-tour-open');
-    try { document.body.style.overflow = 'hidden'; } catch (e) {}
-  }
-
-  function closeTourUI() {
-    const root = document.getElementById('tb-tour');
-    if (root) {
-      root.classList.add('hidden');
-      root.setAttribute('aria-hidden', 'true');
-    }
-    document.body.classList.remove('tb-tour-open');
-    try { document.body.style.overflow = ''; } catch (e) {}
-  }
-
-  function completeTour() {
-    __tourActive = false;
-    setTourState({ complete: true, step: 'done', completedAt: Date.now() });
-    closeTourUI();
-    try {
-      if (window.tbFeedback) tbFeedback.confirm();
-      if (window.ThunderFX && ThunderFX.tourComplete) ThunderFX.tourComplete();
-    } catch (e) {}
-  }
-
-  function skipTour() {
-    /* First-run mandatory tours historically no-op'd skip — Erica: user stays in control on slide tour */
-    __tourActive = false;
-    setTourState({ complete: true, skipped: true, step: 'skipped', completedAt: Date.now() });
-    closeTourUI();
-  }
-
-  function startTour(opts) {
-    opts = opts || {};
-    if (__tourActive) return;
-    const force = !!opts.force;
-    if (!force && isTourComplete() && !opts.replay) return;
-    __tourActive = true;
-    __tourIdx = 0;
-    if (opts.replay) {
-      /* restart from beginning */
-      __tourIdx = 0;
-    }
-    openTourUI();
-    renderTourSlide();
-    try { if (window.tbFeedback) tbFeedback.thunderImpact(); } catch (e) {}
-  }
-
-  function tourNext() {
-    if (!__tourActive) return;
-    if (__tourIdx >= TB_TOUR_STEPS.length - 1) {
-      completeTour();
-      return;
-    }
-    __tourIdx += 1;
-    renderTourSlide();
-    try { if (window.tbFeedback) tbFeedback.selection(); } catch (e) {}
-  }
-
-  function tourBack() {
-    if (!__tourActive || __tourIdx <= 0) return;
-    __tourIdx -= 1;
-    renderTourSlide();
-    try { if (window.tbFeedback) tbFeedback.selection(); } catch (e) {}
-  }
-
-
-  function maybeStartProductTour() {
-    /* First-run: after splash, open slide tour once if not complete.
-       Replay remains More → REPLAY APP TOUR. */
-    try {
-      if (isTourComplete()) return;
-      const start = function () {
-        try {
-          if (!isTourComplete() && !__tourActive) startTour({ force: false });
-        } catch (e) {}
-      };
-      // After splash window (~2s) so slides are not under splash
-      setTimeout(start, 2200);
-    } catch (e) {}
-  }
-
-  function bindTourControls() {
-    const next = document.getElementById('tb-tour-next');
-    const back = document.getElementById('tb-tour-back');
-    const skip = document.getElementById('tb-tour-skip');
-    const closeBtn = document.getElementById('tb-tour-close');
-    if (next && !next.dataset.tbBound) {
-      next.dataset.tbBound = '1';
-      next.addEventListener('click', () => {
-        try { if (window.tbFeedback) tbFeedback.press(next); } catch (e) {}
-        tourNext();
-      });
-    }
-    if (back && !back.dataset.tbBound) {
-      back.dataset.tbBound = '1';
-      back.addEventListener('click', () => tourBack());
-    }
-    if (skip && !skip.dataset.tbBound) {
-      skip.dataset.tbBound = '1';
-      skip.addEventListener('click', () => skipTour());
-    }
-    if (closeBtn && !closeBtn.dataset.tbBound) {
-      closeBtn.dataset.tbBound = '1';
-      closeBtn.addEventListener('click', () => skipTour());
-    }
-    /* More → Take the Tour */
-    const replay = document.getElementById('take-tour-btn') || document.getElementById('replay-tour-btn') || document.querySelector('[data-action="take-tour"]');
-    if (replay && !replay.dataset.tbBound) {
-      replay.dataset.tbBound = '1';
-      replay.addEventListener('click', () => startTour({ force: true, replay: true }));
-    }
-  }
-
-  /* OLD floating tour API removed — do not resurrect placeTourHost/spotlight */
-
-
   // ---------- FIRST-LOAD WELCOME (once per session; overlaps splash exit) ----------
   function runWelcome() {
-    /* OLD welcome popup removed from DOM. Handoff only to Follow the Bolt tour. */
+    /* OLD welcome popup and retired product tour removed. No first-run tour auto-start. */
     const el = document.getElementById('welcome');
     if (el) {
       el.classList.add('hidden');
@@ -6472,12 +9206,6 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       el.setAttribute('aria-hidden', 'true');
     }
     try { sessionStorage.setItem('tb_welcome_done', '1'); } catch (e) {}
-    try {
-      // Delay slightly so Home paints under the tour spotlight
-      setTimeout(function () {
-        try { maybeStartProductTour(); } catch (e2) {}
-      }, 420);
-    } catch (e) {}
   }
 
   // ---------- WEB PUSH (Gathering alerts) ----------
@@ -6504,6 +9232,145 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     );
   }
 
+  function markPatioFromUrl() {
+    try {
+      const q = new URLSearchParams(location.search || '');
+      if (q.get('src') === 'qr' || q.get('src') === 'board' || q.get('qr') === '1') {
+        sessionStorage.setItem('tb_patio', '1');
+      }
+      if (/^\/tap/i.test(location.pathname || '')) {
+        sessionStorage.setItem('tb_patio', '1');
+      }
+    } catch (e) {}
+  }
+  function fromPatio() {
+    try { return sessionStorage.getItem('tb_patio') === '1'; } catch (e) { return false; }
+  }
+  function runPatioAlive() {
+    markPatioFromUrl();
+    if (!fromPatio()) return;
+    if (isStandalonePwa()) return;
+  }
+  function a2hsHushed() {
+    try { return Date.now() < Number(load('a2hsQuietUntil') || 0); } catch (e) { return false; }
+  }
+  function hushA2hs(days) {
+    try { save('a2hsQuietUntil', Date.now() + (days || 7) * 86400000); } catch (e) {}
+  }
+  function hideHomeA2hs() {
+    const el = document.getElementById('home-a2hs');
+    if (el) el.classList.add('hidden');
+  }
+  function showHomeA2hs() {
+    hideHomeA2hs();
+  }
+  function imInA2hsAsked() {
+    try { return load('iminA2hsAsked') === '1' || load('iminA2hsAsked') === true; } catch (e) { return false; }
+  }
+  function markImInA2hsAsked() {
+    try { save('iminA2hsAsked', '1'); } catch (e) {}
+  }
+  function closeImInA2hsSheet() {
+    const el = document.getElementById('imin-a2hs-sheet');
+    if (el) {
+      el.classList.add('hidden');
+      el.setAttribute('aria-hidden', 'true');
+    }
+    document.body.classList.remove('tb-imin-a2hs-open');
+    if (typeof unlockBodyIfClear === 'function') unlockBodyIfClear();
+    else document.body.style.overflow = '';
+  }
+  function openImInA2hsSheet() {
+    if (isStandalonePwa()) { hideHomeA2hs(); return false; }
+    if (imInA2hsAsked()) return false;
+    if (a2hsHushed()) return false;
+    const el = document.getElementById('imin-a2hs-sheet');
+    if (!el) return false;
+    el.classList.remove('hidden');
+    el.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('tb-imin-a2hs-open');
+    document.body.style.overflow = 'hidden';
+    return true;
+  }
+  function maybeOfferImInA2hs() {
+    if (isStandalonePwa()) return false;
+    if (imInA2hsAsked()) return false;
+    if (a2hsHushed()) return false;
+    if (document.body.classList.contains('tb-tour-open')) return false;
+    const gate = document.getElementById('auth-gate');
+    if (gate && !gate.classList.contains('hidden')) {
+      window.__tbA2hsAfterAuth = true;
+      return false;
+    }
+    return openImInA2hsSheet();
+  }
+  function bindImInA2hsSheet() {
+    if (document.documentElement.dataset.tbImInA2hsBound === '1') return;
+    document.documentElement.dataset.tbImInA2hsBound = '1';
+    const put = document.getElementById('imin-a2hs-put');
+    const later = document.getElementById('imin-a2hs-later');
+    const x = document.getElementById('imin-a2hs-close');
+    const backdrop = document.getElementById('imin-a2hs-backdrop');
+    function doneHush() {
+      markImInA2hsAsked();
+      hushA2hs(7);
+      closeImInA2hsSheet();
+    }
+    if (put) put.addEventListener('click', function () {
+      markImInA2hsAsked();
+      closeImInA2hsSheet();
+      try { launchAddToHomeScreen(); } catch (e) {}
+    });
+    if (later) later.addEventListener('click', doneHush);
+    if (x) x.addEventListener('click', doneHush);
+    if (backdrop) backdrop.addEventListener('click', doneHush);
+  }
+  function paintCalA2hs() {
+    const btn = document.getElementById('cal-confirm-a2hs');
+    const hint = document.getElementById('cal-confirm-hint');
+    const need = !isStandalonePwa();
+    if (btn) btn.classList.toggle('hidden', !need);
+    if (need && hint) hint.textContent = 'Home Screen = 7-day ping on a locked iPhone.';
+  }
+  function launchAddToHomeScreen() {
+    if (isStandalonePwa()) return;
+    if (typeof isInAppBrowser === 'function' && (isInAppBrowser() || (isIos() && !isIosSafariBrowser()))) {
+      try { openInAppInstallOverlay(); } catch (e) {}
+      return;
+    }
+    const def = window.__tbDeferredInstall;
+    if (def && typeof def.prompt === 'function') {
+      try { def.prompt(); } catch (e) {}
+      return;
+    }
+    if (isIos()) {
+      try { openIosInstallOverlay(); } catch (e) {}
+      return;
+    }
+    try { showView('about'); } catch (e) {}
+    const card = document.getElementById('install-help-card');
+    if (card) try { card.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+  }
+
+  function isIosSafariBrowser() {
+    if (!isIos() || isStandalonePwa()) return false;
+    const ua = navigator.userAgent || '';
+    if (/CriOS|FxiOS|EdgiOS/i.test(ua)) return false;
+    if (!/Safari/i.test(ua)) return false;
+    try { return typeof window.safari !== 'undefined'; } catch (e) { return false; }
+  }
+  function offerHomeScreen(reason) {
+    if (roomCut()) return false;
+    if (isStandalonePwa()) { hideHomeA2hs(); return false; }
+    if (document.body.classList.contains('tb-tour-open')) return false;
+    if (reason === 'imin') {
+      paintCalA2hs();
+      return true;
+    }
+    // Never throw TAP SHARE unsolicited. Door is More → PUT IT ON THE HOME SCREEN.
+    return false;
+  }
+
   function isIos() {
     return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -6513,11 +9380,21 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     return /Android/i.test(navigator.userAgent || '');
   }
 
-  /** Instagram / Facebook / Messenger / TikTok / LinkedIn in-app browsers */
+  /** Instagram, Grok, ChatGPT, and other webviews that cannot Add to Home Screen. */
   function isInAppBrowser() {
     const ua = navigator.userAgent || '';
-    return /FBAN|FBAV|Instagram|Line\/|LinkedInApp|Twitter|TikTok|Snapchat|MicroMessenger|Pinterest/i.test(ua)
-      || (isIos() && !/Safari/i.test(ua) && /AppleWebKit/i.test(ua) && !/CriOS|FxiOS|EdgiOS/i.test(ua));
+    if (/FBAN|FBAV|Instagram|Line\/|LinkedInApp|Twitter|TikTok|Snapchat|MicroMessenger|Pinterest|Grok|xAI|ChatGPT|OpenAI|Claude|Anthropic|Perplexity|Copilot/i.test(ua)) return true;
+    try {
+      if (window.self !== window.top) return true;
+    } catch (e) { return true; }
+    try {
+      if (document.referrer && /grok\.com|x\.ai|chatgpt\.com|openai\.com/i.test(document.referrer)) return true;
+    } catch (e) {}
+    if (isIos() && !isStandalonePwa()) {
+      if (/CriOS|FxiOS|EdgiOS/i.test(ua)) return true;
+      if (!/Safari/i.test(ua) && /AppleWebKit/i.test(ua)) return true;
+    }
+    return false;
   }
 
   /**
@@ -6526,7 +9403,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
    */
   function getInstallState() {
     if (isStandalonePwa()) return 'INSTALLED';
-    if (isInAppBrowser()) return 'IN_APP_BROWSER';
+    if (isInAppBrowser() || (isIos() && !isIosSafariBrowser())) return 'IN_APP_BROWSER';
     if (typeof window.__tbDeferredInstall !== 'undefined' && window.__tbDeferredInstall) return 'ANDROID_NATIVE';
     if (isIos()) return 'IPHONE_SAFARI';
     if (isAndroid()) return 'ANDROID_MANUAL';
@@ -6568,14 +9445,14 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
   let __iosCoachStep = 0;
   const IOS_COACH = [
-    { line: 'TAP SHARE', hint: 'Box with ↑ — often bottom center, or via More (⋯) then Share' },
-    { line: 'ADD TO HOME SCREEN', hint: 'Scroll the Share sheet if needed — look for the Home Screen option' },
-    { line: 'TAP ADD', hint: 'Confirm in the top corner — then open the new Thunder icon' }
+    { line: 'TAP SHARE', hint: 'The square with the arrow up' },
+    { line: 'ADD TO HOME SCREEN', hint: 'Scroll the share list if you have to' },
+    { line: 'TAP ADD', hint: 'Then open the new Thunder icon' }
   ];
   const IOS_COACH_ALT = [
-    { line: 'FIND SHARE', hint: 'Some Safari layouts: tap More (⋯) first, then Share' },
-    { line: 'ADD TO HOME SCREEN', hint: 'May appear as “Add to Home Screen” or under Edit Actions' },
-    { line: 'TAP ADD', hint: 'Then leave Safari and open Thunder Board from your Home Screen' }
+    { line: 'FIND SHARE', hint: 'Safari: More (⋯), then Share' },
+    { line: 'ADD TO HOME SCREEN', hint: 'May sit under Edit Actions' },
+    { line: 'TAP ADD', hint: 'Then open Thunder from the Home Screen' }
   ];
 
   function renderIosCoachStep() {
@@ -6618,12 +9495,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     __iosCoachAlt = false;
     renderIosCoachStep();
     const sub = document.getElementById('ios-install-sub');
-    if (sub) {
-      const prog = getInstallProgress();
-      sub.textContent = (prog === 'RETURNED_NOT_INSTALLED' || prog === 'INSTALL_ATTEMPTED')
-        ? 'STILL WITH YOU. ⚡ Pick up where you left off.'
-        : 'Three quick taps.';
-    }
+    if (sub) sub.textContent = 'Share → Add to Home Screen → Add';
     el.classList.remove('hidden');
     el.setAttribute('aria-hidden', 'false');
   }
@@ -6636,6 +9508,12 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   function openInAppInstallOverlay() {
     const el = document.getElementById('inapp-install-overlay');
     if (!el) return;
+    if (__tourActive) return;
+    const splash = document.getElementById('splash');
+    if (splash && !splash.classList.contains('splash-done') && splash.style.display !== 'none') {
+      if (!splash.classList.contains('hidden')) return;
+    }
+    if (typeof isTourComplete === 'function' && !isTourComplete()) return;
     const title = document.getElementById('inapp-install-title');
     const sub = el.querySelector('.ios-install-sub');
     if (isAndroid()) {
@@ -6658,7 +9536,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
   async function ensureServiceWorker() {
     if (!('serviceWorker' in navigator)) return null;
     try {
-      const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+      const reg = await navigator.serviceWorker.register('/sw.js?v=' + encodeURIComponent((cfg().APP_BUILD || '1')), { scope: '/' });
       await navigator.serviceWorker.ready;
       return reg;
     } catch (e) {
@@ -6703,6 +9581,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     }
     if (isIos() && !isStandalonePwa()) {
       setAlertsHint('iPhone: Add to Home Screen first, then open from the icon and turn alerts on.');
+      try { launchAddToHomeScreen(); } catch (e) {}
       return false;
     }
 
@@ -6728,7 +9607,15 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
     const res = await fetch('/.netlify/functions/push-subscribe', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: await (async function () {
+        const h = { 'Content-Type': 'application/json' };
+        try {
+          const { data } = await getSb().auth.getSession();
+          const t = data && data.session && data.session.access_token;
+          if (t) h.Authorization = 'Bearer ' + t;
+        } catch (e) {}
+        return h;
+      })(),
       body: JSON.stringify({ subscription: sub.toJSON() })
     });
     if (!res.ok) {
@@ -6739,7 +9626,7 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     }
 
     save('gatheringAlertsOn', true);
-    setAlertsHint('On. You’ll get a ping when leadership posts an announcement.');
+    setAlertsHint('On. Gathering, leadership line. Nothing else.');
     return true;
   }
 
@@ -6770,6 +9657,71 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     return true;
   }
 
+  async function quietPushSubscribe() {
+    try {
+      const vapid = (cfg().VAPID_PUBLIC_KEY || '').trim();
+      if (!vapid || !('serviceWorker' in navigator) || !('PushManager' in window)) return null;
+      if (!('Notification' in window) || Notification.permission === 'denied') return null;
+      const perm = Notification.permission === 'granted'
+        ? 'granted'
+        : await requestNotifyPermission();
+      if (perm !== 'granted') return null;
+      const reg = await ensureServiceWorker();
+      if (!reg) return null;
+      let sub = await reg.pushManager.getSubscription();
+      if (!sub) {
+        sub = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(vapid)
+        });
+      }
+      await fetch('/.netlify/functions/push-subscribe', {
+        method: 'POST',
+        headers: await (async function () {
+          const h = { 'Content-Type': 'application/json' };
+          try {
+            const { data } = await getSb().auth.getSession();
+            const t = data && data.session && data.session.access_token;
+            if (t) h.Authorization = 'Bearer ' + t;
+          } catch (e) {}
+          return h;
+        })(),
+        body: JSON.stringify({ subscription: sub.toJSON() })
+      });
+      save('gatheringAlertsOn', true);
+      try { window.__tbPushEndpoint = sub.endpoint; } catch (e) {}
+      return sub;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async function notifyImInBroadcast() {
+    try {
+      const first = (typeof knownFirstName === 'function' && knownFirstName()) || '';
+      const headers = { 'Content-Type': 'application/json' };
+      try {
+        const sb = getSb && getSb();
+        if (sb && sb.auth && sb.auth.getSession) {
+          const { data } = await sb.auth.getSession();
+          const accessToken = (data && data.session && data.session.access_token) || '';
+          if (accessToken) headers.Authorization = 'Bearer ' + accessToken;
+        }
+      } catch (e) {}
+      fetch('/.netlify/functions/push-im-in', {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify({
+          name: first,
+          meeting_key: meetingKey(),
+          endpoint: window.__tbPushEndpoint || ''
+        })
+      }).catch(function () {});
+    } catch (e) {
+      console.warn('im-in push', e);
+    }
+  }
+
   let __tbBroadcastInFlight = false;
   async function broadcastAnnouncementPush(title, bodyText) {
     // Authority is Supabase session + app_members leader/admin — not LEADER_PIN.
@@ -6798,7 +9750,9 @@ $('#thunder-input').addEventListener('keydown', (e) => {
         },
         body: JSON.stringify({
           title: String(title || 'Sons of Thunder').slice(0, 80),
-          body: String(bodyText != null ? bodyText : 'Open Thunder Board').slice(0, 120)
+          body: String(bodyText != null ? bodyText : '').slice(0, 120),
+          url: '/?view=home',
+          tag: 'thunder-leader'
         })
       });
       const data = await res.json().catch(() => ({}));
@@ -6817,19 +9771,162 @@ $('#thunder-input').addEventListener('keydown', (e) => {
 
 
   // Housekeeping: bounded, event-driven only — no polling, no auto-delete of user data
+  function cacheClearBlocked() {
+    try {
+      if (typeof __tourActive !== 'undefined' && __tourActive) return true;
+      if (document.body.classList.contains('tb-tour-open')) return true;
+      if (document.body.classList.contains('tb-ask-open')) return true;
+      if (document.body.classList.contains('tb-raffle-live')) return true;
+      if (document.body.classList.contains('tb-axum-open')) return true;
+      const gate = document.getElementById('auth-gate');
+      if (gate && !gate.classList.contains('hidden')) return true;
+      const ae = document.activeElement;
+      if (ae && /INPUT|TEXTAREA|SELECT/.test(ae.tagName || '')) return true;
+    } catch (e) {}
+    return false;
+  }
+
+  function openHardRefresh() {
+    if (cacheClearBlocked()) return;
+    try {
+      if (sessionStorage.getItem('tb_hard_pending') === '1') {
+        sessionStorage.setItem('tb_hard_pending', '0');
+        sessionStorage.setItem('tb_hard_at', String(Date.now()));
+        return;
+      }
+      var last = parseInt(sessionStorage.getItem('tb_hard_at') || '0', 10);
+      if (last && Date.now() - last < 10000) return;
+      sessionStorage.setItem('tb_hard_pending', '1');
+      sessionStorage.setItem('tb_hard_at', String(Date.now()));
+    } catch (e) {}
+    forceRefreshApp(true);
+  }
+
+  function pingServiceWorkerUpdate() {
+    try {
+      if (!('serviceWorker' in navigator)) return;
+      navigator.serviceWorker.getRegistration().then(function (reg) {
+        if (reg && reg.update) reg.update().catch(function () {});
+      }).catch(function () {});
+    } catch (e) {}
+  }
+
+  function reconcileOnWake() {
+    try { huntGhosts(); } catch (e0) {}
+    try { refreshAlertsToggleUI(); } catch (e) {}
+    try {
+      const sb = getSb && getSb();
+      if (sb && sb.auth && sb.auth.getSession) sb.auth.getSession().catch(function () {});
+    } catch (e) {}
+    try { pingServiceWorkerUpdate(); } catch (e) {}
+    try { checkStaleBuild(); } catch (e) {}
+  }
+
   function runLaunchHousekeeping() {
-    /* Once per open: light, event-driven — no polling */
+    try { huntGhosts(); } catch (e0) {}
     try {
       const build = (cfg().APP_BUILD || '').toString();
       if (build) sessionStorage.setItem('tb_app_build', build);
     } catch (e) {}
     try {
-      /* Drop ghost dual calendar if any prior build injected it */
       const ghost = document.getElementById('rsvp-add-cal');
       if (ghost) ghost.remove();
     } catch (e) {}
     try { renderRsvp(); } catch (e) {}
   }
+
+  const TB_TRAP_IDS = [
+    'brother-detail', 'info-detail', 'memory-viewer', 'auth-gate', 'contact-swap',
+    'raffle-live', 'cal-confirm-sheet', 'imin-a2hs-sheet', 'ios-install-overlay',
+    'inapp-install-overlay', 'axum-drop', 'axum-card', 'install-modal',
+    'thunder-modal', 'contact-qr-modal', 'profile-modal', 'media-modal',
+    'qr-explainer-modal'
+  ];
+
+  function huntGhosts() {
+    var tour = document.getElementById('tb-tour');
+    var tourOpen = document.body.classList.contains('tb-tour-open');
+    var nav = document.querySelector('nav.bottom-nav');
+
+    if (tour) {
+      var hidden = tour.classList.contains('hidden');
+      if (hidden && tourOpen) {
+        document.body.classList.remove('tb-tour-open', 'tb-tour-mandatory');
+        tourOpen = false;
+      }
+      if (!hidden && tourOpen) {
+        tour.style.setProperty('display', 'flex', 'important');
+        tour.style.setProperty('visibility', 'visible', 'important');
+        tour.style.setProperty('pointer-events', 'auto', 'important');
+        tour.style.setProperty('z-index', '50000', 'important');
+        tour.style.setProperty('inset', '0', 'important');
+        tour.style.setProperty('width', '100%', 'important');
+        tour.style.setProperty('height', '100%', 'important');
+        tour.style.setProperty('opacity', '1', 'important');
+        if (nav) nav.style.setProperty('pointer-events', 'none', 'important');
+        TB_TRAP_IDS.forEach(function (id) {
+          var el = document.getElementById(id);
+          if (el && !el.classList.contains('hidden')) {
+            el.classList.add('hidden');
+            el.setAttribute('aria-hidden', 'true');
+          }
+        });
+      } else {
+        tour.style.removeProperty('display');
+        tour.style.removeProperty('visibility');
+        tour.style.removeProperty('pointer-events');
+        tour.style.removeProperty('z-index');
+        tour.style.removeProperty('inset');
+        tour.style.removeProperty('width');
+        tour.style.removeProperty('height');
+        tour.style.removeProperty('opacity');
+        if (nav) nav.style.removeProperty('pointer-events');
+      }
+    }
+
+    var bd = document.getElementById('brother-detail');
+    if (bd) {
+      var nm = document.getElementById('brother-detail-name');
+      if (!nm || !String(nm.textContent || '').trim()) {
+        bd.classList.add('hidden');
+        bd.setAttribute('aria-hidden', 'true');
+        bd.style.setProperty('display', 'none', 'important');
+        try { closeBrotherDetail(); } catch (e) {}
+      } else if (!bd.classList.contains('hidden')) {
+        bd.style.removeProperty('display');
+      }
+    }
+
+    var info = document.getElementById('info-detail');
+    if (info && !info.classList.contains('hidden')) {
+      var it = document.getElementById('info-detail-title');
+      var ib = document.getElementById('info-detail-body');
+      var t = (it && it.textContent) || '';
+      var b = (ib && ib.textContent) || '';
+      if (!String(t).trim() && !String(b).trim()) {
+        try { closeInfoDetail(); } catch (e2) { info.classList.add('hidden'); }
+      }
+    }
+
+    if (Array.isArray(brothers)) {
+      var before = brothers.length;
+      brothers = brothers.filter(function (row) {
+        return row && String(row.name || '').trim();
+      });
+      if (brothers.length !== before) {
+        try { save('brothers', brothers); } catch (e3) {}
+      }
+    }
+
+    var splash = document.getElementById('splash');
+    if (splash && (splash.classList.contains('splash-done') || splash.classList.contains('splash-out'))) {
+      splash.style.setProperty('display', 'none', 'important');
+      splash.style.setProperty('pointer-events', 'none', 'important');
+    }
+
+    try { unlockBodyIfClear(); } catch (e4) {}
+  }
+  try { window.huntGhosts = huntGhosts; } catch (eH) {}
 
   function setupHousekeeping() {
     if (window.__tbHousekeepingBound) return;
@@ -6839,21 +9936,96 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     try {
       const prev = sessionStorage.getItem('tb_app_build');
       if (build && prev && prev !== build) {
-        // New deploy detected in this browser tab session — nudge, never force mid-task
         console.info('Thunder Board: new build', build, '(was', prev + ')');
       }
       if (build) sessionStorage.setItem('tb_app_build', build);
     } catch (e) {}
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState !== 'visible') return;
-      // Reconcile alerts toggle with real PushManager (never trust localStorage alone)
-      try { refreshAlertsToggleUI(); } catch (e) {}
-      // Soft session touch: if Supabase client exists, refresh session quietly
+      if (document.visibilityState !== 'visible') {
+        window.__tbHiddenAt = Date.now();
+        return;
+      }
+      reconcileOnWake();
       try {
-        const sb = getSb && getSb();
-        if (sb && sb.auth && sb.auth.getSession) sb.auth.getSession().catch(function () {});
-      } catch (e) {}
+        pingServiceWorkerUpdate();
+      } catch (eV) {}
     });
+    window.addEventListener('online', function () {
+      reconcileOnWake();
+    });
+    window.addEventListener('pageshow', function (e) {
+      reconcileOnWake();
+    });
+    window.addEventListener('focus', function () {
+      try { checkStaleBuild(); } catch (e) {}
+    });
+    setTimeout(function () { try { checkStaleBuild(); } catch (e) {} }, 2500);
+    if (!window.__tbBuildWatch) {
+      window.__tbBuildWatch = setInterval(function () {
+        if (document.visibilityState !== 'visible') return;
+        try { pingServiceWorkerUpdate(); } catch (e) {}
+        try { checkStaleBuild(); } catch (e) {}
+      }, 45000);
+    }
+    try {
+      if ('serviceWorker' in navigator && !window.__tbSwCtrlBound) {
+        window.__tbSwCtrlBound = true;
+        navigator.serviceWorker.addEventListener('controllerchange', function () {
+          try { checkStaleBuild(); } catch (e) {}
+        });
+      }
+    } catch (e) {}
+  }
+
+  async function checkStaleBuild() {
+    try {
+      if (cacheClearBlocked()) {
+        if (!window.__tbStaleRetry) {
+          window.__tbStaleRetry = setTimeout(function () {
+            window.__tbStaleRetry = null;
+            try { checkStaleBuild(); } catch (e) {}
+          }, 8000);
+        }
+        return;
+      }
+      const r = await fetch('build.json?_=' + Date.now(), { cache: 'no-store' });
+      if (!r.ok) return;
+      const j = await r.json();
+      const live = String(j.APP_BUILD || '');
+      const here = String((cfg() && cfg().APP_BUILD) || '');
+      if (!live || !here || live === here) return;
+      if (sessionStorage.getItem('tb_reloading') === live) return;
+      sessionStorage.setItem('tb_reloading', live);
+      forceRefreshApp();
+    } catch (e) {}
+  }
+
+  async function forceRefreshApp(silent) {
+    // Cache/SW only. Never delete sb-* / supabase keys or IndexedDB auth.
+    if (!silent) {
+      try { tbToast('Updating… hang tight', 4000); } catch (e) {}
+    }
+    try {
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((r) => r.unregister()));
+      }
+    } catch (e) {}
+    try {
+      if (window.caches && caches.keys) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+    } catch (e) {}
+    setTimeout(() => {
+      try {
+        const u = new URL(window.location.href);
+        u.searchParams.set('_tb', String(Date.now()));
+        window.location.replace(u.toString());
+      } catch (e) {
+        window.location.reload(true);
+      }
+    }, 280);
   }
 
   function setupGatheringAlerts() {
@@ -6878,20 +10050,645 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     });
   }
 
+
+  // ---------- PRODUCT TOUR — 7-slide (restored 20260818) ----------
+  const TB_TOUR_VERSION = 42;
+  function tourStorageKey() { return 'thunderTourV' + TB_TOUR_VERSION; }
+  function isTourComplete() {
+    try {
+      const s = load(tourStorageKey());
+      return !!(s && s.done);
+    } catch (e) { return false; }
+  }
+  function setTourState(patch) {
+    try {
+      const cur = load(tourStorageKey()) || {};
+      save(tourStorageKey(), Object.assign({}, cur, patch, { v: TB_TOUR_VERSION }));
+    } catch (e) {}
+  }
+  function getTourState() {
+    try { return load(tourStorageKey()) || {}; } catch (e) { return {}; }
+  }
+
+  /* Tour copy/boards. Memories slide = DROP A PIC, no fake mini photos. */
+  const TB_TOUR_STEPS = [
+    {
+      id: 'welcome',
+      headline: 'FOLLOW ME',
+      sub: 'I\u2019LL SHOW YOU THE ROOM',
+      body: 'I\u2019m Thunder. I\u2019ve got your back. Let me show you around.',
+      nextLabel: 'LET\u2019S GO'
+    },
+    {
+      id: 'locked-in',
+      headline: 'LOCKED IN',
+      sub: 'NEVER MISS WHAT MATTERS',
+      body: 'Tap I\u2019M IN. We save your seat and remind you so you don\u2019t miss it.',
+      nextLabel: 'NEXT'
+    },
+    {
+      id: 'brothers',
+      headline: 'BROTHERS',
+      sub: 'THE ROUND TABLE',
+      body: 'A seat for every man. Names. Faces. The table.',
+      nextLabel: 'NEXT'
+    },
+    {
+      id: 'memories',
+      headline: 'MEMORIES',
+      sub: 'DROP A PIC.',
+      body: 'The nights we keep. Drop a photo. Build the history.',
+      nextLabel: 'NEXT'
+    },
+    {
+      id: 'text-leader',
+      headline: 'TEXT A LEADER',
+      sub: 'WHEN YOU NEED IT MOST',
+      body: 'Rough day? Hard season? Text a leader. Confidential. Always.',
+      nextLabel: 'NEXT'
+    },
+    {
+      id: 'ask-thunder',
+      headline: 'ASK THUNDER',
+      sub: 'WHAT I CAN DO',
+      body: 'Stay sharp. I can take just about anything on your mind \u2014 your boy, the truck, a 20-minute workout, the thing you don\u2019t want to look stupid walking into. I got you, brother. I don\u2019t listen until you tap.',
+      nextLabel: 'LET\u2019S GO'
+    }
+  ];
+
+  let __tourIdx = 0;
+  let __tourActive = false;
+
+  function tourReducedMotion() {
+    try { return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; }
+  }
+
+  let __tourTypeTimer = null;
+  let __tourTypeToken = 0;
+  let __tourBubbleDelay = null;
+  let __hostFidgetTimer = null;
+  let __hostGlintTimer = null;
+  let __hostSwayTimer = null;
+
+  function stopTourHostMotion() {
+    [__hostFidgetTimer, __hostGlintTimer, __hostSwayTimer].forEach(function (t) {
+      if (t) try { clearTimeout(t); } catch (e) {}
+    });
+    __hostFidgetTimer = __hostGlintTimer = __hostSwayTimer = null;
+    const host = document.getElementById('tb-tour-host');
+    if (host) {
+      host.classList.remove('tb-host-enter', 'tb-host-fidget', 'tb-host-glint', 'tb-host-sway');
+    }
+  }
+
+  /* Tour host idle — host only. Irregular. Never a metronome. */
+  function applyTourHostExpression(idx) {
+    const host = document.getElementById('tb-tour-host');
+    if (!host) return;
+    stopTourHostMotion();
+    const moods = ['arrive', 'lockin', 'brotherhood', 'watch', 'listen', 'appreciate'];
+    const mood = moods[idx] || 'arrive';
+    const bolt = 'assets/thunder-tour-host.png?v=20260819-bond2';
+    const tux = 'assets/thunder-bond-hero.png?v=20260819-tux2';
+    if (idx === 5) {
+      host.className = 'tb-guide-thunder tb-host-alive tb-host-bond';
+      host.src = tux;
+      host.removeAttribute('srcset');
+      if (!tourReducedMotion()) {
+        void host.offsetWidth;
+        host.classList.add('tb-host-bond-pop');
+      }
+    } else {
+      host.className = 'tb-guide-thunder tb-host-alive tb-host-' + mood;
+      if (host.getAttribute('src') !== bolt) {
+        host.src = bolt;
+        host.setAttribute('srcset', bolt + ' 400w, assets/thunder-tour-host@2x.png?v=20260819-s47 800w');
+      }
+    }
+    if (tourReducedMotion()) return;
+    /* CSS owns host motion per board. No fidget shake. */
+    return;
+    host.classList.add('tb-host-enter');
+    __hostFidgetTimer = setTimeout(function () {
+      host.classList.remove('tb-host-enter');
+      host.classList.add('tb-host-fidget');
+      setTimeout(function () { host.classList.remove('tb-host-fidget'); }, 520);
+    }, 720 + Math.random() * 900);
+    function glintTick() {
+      if (!document.body.classList.contains('tb-tour-open')) return;
+      host.classList.add('tb-host-glint');
+      setTimeout(function () { host.classList.remove('tb-host-glint'); }, 260);
+      __hostGlintTimer = setTimeout(glintTick, 4800 + Math.random() * 7200);
+    }
+    __hostGlintTimer = setTimeout(glintTick, 1800 + Math.random() * 2400);
+    if (idx !== moods.length - 1) {
+      __hostSwayTimer = setTimeout(function () {
+        host.classList.add('tb-host-sway');
+        setTimeout(function () { host.classList.remove('tb-host-sway'); }, 1400);
+      }, 4200 + Math.random() * 2200);
+    }
+  }
+
+  function stopTourTypewriter() {
+    if (__tourTypeTimer) {
+      try { clearTimeout(__tourTypeTimer); } catch (e) {}
+      __tourTypeTimer = null;
+    }
+  }
+
+  function typeTourBody(fullText, bodyEl) {
+    stopTourTypewriter();
+    if (!bodyEl) return;
+    const text = fullText || '';
+    const bubble = bodyEl.closest('.tb-guide-bubble');
+    if (bubble && !tourReducedMotion()) {
+      bubble.classList.remove('tb-speak-flash');
+      void bubble.offsetWidth;
+      bubble.classList.add('tb-speak-flash');
+    }
+    if (tourReducedMotion() || !text) {
+      bodyEl.textContent = text;
+      bodyEl.classList.remove('tb-tour-typing');
+      return;
+    }
+    const token = ++__tourTypeToken;
+    bodyEl.textContent = '';
+    bodyEl.classList.add('tb-tour-typing');
+    let i = 0;
+    /* ~70 chars/sec — snappy, still a speak. Reduced-motion dumps full text above. */
+    const ms = 24;
+    try { tbFeedback.selection(); } catch (e) {}
+    function tick() {
+      if (token !== __tourTypeToken) return;
+      i += 1;
+      bodyEl.textContent = text.slice(0, i);
+      if (i < text.length) {
+        __tourTypeTimer = setTimeout(tick, ms);
+      } else {
+        bodyEl.classList.remove('tb-tour-typing');
+        __tourTypeTimer = null;
+      }
+    }
+    __tourTypeTimer = setTimeout(tick, 110);
+  }
+
+  /* Brothers grid — 5 mechanics, personality changes speed/amp/timing. No float. */
+  const BRO_STYLE = {
+    soldier: { amp: 0.65, speed: 0.8 },
+    hippie:  { amp: 1.15, speed: 1.45 },
+    dad:     { amp: 0.9,  speed: 1.05 },
+    tough:   { amp: 0.75, speed: 0.9 },
+    cool:    { amp: 0.7,  speed: 1.15 },
+    goof:    { amp: 1.1,  speed: 0.75 }
+  };
+  let __broIdleTimers = [];
+  function broSet(el, x, y, z, t, ms) {
+    el.style.transitionDuration = (ms || 500) + 'ms';
+    el.style.setProperty('--bro-x', (x || 0) + 'deg');
+    el.style.setProperty('--bro-y', (y || 0) + 'deg');
+    el.style.setProperty('--bro-z', (z || 0) + 'deg');
+    el.style.setProperty('--bro-t', (t || 0) + 'px');
+  }
+  function broRest(el, ms) { broSet(el, 0, 0, 0, 0, ms); }
+  function broAfter(ms, fn) {
+    const t = setTimeout(fn, ms);
+    __broIdleTimers.push(t);
+    return t;
+  }
+  function stopBroPersonaIdle() {
+    __broIdleTimers.forEach(function (t) { try { clearTimeout(t); } catch (e) {} });
+    __broIdleTimers = [];
+    document.querySelectorAll('.tb-live-bros-full .tb-live-face').forEach(function (el) {
+      broRest(el, 300);
+    });
+  }
+  function startBroPersonaIdle() {
+    stopBroPersonaIdle();
+    if (tourReducedMotion()) return;
+    document.querySelectorAll('.tb-live-roundtable .tb-live-face, .tb-live-bros-full .tb-live-face').forEach(function (el, i) {
+      const persona = el.getAttribute('data-persona') || 'dad';
+      const st = BRO_STYLE[persona] || BRO_STYLE.dad;
+      const A = st.amp;
+      const S = st.speed;
+      const born = Date.now();
+      function mechLook() {
+        if (persona === 'soldier') {
+          broSet(el, 0, -10 * A, 0, 0, 380 * S);
+          broAfter(420 * S, function () { broSet(el, 0, 10 * A, 0, 0, 480 * S); });
+          broAfter(980 * S, function () { broRest(el, 360 * S); });
+        } else if (persona === 'hippie') {
+          broSet(el, 2 * A, -8 * A, 4 * A, 0, 900 * S);
+          broAfter(1100 * S, function () { broSet(el, 0, 9 * A, -3 * A, 0, 1100 * S); });
+          broAfter(2400 * S, function () { broRest(el, 800 * S); });
+        } else if (persona === 'cool') {
+          broSet(el, 7 * A, 0, 0, -1, 500 * S);
+          broAfter(900 * S, function () { broRest(el, 500 * S); });
+        } else if (persona === 'goof') {
+          broSet(el, 0, -14 * A, 0, 0, 180);
+          broAfter(260, function () { broRest(el, 140); });
+          broAfter(480, function () { broSet(el, 0, -14 * A, 0, 0, 160); });
+          broAfter(720, function () { broRest(el, 200); });
+        } else if (persona === 'tough') {
+          broSet(el, 3 * A, 4 * A, 0, 0, 400 * S);
+          broAfter(700 * S, function () { broRest(el, 400 * S); });
+        } else {
+          broSet(el, 0, 9 * A, 0, 0, 220);
+          broAfter(380, function () { broRest(el, 260); });
+        }
+      }
+      function mechShift() {
+        if (persona === 'soldier') broSet(el, 0, 0, 0, -1.5 * A, 180);
+        else if (persona === 'hippie') broSet(el, 0, 0, 6 * A, 1 * A, 800 * S);
+        else if (persona === 'cool' || persona === 'tough') broSet(el, -5 * A, 0, 0, 0, 400 * S);
+        else broSet(el, 0, 0, 3 * A, 1 * A, 500);
+        broAfter((persona === 'hippie' ? 1400 : 700) * S, function () { broRest(el, 400 * S); });
+      }
+      function mechReset() {
+        if (persona === 'soldier') { broSet(el, 0, 0, 0, -2, 140); broAfter(220, function () { broRest(el, 160); }); }
+        else if (persona === 'tough') { broSet(el, 0, 0, -8 * A, 0, 220); broAfter(480, function () { broRest(el, 220); }); }
+        else if (persona === 'hippie') { broSet(el, 0, 0, 5 * A, 0, 700); broAfter(800, function () { broSet(el, 0, 0, -4 * A, 0, 700); }); broAfter(1600, function () { broRest(el, 700); }); }
+        else { broSet(el, 0, 0, 7 * A, 0, 280); broAfter(400, function () { broSet(el, 0, 0, -5 * A, 0, 280); }); broAfter(760, function () { broRest(el, 280); }); }
+      }
+      function mechRare() {
+        if (persona === 'cool') {
+          broSet(el, 10 * A, 0, 0, -2, 600);
+          broAfter(1400, function () { broRest(el, 500); });
+        } else if (persona === 'soldier') {
+          mechLook();
+          broAfter(1200 * S, function () { broSet(el, 0, 0, 0, -2, 160); });
+          broAfter(1500 * S, function () { broRest(el, 160); });
+        } else if (persona === 'goof') mechLook();
+        else if (persona === 'dad') {
+          broSet(el, 0, 8 * A, 0, 0, 200);
+          broAfter(600, function () { broSet(el, 0, 0, 4 * A, 0, 300); });
+          broAfter(1100, function () { broRest(el, 300); });
+        } else if (persona === 'tough') {
+          broSet(el, 0, 0, -10 * A, 0, 200);
+          broAfter(500, function () { broRest(el, 220); });
+        } else {
+          broSet(el, 4 * A, 0, 5 * A, 1, 900 * S);
+          broAfter(1600 * S, function () { broRest(el, 800 * S); });
+        }
+      }
+      function loop() {
+        if (__tourIdx !== 2) return;
+        const quiet = Date.now() - born;
+        const r = Math.random();
+        if (quiet > 8000 && r < 0.18) mechRare();
+        else if (r < 0.28) mechLook();
+        else if (r < 0.55) mechShift();
+        else if (r < 0.78) mechReset();
+        else mechLook();
+        const gap = (2800 + Math.random() * 4200) * S + i * 180;
+        broAfter(gap, loop);
+      }
+      broAfter(i * 28, function () {
+        mechLook();
+        broAfter(900 + Math.random() * 400, loop);
+      });
+    });
+  }
+
+  function renderTourSlide() {
+    const step = TB_TOUR_STEPS[__tourIdx];
+    if (!step) return;
+    const img = document.getElementById('tb-tour-slide-img');
+    const headline = document.getElementById('tb-tour-headline');
+    const body = document.getElementById('tb-tour-body');
+    const progress = document.getElementById('tb-tour-progress');
+    const next = document.getElementById('tb-tour-next');
+    const back = document.getElementById('tb-tour-back');
+    const dots = document.getElementById('tb-tour-dots');
+
+    document.querySelectorAll('.tb-live-slide').forEach(function (el) {
+      const on = Number(el.getAttribute('data-slide')) === __tourIdx;
+      el.classList.toggle('is-on', on);
+    });
+    const live = document.getElementById('tb-tour-live');
+    if (live && !tourReducedMotion() && __tourIdx !== 5) {
+      live.classList.remove('tb-tour-slide-in');
+      void live.offsetWidth;
+      live.classList.add('tb-tour-slide-in');
+    }
+    if (img) {
+      img.src = step.slide;
+      img.alt = step.headline || '';
+    }
+    const sub = document.getElementById('tb-tour-sub');
+    const stage = document.querySelector('#tb-tour .tb-tour-stage');
+    if (stage) stage.setAttribute('data-board', String(__tourIdx));
+    if (headline) headline.textContent = step.headline || '';
+    if (sub) {
+      sub.textContent = step.sub || '';
+      sub.classList.toggle('hidden', !step.sub);
+    }
+    applyTourHostExpression(__tourIdx);
+    if (__tourBubbleDelay) {
+      try { clearTimeout(__tourBubbleDelay); } catch (e) {}
+      __tourBubbleDelay = null;
+    }
+    if (__tourIdx === 2) {
+      startBroPersonaIdle();
+      if (body) body.textContent = '';
+      __tourBubbleDelay = setTimeout(function () {
+        typeTourBody(step.body || '', body);
+      }, 1100);
+    } else if (__tourIdx === 5) {
+      stopBroPersonaIdle();
+      if (body) body.textContent = '';
+      __tourBubbleDelay = setTimeout(function () {
+        typeTourBody(step.body || '', body);
+      }, 720);
+    } else {
+      stopBroPersonaIdle();
+      typeTourBody(step.body || '', body);
+    }
+    if (progress) progress.textContent = (__tourIdx + 1) + ' OF ' + TB_TOUR_STEPS.length;
+    if (next) next.textContent = step.nextLabel || (__tourIdx >= TB_TOUR_STEPS.length - 1 ? 'DONE' : 'NEXT');
+    if (back) back.disabled = __tourIdx <= 0;
+    if (dots) {
+      dots.innerHTML = TB_TOUR_STEPS.map(function (_, i) {
+        return '<span class="' + (i === __tourIdx ? 'on' : '') + '"></span>';
+      }).join('');
+    }
+  }
+
+  function showTour() {
+    const root = document.getElementById('tb-tour');
+    if (!root) return;
+    try { closeInAppInstallOverlay(); } catch (e) {}
+    try { closeIosInstallOverlay(); } catch (e) {}
+    root.classList.remove('hidden', 'splash-done', 'splash-out');
+    root.removeAttribute('hidden');
+    root.setAttribute('aria-hidden', 'false');
+    root.style.setProperty('display', 'flex', 'important');
+    root.style.setProperty('visibility', 'visible', 'important');
+    root.style.setProperty('opacity', '1', 'important');
+    root.style.setProperty('pointer-events', 'auto', 'important');
+    root.style.setProperty('z-index', '50000', 'important');
+    document.body.classList.add('tb-tour-open');
+    try { tbKeepAwake('tour'); } catch (e) {}
+    syncTourExitUI();
+    renderTourSlide();
+    try { huntGhosts(); } catch (eH) {}
+  }
+
+  function hideTour() {
+    stopTourTypewriter();
+    if (__tourBubbleDelay) {
+      try { clearTimeout(__tourBubbleDelay); } catch (e) {}
+      __tourBubbleDelay = null;
+    }
+    stopTourHostMotion();
+    stopBroPersonaIdle();
+    const root = document.getElementById('tb-tour');
+    if (root) {
+      root.classList.add('hidden');
+      root.setAttribute('aria-hidden', 'true');
+    }
+    document.body.classList.remove('tb-tour-open');
+    document.body.classList.remove('tb-tour-mandatory');
+    __tourActive = false;
+    try { tbAllowSleep('tour'); } catch (e) {}
+    try { huntGhosts(); } catch (eH) {}
+    try { unlockBodyIfClear(); } catch (e2) {}
+  }
+
+  function isTourMandatory() {
+    return false; // First-run is optional. Thunder invites once from backstage.
+  }
+
+  function syncTourExitUI() {
+    const lock = !!(__tourActive && isTourMandatory());
+    document.body.classList.toggle('tb-tour-mandatory', lock);
+    const skip = document.getElementById('tb-tour-skip');
+    const closeBtn = document.getElementById('tb-tour-close');
+    if (skip) {
+      skip.classList.toggle('hidden', lock);
+      skip.setAttribute('aria-hidden', lock ? 'true' : 'false');
+    }
+    if (closeBtn) {
+      closeBtn.classList.toggle('hidden', lock);
+      closeBtn.setAttribute('aria-hidden', lock ? 'true' : 'false');
+    }
+  }
+
+  function skipTour() {
+    if (isTourMandatory()) return;
+    setTourState({ done: true, skipped: true, at: Date.now() });
+    hideTour();
+  }
+
+  function completeTour() {
+    setTourState({ done: true, completed: true, at: Date.now() });
+    hideTour();
+    /* Stay in the room. Install lives on More — not a trap after the tour. */
+  }
+
+  function startTour(opts) {
+    opts = opts || {};
+    if (__tourActive && !opts.force) return;
+    if (!opts.force && !opts.replay && isTourComplete()) return;
+    try { closeBrotherDetail(); } catch (e) {}
+    try {
+      var shell = document.getElementById('brother-detail');
+      if (shell) {
+        shell.classList.add('hidden');
+        shell.setAttribute('aria-hidden', 'true');
+        shell.style.setProperty('display', 'none', 'important');
+      }
+    } catch (e1) {}
+    try { closeContactSwap(); } catch (e2) {}
+    try { closeAuthGate(); } catch (e3) {}
+    try { closeInfoDetail(); } catch (e4) {}
+    try { closeMemoryViewer(); } catch (e5) {}
+    __tourActive = true;
+    __tourIdx = 0;
+    showTour();
+  }
+  try { window.startTour = startTour; } catch (e) {}
+
+  function tourNext() {
+    if (!__tourActive) return;
+    if (__tourIdx >= TB_TOUR_STEPS.length - 1) {
+      completeTour();
+      return;
+    }
+    if (__tourIdx === 4 && !tourReducedMotion()) {
+      const stage = document.querySelector('#tb-tour .tb-tour-stage');
+      if (stage) stage.classList.add('tb-finale-leave');
+      setTimeout(function () {
+        if (stage) stage.classList.remove('tb-finale-leave');
+        __tourIdx = 5;
+        renderTourSlide();
+      }, 360);
+      return;
+    }
+    __tourIdx += 1;
+    renderTourSlide();
+  }
+
+  function tourBack() {
+    if (!__tourActive || __tourIdx <= 0) return;
+    __tourIdx -= 1;
+    renderTourSlide();
+  }
+
+  function presentationScrub() {
+    try { closeCalConfirmSheet(); } catch (e) {}
+    try { closeAxumDrop(); } catch (e) {}
+    try { closeAxumCard(); } catch (e) {}
+    ['ios-install-overlay', 'inapp-install-overlay', 'welcome', 'axum-drop', 'axum-card', 'cal-confirm-sheet', 'contact-swap', 'imin-a2hs-sheet'].forEach(function (id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.add('hidden');
+        el.setAttribute('aria-hidden', 'true');
+      }
+    });
+    try { document.body.classList.remove('cal-sheet-open', 'tb-axum-open'); } catch (e) {}
+    try { document.body.style.overflow = ''; } catch (e) {}
+  }
+
+  function bindLeaderGhost() {
+    /* Leadership stays hidden until refreshChairMode confirms an active leader/admin. */
+    const zone = document.querySelector('.admin-zone');
+    if (zone) {
+      zone.classList.add('hidden');
+      zone.classList.remove('tb-leader-ghost');
+    }
+    const tools = document.getElementById('leader-tools');
+    if (tools) tools.classList.add('hidden');
+    const unlockBtn = document.getElementById('leader-unlock-btn');
+    if (unlockBtn) unlockBtn.classList.add('hidden');
+    chairUnlocked = false;
+    leaderUnlocked = false;
+  }
+
+  function maybeStartProductTour() {
+    return;
+  }
+
+  function bindTourControls() {
+    const next = document.getElementById('tb-tour-next');
+    const back = document.getElementById('tb-tour-back');
+    const skip = document.getElementById('tb-tour-skip');
+    const closeBtn = document.getElementById('tb-tour-close');
+    if (next && !next.dataset.tbBound) {
+      next.dataset.tbBound = '1';
+      next.addEventListener('click', function () {
+        try { if (window.tbFeedback) tbFeedback.press(next); } catch (e) {}
+        tourNext();
+      });
+    }
+    if (back && !back.dataset.tbBound) {
+      back.dataset.tbBound = '1';
+      back.addEventListener('click', function () { tourBack(); });
+    }
+    if (skip && !skip.dataset.tbBound) {
+      skip.dataset.tbBound = '1';
+      skip.addEventListener('click', function () { skipTour(); });
+    }
+    if (closeBtn && !closeBtn.dataset.tbBound) {
+      closeBtn.dataset.tbBound = '1';
+      closeBtn.addEventListener('click', function () { skipTour(); });
+    }
+    const tourRoot = document.getElementById('tb-tour');
+    if (tourRoot && tourRoot.dataset.swipeClose !== '1') {
+      tourRoot.dataset.swipeClose = '1';
+      bindElasticSwipe(tourRoot, {
+        getEl: function () { return tourRoot.querySelector('.tb-tour-stage') || tourRoot; },
+        onDown: function () { skipTour(); },
+        canDown: function () { return !isTourMandatory(); },
+        onDownDist: 52,
+        follow: 0.88,
+        blocked: function (t) {
+          return !!(t && t.closest && t.closest('button, a, input, textarea, video'));
+        }
+      });
+    }
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Escape') return;
+      if (!document.body.classList.contains('tb-tour-open')) return;
+      if (isTourMandatory()) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      skipTour();
+    }, true);
+    const replay = document.getElementById('replay-tour-btn') || document.getElementById('take-tour-btn');
+    if (replay) replay.textContent = 'TAKE THE TOUR';
+    if (replay && !replay.dataset.tbBound) {
+      replay.dataset.tbBound = '1';
+      replay.addEventListener('click', function (e) {
+        if (e) { e.preventDefault(); e.stopPropagation(); }
+        startTour({ force: true, replay: true });
+      });
+    }
+  }
+
+
   // ---------- INIT ----------
   async function init() {
     runSplash();
-    try { bindTourControls(); } catch (e) {}
     try {
-      // Welcome already finished earlier this session → tour can start after splash
-      // Product tour is manual-only (More → replay). No auto-start after welcome.
-      try { maybeStartProductTour(); } catch (e) {}
+      const header = document.getElementById('main-header');
+      if (header) {
+        header.style.display = 'block';
+        header.style.visibility = 'visible';
+        header.removeAttribute('hidden');
+      }
+    } catch (eH) {}
+    try { if (roomCut()) document.body.classList.add('tb-room-cut'); } catch (e) {}
+    try { presentationScrub(); } catch (e) {}
+    try { bindLeaderGhost(); } catch (e) {}
+    try {
+      const live = document.getElementById('install-live-link');
+      if (live) live.textContent = publicOrigin().replace(/^https?:\/\//, '');
     } catch (e) {}
+    try { markPatioFromUrl(); runPatioAlive(); } catch (e) {}
+    try { bindTourControls(); } catch (e) {}
+    try { maybeStartProductTour(); } catch (e) {}
     bootstrapSeenState();
     updateMeetingCard();
     setupReminderButton();
     setupNotificationSystem();
     setupGatheringAlerts();
+    try { applyDeepLink(location.href); } catch (e) {}
+    try {
+      const n = Number(load('tbVisits') || 0) + 1;
+      save('tbVisits', n);
+      if (!isStandalonePwa() && isTourComplete()) {
+        const d = daysUntil(getNextMeetingMonday());
+        if (n >= 2 || d === 0 || d === 1) offerHomeScreen(d === 0 || d === 1 ? 'gathering' : 'visit');
+      } else {
+        hideHomeA2hs();
+      }
+    } catch (e) {}
+    bindImInA2hsSheet();
+    const a2hsPut = document.getElementById('home-a2hs-put');
+    const a2hsLater = document.getElementById('home-a2hs-later');
+    if (a2hsPut && !a2hsPut.dataset.tbBound) {
+      a2hsPut.dataset.tbBound = '1';
+      a2hsPut.addEventListener('click', function () { launchAddToHomeScreen(); });
+    }
+    if (a2hsLater && !a2hsLater.dataset.tbBound) {
+      a2hsLater.dataset.tbBound = '1';
+      a2hsLater.addEventListener('click', function () {
+        hushA2hs(7);
+        hideHomeA2hs();
+      });
+    }
+    try {
+      if (navigator.serviceWorker) {
+        navigator.serviceWorker.addEventListener('message', function (ev) {
+          if (ev.data && ev.data.type === 'tb-open') applyDeepLink(ev.data.url || '/?view=home');
+          if (ev.data && ev.data.type === 'tb-sw-updated') {
+            try { checkStaleBuild(); } catch (e) {}
+          }
+        });
+      }
+    } catch (e) {}
     setupHousekeeping();
     renderAnnouncements();
     renderBrothers();
@@ -6915,14 +10712,99 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     renderEventsNote();
     renderLastFire();
     bindInfoCardTargets();
-    renderRsvp();
+    try { renderRsvp(); } catch (e) { console.warn('renderRsvp', e); }
     bindEvents();
+    bindHomeMemberCta();
     updateAllNewBadges();
     showView('home');
     /* loadIronFeed retired — RSS cut 2026-08-18 */
     bindActivityTags();
+    (function bindPatio() {
+      const here = document.getElementById('here-btn');
+      if (here && here.dataset.bound !== '1') {
+        here.dataset.bound = '1';
+        here.addEventListener('click', function () { checkInHere(); });
+      }
+      const beer = document.getElementById('draw-beer-btn');
+      const hat = document.getElementById('draw-hat-btn');
+      if (beer && beer.dataset.bound !== '1') {
+        beer.dataset.bound = '1';
+        beer.addEventListener('click', function () { drawRaffle('beer'); });
+      }
+      const memSign = document.getElementById('memories-signin-shot');
+      if (memSign && memSign.dataset.bound !== '1') {
+        memSign.dataset.bound = '1';
+        memSign.addEventListener('click', function () { openDropShot(); });
+      }
+      const memLib = document.getElementById('memories-library-btn');
+      if (memLib && memLib.dataset.bound !== '1') {
+        memLib.dataset.bound = '1';
+        memLib.addEventListener('click', function () { openLibraryShot(); });
+      }
+      if (hat && hat.dataset.bound !== '1') {
+        hat.dataset.bound = '1';
+        hat.addEventListener('click', function () { drawRaffle('hat'); });
+      }
+      const raffleLive = document.getElementById('raffle-live');
+      if (raffleLive && raffleLive.dataset.bound !== '1') {
+        raffleLive.dataset.bound = '1';
+        raffleLive.addEventListener('click', function (e) {
+          if (e.target && e.target.id === 'raffle-live-close') return;
+          if (raffleLive.classList.contains('is-landed')) closeRaffleLive();
+        });
+      }
+      const raffleClose = document.getElementById('raffle-live-close');
+      if (raffleClose && raffleClose.dataset.bound !== '1') {
+        raffleClose.dataset.bound = '1';
+        raffleClose.addEventListener('click', function (e) {
+          e.stopPropagation();
+          closeRaffleLive();
+        });
+      }
+    })();
+    (function bindAxumCoffee() {
+      const chip = document.getElementById('axum-chip');
+      const showBtn = document.getElementById('axum-show-btn');
+      const closeCard = document.getElementById('axum-card-close');
+      const backdrop = document.getElementById('axum-drop-backdrop');
+      const redeem = document.getElementById('axum-redeem-btn');
+      if (chip && chip.dataset.bound !== '1') {
+        chip.dataset.bound = '1';
+        chip.addEventListener('click', function () { openAxumCard(); });
+      }
+      if (showBtn && showBtn.dataset.bound !== '1') {
+        showBtn.dataset.bound = '1';
+        showBtn.addEventListener('click', function () { openAxumCard(); });
+      }
+      if (closeCard && closeCard.dataset.bound !== '1') {
+        closeCard.dataset.bound = '1';
+        closeCard.addEventListener('click', closeAxumCard);
+      }
+      if (backdrop && backdrop.dataset.bound !== '1') {
+        backdrop.dataset.bound = '1';
+        backdrop.addEventListener('click', closeAxumDrop);
+      }
+      if (redeem && redeem.dataset.bound !== '1') {
+        redeem.dataset.bound = '1';
+        redeem.addEventListener('click', function () {
+          if (redeem.dataset.armed !== '1') {
+            redeem.dataset.armed = '1';
+            redeem.textContent = 'CONFIRM — THIS DIES';
+            return;
+          }
+          redeemAxumCoffee();
+        });
+      }
+    })();
     try {
       await initAuth();
+      try { await refreshChairMode(); } catch (eC) {}
+      try { await pullRaffle(); } catch (e) {}
+      try { renderHere(); } catch (e) {}
+      try {
+        if (/[?&]checkin=1/.test(location.search || '')) checkInHere();
+      } catch (e) {}
+      try { maybeShowAxumCoffee(); } catch (e) {}
       // Shared announcements + gathering board + brothers (read without sign-in)
       try {
         await pullAnnouncements();
@@ -6945,6 +10827,11 @@ $('#thunder-input').addEventListener('keydown', (e) => {
       } catch (eB) {
         console.warn('brothers init', eB);
       }
+      try {
+        await pullRsvps();
+      } catch (eR) {
+        console.warn('rsvps init', eR);
+      }
       if (isSignedIn()) {
         await pullMemories();
         renderMedia();
@@ -6961,5 +10848,5 @@ $('#thunder-input').addEventListener('keydown', (e) => {
     }
   }
 
-  init();
+  try { init(); } catch (e) { console.error('Thunder Board init', e); }
 })();

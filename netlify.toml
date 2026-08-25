@@ -9,8 +9,8 @@
 
 [build.environment]
   # Public VAPID + Supabase anon keys live in client JS by design (browser needs them).
-  # Private secrets (XAI_API_KEY, VAPID_PRIVATE_KEY) exist ONLY in Netlify env — never in repo.
-  SECRETS_SCAN_ENABLED = "false"
+  # Private secrets (XAI_API_KEY, VAPID_PRIVATE_KEY, SUPABASE_SERVICE_ROLE_KEY) exist ONLY in Netlify env — never in repo.
+  # Scan stays on; omit only known-public browser keys (not real secrets).
   SECRETS_SCAN_OMIT_PATHS = "js/config.js,js/app.js,index.html,README.md,package-lock.json"
   SECRETS_SCAN_OMIT_KEYS = "SUPABASE_ANON_KEY,VAPID_PUBLIC_KEY,LEADER_PIN,SUPABASE_URL"
 
@@ -23,8 +23,9 @@
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "camera=(), microphone=(self), geolocation=(), payment=()"
-    Content-Security-Policy = "frame-ancestors 'none'"
+    Permissions-Policy = "camera=(self), microphone=(self), geolocation=(), payment=()"
+    # Real CSP (cyber handoff 2026-08-24). frame-ancestors alone is not enough.
+    Content-Security-Policy = "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: blob: https://*.supabase.co; media-src 'self' blob:; font-src 'self' https://fonts.gstatic.com data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' https://cdn.jsdelivr.net; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.x.ai; worker-src 'self'; manifest-src 'self'; upgrade-insecure-requests"
 
 # Static assets — long cache (filenames are versioned by deploy)
 [[headers]]

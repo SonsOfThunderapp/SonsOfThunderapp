@@ -1,31 +1,34 @@
-# Thunder Board — ONE deploy checklist (credit-safe)
+# Thunder Board — deploy this package
 
-## This build: `20260815-life1`
-- Logo box kill switch (no yellow rectangle on wordmark)
-- Auth copy: shared memories only; invite-minded
-- Leadership can edit announcements / Next Mission / events note (cloud when signed in + schema)
-- Core DNA unchanged
+## This build: `20260824-sec-hand1`
 
-## Deploy (Netlify)
-1. Unzip so **index.html is at the root** of what you drag (not a nested folder).
-2. Deploys → Deploy manually → drop files → wait for Published.
-3. Phone: More → **REFRESH APP**.
+Security-handoff tree. Product UI unchanged from the live-synced splash runtime plus:
 
-## Prove logo (30 seconds)
-Open Home. Wordmark must sit on pure black with **no yellow box**.
-If box remains: REFRESH APP again or delete Home Screen icon and reopen.
+- `SECURITY-HANDOFF.md` for the cybersecurity review
+- Real CSP in `netlify.toml` (replaces frame-ancestors-only once this publish goes live)
+- `push-subscribe` rate limit + endpoint validation
+- `security.txt`
+- Restored `_redirects` (SPA + security.txt)
 
-## App-for-life (do once in Supabase — not a code deploy)
-1. Auth → disable **open signup** if you only want invited brothers (or keep signup and invite manually).
-2. Auth → turn **off** “Confirm email” if brothers get stuck on the confirm page (you control risk).
-3. Run `supabase-schema.sql` in SQL Editor if not already.
-4. Seed yourself as leader:
-   ```sql
-   insert into public.app_members (user_id, role, active)
-   values ('YOUR-AUTH-USER-UUID', 'admin', true)
-   on conflict (user_id) do update set role = excluded.role, active = true;
-   ```
-5. Netlify env: `XAI_API_KEY`, `VAPID_*`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (server only).
+## Official URL
+
+https://sonsofthunderboard.com
+
+## Deploy
+
+1. Unzip so **index.html is at the zip/root you upload** (not a nested folder).
+2. GitHub: replace repo root with these files → push `main` → Netlify auto-publish.
+   Or Netlify Deploys → Deploy manually → drop the unzipped contents.
+3. Confirm live identity:
+   https://sonsofthunderboard.com/build.json  
+   must show `"APP_BUILD": "20260824-sec-hand1"`
+4. Phone: More → **REFRESH APP**.
+
+## Env (already set — do not put in the zip)
+
+`XAI_API_KEY`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
 
 ## After publish
-Canary 5–10 brothers before the 900-member Facebook post.
+
+Hand `SECURITY-HANDOFF.md` to the cybersecurity guy.  
+He must test **this** APP_BUILD, not an older live cache.

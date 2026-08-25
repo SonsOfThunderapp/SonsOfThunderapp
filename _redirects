@@ -1,4 +1,5 @@
-# Existing files are served as-is. This rewrite only runs when no file matches.
-# Do NOT use ! (force) — that can shadow functions and assets.
-# Netlify Functions (/.netlify/functions/*) are handled before redirects.
+# Thunder Board — Netlify redirects
+# SPA: all app routes serve index.html
 /*    /index.html   200
+
+/.well-known/security.txt    /security.txt   200

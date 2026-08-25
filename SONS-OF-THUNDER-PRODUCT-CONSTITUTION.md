@@ -31,13 +31,6 @@ Unless the product owner **explicitly** overrides a protected decision, these ru
 
 Never silently overwrite these files. Never use “close enough” AI redraws as production.
 
-### HEADER MARK — ETERNAL (phone-approved 2026-08-23)
-
-The in-app header is the HD stacked mark: **white SONS + gold 3D bolt + red OF THUNDER**.  
-Source: `assets/CANONICAL/logo-print-diecut.png` → `logo@2x` / `@3x` / `@4x`.  
-Sticky on every tab. Never crop, hide, stretch, or swap. Law: `HEADER-MARK-LOCK.md`.
-
-
 ---
 
 ## 2. ABSOLUTE APPROVED-ASSET RULE
