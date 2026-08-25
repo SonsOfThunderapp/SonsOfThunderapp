@@ -1,0 +1,31 @@
+{
+  "id": "thunder-brotherhood",
+  "locked": "2026-08-19",
+  "law": "One authorized Thunder (gold bolt head, black sunglasses). Personality is expression + gear + hair — never a new mascot. Tuxedo is Ask Thunder only.",
+  "source": "assets/thunder-cool.png",
+  "roster": [
+    { "id": "smirk", "file": "thunder-smirk.png", "note": "cool smirk" },
+    { "id": "grin", "file": "thunder-grin.png", "note": "open grin" },
+    { "id": "wink", "file": "thunder-wink.png", "note": "wink" },
+    { "id": "think", "file": "thunder-think.png", "note": "thoughtful" },
+    { "id": "laugh", "file": "thunder-laugh.png", "note": "laugh" },
+    { "id": "care", "file": "thunder-care.png", "note": "concerned, brotherly" },
+    { "id": "stache", "file": "thunder-stache.png", "note": "mustache" },
+    { "id": "hat", "file": "thunder-hat.png", "note": "hat backwards" },
+    { "id": "cigar", "file": "thunder-cigar.png", "note": "cigar" },
+    { "id": "bandana", "file": "thunder-bandana.png", "note": "red bandana" },
+    { "id": "beanie", "file": "thunder-beanie.png", "note": "black beanie" },
+    { "id": "stubble", "file": "thunder-stubble.png", "note": "stubble" },
+    { "id": "cross", "file": "thunder-cross.png", "note": "cross chain" },
+    { "id": "earring", "file": "thunder-earring.png", "note": "hoop earring" },
+    { "id": "headphones", "file": "thunder-headphones.png", "note": "headphones" },
+    { "id": "patrol", "file": "thunder-patrol.png", "note": "patrol cap" },
+    { "id": "toothpick", "file": "thunder-toothpick.png", "note": "toothpick" },
+    { "id": "sweatband", "file": "thunder-sweatband.png", "note": "yellow sweatband" },
+    { "id": "beard", "file": "thunder-beard.png", "note": "full beard" },
+    { "id": "goatee", "file": "thunder-goatee.png", "note": "goatee" },
+    { "id": "handlebar", "file": "thunder-handlebar.png", "note": "handlebar mustache" },
+    { "id": "curls", "file": "thunder-curls.png", "note": "curls on the bolt" },
+    { "id": "mullet", "file": "thunder-mullet.png", "note": "mullet on the bolt" }
+  ]
+}

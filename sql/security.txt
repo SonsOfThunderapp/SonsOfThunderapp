@@ -1,0 +1,6 @@
+Contact: mailto:obietv@gmail.com
+Preferred-Languages: en
+Canonical: https://sonsofthunderboard.com/security.txt
+Policy: https://sonsofthunderboard.com/privacy
+Expires: 2027-08-24T00:00:00.000Z
+Acknowledgments: Controlled research only. Do not send bulk SMS/push or destroy production data.

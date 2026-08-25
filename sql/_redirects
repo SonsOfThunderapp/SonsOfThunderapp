@@ -1,0 +1,5 @@
+# Thunder Board — Netlify redirects
+# SPA: all app routes serve index.html
+/*    /index.html   200
+
+/.well-known/security.txt    /security.txt   200
