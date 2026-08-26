@@ -1,0 +1,83 @@
+/* Home month film — under .next-meeting.card only. Do not restyle the gathering card. */
+.tb-month-film{
+  display:block;
+  width:100%;
+  margin:12px 0 0;
+  padding:0;
+  border:0;
+  background:#000;
+  border-radius:22px;
+  overflow:hidden;
+  position:relative;
+  aspect-ratio:1/1;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.tb-month-film-pic{
+  display:block;
+  width:100%;
+  height:100%;
+  background:#000 center/cover no-repeat;
+}
+.tb-month-film-ring{
+  position:absolute;
+  left:50%;
+  top:46%;
+  width:56px;
+  height:56px;
+  margin:-28px 0 0 -28px;
+  border:2px solid #FEF105;
+  border-radius:50%;
+  pointer-events:none;
+}
+.tb-month-film-ring:after{
+  content:"";
+  position:absolute;
+  left:21px;
+  top:16px;
+  border-style:solid;
+  border-width:12px 0 12px 18px;
+  border-color:transparent transparent transparent #FEF105;
+}
+.tb-month-film-label{
+  position:absolute;
+  left:0;right:0;bottom:16px;
+  text-align:center;
+  color:#FEF105;
+  font-weight:700;
+  letter-spacing:.08em;
+  font-size:12px;
+  pointer-events:none;
+}
+#tb-month-player{
+  position:fixed;
+  inset:0;
+  z-index:12000;
+  background:#000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  touch-action:none;
+}
+#tb-month-player video{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  background:#000;
+}
+.tb-month-x{
+  position:absolute;
+  top:max(12px, env(safe-area-inset-top));
+  right:14px;
+  z-index:2;
+  width:44px;height:44px;
+  border:0;
+  background:transparent;
+  color:#FEF105;
+  font-size:32px;
+  line-height:44px;
+}
+body.tb-month-lock{
+  overflow:hidden !important;
+  touch-action:none;
+}
