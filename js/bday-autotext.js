@@ -50,7 +50,10 @@
       var st = document.createElement('style');
       st.id = 'tb-bday-sms-style';
       st.textContent =
-        '#auth-gate .auth-card{overflow:auto;max-height:min(86vh,720px);-webkit-overflow-scrolling:touch;}' +
+        '#auth-gate{overscroll-behavior:contain}' +
+        '#auth-gate .auth-card{max-height:calc(100dvh - 24px);overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px))}' +
+        '#auth-gate .auth-actions{position:sticky;bottom:0;z-index:3;padding-top:8px;padding-bottom:8px}' +
+        '#auth-gate .auth-link-row{position:sticky;bottom:0;z-index:3;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))}' +
         '.auth-sms-opt{display:flex;align-items:flex-start;gap:10px;max-width:100%;box-sizing:border-box;text-align:left;color:#ccc;font-size:13px;line-height:1.35;margin:8px 0 12px;padding:2px 0;cursor:pointer;font-family:Inter,system-ui,sans-serif}' +
         '.auth-sms-opt span{flex:1;min-width:0;white-space:normal;overflow-wrap:anywhere}' +
         '.auth-sms-opt a{color:#FEF105;text-decoration:underline}' +
