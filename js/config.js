@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260826-commit1',
+  APP_BUILD: '20260826-theater1',
   /* Public "who's in" presence — floor so no brother is ever alone on the card.
      seedFloor: deprecated for display count — keep 0. Truthful attendance only.
      anchorName: always listed first (leadership presence). */
@@ -321,7 +321,33 @@ window.TB_CONFIG = {
       htj.defer = true;
       (document.body || document.documentElement).appendChild(htj);
     }
+    if (!document.querySelector('link[href*="home-month-film.css"]')) {
+      var hmfc = document.createElement('link');
+      hmfc.rel = 'stylesheet';
+      hmfc.href = 'css/home-month-film.css?v=' + encodeURIComponent(__tbB);
+      (document.head || document.documentElement).appendChild(hmfc);
+    }
+    if (!document.querySelector('link[href*="theater-month.css"]')) {
+      var tmcss = document.createElement('link');
+      tmcss.rel = 'stylesheet';
+      tmcss.href = 'css/theater-month.css?v=' + encodeURIComponent(__tbB);
+      (document.head || document.documentElement).appendChild(tmcss);
+    }
+    if (!document.querySelector('script[src*="home-month-film.js"]')) {
+      var hmj = document.createElement('script');
+      hmj.src = 'js/home-month-film.js?v=' + encodeURIComponent(__tbB);
+      hmj.defer = true;
+      (document.body || document.documentElement).appendChild(hmj);
+    }
+    if (!document.querySelector('script[src*="theater-month.js"]')) {
+      var tmj = document.createElement('script');
+      tmj.src = 'js/theater-month.js?v=' + encodeURIComponent(__tbB);
+      tmj.defer = true;
+      (document.body || document.documentElement).appendChild(tmj);
+    }
+
     if (document.querySelector('script[src*="bday-autotext.js"]')) return;
+
     var s = document.createElement('script');
     s.src = 'js/bday-autotext.js?v=' + encodeURIComponent(__tbB);
     s.defer = true;

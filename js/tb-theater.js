@@ -22,7 +22,7 @@
     root.setAttribute('aria-modal', 'true');
     root.innerHTML =
       '<button type="button" class="tb-th-done" aria-label="Done">DONE</button>' +
-      '<video playsinline webkit-playsinline></video>' +
+      '<video playsinline webkit-playsinline muted></video>' +
       '<div class="tb-th-chrome">' +
         '<div class="tb-th-time"><span class="tb-th-cur">0:00</span> / <span class="tb-th-dur">0:00</span></div>' +
         '<input class="tb-th-scrub" type="range" min="0" max="1000" value="0" step="1" aria-label="Seek">' +
@@ -34,7 +34,7 @@
     durEl = q('.tb-th-dur');
     video.setAttribute('playsinline', '');
     video.setAttribute('webkit-playsinline', '');
-    video.setAttribute('preload', 'auto');
+    video.setAttribute('preload', 'metadata');
     video.controls = false;
     video.setAttribute('controlslist', 'nodownload nofullscreen noremoteplayback');
     try { video.disablePictureInPicture = true; } catch (e0) {}
@@ -97,7 +97,7 @@
   function onMove(ev) { if (ev.cancelable) ev.preventDefault(); }
   function onEnd(ev) {
     var y = ev.changedTouches && ev.changedTouches[0] ? ev.changedTouches[0].clientY : startY;
-    if (y - startY > 90) close();
+    if (y - startY > 140) close();
   }
   function onPop() {
     if (root && root.classList.contains('is-open')) {
@@ -118,7 +118,7 @@
     } else {
       try { video.removeAttribute('src'); video.load(); } catch (e3) {}
     }
-    try { video.muted = false; } catch (e4) {}
+    try { video.muted = true; } catch (e4) {}
     document.body.classList.add('tb-theater-open');
     root.classList.add('is-open');
     root.classList.remove('is-faded');
@@ -126,8 +126,15 @@
       try { history.pushState({ tbTheater: 1 }, '', location.href); pushed = true; } catch (e5) {}
     }
     wakeChrome();
+    try { video.muted = false; } catch (e4b) {}
     var p = video.play();
-    if (p && p.catch) p.catch(function () {});
+    if (p && p.catch) {
+      p.catch(function () {
+        try { video.muted = true; } catch (e4c) {}
+        var p2 = video.play();
+        if (p2 && p2.catch) p2.catch(function () {});
+      });
+    }
   }
 
   function close(fromPop) {
@@ -150,7 +157,10 @@
     el.addEventListener('click', function (ev) {
       ev.preventDefault();
       var film = typeof getFilm === 'function' ? getFilm() : getFilm;
-      if (!film || (!film.src && !film.poster)) return;
+      if (!film || (!film.src && !film.poster)) {
+        open({ src: '', poster: '' });
+        return;
+      }
       open(film);
     });
   }
