@@ -6,6 +6,7 @@
   var VPATH = 'theater/current.mp4';
   var PPATH = 'theater/current.jpg';
   var MAX = 50 * 1024 * 1024;
+  var RAW_MAX = 80 * 1024 * 1024;
   var picked = null;
 
   function cfg() { return window.TB_CONFIG || {}; }
@@ -72,7 +73,6 @@
       '</div>';
     document.body.appendChild(wrap);
     wrap.querySelector('.tb-ms-x').addEventListener('click', closeSheet);
-    wrap.addEventListener('click', function (e) { if (e.target === wrap) {} });
     var file = wrap.querySelector('#tb-month-file');
     var title = wrap.querySelector('#tb-month-title');
     title.value = draftTitle();
@@ -145,9 +145,9 @@
     var put = document.getElementById('tb-month-put');
     if (!client) { status('Sign in on Brothers'); return; }
     if (!picked) { status('Choose a clip first'); return; }
-    if (picked.size > MAX) {
-      status('Keep it under 50 MB. A one-minute 1080 plate fits. 4K usually does not.');
-      toast('Keep it under 50 MB.');
+    if (picked.size > RAW_MAX) {
+      status('Shoot HD 30 for 60 seconds, or export under 50 MB.');
+      toast('Shoot HD 30 for 60 seconds.');
       return;
     }
     var ok = await isLeader();
@@ -155,8 +155,16 @@
     var sess = await client.auth.getUser();
     var user = sess && sess.data && sess.data.user;
     put.disabled = true;
-    status('Uploading…');
+    status('Cooking the plate\u2026');
     try {
+      if (window.tbCookTheaterPlate) {
+        picked = await window.tbCookTheaterPlate(picked, status);
+      }
+      if (picked.size > MAX) {
+        status('Still over 50 MB. Shoot HD 30, not 4K.');
+        put.disabled = false;
+        return;
+      }
       var probe = await probeClip(picked);
       if (probe.duration > 65) {
         status('Keep it to a minute.');
@@ -168,6 +176,7 @@
       try {
         await client.storage.from(bucket()).copy(VPATH, 'theater/archive-' + ym + '.mp4');
       } catch (eA) {}
+      status('Uploading\u2026');
       var upV = await client.storage.from(bucket()).upload(VPATH, picked, {
         contentType: picked.type || 'video/mp4',
         upsert: true
@@ -212,9 +221,7 @@
     btn.type = 'button';
     btn.className = 'btn-rsvp';
     btn.textContent = 'THIS MONTH';
-    btn.addEventListener('click', function () {
-      openSheet();
-    });
+    btn.addEventListener('click', function () { openSheet(); });
     var after = document.getElementById('admin-room-btn');
     if (after && after.parentNode === tools) after.insertAdjacentElement('afterend', btn);
     else tools.insertBefore(btn, tools.firstChild);
