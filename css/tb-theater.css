@@ -1,0 +1,82 @@
+/* Thunder Theater — eats the glass. Chrome only. Never leave the board. */
+#tb-theater{
+  position:fixed;
+  inset:0;
+  width:100vw;
+  height:100dvh;
+  height:100svh;
+  height:-webkit-fill-available;
+  background:#000000;
+  z-index:2147483000;
+  display:none;
+  touch-action:none;
+  overscroll-behavior:none;
+}
+#tb-theater.is-open{display:block}
+#tb-theater video{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  background:#000000;
+}
+#tb-theater .tb-th-done{
+  position:absolute;
+  top:max(10px, env(safe-area-inset-top, 10px));
+  right:max(10px, env(safe-area-inset-right, 10px));
+  z-index:3;
+  min-width:44px;
+  min-height:44px;
+  padding:0 12px;
+  border:0;
+  background:transparent;
+  color:#E30600;
+  font-weight:800;
+  font-size:14px;
+  letter-spacing:.06em;
+}
+#tb-theater .tb-th-chrome{
+  position:absolute;
+  left:0;right:0;bottom:0;
+  padding:0 16px calc(14px + env(safe-area-inset-bottom, 0px));
+  z-index:3;
+  opacity:1;
+  transition:opacity .35s linear;
+}
+#tb-theater.is-faded .tb-th-chrome,
+#tb-theater.is-faded .tb-th-done{opacity:0}
+#tb-theater .tb-th-time{
+  color:#FEF105;
+  font-size:11px;
+  font-variant-numeric:tabular-nums;
+  margin-bottom:6px;
+}
+#tb-theater .tb-th-scrub{
+  -webkit-appearance:none;
+  appearance:none;
+  width:100%;
+  height:3px;
+  background:rgba(254,241,5,.25);
+  border-radius:2px;
+}
+#tb-theater .tb-th-scrub::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:12px;height:12px;
+  border-radius:50%;
+  background:#FEF105;
+  border:0;
+}
+body.tb-theater-open{
+  overflow:hidden !important;
+  overscroll-behavior:none;
+  touch-action:none;
+}
+body.tb-theater-open #thunder-fab,
+body.tb-theater-open .thunder-fab,
+body.tb-theater-open .bottom-nav,
+body.tb-theater-open #fab-bubble,
+body.tb-theater-open #main-header{
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
