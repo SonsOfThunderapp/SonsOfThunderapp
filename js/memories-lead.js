@@ -27,21 +27,27 @@
   else boot();
 })();
 
-/* homefilm1: load month film extra without rewriting config.js */
+/* theater1: load Thunder Theater then month film without rewriting config extras */
 (function () {
   var b = (window.TB_CONFIG && window.TB_CONFIG.APP_BUILD) || '1';
+  function css(hrefPart, href) {
+    if (document.querySelector('link[href*="' + hrefPart + '"]')) return;
+    var l = document.createElement('link');
+    l.rel = 'stylesheet';
+    l.href = href + '?v=' + encodeURIComponent(b);
+    (document.head || document.documentElement).appendChild(l);
+  }
+  function js(srcPart, src) {
+    if (document.querySelector('script[src*="' + srcPart + '"]')) return;
+    var s = document.createElement('script');
+    s.src = src + '?v=' + encodeURIComponent(b);
+    s.defer = true;
+    (document.body || document.documentElement).appendChild(s);
+  }
   try {
-    if (!document.querySelector('link[href*="home-month-film.css"]')) {
-      var l = document.createElement('link');
-      l.rel = 'stylesheet';
-      l.href = 'css/home-month-film.css?v=' + encodeURIComponent(b);
-      (document.head || document.documentElement).appendChild(l);
-    }
-    if (!document.querySelector('script[src*="home-month-film.js"]')) {
-      var s = document.createElement('script');
-      s.src = 'js/home-month-film.js?v=' + encodeURIComponent(b);
-      s.defer = true;
-      (document.body || document.documentElement).appendChild(s);
-    }
+    css('tb-theater.css', 'css/tb-theater.css');
+    css('home-month-film.css', 'css/home-month-film.css');
+    js('tb-theater.js', 'js/tb-theater.js');
+    js('home-month-film.js', 'js/home-month-film.js');
   } catch (e) {}
 })();
