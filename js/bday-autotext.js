@@ -32,18 +32,32 @@
       var box = document.createElement('input');
       box.type = 'checkbox';
       box.id = 'auth-sms-opt';
+      box.checked = false;
+      box.removeAttribute('checked');
+      box.setAttribute('autocomplete', 'off');
       var span = document.createElement('span');
-      span.innerHTML = 'Yes — text me from Sons of Thunder. Msg frequency varies. Msg & data rates may apply. Reply STOP to cancel, HELP for help. Consent is not required to sit with us. <a href="https://sonsofthunderboard.com/privacy">Privacy</a> · <a href="https://sonsofthunderboard.com/terms">Terms</a>. We do not share, sell, or provide your mobile number or messaging consent to third parties or affiliates for marketing or promotional purposes.';
+      span.innerHTML = 'Text me about the next night. <a href="https://sonsofthunderboard.com/privacy">Details</a>';
       label.appendChild(box);
       label.appendChild(span);
       if (slot) slot.appendChild(label);
       else if (email && email.parentNode) email.parentNode.insertBefore(label, email.nextSibling);
       else card.appendChild(label);
+    } else {
+      var live = document.getElementById('auth-sms-opt');
+      if (live && !live.getAttribute('data-tb-user')) live.checked = false;
     }
     if (!document.getElementById('tb-bday-sms-style')) {
       var st = document.createElement('style');
       st.id = 'tb-bday-sms-style';
-      st.textContent = '.auth-sms-opt{display:flex;align-items:flex-start;gap:10px;text-align:left;color:#ccc;font-size:14px;line-height:1.35;margin:2px 0 12px;cursor:pointer;font-family:Inter,system-ui,sans-serif}.auth-sms-opt input[type=checkbox]{width:18px;height:18px;margin:2px 0 0;flex:0 0 18px;accent-color:#E8B923}';
+      st.textContent =
+        '#auth-gate .auth-card{overflow:auto;max-height:min(86vh,720px);-webkit-overflow-scrolling:touch;}' +
+        '.auth-sms-opt{display:flex;align-items:flex-start;gap:10px;max-width:100%;box-sizing:border-box;text-align:left;color:#ccc;font-size:13px;line-height:1.35;margin:8px 0 12px;padding:2px 0;cursor:pointer;font-family:Inter,system-ui,sans-serif}' +
+        '.auth-sms-opt span{flex:1;min-width:0;white-space:normal;overflow-wrap:anywhere}' +
+        '.auth-sms-opt a{color:#FEF105;text-decoration:underline}' +
+        '.auth-sms-opt input[type=checkbox]{-webkit-appearance:none;appearance:none;width:18px;height:18px;min-width:18px;margin:2px 0 0;flex:0 0 18px;border:2px solid #FEF105;border-radius:3px;background:#111;accent-color:#FEF105}' +
+        '.auth-sms-opt input[type=checkbox]:checked{background:#FEF105}' +
+        '.auth-sms-opt input[type=checkbox]:checked::after{content:"";display:block;width:5px;height:9px;margin:1px 0 0 5px;border:solid #111;border-width:0 2px 2px 0;transform:rotate(45deg)}' +
+        '#auth-consent,label.tb-seat-consent{display:none!important}';
       document.head.appendChild(st);
     }
   }
@@ -143,6 +157,11 @@
   function boot() {
     injectSheet();
     applyBdayLink();
+    var opt = document.getElementById('auth-sms-opt');
+    if (opt && !opt.getAttribute('data-tb-bound')) {
+      opt.setAttribute('data-tb-bound', '1');
+      opt.addEventListener('change', function () { opt.setAttribute('data-tb-user', '1'); });
+    }
     var gate = document.getElementById('auth-gate');
     if (gate && !gate.dataset.tbBdayObs) {
       gate.dataset.tbBdayObs = '1';
