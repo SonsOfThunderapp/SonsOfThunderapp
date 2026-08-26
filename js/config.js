@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260826-repair1',
+  APP_BUILD: '20260826-guestsign1',
   /* Public "who's in" presence — floor so no brother is ever alone on the card.
      seedFloor: deprecated for display count — keep 0. Truthful attendance only.
      anchorName: always listed first (leadership presence). */
@@ -219,6 +219,14 @@ window.TB_CONFIG = {
       (document.body || document.documentElement).appendChild(mg);
     }
   } catch (eSeed) {}
+  try {
+    if (!document.querySelector('script[src*="guest-qr-signin.js"]')) {
+      var gq = document.createElement('script');
+      gq.src = 'js/guest-qr-signin.js?v=' + encodeURIComponent(__tbB);
+      gq.defer = true;
+      (document.body || document.documentElement).appendChild(gq);
+    }
+  } catch (eGq) {}
   try {
 
     if (!document.querySelector('script[src*="leader-door.js"]')) {
