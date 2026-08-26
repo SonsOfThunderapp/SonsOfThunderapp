@@ -31,7 +31,7 @@
   setTimeout(bind,2000);
 })();
 
-/* Guest Memories wall: http image files only. SVG night stills + real jpg. No data: in img src. Upload stays sign-in. */
+/* Guest Memories wall: http image files only. real night stills + patio jpgs. No data: in img src. Upload stays sign-in. */
 (function () {
   var painting = false;
   var viewerBound = false;
@@ -39,21 +39,21 @@
   var feedObs = null;
 
   var GUEST_WALL = [
-    { id: 'sot-tent-banner', src: '/assets/tour-memories/sot-tent-banner.svg' },
-    { id: 'sot-topgolf-jacket', src: '/assets/tour-memories/sot-topgolf-jacket.svg' },
-    { id: 'sot-three-huddle', src: '/assets/tour-memories/sot-three-huddle.svg' },
-    { id: 'sot-veteran-talk', src: '/assets/tour-memories/sot-veteran-talk.svg' },
-    { id: 'sot-night-line', src: '/assets/tour-memories/sot-night-line.svg' },
-    { id: 'sot-night-patio', src: '/assets/tour-memories/sot-night-patio.svg' },
-    { id: 'sot-night-patio-2', src: '/assets/tour-memories/sot-night-patio-2.svg' },
-    { id: 'sot-topgolf-selfie', src: '/assets/tour-memories/sot-topgolf-selfie.svg' },
-    { id: 'sot-pizza', src: '/assets/tour-memories/sot-pizza.svg' },
-    { id: 'sot-topgolf-eight', src: '/assets/tour-memories/sot-topgolf-eight.svg' },
-    { id: 'sot-topgolf-five', src: '/assets/tour-memories/sot-topgolf-five.svg' },
-    { id: 'sot-night-selfie-four', src: '/assets/tour-memories/sot-night-selfie-four.svg' },
-    { id: 'sot-roast-carve', src: '/assets/tour-memories/sot-roast-carve.svg' },
-    { id: 'sot-patio-from-seat', src: '/assets/tour-memories/sot-patio-from-seat.svg' },
-    { id: 'sot-daylight-patio', src: '/assets/tour-memories/sot-daylight-patio.svg' },
+    { id: 'sot-tent-banner', src: '/assets/tour-memories/sot-tent-banner.jpg' },
+    { id: 'sot-topgolf-jacket', src: '/assets/tour-memories/sot-topgolf-jacket.jpg' },
+    { id: 'sot-three-huddle', src: '/assets/tour-memories/sot-three-huddle.jpg' },
+    { id: 'sot-veteran-talk', src: '/assets/tour-memories/sot-veteran-talk.jpg' },
+    { id: 'sot-night-line', src: '/assets/tour-memories/sot-night-line.jpg' },
+    { id: 'sot-night-patio', src: '/assets/tour-memories/sot-night-patio.jpg' },
+    { id: 'sot-night-patio-2', src: '/assets/tour-memories/sot-night-patio-2.jpg' },
+    { id: 'sot-topgolf-selfie', src: '/assets/tour-memories/sot-topgolf-selfie.jpg' },
+    { id: 'sot-pizza', src: '/assets/tour-memories/sot-pizza.jpg' },
+    { id: 'sot-topgolf-eight', src: '/assets/tour-memories/sot-topgolf-eight.jpg' },
+    { id: 'sot-topgolf-five', src: '/assets/tour-memories/sot-topgolf-five.jpg' },
+    { id: 'sot-night-selfie-four', src: '/assets/tour-memories/sot-night-selfie-four.jpg' },
+    { id: 'sot-roast-carve', src: '/assets/tour-memories/sot-roast-carve.jpg' },
+    { id: 'sot-patio-from-seat', src: '/assets/tour-memories/sot-patio-from-seat.jpg' },
+    { id: 'sot-daylight-patio', src: '/assets/tour-memories/sot-daylight-patio.jpg' },
     { id: 'real-tree', src: '/assets/tour-memories/real-tree.jpg' },
     { id: 'real-patio', src: '/assets/tour-memories/real-patio.jpg' },
     { id: 'real-bowl', src: '/assets/tour-memories/real-bowl.jpg' }
