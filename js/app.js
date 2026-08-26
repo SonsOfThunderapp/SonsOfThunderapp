@@ -4460,19 +4460,49 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   function renderInlineProfileQR(brother) {
     const wrap = $('#brother-qr-wrap');
     const target = $('#brother-qr-target');
+    const label = wrap && wrap.querySelector('.qr-label');
+    const hint = wrap && wrap.querySelector('.brother-qr-hint');
     if (!wrap || !target) return;
-    if (!brother || !digitsOnly(brother.phone) || !(brother.name || '').trim()) {
-      wrap.classList.add('hidden');
+    const name = String((brother && brother.name) || '').trim();
+    const hasPhone = !!(brother && digitsOnly(brother.phone));
+
+    // Always show the QR block so brothers know why a code is missing
+    wrap.classList.remove('hidden');
+
+    if (!name) {
       clearQrTarget(target);
+      if (label) label.textContent = 'SONS OF THUNDER';
+      if (hint) hint.textContent = 'No name on this seat yet.';
       return;
     }
-    wrap.classList.remove('hidden');
+
+    if (!hasPhone) {
+      clearQrTarget(target);
+      target.innerHTML =
+        '<div class="qr-missing-phone" style="padding:18px 14px;text-align:center;color:#888;font-size:13px;line-height:1.45;">' +
+        '<div style="color:#FEF105;font-weight:700;margin-bottom:6px;">NO SCAN CODE YET</div>' +
+        'This brother has no phone on his profile.<br>Ask him to add one under More options → Phone.' +
+        '</div>';
+      if (label) label.textContent = (name + ' · SONS OF THUNDER').toUpperCase();
+      if (hint) hint.textContent = 'Phone unlocks a unique QR for this seat.';
+      return;
+    }
+
+    if (label) label.textContent = (name + ' · SONS OF THUNDER').toUpperCase();
+    if (hint) hint.textContent = 'Hold up to their camera → Add Contact';
     const vcard = buildVCard(brother, { forQr: true });
     // Wait until panel is laid out (was hidden) so canvas gets real dimensions
+    function paint() {
+      const ok = renderBrotherQR(vcard, target, 240);
+      if (!ok) {
+        // Retry once after layout settles (iOS Safari timing)
+        setTimeout(function () {
+          renderBrotherQR(vcard, target, 240);
+        }, 120);
+      }
+    }
     requestAnimationFrame(function () {
-      requestAnimationFrame(function () {
-        renderBrotherQR(vcard, target, 240);
-      });
+      requestAnimationFrame(paint);
     });
   }
 
@@ -4500,26 +4530,35 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     const hasPhoto = b.photo && (b.photo.startsWith('data:') || b.photo.startsWith('http'));
     const photoEl = $('#brother-detail-photo');
     if (photoEl) {
-      photoEl.style.cssText = 'width:88px!important;height:88px!important;max-width:88px!important;max-height:88px!important;min-width:88px!important;min-height:88px!important;overflow:hidden!important;margin:20px auto 0!important;border-radius:12px!important;';
+      photoEl.style.cssText = 'width:104px!important;height:104px!important;max-width:104px!important;max-height:104px!important;min-width:104px!important;min-height:104px!important;overflow:hidden!important;margin:20px auto 0!important;border-radius:12px!important;';
       photoEl.innerHTML = hasPhoto
-        ? `<img src="${esc(b.photo)}" alt="${esc(b.name || '')}" width="88" height="88" style="width:88px!important;height:88px!important;max-width:88px!important;max-height:88px!important;object-fit:cover!important;object-position:center top!important;display:block!important;border-radius:12px!important;" />`
+        ? `<img src="${esc(b.photo)}" alt="${esc(b.name || '')}" width="104" height="104" style="width:104px!important;height:104px!important;max-width:104px!important;max-height:104px!important;object-fit:cover!important;object-position:center top!important;display:block!important;border-radius:12px!important;" />`
         : esc(initials);
     }
     const nameEl = $('#brother-detail-name');
     if (nameEl) nameEl.textContent = b.name || '';
     const bioEl = $('#brother-detail-bio');
     if (bioEl) bioEl.textContent = b.bio || '';
-    const skillsLine = $('#brother-detail-skills');
-    if (skillsLine) {
+
+    // Front-of-card meta: birthday + occupation always visible when present
+    const metaEl = $('#brother-detail-meta');
+    if (metaEl) {
+      const parts = [];
+      const bday = String(b.birthday || '').trim();
       const sk = String(b.skills || '').trim();
-      skillsLine.textContent = sk ? ('CAN HELP · ' + sk) : '';
-      skillsLine.classList.toggle('hidden', !sk);
+      if (bday) parts.push('<span class="bd-meta-bday">🎂 ' + esc(bday) + '</span>');
+      if (sk) parts.push('<span class="bd-meta-job">' + esc(sk) + '</span>');
+      metaEl.innerHTML = parts.length ? parts.join('<span class="bd-meta-dot">·</span>') : '';
+      metaEl.classList.toggle('hidden', !parts.length);
     }
 
-  
+    const skillsLine = $('#brother-detail-skills');
+    if (skillsLine) {
+      skillsLine.textContent = '';
+      skillsLine.classList.add('hidden');
+    }
 
-
-     // Birthday Honors
+    // Birthday Honors
     const isBday = isTodayBirthday(b.birthday);
     const bdayHeader = $('#brother-birthday-header');
     const textHimBtn = $('#brother-text-him');
@@ -4557,8 +4596,18 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       shareBtn.addEventListener('click', () => { try { tbFeedback.press(shareBtn); } catch (e) {} }, true);
     }
     if (shareBtn) {
-      shareBtn.onclick = () => shareContact(b);
+      shareBtn.onclick = () => {
+        // Prefer showing / refreshing the unique QR in-place; share sheet is secondary
+        if (digitsOnly(b.phone)) {
+          renderInlineProfileQR(b);
+          shareContact(b);
+        } else {
+          try { showInstallToast((b.name || 'Brother') + ' has no phone on this seat.'); } catch (e) {}
+          renderInlineProfileQR(b);
+        }
+      };
       shareBtn.classList.toggle('hidden', !(b.name || '').trim());
+      shareBtn.textContent = digitsOnly(b.phone) ? 'SHARE CONTACT' : 'NO PHONE ON PROFILE';
     }
 
     detail.classList.remove('hidden');
@@ -4566,7 +4615,7 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     detail.style.removeProperty('display');
     document.body.style.overflow = 'hidden';
     bindBrotherDetail(); // ensure X is wired
-    // Inline Cash App–style QR with bolt center — ready as soon as profile opens
+    // Inline Cash App–style QR with bolt center — unique vCard per brother, ready on open
     renderInlineProfileQR(b);
   }
 
@@ -6206,8 +6255,8 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       if (!t) return;
       const dx = t.clientX - sx;
       const dy = t.clientY - sy;
-      if (Math.abs(dx) < 72) return;
-      if (Math.abs(dx) < Math.abs(dy) * 1.6) return;
+      if (Math.abs(dx) < 58) return;
+      if (Math.abs(dx) < Math.abs(dy) * 1.45) return;
       const i = TAB_ORDER.indexOf(currentViewName);
       if (dx < 0 && i >= 0 && i < TAB_ORDER.length - 1) {
         showView(TAB_ORDER[i + 1], { fromSwipe: true, swipeDir: 'next' });

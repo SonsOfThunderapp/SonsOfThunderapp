@@ -9455,3 +9455,296 @@ body.patio-live .announcements-section {
 .profile-one-breath .field-label {
   margin-top: 10px;
 }
+
+/* ===== PROFILE FRONT ROW — birthday + occupation always on the card ===== */
+.profile-front-row {
+  display: grid;
+  grid-template-columns: 0.9fr 1.4fr;
+  gap: 10px;
+  margin: 4px 0 14px;
+}
+.profile-front-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.profile-front-field .field-label {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #FEF105;
+  opacity: 0.9;
+}
+.profile-one-breath-body .profile-front-field input {
+  text-align: left;
+  font-size: 15px;
+  padding: 14px 12px;
+  margin: 0;
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  color: #fff;
+  width: 100%;
+  box-sizing: border-box;
+}
+.profile-one-breath-body .profile-front-field input::placeholder {
+  color: #555;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+.profile-one-breath-body input#profile-name {
+  font-size: 18px;
+  font-weight: 700;
+  border-color: #333;
+  background: #121212;
+}
+.profile-one-breath .photo-preview,
+.profile-photo-ring {
+  box-shadow: 0 0 0 1px rgba(254, 241, 5, 0.25), 0 8px 28px rgba(0, 0, 0, 0.55);
+}
+
+/* Brother detail — sexier meta line */
+.brother-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 8px;
+  margin: 6px 16px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #bbb;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+.brother-detail-meta.hidden { display: none !important; }
+.brother-detail-meta .bd-meta-bday {
+  color: #FEF105;
+}
+.brother-detail-meta .bd-meta-job {
+  color: #ddd;
+}
+.brother-detail-meta .bd-meta-dot {
+  color: #444;
+  margin: 0 2px;
+}
+.brother-detail-name {
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em;
+  margin-top: 8px !important;
+}
+.brother-detail-bio {
+  color: #999 !important;
+  font-size: 14px !important;
+  line-height: 1.4;
+  margin: 4px 20px 2px !important;
+}
+.brother-detail-panel {
+  background: linear-gradient(180deg, #0c0c0c 0%, #000 40%) !important;
+  border: 1px solid #1c1c1c;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.65);
+}
+.brother-detail-photo {
+  border: 2px solid rgba(254, 241, 5, 0.35) !important;
+  box-shadow: 0 0 20px rgba(254, 241, 5, 0.12);
+}
+
+/* ===== INFO SHEET PREMIUM PASS — attractive, not formy ===== */
+.profile-one-breath {
+  max-width: 400px !important;
+  border-radius: 20px !important;
+  border: 1px solid #1f1f1f !important;
+  background: linear-gradient(180deg, #0e0e0e 0%, #050505 55%, #000 100%) !important;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.75), 0 0 0 1px rgba(254,241,5,0.06) !important;
+  overflow: hidden;
+}
+.profile-one-breath-header {
+  border-bottom: none !important;
+  padding: 22px 20px 8px !important;
+  text-align: center;
+  justify-content: center;
+  position: relative;
+}
+.profile-one-breath-header .modal-close,
+.profile-one-breath-header [data-close] {
+  position: absolute !important;
+  right: 14px;
+  top: 14px;
+}
+.profile-one-breath-header h2 {
+  font-size: 26px !important;
+  letter-spacing: -0.03em !important;
+  text-align: center;
+}
+.profile-modal-sub {
+  text-align: center;
+  color: #777 !important;
+  font-size: 12.5px !important;
+  max-width: 280px;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+.profile-one-breath-body {
+  padding: 8px 20px 22px !important;
+}
+.profile-photo-hero {
+  margin-bottom: 22px !important;
+}
+.profile-one-breath .photo-preview,
+.profile-photo-ring {
+  width: 128px !important;
+  height: 128px !important;
+  border-width: 2.5px !important;
+  box-shadow:
+    0 0 0 4px rgba(0,0,0,0.9),
+    0 0 28px rgba(254,241,5,0.22),
+    0 12px 32px rgba(0,0,0,0.5) !important;
+}
+.profile-photo-plus {
+  font-size: 42px !important;
+}
+.profile-photo-cta {
+  letter-spacing: 0.14em !important;
+  font-size: 11px !important;
+  opacity: 0.95;
+}
+.profile-one-breath-body input#profile-name,
+.profile-one-breath-body input#profile-bio {
+  background: #101010 !important;
+  border: 1px solid #262626 !important;
+  border-radius: 12px !important;
+  padding: 17px 16px !important;
+  margin-bottom: 12px !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.profile-one-breath-body input#profile-name:focus,
+.profile-one-breath-body input#profile-bio:focus,
+.profile-one-breath-body .profile-front-field input:focus {
+  border-color: rgba(254,241,5,0.45) !important;
+  box-shadow: 0 0 0 3px rgba(254,241,5,0.08) !important;
+  outline: none;
+}
+.profile-one-breath-body input#profile-name {
+  font-size: 19px !important;
+  font-weight: 700 !important;
+}
+.profile-front-row {
+  gap: 12px !important;
+  margin: 2px 0 18px !important;
+}
+.profile-front-field .field-label {
+  font-size: 10px !important;
+  letter-spacing: 0.14em !important;
+  color: #FEF105 !important;
+  margin-bottom: 2px;
+}
+.profile-one-breath-body .profile-front-field input {
+  background: #101010 !important;
+  border: 1px solid #262626 !important;
+  border-radius: 12px !important;
+  padding: 15px 12px !important;
+  min-height: 48px;
+}
+.profile-lock-btn,
+#save-profile.profile-lock-btn {
+  padding: 17px 18px !important;
+  border-radius: 14px !important;
+  font-size: 15px !important;
+  letter-spacing: 0.1em !important;
+  box-shadow: 0 8px 24px rgba(227,6,0,0.35) !important;
+  margin-top: 4px !important;
+}
+.profile-more-toggle {
+  color: #555 !important;
+  margin-top: 6px !important;
+  letter-spacing: 0.08em !important;
+}
+.profile-more-toggle:hover,
+.profile-more-toggle:active {
+  color: #888 !important;
+}
+
+/* Brother open card — attractive info sheet */
+.brother-detail-panel {
+  max-width: 360px;
+  margin: 0 auto;
+  border-radius: 22px !important;
+  border: 1px solid #222 !important;
+  background: linear-gradient(165deg, #121212 0%, #070707 45%, #000 100%) !important;
+  box-shadow: 0 28px 70px rgba(0,0,0,0.8), 0 0 0 1px rgba(254,241,5,0.05) !important;
+  padding-bottom: 28px !important;
+}
+.brother-detail-photo {
+  width: 104px !important;
+  height: 104px !important;
+  max-width: 104px !important;
+  max-height: 104px !important;
+  min-width: 104px !important;
+  min-height: 104px !important;
+  border-radius: 16px !important;
+  border: 2px solid rgba(254,241,5,0.5) !important;
+  box-shadow: 0 0 32px rgba(254,241,5,0.18), 0 10px 28px rgba(0,0,0,0.5) !important;
+  margin-top: 28px !important;
+}
+.brother-detail-photo img {
+  width: 104px !important;
+  height: 104px !important;
+  max-width: 104px !important;
+  max-height: 104px !important;
+  border-radius: 14px !important;
+  object-fit: cover !important;
+}
+.brother-detail-name {
+  font-size: 26px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.03em !important;
+  margin: 14px 20px 4px !important;
+  text-align: center;
+}
+.brother-detail-bio {
+  font-size: 14px !important;
+  color: #8a8a8a !important;
+  line-height: 1.45 !important;
+  margin: 0 28px 10px !important;
+  text-align: center;
+}
+.brother-detail-meta {
+  margin: 0 24px 16px !important;
+  padding: 10px 14px;
+  background: rgba(254,241,5,0.04);
+  border: 1px solid rgba(254,241,5,0.12);
+  border-radius: 12px;
+  font-size: 13px !important;
+}
+.brother-detail-meta .bd-meta-bday {
+  color: #FEF105 !important;
+  font-weight: 700;
+}
+.brother-detail-meta .bd-meta-job {
+  color: #c8c8c8 !important;
+  font-weight: 600;
+}
+#brother-share-contact.btn-share {
+  margin: 4px 24px 12px !important;
+  width: calc(100% - 48px) !important;
+  border-radius: 12px !important;
+  padding: 15px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.06em;
+}
+.brother-qr-wrap {
+  margin: 8px 24px 0 !important;
+  padding-top: 8px;
+  border-top: 1px solid #1a1a1a;
+}
+.qr-label {
+  letter-spacing: 0.08em !important;
+  font-weight: 700 !important;
+  color: #eee !important;
+  margin-top: 10px !important;
+}
