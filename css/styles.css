@@ -112,7 +112,7 @@ html, body {
   /* Authorized IMG_7697 stacked mark — SONS + RED OF THUNDER + tagline. Never crop height. */
   height: auto !important;
   width: auto !important;
-  max-width: 72vw !important;
+  max-width: min(58vw, 256px) !important;
   max-height: none !important;
   object-fit: contain !important;
   object-position: center center !important;
