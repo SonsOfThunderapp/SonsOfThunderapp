@@ -2,8 +2,8 @@
 # Do NOT set a custom Build command in the Netlify UI. This file owns it.
 
 [build]
-  # No-op so Netlify never invents `npm run build` and fails with exit code 2.
-  command = "echo 'Thunder Board: static publish (no compile step)'"
+  # Apply the exact 20260826-repair1 app.js seat-claim patch at publish, then static publish.
+  command = "node scripts/netlify-build.js"
   publish = "."
   functions = "netlify/functions"
 
