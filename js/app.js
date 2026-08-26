@@ -5037,9 +5037,31 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       hero.classList.remove('hidden');
       bindMediaThumbs(hero);
     }
-    el.innerHTML = media.slice(1).map(function (m, i) {
-      return memoryThumbHtml(m, i + 1, false);
-    }).join('');
+    /* Brotherhood Memory — group by real meeting_key when present (no fabricated history) */
+    (function () {
+      var rest = media.slice(1);
+      var hasKeys = rest.some(function (m) { return m && m.meeting_key; });
+      if (!hasKeys) {
+        el.innerHTML = rest.map(function (m, i) {
+          return memoryThumbHtml(m, i + 1, false);
+        }).join('');
+      } else {
+        var groups = {};
+        var order = [];
+        rest.forEach(function (m, i) {
+          var k = (m && m.meeting_key) ? String(m.meeting_key) : 'earlier';
+          if (!groups[k]) { groups[k] = []; order.push(k); }
+          groups[k].push({ m: m, i: i + 1 });
+        });
+        el.innerHTML = order.map(function (k) {
+          var label = k === 'earlier' ? 'EARLIER NIGHTS' : k.toUpperCase();
+          var thumbs = groups[k].map(function (x) {
+            return memoryThumbHtml(x.m, x.i, false);
+          }).join('');
+          return '<div class="memory-night-label">' + label + '</div><div class="memory-night-grid">' + thumbs + '</div>';
+        }).join('');
+      }
+    })();
     bindMediaThumbs(el);
     updateAllNewBadges();
     try { syncDropShotAuth(); } catch (e) {}
@@ -5765,12 +5787,12 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     return names;
   }
 
-  /** Presence floor so the room never feels empty. Obie always first. */
+  /** Presence config — counts are truthful; Open Chair is the empty-state metaphor. */
   function rsvpPresenceConfig() {
     const c = (window.TB_CONFIG && window.TB_CONFIG.RSVP_PRESENCE) || {};
     return {
       publicOnHome: c.publicOnHome !== false,
-      seedFloor: Math.max(1, parseInt(c.seedFloor, 10) || 3),
+      seedFloor: (function () { var n = parseInt(c.seedFloor, 10); return Number.isFinite(n) ? Math.max(0, n) : 0; })(),
       anchorName: String(c.anchorName || 'Obie').trim() || 'Obie'
     };
   }
@@ -5799,33 +5821,56 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     if (roomCut()) { el.classList.add('hidden'); return; }
     const cfg = rsvpPresenceConfig();
     if (!cfg.publicOnHome) {
-      // Legacy leader-only path
       if (!leaderUnlocked) { el.classList.add('hidden'); return; }
     }
     const realN = (sharedRsvps || []).length;
     const localIn = !!rsvp;
-    // Show once someone is in (shared or this phone). Floor at seed so no one is "first alone."
-    if (realN < 1 && !localIn) {
-      el.classList.add('hidden');
-      return;
-    }
-    const n = Math.max(cfg.seedFloor, realN || (localIn ? 1 : 0));
+    /* TRUTH ONLY: never Math.max(seedFloor, real). Fake attendance is a product fail. */
+    const n = realN > 0 ? realN : (localIn ? 1 : 0);
+
+    const numEl = document.getElementById('in-count-num');
+    const namesEl = document.getElementById('in-count-names');
+    const chairEl = document.getElementById('open-chair-line');
+
     let days = null;
     try { days = daysUntil(getNextMeetingMonday()); } catch (e) {}
-    const head = n === 1 ? '1 BROTHER IS IN' : (n + ' BROTHERS ARE IN');
     let clock = '';
     if (days === 0) clock = 'TONIGHT';
     else if (days === 1) clock = 'TOMORROW';
     else if (days > 1) clock = days + ' DAYS';
+
+    if (n < 1) {
+      /* Open Chair — empty room, invite without lying */
+      if (numEl) numEl.textContent = clock ? (clock + '  ·  YOUR CHAIR IS OPEN') : 'YOUR CHAIR IS OPEN';
+      if (namesEl) { namesEl.textContent = 'Tap I’M IN — lock your seat.'; namesEl.classList.remove('hidden'); }
+      if (chairEl) { chairEl.textContent = ''; chairEl.classList.add('hidden'); }
+      el.classList.remove('hidden');
+      return;
+    }
+
+    const head = n === 1 ? '1 BROTHER IS IN' : (n + ' BROTHERS ARE IN');
     const names = lockedFirstNames();
-    const nameLine = presenceNameLine(names, cfg.anchorName);
-    const numEl = document.getElementById('in-count-num');
-    const namesEl = document.getElementById('in-count-names');
+    /* Names: real roster only. Anchor only if he actually locked in. */
+    let nameLine = '';
+    if (names.length) {
+      const show = names.slice(0, 4).map(function (x) { return String(x || '').toUpperCase(); });
+      nameLine = show.join(' · ');
+      if (names.length > 4) nameLine += ' · +' + (names.length - 4);
+    }
     if (numEl) numEl.textContent = clock ? (clock + '  ·  ' + head) : head;
     else el.textContent = head;
     if (namesEl) {
       namesEl.textContent = nameLine;
       namesEl.classList.toggle('hidden', !nameLine);
+    }
+    if (chairEl) {
+      if (localIn) {
+        chairEl.textContent = "YOUR CHAIR'S TAKEN.";
+        chairEl.classList.remove('hidden');
+      } else {
+        chairEl.textContent = 'THERE\'S STILL A CHAIR FOR YOU.';
+        chairEl.classList.remove('hidden');
+      }
     }
     el.classList.remove('hidden');
   }
@@ -6482,7 +6527,57 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       };
     }
 
-    if (query.includes('who can help') || query.includes('need someone') || query.includes('who knows') || query.includes('hvac') || query.includes('electrical') || query.includes('construction') || query.includes('who can i ask')) {
+
+    /* Lightweight One Introduction — consented skills/bio only, one suggestion */
+    if (query.includes('who should i meet') || query.includes('introduce me') || query.includes('who should i talk') || query.includes('new here') || query.includes('who can i meet')) {
+      const meId = myProfileId || (currentUser() && currentUser().id);
+      const pool = (brothers || []).filter(function (b) {
+        if (!b || !(b.name || '').trim()) return false;
+        if (meId && b.id === meId) return false;
+        const hay = (String(b.skills || '') + ' ' + String(b.bio || '')).trim();
+        return hay.length > 2;
+      });
+      if (!pool.length) {
+        return {
+          text: "Nobody has filled a brief yet. On **Brothers**, add what you can help with — then the room gets smarter.",
+          source: 'local'
+        };
+      }
+      // Prefer shared skill tokens with my profile if present
+      let meHay = '';
+      try {
+        const me = (brothers || []).find(function (b) { return meId && b.id === meId; });
+        if (me) meHay = (String(me.skills || '') + ' ' + String(me.bio || '')).toLowerCase();
+      } catch (e) {}
+      const meTok = meHay.split(/[^a-z0-9]+/).filter(function (w) { return w.length > 3; });
+      pool.sort(function (a, b) {
+        function score(x) {
+          const h = (String(x.skills || '') + ' ' + String(x.bio || '')).toLowerCase();
+          var s = 0;
+          meTok.forEach(function (tok) { if (h.indexOf(tok) !== -1) s++; });
+          if (String(x.skills || '').trim()) s += 2;
+          return s;
+        }
+        return score(b) - score(a);
+      });
+      const pick = pool[0];
+      const sk = String(pick.skills || '').trim();
+      const why = sk ? ('He listed: **' + sk + '**.') : 'He has a brief on the board.';
+      return {
+        text: "Worth grabbing in the room: **" + (pick.name || 'a brother') + "**.\n\n" + why + "\n\nOne introduction. No score. No public match.",
+        source: 'local'
+      };
+    }
+
+    /* Thunder knows when a human is better — not medical/legal/pastoral diagnosis */
+    if (query.includes('counsel') || query.includes('pastor') || query.includes('therapy') || query.includes('therapist') || query.includes('suicide') || query.includes('kill myself') || query.includes('divorce lawyer') || query.includes('legal advice') || query.includes('diagnose')) {
+      return {
+        text: "That's a **brother conversation** — not an AI answer.\n\n**Text a Leader** from Home, or talk to a man who knows you.\n\nIf you are in immediate danger, call **988** (US) or local emergency services.",
+        source: 'local'
+      };
+    }
+
+        if (query.includes('who can help') || query.includes('need someone') || query.includes('who knows') || query.includes('hvac') || query.includes('electrical') || query.includes('construction') || query.includes('who can i ask') || query.includes('business') || query.includes('teenage') || query.includes('teen') || query.includes('kids') || query.includes('help move') || query.includes('built a business')) {
       const stop = { who:1, can:1, help:1, with:1, knows:1, someone:1, need:1, the:1, and:1, for:1, what:1, does:1, again:1, about:1 };
       const terms = query.replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(function (w) { return w.length > 2 && !stop[w]; });
       const hits = (brothers || []).filter(function (b) {
@@ -8242,7 +8337,28 @@ $('#edit-profile-btn').addEventListener('click', () => {
           setTimeout(() => {
             try { if (typeof showView === 'function') showView(spec.dest); } catch (e) {}
             try {
-              if (spec.checkin && typeof checkInHere === 'function') checkInHere();
+              if (spec.checkin) {
+                try {
+                  var patioOn = typeof isPatioLive === 'function' && isPatioLive();
+                  var daysLeft = null;
+                  try { daysLeft = daysUntil(getNextMeetingMonday()); } catch (eD) {}
+                  if (patioOn && typeof checkInHere === 'function') {
+                    checkInHere();
+                  } else if (daysLeft === 0 || (daysLeft != null && daysLeft <= 7)) {
+                    try { showView('home'); } catch (eH) {}
+                    try {
+                      var im = document.getElementById('rsvp-btn') || document.querySelector('.btn-im-in, #im-in-btn');
+                      if (im && im.scrollIntoView) im.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    } catch (eS) {}
+                    try { showInstallToast('LOCK YOUR SEAT — then show up on the patio.', { success: false }); } catch (eT) {}
+                  } else {
+                    try { showView('events'); } catch (eE) {}
+                    try { showInstallToast('Night is on Memories — drop a shot when you are there.', { success: false }); } catch (eT2) {}
+                  }
+                } catch (eC) {
+                  try { if (typeof checkInHere === 'function') checkInHere(); } catch (e2) {}
+                }
+              }
             } catch (eC) {}
           }, 400);
         }

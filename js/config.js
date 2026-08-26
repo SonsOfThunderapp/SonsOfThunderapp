@@ -1,13 +1,15 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260825-nightclean1',
+  APP_BUILD: '20260825-integrate1',
   /* Public "who's in" presence — floor so no brother is ever alone on the card.
-     seedFloor: minimum count shown once anyone locks in.
+     seedFloor: deprecated for display count — keep 0. Truthful attendance only.
      anchorName: always listed first (leadership presence). */
   RSVP_PRESENCE: {
     publicOnHome: true,
-    seedFloor: 3,
-    anchorName: 'Obie'
+    /* Truth only — never inflate attendance (ChatGPT red-team 2026-08-25). */
+    seedFloor: 0,
+    anchorName: 'Obie',
+    openChairCopy: true
   },
 
   /* HEADER MARK — ETERNAL 2026-08-23. Phone-approved (IMG_7978).

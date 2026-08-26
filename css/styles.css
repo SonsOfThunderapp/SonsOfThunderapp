@@ -9250,3 +9250,52 @@ body.patio-live .btn-rsvp:not(.confirmed) {
   background: #fff;
   border-radius: 8px;
 }
+
+
+/* Open Chair — truthful belonging metaphor (deluxe1) */
+.open-chair-line {
+  margin-top: 6px;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #FEF105;
+  opacity: 0.9;
+  font-weight: 600;
+}
+.in-count-names {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.55);
+  margin-top: 4px;
+}
+
+
+/* Digital Campfire — gathering night quiets secondary chrome (future1)
+   Prefer fewer distractions during the room. Does not add screens. */
+body.patio-live #iron-feed,
+body.patio-live .sharpening-iron,
+body.patio-live #home-install-card {
+  opacity: 0.42;
+  transition: opacity 0.25s ease;
+}
+body.patio-live .next-meeting,
+body.patio-live #in-count,
+body.patio-live #last-fire,
+body.patio-live #here-btn,
+body.patio-live #drop-shot-btn {
+  opacity: 1;
+}
+body.patio-live .announcements-section {
+  opacity: 0.72;
+}
+.memory-night-label {
+  grid-column: 1 / -1;
+  margin: 14px 0 6px;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #FEF105;
+  font-weight: 700;
+}
+.memory-night-grid {
+  display: contents;
+}
