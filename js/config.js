@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260826-theater1',
+  APP_BUILD: '20260826-theater2',
   /* Public "who's in" presence — floor so no brother is ever alone on the card.
      seedFloor: deprecated for display count — keep 0. Truthful attendance only.
      anchorName: always listed first (leadership presence). */
@@ -139,6 +139,7 @@ window.TB_CONFIG = {
   SUPABASE_URL: 'https://mnsempcgomukcpofgvlm.supabase.co',
   SUPABASE_ANON_KEY: 'sb_publishable_QkUCt8trZ0vUwXmqfaUQwg_qXZ5_87m',
   MEMORIES_BUCKET: 'Sons Of Thunder Memories',
+  THEATER_BUCKET: 'thunder-theater',
   VAPID_PUBLIC_KEY: 'BGRjLCD3QnLBxb2VFNgxpGcJ1Ptxosp8yGq8yiJTGm2YS8OHVYsOhVvCFpmyREbeQsmsq6NaJ42j9yMx19Vl6hE'
 };
 

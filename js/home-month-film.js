@@ -7,7 +7,7 @@
   var row = { url: '', poster: '', title: '' };
 
   function cfg() { return window.TB_CONFIG || {}; }
-  function bucket() { return (cfg().MEMORIES_BUCKET || 'Sons Of Thunder Memories').trim(); }
+  function bucket() { return (cfg().THEATER_BUCKET || 'thunder-theater').trim(); }
   function sb() {
     var c = cfg();
     if (!c.SUPABASE_URL || !c.SUPABASE_ANON_KEY || !window.supabase) return null;
@@ -51,6 +51,18 @@
     }
   }
 
+  function publicUrl(path, bust) {
+    var client = sb();
+    if (!client || !path) return '';
+    try {
+      var out = client.storage.from(bucket()).getPublicUrl(path);
+      var u = (out && out.data && out.data.publicUrl) || '';
+      if (u && bust) u += (u.indexOf('?') >= 0 ? '&' : '?') + 't=' + encodeURIComponent(bust);
+      return u;
+    } catch (e) {
+      return '';
+    }
+  }
   async function signed(path) {
     var client = sb();
     if (!client || !path) return '';
@@ -71,10 +83,13 @@
       var d = q.data;
       var vPath = d.video_path || 'theater/current.mp4';
       var pPath = d.poster_path || 'theater/current.jpg';
-      var url = await signed(vPath);
-      var poster = await signed(pPath);
-      if (!url) url = d.url || '';
-      if (!poster) poster = d.poster || '';
+      var bust = d.updated_at || '';
+      var url = '';
+      var poster = '';
+      if (String(d.url || '').trim() || String(d.title || '').trim()) {
+        url = publicUrl(vPath, bust) || (await signed(vPath)) || d.url || '';
+        poster = publicUrl(pPath, bust) || (await signed(pPath)) || d.poster || '';
+      }
       row = { url: url, poster: poster, title: d.title || '' };
     } catch (e1) {
       row = { url: '', poster: '', title: '' };

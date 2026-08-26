@@ -5,11 +5,11 @@
 
   var VPATH = 'theater/current.mp4';
   var PPATH = 'theater/current.jpg';
-  var MAX = 25 * 1024 * 1024;
+  var MAX = 50 * 1024 * 1024;
   var picked = null;
 
   function cfg() { return window.TB_CONFIG || {}; }
-  function bucket() { return (cfg().MEMORIES_BUCKET || 'Sons Of Thunder Memories').trim(); }
+  function bucket() { return (cfg().THEATER_BUCKET || 'thunder-theater').trim(); }
   function sb() {
     var c = cfg();
     if (!c.SUPABASE_URL || !c.SUPABASE_ANON_KEY || !window.supabase) return null;
@@ -146,8 +146,8 @@
     if (!client) { status('Sign in on Brothers'); return; }
     if (!picked) { status('Choose a clip first'); return; }
     if (picked.size > MAX) {
-      status('Export H.264 from CapCut (under 15 MB) and choose that file.');
-      toast('Export H.264 from CapCut (under 15 MB) and choose that file.');
+      status('Keep it under 50 MB. A one-minute 1080 plate fits. 4K usually does not.');
+      toast('Keep it under 50 MB.');
       return;
     }
     var ok = await isLeader();
@@ -179,14 +179,14 @@
           upsert: true
         });
       }
-      var signedV = await client.storage.from(bucket()).createSignedUrl(VPATH, 604800);
-      var signedP = await client.storage.from(bucket()).createSignedUrl(PPATH, 604800);
+      var pubV = client.storage.from(bucket()).getPublicUrl(VPATH);
+      var pubP = client.storage.from(bucket()).getPublicUrl(PPATH);
       var title = ((document.getElementById('tb-month-title') || {}).value || '').trim();
       saveDraft(title);
       var row = {
         id: 'current',
-        url: (signedV && signedV.data && signedV.data.signedUrl) || '',
-        poster: (signedP && signedP.data && signedP.data.signedUrl) || '',
+        url: (pubV && pubV.data && pubV.data.publicUrl) || '',
+        poster: (pubP && pubP.data && pubP.data.publicUrl) || '',
         title: title,
         video_path: VPATH,
         poster_path: PPATH,
