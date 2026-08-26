@@ -4445,7 +4445,9 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     }
     const vcard = buildVCard(brother, { forQr: true });
     const title = $('#contact-qr-title');
-    if (title) title.textContent = ((brother.name || 'BROTHER') + ' · QR').toUpperCase();
+    if (title) title.textContent = (brother.name || 'BROTHER').toUpperCase();
+    const subQr = document.getElementById('contact-qr-sub');
+    if (subQr) subQr.textContent = 'Hold this up';
     const shareBtn = $('#contact-qr-share-btn');
     if (shareBtn) {
       shareBtn.onclick = () => shareContact(brother);
@@ -4479,12 +4481,11 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     if (!hasPhone) {
       clearQrTarget(target);
       target.innerHTML =
-        '<div class="qr-missing-phone" style="padding:18px 14px;text-align:center;color:#888;font-size:13px;line-height:1.45;">' +
-        '<div style="color:#FEF105;font-weight:700;margin-bottom:6px;">NO SCAN CODE YET</div>' +
-        'This brother has no phone on his profile.<br>Ask him to add one under More options → Phone.' +
+        '<div class="qr-empty-state">' +
+        '<p class="qr-empty-whisper">Phone unlocks your code.</p>' +
         '</div>';
       if (label) label.textContent = (name + ' · SONS OF THUNDER').toUpperCase();
-      if (hint) hint.textContent = 'Phone unlocks a unique QR for this seat.';
+      if (hint) hint.textContent = '';
       return;
     }
 
@@ -4546,9 +4547,10 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       const parts = [];
       const bday = String(b.birthday || '').trim();
       const sk = String(b.skills || '').trim();
-      if (bday) parts.push('<span class="bd-meta-bday">🎂 ' + esc(bday) + '</span>');
+      if (bday) parts.push('<span class="bd-meta-bday">' + esc(bday) + '</span>');
       if (sk) parts.push('<span class="bd-meta-job">' + esc(sk) + '</span>');
-      metaEl.innerHTML = parts.length ? parts.join('<span class="bd-meta-dot">·</span>') : '';
+      metaEl.innerHTML = parts.length ? parts.join('<span class="bd-meta-dot"> · </span>') : '';
+      metaEl.classList.toggle('is-empty', !parts.length);
       metaEl.classList.toggle('hidden', !parts.length);
     }
 
@@ -4607,7 +4609,13 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         }
       };
       shareBtn.classList.toggle('hidden', !(b.name || '').trim());
-      shareBtn.textContent = digitsOnly(b.phone) ? 'SHARE CONTACT' : 'NO PHONE ON PROFILE';
+      if (digitsOnly(b.phone)) {
+        shareBtn.textContent = 'SHARE CONTACT';
+        shareBtn.classList.remove('btn-share-muted');
+      } else {
+        shareBtn.textContent = 'PHONE UNLOCKS SHARE';
+        shareBtn.classList.add('btn-share-muted');
+      }
     }
 
     detail.classList.remove('hidden');
@@ -4681,14 +4689,14 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
     const moreToggle = $('#profile-more-toggle');
 
     // Option 1 One breath: collapse optional fields; expand if editing existing extras
-    const hasExtras = !!(me && (me.phone || me.skills || me.birthday));
+    const hasExtras = !!(me && me.phone);
     if (moreWrap) {
       if (hasExtras) moreWrap.classList.remove('hidden');
       else moreWrap.classList.add('hidden');
     }
     if (moreToggle) {
       moreToggle.setAttribute('aria-expanded', hasExtras ? 'true' : 'false');
-      moreToggle.textContent = hasExtras ? 'Hide options' : 'More options';
+      moreToggle.textContent = hasExtras ? 'Hide Phone & QR' : 'Phone & QR';
     }
 
     if (me) {
@@ -7120,6 +7128,20 @@ $('#edit-profile-btn').addEventListener('click', () => {
         pendingPhotoData = null;
         rewardSaveSuccess('profile');
         try { updatePersonalHome(); } catch (e) {}
+        // Action: info saved → if phone on seat, pop unique QR for brothers to scan
+        if (digitsOnly(entry.phone)) {
+          setTimeout(function () {
+            try { showContactQR(entry); } catch (e) {}
+          }, 480);
+        } else {
+          setTimeout(function () {
+            try {
+              const t = document.getElementById('install-toast');
+              if (t && !t.textContent) { /* noop */ }
+              showInstallToast('Seat locked. Add a phone under Phone & QR to share your code.');
+            } catch (e) {}
+          }, 500);
+        }
         if (!supabaseEnabled()) {
           /* soft toast already rewards; keep local-only note brief */
           setTimeout(() => {
@@ -7177,11 +7199,11 @@ $('#edit-profile-btn').addEventListener('click', () => {
         if (open) {
           wrap.classList.remove('hidden');
           profileMoreToggle.setAttribute('aria-expanded', 'true');
-          profileMoreToggle.textContent = 'Hide options';
+          profileMoreToggle.textContent = 'Hide Phone & QR';
         } else {
           wrap.classList.add('hidden');
           profileMoreToggle.setAttribute('aria-expanded', 'false');
-          profileMoreToggle.textContent = 'More options';
+          profileMoreToggle.textContent = 'Phone & QR';
         }
         try { tbFeedback.selection(); } catch (e) {}
       });
