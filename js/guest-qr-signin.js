@@ -78,8 +78,7 @@
       '#brother-detail[data-tb-no-qr="1"] .tb-guest-qr-signin,' +
       '#brother-detail[data-tb-no-qr="1"] .qr-bolt-pad{display:none!important;}' +
       '#auth-gate[data-no-swipe-close="1"],#profile-modal[data-no-swipe-close="1"]{touch-action:pan-y;}' +
-      '#auth-gate .tb-seat-consent{display:flex;align-items:flex-start;gap:8px;margin:10px 0 0;text-align:left;font-size:13px;line-height:1.3;}' +
-      '#auth-gate .tb-seat-consent input{margin-top:3px;}' +
+      '#auth-consent,label.tb-seat-consent{display:none!important;}' +
       '#auth-signin-btn.tb-form-signin{letter-spacing:.08em;}';
     (document.head || document.documentElement).appendChild(s);
   }
@@ -129,13 +128,7 @@
       ph.maxLength = 20;
       email.parentNode.insertBefore(ph, email.nextSibling);
     }
-    if (!$('auth-consent')) {
-      var lab = document.createElement('label');
-      lab.className = 'tb-seat-consent';
-      lab.innerHTML = '<input type="checkbox" id="auth-consent"> <span>Text me about the next night.</span>';
-      var actions = gate.querySelector('.auth-actions') || email.parentNode;
-      actions.parentNode.insertBefore(lab, actions);
-    }
+    /* SMS box lives on #auth-sms-opt. Do not stack a second checkbox. */
     var sign = $('auth-signin-btn');
     if (sign && !sign.textContent) sign.textContent = 'SIGN IN';
   }
@@ -159,7 +152,7 @@
     if ($('auth-name') && d.name && !$('auth-name').value) $('auth-name').value = d.name;
     if ($('auth-phone') && d.phone && !$('auth-phone').value) $('auth-phone').value = d.phone;
     if ($('auth-email') && d.email && !$('auth-email').value) $('auth-email').value = d.email;
-    if ($('auth-consent') && d.consent) $('auth-consent').checked = true;
+    /* do not restore SMS consent — must be a fresh tap */
   }
 
   function fieldsTyped() {
