@@ -77,8 +77,7 @@
       '#brother-detail[data-tb-no-qr="1"] .qr-empty-whisper,' +
       '#brother-detail[data-tb-no-qr="1"] .tb-guest-qr-signin,' +
       '#brother-detail[data-tb-no-qr="1"] .qr-bolt-pad{display:none!important;}' +
-      '#auth-gate[data-no-swipe-close="1"],#profile-modal[data-no-swipe-close="1"]{touch-action:pan-y;}' +
-      '#auth-gate .auth-card,#auth-gate form{touch-action:pan-y;-webkit-overflow-scrolling:touch;}' +
+      '#auth-gate[data-no-swipe-close="1"],#profile-modal[data-no-swipe-close="1"]{touch-action:pan-y;}' +'#auth-gate .auth-card,#auth-gate form{touch-action:pan-y;-webkit-overflow-scrolling:touch;}' +
       '#auth-consent,label.tb-seat-consent{display:none!important;}' +
       '#auth-signin-btn.tb-form-signin{letter-spacing:.08em;}';
     (document.head || document.documentElement).appendChild(s);
