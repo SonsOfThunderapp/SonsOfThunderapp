@@ -1,91 +1,67 @@
-/* Home month film. Inserts under .next-meeting.card. Never restyles I'M IN. Never leaves the board. */
+/* Home month film. Tile under .next-meeting.card. Player is ThunderTheater only. */
 (function () {
   if (window.__tbHomeMonthFilm) return;
   window.__tbHomeMonthFilm = 1;
 
   var POSTER = "assets/tour-memories/sot-night-patio.svg";
   var SRC = "assets/home-month/this-month.mp4";
+  window.__tbMonthLastPoster = window.__tbMonthLastPoster || POSTER;
+
+  function film() {
+    return {
+      src: SRC,
+      poster: window.__tbMonthLastPoster || POSTER,
+      title: "THIS MONTH"
+    };
+  }
+
+  function loadTheater(cb) {
+    if (window.ThunderTheater) { cb(); return; }
+    var b = (window.TB_CONFIG && window.TB_CONFIG.APP_BUILD) || "1";
+    if (!document.querySelector('link[href*="tb-theater.css"]')) {
+      var l = document.createElement("link");
+      l.rel = "stylesheet";
+      l.href = "css/tb-theater.css?v=" + encodeURIComponent(b);
+      (document.head || document.documentElement).appendChild(l);
+    }
+    if (document.querySelector('script[src*="tb-theater.js"]')) {
+      var n = 0;
+      var t = setInterval(function () {
+        n += 1;
+        if (window.ThunderTheater || n > 40) { clearInterval(t); cb(); }
+      }, 50);
+      return;
+    }
+    var s = document.createElement("script");
+    s.src = "js/tb-theater.js?v=" + encodeURIComponent(b);
+    s.onload = cb;
+    s.onerror = cb;
+    (document.body || document.documentElement).appendChild(s);
+  }
 
   function boot() {
     var home = document.getElementById("view-home");
     var card = home && home.querySelector(".next-meeting.card");
-    if (!card || document.getElementById("tb-month-film")) return;
-    var tile = document.createElement("button");
-    tile.id = "tb-month-film";
-    tile.type = "button";
-    tile.className = "tb-month-film";
-    tile.setAttribute("aria-label", "This month");
-    tile.innerHTML =
-      '<span class="tb-month-film-pic" style="background-image:url(\'' + POSTER + '\')"></span>' +
-      '<span class="tb-month-film-ring" aria-hidden="true"></span>' +
-      '<span class="tb-month-film-label">THIS MONTH</span>';
-    card.insertAdjacentElement("afterend", tile);
-    tile.addEventListener("click", openPlayer);
-  }
-
-  var overlay = null;
-  var video = null;
-  var startY = 0;
-
-  function openPlayer(ev) {
-    if (ev) ev.preventDefault();
-    if (overlay) {
-      play();
-      return;
+    if (!card) return;
+    var tile = document.getElementById("tb-month-film");
+    if (!tile) {
+      tile = document.createElement("button");
+      tile.id = "tb-month-film";
+      tile.type = "button";
+      tile.className = "tb-month-film";
+      tile.setAttribute("aria-label", "This month");
+      tile.innerHTML =
+        '<span class="tb-month-film-pic" style="background-image:url(\'' + POSTER + '\')"></span>' +
+        '<span class="tb-month-film-ring" aria-hidden="true"></span>' +
+        '<span class="tb-month-film-label">THIS MONTH</span>';
+      card.insertAdjacentElement("afterend", tile);
     }
-    overlay = document.createElement("div");
-    overlay.id = "tb-month-player";
-    overlay.innerHTML =
-      '<button type="button" class="tb-month-x" aria-label="Close">\u00d7</button><video playsinline webkit-playsinline></video>';
-    document.body.appendChild(overlay);
-    video = overlay.querySelector("video");
-    video.setAttribute("playsinline", "");
-    video.setAttribute("webkit-playsinline", "");
-    video.setAttribute("preload", "auto");
-    video.poster = POSTER;
-    video.src = SRC;
-    video.addEventListener("error", function () {
-      try { video.removeAttribute("src"); video.load(); } catch (e1) {}
-      overlay.style.background = "#000 url(" + POSTER + ") center/cover no-repeat";
+    loadTheater(function () {
+      if (window.ThunderTheater) {
+        window.ThunderTheater.ensure();
+        window.ThunderTheater.bindTile(tile, film);
+      }
     });
-    overlay.querySelector(".tb-month-x").addEventListener("click", function (e2) {
-      e2.stopPropagation();
-      closePlayer();
-    });
-    overlay.addEventListener("touchstart", onStart, { passive: false });
-    overlay.addEventListener("touchmove", onMove, { passive: false });
-    overlay.addEventListener("touchend", onEnd, { passive: false });
-    document.body.classList.add("tb-month-lock");
-    play();
-  }
-
-  function play() {
-    if (!video) return;
-    var p = video.play();
-    if (p && p.catch) p.catch(function () {});
-  }
-
-  function closePlayer() {
-    if (video) {
-      try { video.pause(); } catch (e3) {}
-    }
-    if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
-    overlay = null;
-    video = null;
-    document.body.classList.remove("tb-month-lock");
-  }
-
-  function onStart(ev) {
-    if (!ev.touches || !ev.touches[0]) return;
-    startY = ev.touches[0].clientY;
-    if (ev.cancelable) ev.preventDefault();
-  }
-  function onMove(ev) {
-    if (ev.cancelable) ev.preventDefault();
-  }
-  function onEnd(ev) {
-    var y = ev.changedTouches && ev.changedTouches[0] ? ev.changedTouches[0].clientY : startY;
-    if (y - startY > 160) closePlayer();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
