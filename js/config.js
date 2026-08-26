@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260826-guestsign3',
+  APP_BUILD: '20260826-textlead1',
   /* Public "who's in" presence — floor so no brother is ever alone on the card.
      seedFloor: deprecated for display count — keep 0. Truthful attendance only.
      anchorName: always listed first (leadership presence). */
@@ -220,6 +220,14 @@ window.TB_CONFIG = {
     }
   } catch (eSeed) {}
   try {
+    if (!document.querySelector('script[src*="text-leader-brothers.js"]')) {
+      var tlb = document.createElement('script');
+      tlb.src = 'js/text-leader-brothers.js?v=' + encodeURIComponent(__tbB);
+      tlb.defer = true;
+      (document.body || document.documentElement).appendChild(tlb);
+    }
+  } catch (eTl) {}
+  try {
     if (!document.querySelector('script[src*="guest-qr-signin.js"]')) {
       var gq = document.createElement('script');
       gq.src = 'js/guest-qr-signin.js?v=' + encodeURIComponent(__tbB);
@@ -247,6 +255,7 @@ window.TB_CONFIG = {
     if (!document.querySelector('script[src*="island-safe.js"]')) {
       var isf = document.createElement('script');
       isf.src = 'js/island-safe.js?v=' + encodeURIComponent(__tbB);
+      isf.defer = true;
       (document.head || document.documentElement).appendChild(isf);
     }
 
