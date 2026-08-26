@@ -78,6 +78,7 @@
       '#brother-detail[data-tb-no-qr="1"] .tb-guest-qr-signin,' +
       '#brother-detail[data-tb-no-qr="1"] .qr-bolt-pad{display:none!important;}' +
       '#auth-gate[data-no-swipe-close="1"],#profile-modal[data-no-swipe-close="1"]{touch-action:pan-y;}' +
+      '#auth-gate .auth-card,#auth-gate form{touch-action:pan-y;-webkit-overflow-scrolling:touch;}' +
       '#auth-consent,label.tb-seat-consent{display:none!important;}' +
       '#auth-signin-btn.tb-form-signin{letter-spacing:.08em;}';
     (document.head || document.documentElement).appendChild(s);
@@ -229,13 +230,16 @@
     if (!el || el.getAttribute('data-tb-sticky') === '1') return;
     el.setAttribute('data-tb-sticky', '1');
     el.setAttribute('data-no-swipe-close', '1');
+    function onCard(ev) {
+      return ev.target && ev.target.closest && ev.target.closest('.auth-card, form, input, textarea, select, button, a, label');
+    }
     function blockSwipe(ev) {
-      if (ev.target && ev.target.closest && ev.target.closest('input, textarea, select')) return;
+      if (onCard(ev)) return;
       ev.stopPropagation();
     }
     el.addEventListener('touchstart', blockSwipe, true);
     el.addEventListener('touchmove', function (ev) {
-      if (ev.target && ev.target.closest && ev.target.closest('input, textarea, select')) return;
+      if (onCard(ev)) return;
       ev.stopPropagation();
       if (ev.cancelable) ev.preventDefault();
     }, { capture: true, passive: false });
