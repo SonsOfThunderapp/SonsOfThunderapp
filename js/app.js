@@ -4625,7 +4625,27 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
   function openProfileEditor() {
     const me = brothers.find(b => b.id === myProfileId);
     const phoneEl = $('#profile-phone');
+    const titleEl = $('#profile-modal-title');
+    const subEl = $('#profile-modal-sub');
+    const saveBtn = $('#save-profile');
+    const moreWrap = $('#profile-more-fields');
+    const moreToggle = $('#profile-more-toggle');
+
+    // Option 1 One breath: collapse optional fields; expand if editing existing extras
+    const hasExtras = !!(me && (me.phone || me.skills || me.birthday));
+    if (moreWrap) {
+      if (hasExtras) moreWrap.classList.remove('hidden');
+      else moreWrap.classList.add('hidden');
+    }
+    if (moreToggle) {
+      moreToggle.setAttribute('aria-expanded', hasExtras ? 'true' : 'false');
+      moreToggle.textContent = hasExtras ? 'Hide options' : 'More options';
+    }
+
     if (me) {
+      if (titleEl) titleEl.innerHTML = 'EDIT YOUR <span class="accent-yellow">SEAT</span>';
+      if (subEl) subEl.textContent = 'Update your name, photo, or line.';
+      if (saveBtn) saveBtn.textContent = 'LOCK IT IN';
       const nameEl = $('#profile-name');
       const bioEl = $('#profile-bio');
       if (nameEl) nameEl.value = me.name || '';
@@ -4650,6 +4670,9 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
         if (preview) { preview.innerHTML = ''; preview.classList.remove('visible'); }
       }
     } else {
+      if (titleEl) titleEl.innerHTML = 'TAKE YOUR <span class="accent-yellow">SEAT</span>';
+      if (subEl) subEl.textContent = "You're in the room. Put a name on the chair.";
+      if (saveBtn) saveBtn.textContent = 'LOCK IT IN';
       const nameEl = $('#profile-name');
       const bioEl = $('#profile-bio');
       if (nameEl) nameEl.value = '';
@@ -4661,8 +4684,6 @@ const BIRTHDAY_SMS_PREFILL = "Grateful you’re in the room, bro";
       const skillsEmpty = $('#profile-skills');
       if (skillsEmpty) skillsEmpty.value = '';
 
-
-      
       pendingPhotoData = null;
       const preview = $('#photo-preview');
       if (preview) { preview.innerHTML = ''; preview.classList.remove('visible'); }
@@ -7092,9 +7113,30 @@ $('#edit-profile-btn').addEventListener('click', () => {
         renderBrothers();
         closeModal('profile-modal');
       } finally {
-        if (btn) { btn.disabled = false; btn.textContent = 'Save Profile'; }
+        if (btn) { btn.disabled = false; btn.textContent = 'LOCK IT IN'; }
       }
     });
+
+    // Profile optional fields toggle (One breath — phone/skills/birthday never block seat)
+    const profileMoreToggle = $('#profile-more-toggle');
+    if (profileMoreToggle && profileMoreToggle.dataset.tbBound !== '1') {
+      profileMoreToggle.dataset.tbBound = '1';
+      profileMoreToggle.addEventListener('click', () => {
+        const wrap = $('#profile-more-fields');
+        if (!wrap) return;
+        const open = wrap.classList.contains('hidden');
+        if (open) {
+          wrap.classList.remove('hidden');
+          profileMoreToggle.setAttribute('aria-expanded', 'true');
+          profileMoreToggle.textContent = 'Hide options';
+        } else {
+          wrap.classList.add('hidden');
+          profileMoreToggle.setAttribute('aria-expanded', 'false');
+          profileMoreToggle.textContent = 'More options';
+        }
+        try { tbFeedback.selection(); } catch (e) {}
+      });
+    }
 
     // Media — shared Supabase when configured; requires signed-in session
     const camInput = $('#media-file-cam');

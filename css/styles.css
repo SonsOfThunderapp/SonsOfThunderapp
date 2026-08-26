@@ -9299,3 +9299,159 @@ body.patio-live .announcements-section {
 .memory-night-grid {
   display: contents;
 }
+
+/* ===== PROFILE ONE BREATH (Brothers → TAKE YOUR SEAT) ===== */
+.profile-one-breath {
+  max-width: 420px;
+}
+.profile-one-breath-header {
+  border-bottom: 1px solid #1a1a1a;
+  align-items: flex-start;
+  gap: 12px;
+}
+.profile-title-block {
+  flex: 1;
+  min-width: 0;
+}
+.profile-one-breath-header h2 {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+  margin: 0;
+}
+.profile-one-breath-header .accent-yellow {
+  color: var(--yellow, #FEF105);
+}
+.profile-modal-sub {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #888;
+  font-weight: 500;
+  line-height: 1.35;
+}
+.profile-one-breath-body {
+  padding-top: 16px;
+}
+.profile-photo-hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.profile-one-breath .photo-preview {
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  margin: 0 0 10px;
+  border: 2px solid var(--yellow, #FEF105);
+  background: #111;
+}
+.profile-one-breath .photo-preview.visible {
+  display: block;
+}
+.profile-one-breath .photo-preview:not(.visible) {
+  display: none;
+}
+.profile-photo-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  color: var(--yellow, #FEF105);
+}
+.profile-one-breath .photo-preview.visible ~ .profile-photo-label .profile-photo-ring {
+  display: none;
+}
+.profile-photo-ring {
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  border: 2px solid var(--yellow, #FEF105);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #111;
+}
+.profile-photo-plus {
+  font-size: 36px;
+  font-weight: 300;
+  line-height: 1;
+  color: var(--yellow, #FEF105);
+}
+.profile-photo-cta {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--yellow, #FEF105);
+}
+.profile-one-breath-body input#profile-name,
+.profile-one-breath-body input#profile-bio {
+  text-align: left;
+  font-size: 16px;
+  padding: 16px 14px;
+  margin-bottom: 10px;
+  background: #141414;
+  border: 1px solid #2a2a2a;
+}
+.profile-one-breath-body input#profile-name::placeholder,
+.profile-one-breath-body input#profile-bio::placeholder {
+  color: #666;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+.profile-phone-ghost {
+  margin: 4px 0 16px;
+  font-size: 12px;
+  color: var(--yellow, #FEF105);
+  text-align: center;
+  opacity: 0.85;
+  font-weight: 600;
+}
+.profile-lock-btn,
+#save-profile.profile-lock-btn {
+  width: 100%;
+  padding: 16px 18px;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+.profile-more-toggle {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 12px 8px;
+  cursor: pointer;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.profile-more-toggle[aria-expanded="true"] {
+  color: #888;
+}
+.profile-more-fields {
+  padding-top: 4px;
+  border-top: 1px solid #1a1a1a;
+  margin-top: 4px;
+}
+.profile-more-fields.hidden {
+  display: none !important;
+}
+.profile-one-breath .field-label {
+  margin-top: 10px;
+}

@@ -569,46 +569,63 @@
     </div>
   </div>
 
-  <!-- PROFILE MODAL -->
+  <!-- PROFILE MODAL — Option 1 One breath (Brothers → take your seat) -->
   <div id="profile-modal" class="modal hidden">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>My Profile</h2>
-        <button class="modal-close" data-close="profile-modal">×</button>
+    <div class="modal-content profile-one-breath">
+      <div class="modal-header profile-one-breath-header">
+        <div class="profile-title-block">
+          <h2 id="profile-modal-title">TAKE YOUR <span class="accent-yellow">SEAT</span></h2>
+          <p id="profile-modal-sub" class="profile-modal-sub">You're in the room. Put a name on the chair.</p>
+        </div>
+        <button class="modal-close" data-close="profile-modal" aria-label="Close">×</button>
       </div>
-      <div class="modal-body">
-        <div class="photo-preview" id="photo-preview"></div>
-        <label class="file-label"><input type="file" id="profile-photo" accept="image/*" />Choose Photo</label>
-        <input type="text" id="profile-name" placeholder="First name" maxlength="30" />
-        <textarea id="profile-bio" placeholder="One-line identity (occupation, family, what you bring)" maxlength="120" rows="3"></textarea>
-        <label class="field-label" for="profile-skills">What I can help with <span class="field-hint">(optional — HVAC, legal, kids, trucks)</span></label>
-        <input type="text" id="profile-skills" placeholder="e.g. electrical · real estate · prayer" maxlength="80" />
-        <label class="field-label" for="profile-phone">Phone <span class="field-hint">(optional — only shared if you add it)</span></label>
-        <input type="tel" id="profile-phone" placeholder="Mobile number" maxlength="20" inputmode="tel" autocomplete="tel" />
-        <p class="profile-phone-help" id="profile-phone-help">
-          Add a number so brothers can save you with one scan — like Cash App, but for the brotherhood.
+      <div class="modal-body profile-one-breath-body">
+        <!-- Hero: photo -->
+        <div class="profile-photo-hero">
+          <div class="photo-preview" id="photo-preview" aria-hidden="true"></div>
+          <label class="file-label profile-photo-label" for="profile-photo">
+            <input type="file" id="profile-photo" accept="image/*" />
+            <span class="profile-photo-ring" aria-hidden="true">
+              <span class="profile-photo-plus">+</span>
+            </span>
+            <span class="profile-photo-cta">ADD PHOTO</span>
+          </label>
+        </div>
+
+        <!-- Primary fields only -->
+        <input type="text" id="profile-name" placeholder="YOUR NAME" maxlength="30" autocomplete="name" />
+        <input type="text" id="profile-bio" placeholder="ONE LINE — who you are" maxlength="120" />
+
+        <p class="profile-phone-ghost" id="profile-phone-help">
+          Phone optional — add later for Share
         </p>
 
-<label class="field-label" for="profile-birthday">
-          Birthday (MM-DD)
-          <span class="field-hint">(optional)</span>
-        </label>
-        <input type="text"
-               id="profile-birthday"
-               placeholder="e.g. 04-24"
-               maxlength="5"
-               inputmode="numeric"
-               autocomplete="bday"
-               aria-label="Birthday month and day">
+        <button id="save-profile" class="btn-primary profile-lock-btn">LOCK IT IN</button>
 
-
-
-
-        
-        <button type="button" class="btn-text-link" id="profile-qr-why">Why a contact QR?</button>
-        <button id="save-profile" class="btn-primary">Save Profile</button>
-        <button type="button" id="profile-my-qr" class="btn-secondary profile-my-qr hidden">MY QR</button>
-        <p class="profile-qr-unlock hidden" id="profile-qr-unlock">Add a phone to unlock MY QR.</p>
+        <!-- Optional extras — collapsed by default (never blocks the seat) -->
+        <button type="button" class="profile-more-toggle" id="profile-more-toggle" aria-expanded="false">
+          More options
+        </button>
+        <div id="profile-more-fields" class="profile-more-fields hidden">
+          <label class="field-label" for="profile-skills">What I can help with <span class="field-hint">(optional)</span></label>
+          <input type="text" id="profile-skills" placeholder="e.g. electrical · real estate · prayer" maxlength="80" />
+          <label class="field-label" for="profile-phone">Phone <span class="field-hint">(optional — only shared if you add it)</span></label>
+          <input type="tel" id="profile-phone" placeholder="Mobile number" maxlength="20" inputmode="tel" autocomplete="tel" />
+          <label class="field-label" for="profile-birthday">
+            Birthday (MM-DD)
+            <span class="field-hint">(optional)</span>
+          </label>
+          <input type="text"
+                 id="profile-birthday"
+                 placeholder="e.g. 04-24"
+                 maxlength="5"
+                 inputmode="numeric"
+                 autocomplete="bday"
+                 aria-label="Birthday month and day">
+          <button type="button" class="btn-text-link" id="profile-qr-why">Why a contact QR?</button>
+          <button type="button" id="profile-my-qr" class="btn-secondary profile-my-qr hidden">MY QR</button>
+          <p class="profile-qr-unlock hidden" id="profile-qr-unlock">Add a phone to unlock MY QR.</p>
+        </div>
       </div>
     </div>
   </div>
