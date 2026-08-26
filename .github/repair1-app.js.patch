@@ -1,0 +1,74 @@
+--- js/app.js
++++ js/app.js
+@@ -1302,9 +1302,12 @@
+     const pass = document.getElementById('auth-password');
+     const forgot = document.getElementById('auth-forgot-btn');
+     if (gate) gate.classList.add('auth-gate-imin');
+     if (title) title.textContent = 'LOCK YOUR SEAT';
+-    if (sub) { sub.textContent = ''; sub.classList.add('hidden'); }
++    if (sub) {
++      sub.textContent = 'Once on this phone. Name + email. Phone optional.';
++      sub.classList.remove('hidden');
++    }
+     if (hint) hint.classList.add('hidden');
+     if (signBtn) {
+       signBtn.classList.remove('hidden');
+       signBtn.textContent = 'LOCK MY SEAT';
+@@ -1522,26 +1525,28 @@
+         try { flushPendingRsvp(); } catch (e) {}
+         try { flushPendingShot(); } catch (e) {}
+         try { lockInAppReminder(); } catch (e) {}
+         if (event === 'SIGNED_IN') {
+-          try { requestPersistentStorage(); } catch (eP) {}
+-          try { fireSignedInWelcome(); } catch (e) {}
+-          try {
+-            Promise.resolve(claimBrotherOnSignIn()).then(function () {
+-              try { flushPendingSeat(); } catch (e2) {}
+-            });
+-          } catch (e) {}
+-          try { markInviteUsed(); } catch (e) {}
+-          try {
+-            const me = (brothers || []).find(function (b) { return b && b.id === myProfileId && (b.name || '').trim(); });
+-            const coffee = axumCoffeeState();
+-            const showingCoffee = !!(coffee && coffee.code && !coffee.redeemedAt);
+-            const pending = load('pendingSeat') || {};
+-            const hasName = !!(me || (pending && String(pending.name || '').trim()));
+-            if (!hasName && !showingCoffee) {
+-              setTimeout(function () { try { openProfileEditor(); } catch (e2) {} }, 350);
+-            }
+-          } catch (e) {}
++          (async function () {
++            try { requestPersistentStorage(); } catch (eP) {}
++            try { fireSignedInWelcome(); } catch (e) {}
++            try { await markInviteUsed(); } catch (e) {}
++            try { await claimBrotherOnSignIn(); } catch (e) {}
++            try { await flushPendingSeat(); } catch (e) {}
++            try {
++              const me = (brothers || []).find(function (b) { return b && b.id === myProfileId && (b.name || '').trim(); });
++              const coffee = axumCoffeeState();
++              const showingCoffee = !!(coffee && coffee.code && !coffee.redeemedAt);
++              const pending = load('pendingSeat') || {};
++              const hasName = !!(me || (pending && String(pending.name || '').trim()));
++              if (hasName) {
++                try { if (typeof showInstallToast === 'function') showInstallToast('Seat locked. You\'re in.', { success: true }); } catch (eT) {}
++                try { if (typeof renderBrothers === 'function') renderBrothers(); } catch (eR) {}
++              } else if (!showingCoffee) {
++                setTimeout(function () { try { openProfileEditor(); } catch (e2) {} }, 350);
++              }
++            } catch (e) {}
++          })();
+         }
+         pullMemories().then(() => {
+           renderMedia();
+           if (typeof renderLastFire === 'function') renderLastFire();
+@@ -1637,9 +1642,9 @@
+     const { data, error } = await sb.auth.signInWithPassword({ email, password });
+     if (error) throw error;
+     sbSession = data.session;
+     try { requestPersistentStorage(); } catch (eP) {}
+-    try { softRefreshApp('Signed in — refreshing Thunder Board…'); } catch (e) {}
++    /* 20260826-repair1: no full reload on sign-in. Seat claim finishes on this page via SIGNED_IN. */
+     return data;
+   }
+ 
+   async function authSignUp(email, password) {
