@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260826-theater2',
+  APP_BUILD: '20260826-theater3',
   /* Public "who's in" presence — floor so no brother is ever alone on the card.
      seedFloor: deprecated for display count — keep 0. Truthful attendance only.
      anchorName: always listed first (leadership presence). */
@@ -333,6 +333,12 @@ window.TB_CONFIG = {
       tmcss.rel = 'stylesheet';
       tmcss.href = 'css/theater-month.css?v=' + encodeURIComponent(__tbB);
       (document.head || document.documentElement).appendChild(tmcss);
+    }
+    if (!document.querySelector('script[src*="theater-compress.js"]')) {
+      var tcj = document.createElement('script');
+      tcj.src = 'js/theater-compress.js?v=' + encodeURIComponent(__tbB);
+      tcj.defer = true;
+      (document.body || document.documentElement).appendChild(tcj);
     }
     if (!document.querySelector('script[src*="home-month-film.js"]')) {
       var hmj = document.createElement('script');
