@@ -1,1 +1,1 @@
-FILE_REF:/tmp/chair1-mcp-args.json
+PLACEHOLDER_LOAD_FROM_/workspace/thunder-theater/app.js
