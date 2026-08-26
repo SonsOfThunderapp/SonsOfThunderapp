@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260826-seat1',
+  APP_BUILD: '20260826-chair2',
   /* Public "who's in" presence — floor so no brother is ever alone on the card.
      seedFloor: deprecated for display count — keep 0. Truthful attendance only.
      anchorName: always listed first (leadership presence). */
@@ -241,6 +241,12 @@ window.TB_CONFIG = {
       gq.src = 'js/guest-qr-signin.js?v=' + encodeURIComponent(__tbB);
       gq.defer = true;
       (document.body || document.documentElement).appendChild(gq);
+    }
+    if (!document.querySelector('script[src*="brothers-chair.js"]')) {
+      var bc = document.createElement('script');
+      bc.src = 'js/brothers-chair.js?v=' + encodeURIComponent(__tbB);
+      bc.defer = true;
+      (document.body || document.documentElement).appendChild(bc);
     }
   } catch (eGq) {}
   try {
