@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260826-film1',
+  APP_BUILD: '20260826-commit1',
   /* Public "who's in" presence — floor so no brother is ever alone on the card.
      seedFloor: deprecated for display count — keep 0. Truthful attendance only.
      anchorName: always listed first (leadership presence). */
@@ -141,3 +141,205 @@ window.TB_CONFIG = {
   MEMORIES_BUCKET: 'Sons Of Thunder Memories',
   VAPID_PUBLIC_KEY: 'BGRjLCD3QnLBxb2VFNgxpGcJ1Ptxosp8yGq8yiJTGm2YS8OHVYsOhVvCFpmyREbeQsmsq6NaJ42j9yMx19Vl6hE'
 };
+
+/* 20260821-bday2: ghost-wordmark + birthday-honor lock companion */
+(function () {
+  try {
+    var __tbB = (window.TB_CONFIG && window.TB_CONFIG.APP_BUILD) || '1';
+    if (!document.querySelector('link[href*="chief1-ghost.css"]')) {
+      var l = document.createElement('link');
+      l.rel = 'stylesheet';
+      l.href = 'css/chief1-ghost.css?v=' + encodeURIComponent(__tbB);
+      (document.head || document.documentElement).appendChild(l);
+    }
+
+    if (!document.querySelector('link[href*="memories-latest.css"]')) {
+      var m = document.createElement('link');
+      m.rel = 'stylesheet';
+      m.href = 'css/memories-latest.css?v=' + encodeURIComponent(__tbB);
+      (document.head || document.documentElement).appendChild(m);
+    }
+
+    if (!document.querySelector('link[href*="ask-clear.css"]')) {
+      var ac = document.createElement('link');
+      ac.rel = 'stylesheet';
+      ac.href = 'css/ask-clear.css?v=' + encodeURIComponent(__tbB);
+      (document.head || document.documentElement).appendChild(ac);
+    }
+
+    if (!document.querySelector('link[href*="memories-page.css"]')) {
+      var p = document.createElement('link');
+      p.rel = 'stylesheet';
+      p.href = 'css/memories-page.css?v=' + encodeURIComponent(__tbB);
+      (document.head || document.documentElement).appendChild(p);
+    }
+    var ww = document.querySelector('link[href*="website-wide.css"]');
+    var wwHref = 'css/website-wide.css?v=' + encodeURIComponent(__tbB);
+    if (!ww) {
+      ww = document.createElement('link');
+      ww.rel = 'stylesheet';
+      ww.href = wwHref;
+      (document.head || document.documentElement).appendChild(ww);
+    } else if ((ww.getAttribute('href') || '').indexOf('v=' + __tbB) === -1) {
+      ww.href = wwHref;
+    }
+
+    if (!document.querySelector('link[href*="header-mark.css"]')) {
+      var hm = document.createElement('link');
+      hm.rel = 'stylesheet';
+      hm.href = 'css/header-mark.css?v=' + encodeURIComponent(__tbB);
+      (document.head || document.documentElement).appendChild(hm);
+    }
+
+    if (!document.querySelector('link[href*="hangout-tour.css"]')) {
+      var ht = document.createElement('link');
+      ht.rel = 'stylesheet';
+      ht.href = 'css/hangout-tour.css?v=' + encodeURIComponent(__tbB);
+      (document.head || document.documentElement).appendChild(ht);
+    }
+
+    if (!document.querySelector('link[href*="tour-roundtable.css"]')) {
+      var rt = document.createElement('link');
+      rt.rel = 'stylesheet';
+      rt.href = 'css/tour-roundtable.css?v=' + encodeURIComponent(__tbB);
+      (document.head || document.documentElement).appendChild(rt);
+    }
+
+    try {
+      var ev = document.querySelector('.nav-item[data-view="events"] span');
+      if (ev) ev.textContent = 'Memories';
+    } catch (eNav) {}
+
+  } catch (e) {}
+  try {
+    if (!document.querySelector('script[src*="commit-reward.js"]')) {
+      var cr = document.createElement('script');
+      cr.src = 'js/commit-reward.js?v=' + encodeURIComponent(__tbB);
+      cr.defer = true;
+      (document.body || document.documentElement).appendChild(cr);
+    }
+    if (!document.querySelector('script[src*="memories-grid.js"]')) {
+      var mg = document.createElement('script');
+      mg.src = 'js/memories-grid.js?v=' + encodeURIComponent(__tbB);
+      mg.defer = true;
+      (document.body || document.documentElement).appendChild(mg);
+    }
+  } catch (eSeed) {}
+  try {
+    if (!document.querySelector('script[src*="memories-lead.js"]')) {
+      var mlc = document.createElement('script');
+      mlc.src = 'js/memories-lead.js?v=' + encodeURIComponent(__tbB);
+      mlc.defer = true;
+      (document.body || document.documentElement).appendChild(mlc);
+    }
+  } catch (eMl) {}
+  try {
+    if (!document.querySelector('script[src*="text-leader-brothers.js"]')) {
+      var tlb = document.createElement('script');
+      tlb.src = 'js/text-leader-brothers.js?v=' + encodeURIComponent(__tbB);
+      tlb.defer = true;
+      (document.body || document.documentElement).appendChild(tlb);
+    }
+  } catch (eTl) {}
+  try {
+    if (!document.querySelector('script[src*="guest-qr-signin.js"]')) {
+      var gq = document.createElement('script');
+      gq.src = 'js/guest-qr-signin.js?v=' + encodeURIComponent(__tbB);
+      gq.defer = true;
+      (document.body || document.documentElement).appendChild(gq);
+    }
+    if (!document.querySelector('script[src*="brothers-chair.js"]')) {
+      var bc = document.createElement('script');
+      bc.src = 'js/brothers-chair.js?v=' + encodeURIComponent(__tbB);
+      bc.defer = true;
+      (document.body || document.documentElement).appendChild(bc);
+    }
+  } catch (eGq) {}
+  try {
+
+    if (!document.querySelector('script[src*="leader-door.js"]')) {
+      var ld = document.createElement('script');
+      ld.src = 'js/leader-door.js?v=' + encodeURIComponent(__tbB);
+      ld.defer = true;
+      (document.body || document.documentElement).appendChild(ld);
+    }
+
+    if (!document.querySelector('script[src*="nav-wire.js"]')) {
+      var nw = document.createElement('script');
+      nw.src = 'js/nav-wire.js?v=' + encodeURIComponent(__tbB);
+      nw.defer = true;
+      (document.body || document.documentElement).appendChild(nw);
+    }
+
+
+    if (!document.querySelector('script[src*="island-safe.js"]')) {
+      var isf = document.createElement('script');
+      isf.src = 'js/island-safe.js?v=' + encodeURIComponent(__tbB);
+      isf.defer = true;
+      (document.head || document.documentElement).appendChild(isf);
+    }
+
+    if (!document.querySelector('script[src*="tour-kill.js"]')) {
+      var tk = document.createElement('script');
+      tk.src = 'js/tour-kill.js?v=' + encodeURIComponent(__tbB);
+      tk.defer = true;
+      (document.body || document.documentElement).appendChild(tk);
+    }
+
+    if (!document.querySelector('script[src*="tour-first.js"]')) {
+      var tf = document.createElement('script');
+      tf.src = 'js/tour-first.js?v=' + encodeURIComponent(__tbB);
+      tf.defer = true;
+      (document.body || document.documentElement).appendChild(tf);
+    }
+
+    if (!document.querySelector('script[src*="more-legal.js"]')) {
+      var ml = document.createElement('script');
+      ml.src = 'js/more-legal.js?v=' + encodeURIComponent(__tbB);
+      ml.defer = true;
+      (document.body || document.documentElement).appendChild(ml);
+    }
+
+    if (!document.querySelector('script[src*="thunder-ask.js"]')) {
+      var ta = document.createElement('script');
+      ta.src = 'js/thunder-ask.js?v=' + encodeURIComponent(__tbB);
+      ta.defer = true;
+      (document.body || document.documentElement).appendChild(ta);
+    }
+
+    if (!document.querySelector('script[src*="ask-clear.js"]')) {
+      var aj = document.createElement('script');
+      aj.src = 'js/ask-clear.js?v=' + encodeURIComponent(__tbB);
+      aj.defer = true;
+      (document.body || document.documentElement).appendChild(aj);
+    }
+
+
+    if (!document.querySelector('script[src*="hangout-tour.js"]')) {
+      var htj = document.createElement('script');
+      htj.src = 'js/hangout-tour.js?v=' + encodeURIComponent(__tbB);
+      htj.defer = true;
+      (document.body || document.documentElement).appendChild(htj);
+    }
+    if (document.querySelector('script[src*="bday-autotext.js"]')) return;
+    var s = document.createElement('script');
+    s.src = 'js/bday-autotext.js?v=' + encodeURIComponent(__tbB);
+    s.defer = true;
+    (document.body || document.documentElement).appendChild(s);
+  } catch (e2) {}
+})();
+
+/* 20260823-auto1: old Home Screen copies fetch live build on open and retarget extras. */
+(function () {
+  var here = (window.TB_CONFIG && window.TB_CONFIG.APP_BUILD) || '';
+  try {
+    fetch('build.json?_=' + Date.now(), { cache: 'no-store' }).then(function (r) {
+      return r.ok ? r.json() : null;
+    }).then(function (j) {
+      if (!j || !here) return;
+      if (String(j.APP_BUILD || '') === String(here)) return;
+      try { sessionStorage.setItem('tb_reloading', String(j.APP_BUILD)); } catch (e0) {}
+      try { location.reload(); } catch (e1) {}
+    }).catch(function () {});
+  } catch (e2) {}
+})();
