@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260826-textlead1',
+  APP_BUILD: '20260826-memlead1',
   /* Public "who's in" presence — floor so no brother is ever alone on the card.
      seedFloor: deprecated for display count — keep 0. Truthful attendance only.
      anchorName: always listed first (leadership presence). */
@@ -219,6 +219,14 @@ window.TB_CONFIG = {
       (document.body || document.documentElement).appendChild(mg);
     }
   } catch (eSeed) {}
+  try {
+    if (!document.querySelector('script[src*="memories-lead.js"]')) {
+      var mlc = document.createElement('script');
+      mlc.src = 'js/memories-lead.js?v=' + encodeURIComponent(__tbB);
+      mlc.defer = true;
+      (document.body || document.documentElement).appendChild(mlc);
+    }
+  } catch (eMl) {}
   try {
     if (!document.querySelector('script[src*="text-leader-brothers.js"]')) {
       var tlb = document.createElement('script');
