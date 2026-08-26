@@ -31,7 +31,7 @@
   setTimeout(bind,2000);
 })();
 
-/* Guest Memories wall: real image/* files only. No data:webp. Upload stays sign-in. */
+/* Guest Memories wall: http image files only. SVG night stills + real jpg. No data: in img src. Upload stays sign-in. */
 (function () {
   var painting = false;
   var viewerBound = false;
@@ -39,6 +39,21 @@
   var feedObs = null;
 
   var GUEST_WALL = [
+    { id: 'sot-tent-banner', src: '/assets/tour-memories/sot-tent-banner.svg' },
+    { id: 'sot-topgolf-jacket', src: '/assets/tour-memories/sot-topgolf-jacket.svg' },
+    { id: 'sot-three-huddle', src: '/assets/tour-memories/sot-three-huddle.svg' },
+    { id: 'sot-veteran-talk', src: '/assets/tour-memories/sot-veteran-talk.svg' },
+    { id: 'sot-night-line', src: '/assets/tour-memories/sot-night-line.svg' },
+    { id: 'sot-night-patio', src: '/assets/tour-memories/sot-night-patio.svg' },
+    { id: 'sot-night-patio-2', src: '/assets/tour-memories/sot-night-patio-2.svg' },
+    { id: 'sot-topgolf-selfie', src: '/assets/tour-memories/sot-topgolf-selfie.svg' },
+    { id: 'sot-pizza', src: '/assets/tour-memories/sot-pizza.svg' },
+    { id: 'sot-topgolf-eight', src: '/assets/tour-memories/sot-topgolf-eight.svg' },
+    { id: 'sot-topgolf-five', src: '/assets/tour-memories/sot-topgolf-five.svg' },
+    { id: 'sot-night-selfie-four', src: '/assets/tour-memories/sot-night-selfie-four.svg' },
+    { id: 'sot-roast-carve', src: '/assets/tour-memories/sot-roast-carve.svg' },
+    { id: 'sot-patio-from-seat', src: '/assets/tour-memories/sot-patio-from-seat.svg' },
+    { id: 'sot-daylight-patio', src: '/assets/tour-memories/sot-daylight-patio.svg' },
     { id: 'real-tree', src: '/assets/tour-memories/real-tree.jpg' },
     { id: 'real-patio', src: '/assets/tour-memories/real-patio.jpg' },
     { id: 'real-bowl', src: '/assets/tour-memories/real-bowl.jpg' }
@@ -70,13 +85,13 @@
       try {
         var u = new URL(src);
         if (!u.hostname) return false;
-        return /\.(jpe?g|png|gif|webp)(\?|#|$)/i.test(u.pathname);
+        return /\.(jpe?g|png|gif|webp|svg)(\?|#|$)/i.test(u.pathname);
       } catch (eUrl) {
         return false;
       }
     }
     if (src.charAt(0) === '/' || src.indexOf('assets/') === 0 || src.indexOf('img/') === 0) {
-      return /\.(jpe?g|png|gif|webp)(\?|#|$)/i.test(src);
+      return /\.(jpe?g|png|gif|webp|svg)(\?|#|$)/i.test(src);
     }
     return false;
   }
