@@ -124,6 +124,49 @@
     } catch (eR) {}
   }
 
+  function parseStoredSession() {
+    function consider(raw) {
+      if (!raw) return null;
+      try {
+        var j = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        if (!j || typeof j !== 'object') return null;
+        var sess = j;
+        if (j.currentSession && j.currentSession.access_token) sess = j.currentSession;
+        else if (j.session && j.session.access_token) sess = j.session;
+        var at = sess.access_token || j.access_token;
+        var rt = sess.refresh_token || j.refresh_token;
+        if (!at || !rt) return null;
+        return { access_token: at, refresh_token: rt, user: sess.user || j.user || null };
+      } catch (e) { return null; }
+    }
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (!k || k.indexOf('sb-') !== 0) continue;
+        var t = consider(localStorage.getItem(k));
+        if (t) return t;
+      }
+    } catch (eL) {}
+    return null;
+  }
+
+  async function attachStoredSession(client) {
+    if (!client || !client.auth) return null;
+    var user = await sessionUser(client);
+    if (user) return user;
+    var tok = parseStoredSession();
+    if (!tok) return null;
+    try {
+      var out = await client.auth.setSession({
+        access_token: tok.access_token,
+        refresh_token: tok.refresh_token
+      });
+      return (out && out.data && out.data.session && out.data.session.user) || tok.user || await sessionUser(client);
+    } catch (eS) {
+      return tok.user || null;
+    }
+  }
+
   function sb() {
     if (typeof window.getSb === 'function') {
       try {
@@ -135,11 +178,20 @@
   }
 
   async function ensureSb() {
+    try {
+      if (window.__tbSbReady) await window.__tbSbReady;
+    } catch (eReady) {}
     var existing = sb();
-    if (existing) return existing;
+    if (existing) {
+      await attachStoredSession(existing);
+      return existing;
+    }
     await restoreAuthFromIdb();
     existing = sb();
-    if (existing) return existing;
+    if (existing) {
+      await attachStoredSession(existing);
+      return existing;
+    }
     var c = cfg();
     if (!c.SUPABASE_URL || !c.SUPABASE_ANON_KEY || !window.supabase) return null;
     if (!window.__tbTheaterSb) {
@@ -152,6 +204,7 @@
         }
       });
     }
+    await attachStoredSession(window.__tbTheaterSb);
     return window.__tbTheaterSb;
   }
 
@@ -182,6 +235,22 @@
     return false;
   }
 
+  function markChairSheet() {
+    var s = document.getElementById('tb-month-sheet');
+    var box = document.getElementById('tb-month-signin');
+    var on = chairFromApp();
+    if (s) s.classList.toggle('is-chair', on);
+    if (box) {
+      if (on) {
+        box.classList.add('is-chair-hide');
+        box.style.display = 'none';
+      } else {
+        box.classList.remove('is-chair-hide');
+      }
+    }
+    return on;
+  }
+
   async function isLeader() {
     if (chairFromApp()) return true;
     var client = await ensureSb();
@@ -205,11 +274,15 @@
     return false;
   }
 
+  function chairFail(why) {
+    if (chairFromApp()) return { ok: false, why: why || 'Could not put it on Home' };
+    return { ok: false, why: why || 'Sign in here' };
+  }
+
   async function chairWriteOk(client) {
-    if (!client) return { ok: false, why: 'Sign in here' };
-    var sess = await client.auth.getSession();
-    var user = sess && sess.data && sess.data.session && sess.data.session.user;
-    if (!user) return { ok: false, why: 'Sign in here' };
+    if (!client) return chairFail();
+    var user = await sessionUser(client);
+    if (!user) return chairFail();
     try {
       var rpc = await client.rpc('is_sot_leader');
       if (!rpc.error && rpc.data === true) return { ok: true, user: user };
@@ -217,7 +290,7 @@
     if (String(user.email || '').trim().toLowerCase() === 'obietv@gmail.com') {
       return { ok: true, user: user };
     }
-    return { ok: false, why: 'Sign in here' };
+    return chairFail();
   }
 
   async function sessionUser(client) {
@@ -229,11 +302,22 @@
   }
 
   function showSignIn(on) {
+    if (chairFromApp()) on = false;
     var box = document.getElementById('tb-month-signin');
     if (box) box.style.display = on ? 'block' : 'none';
+    markChairSheet();
   }
 
   async function refreshChairStatus() {
+    if (chairFromApp()) {
+      showSignIn(false);
+      status('Chair ready');
+      try {
+        var c0 = await ensureSb();
+        await attachStoredSession(c0);
+      } catch (e0) {}
+      return;
+    }
     var client = await ensureSb();
     var user = await sessionUser(client);
     if (user) {
@@ -277,6 +361,7 @@
       status(picked ? picked.name : '');
     });
     wrap.querySelector('#tb-month-put').addEventListener('click', putOnHome);
+    markChairSheet();
   }
 
   function openSheet() {
@@ -285,6 +370,7 @@
     var t = document.getElementById('tb-month-title');
     if (t && !t.value) t.value = draftTitle();
     s.classList.add('is-open');
+    markChairSheet();
     refreshChairStatus();
   }
   function closeSheet() {
@@ -336,8 +422,10 @@
   }
 
   async function putOnHome() {
-    var client = await ensureSb();
+    status('Working\u2026');
     var put = document.getElementById('tb-month-put');
+    var client = await ensureSb();
+    if (client) await attachStoredSession(client);
     if (!picked) { status('Choose a clip first'); return; }
     if (picked.size > RAW_MAX) {
       status('Shoot HD 30 for 60 seconds, or export under 50 MB.');
@@ -348,33 +436,43 @@
     put.disabled = true;
     var user = await sessionUser(client);
     if (!client || !user) {
-      if (!client) {
-        status('Sign in here');
-        put.disabled = false;
-        return;
-      }
-      var email = ((document.getElementById('tb-month-email') || {}).value || '').trim();
-      var pass = (document.getElementById('tb-month-pass') || {}).value || '';
-      if (!email || !pass) {
-        showSignIn(true);
-        status('Sign in here');
-        put.disabled = false;
-        return;
-      }
-      status('Signing in\u2026');
-      try {
-        var signed = await client.auth.signInWithPassword({ email: email, password: pass });
-        if (signed.error) throw new Error(signed.error.message || 'Sign in here');
-        user = (signed.data && signed.data.user) || await sessionUser(client);
-        try {
-          var pe = document.getElementById('tb-month-pass');
-          if (pe) pe.value = '';
-        } catch (eClr) {}
+      if (chairFromApp()) {
         showSignIn(false);
-      } catch (eIn) {
-        status((eIn && eIn.message) || 'Sign in here');
-        put.disabled = false;
-        return;
+        if (client) user = await attachStoredSession(client);
+        if (!user) {
+          status('Could not put it on Home');
+          put.disabled = false;
+          return;
+        }
+      } else {
+        if (!client) {
+          status('Sign in here');
+          put.disabled = false;
+          return;
+        }
+        var email = ((document.getElementById('tb-month-email') || {}).value || '').trim();
+        var pass = (document.getElementById('tb-month-pass') || {}).value || '';
+        if (!email || !pass) {
+          showSignIn(true);
+          status('Sign in here');
+          put.disabled = false;
+          return;
+        }
+        status('Signing in\u2026');
+        try {
+          var signed = await client.auth.signInWithPassword({ email: email, password: pass });
+          if (signed.error) throw new Error(signed.error.message || 'Sign in here');
+          user = (signed.data && signed.data.user) || await sessionUser(client);
+          try {
+            var pe = document.getElementById('tb-month-pass');
+            if (pe) pe.value = '';
+          } catch (eClr) {}
+          showSignIn(false);
+        } catch (eIn) {
+          status((eIn && eIn.message) || 'Sign in here');
+          put.disabled = false;
+          return;
+        }
       }
     }
     status('Checking the chair\u2026');
@@ -454,7 +552,9 @@
       toast('On Home');
     } catch (err) {
       var msg = err && err.message ? err.message : 'Could not put it on Home';
-      if (/row-level security/i.test(msg)) msg = 'Sign in here';
+      if (/row-level security/i.test(msg)) {
+        msg = chairFromApp() ? 'Could not put it on Home' : 'Sign in here';
+      }
       status(msg);
     }
     put.disabled = false;
@@ -497,6 +597,7 @@
     injectBtn();
     injectHomePut();
     ensureSheet();
+    markChairSheet();
   }
 
   function watchAuth() {
