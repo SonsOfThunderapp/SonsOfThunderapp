@@ -1,0 +1,103 @@
+/* 20260827-proof1: Choice 2 Proof hero. Unhide Events stack. Compact mission strip. */
+#view-events #events-section-title,
+#view-events #upcoming-events {
+  display: block !important;
+}
+#view-events #events-note:not(.hidden) {
+  display: block !important;
+}
+#view-events #next-mission-card,
+#view-events #next-mission-card.mission-mode,
+#view-events #next-mission-card.mission-strip {
+  display: flex !important;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  margin: 8px 0 18px;
+  animation: none !important;
+  transform: none;
+}
+#view-events #next-mission-card #mission-detail,
+#view-events #next-mission-card .mission-detail {
+  display: none !important;
+}
+#view-events #next-mission-card .card-label,
+#view-events #next-mission-card .new-badge-card {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+#view-events #next-mission-card .mission-mode-top {
+  display: flex;
+  align-items: center;
+  margin: 0;
+}
+#view-events #next-mission-card .mission-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.2;
+}
+#view-events #next-mission-card .mission-cta {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 5px 10px;
+  background: #FEF105;
+  color: #000;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  border-radius: 999px;
+}
+#view-events #activity-tags {
+  display: flex !important;
+}
+#view-events #activity-feed:not(.hidden) {
+  display: block !important;
+}
+
+/* Featured = real first photo. Unhide hero leftover hide. 4:3 gold hairline. */
+#view-events #media-hero,
+#view-events #media-hero:not(.hidden) {
+  display: block !important;
+  margin: 0 0 10px;
+}
+#view-events #media-hero .media-thumb,
+#view-events #media-feed .media-thumb-featured,
+#view-events #media-feed .media-thumb-hero {
+  grid-column: 1 / -1;
+  aspect-ratio: 4 / 3;
+  border: 1px solid #FEF105;
+  object-fit: cover;
+}
+#view-events #media-hero .media-thumb img,
+#view-events #media-hero .media-thumb video,
+#view-events #media-feed .media-thumb-featured img,
+#view-events #media-feed .media-thumb-featured video,
+#view-events #media-feed .media-thumb-hero img,
+#view-events #media-feed .media-thumb-hero video {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+#view-events .section-header h1 {
+  font-family: "Bebas Neue", Impact, "Arial Narrow", sans-serif;
+}
+#view-events .memories-add-btn {
+  width: auto !important;
+  flex: 0 0 auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #view-events #next-mission-card,
+  #view-events .media-thumb.media-enter {
+    animation: none !important;
+    transition: none !important;
+  }
+}
