@@ -56,10 +56,10 @@ exports.handler = async function (event) {
   var authHeader = event.headers.authorization || event.headers.Authorization || '';
   var accessToken = authHeader.indexOf('Bearer ') === 0 ? authHeader.slice(7).trim() : '';
   var pin = String(event.headers['x-tb-chair-pin'] || event.headers['X-Tb-Chair-Pin'] || '').trim();
-  var pinOk = pin === String(process.env.TB_CHAIR_PIN || '1121');
+  var pinOk = pin === String(process.env.TB_CHAIR_PIN || '');
   var user = null;
   if (accessToken) user = await chairUser(sbUrl, anonKey, serviceKey, accessToken);
-  if (!user && pinOk) user = { id: null };
+  if (!user && pinOk && pin) user = { id: null };
   if (!user) return json(403, { error: 'Could not put it on Home' }, origin);
 
   var body = {};
@@ -69,28 +69,41 @@ exports.handler = async function (event) {
   var vpath = 'theater/current.mp4';
   var ppath = 'theater/current.jpg';
 
+  async function signPath(path) {
+    var headers = {
+      apikey: serviceKey,
+      Authorization: 'Bearer ' + serviceKey,
+      'Content-Type': 'application/json',
+      'x-upsert': 'true'
+    };
+    var res = await fetch(sbUrl + '/storage/v1/object/upload/sign/' + bucket + '/' + path, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({ upsert: true })
+    });
+    var j = await res.json().catch(function () { return {}; });
+    var msg = String(j.error || j.message || '');
+    if ((!res.ok || !j.url) && /duplicate/i.test(msg)) {
+      await fetch(sbUrl + '/storage/v1/object/' + bucket + '/' + path, {
+        method: 'DELETE',
+        headers: { apikey: serviceKey, Authorization: 'Bearer ' + serviceKey }
+      });
+      res = await fetch(sbUrl + '/storage/v1/object/upload/sign/' + bucket + '/' + path, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify({ upsert: true })
+      });
+      j = await res.json().catch(function () { return {}; });
+    }
+    return { ok: res.ok, json: j };
+  }
+
   if (action === 'sign') {
-    var vRes = await fetch(sbUrl + '/storage/v1/object/upload/sign/' + bucket + '/' + vpath, {
-      method: 'POST',
-      headers: {
-        apikey: serviceKey,
-        Authorization: 'Bearer ' + serviceKey,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ upsert: true })
-    });
-    var vj = await vRes.json().catch(function () { return {}; });
-    if (!vRes.ok || !vj.url) return json(500, { error: (vj.error || vj.message || 'upload failed') }, origin);
-    var pRes = await fetch(sbUrl + '/storage/v1/object/upload/sign/' + bucket + '/' + ppath, {
-      method: 'POST',
-      headers: {
-        apikey: serviceKey,
-        Authorization: 'Bearer ' + serviceKey,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ upsert: true })
-    });
-    var pj = await pRes.json().catch(function () { return {}; });
+    var vSign = await signPath(vpath);
+    var vj = vSign.json || {};
+    if (!vSign.ok || !vj.url) return json(500, { error: (vj.error || vj.message || 'upload failed') }, origin);
+    var pSign = await signPath(ppath);
+    var pj = pSign.json || {};
     var abs = function (u) {
       if (!u) return '';
       if (u.indexOf('http') === 0) return u;
