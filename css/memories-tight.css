@@ -1,0 +1,14 @@
+#view-events #events-section-title,
+#view-events #events-note,
+#view-events #upcoming-events {
+  display: none !important;
+}
+#view-events .events-hit-line {
+  margin: 4px 0 14px;
+}
+#view-events #next-mission-card {
+  margin-bottom: 16px;
+}
+#view-events #media-hero:not(.hidden) {
+  margin-top: 4px;
+}
