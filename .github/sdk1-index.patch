@@ -1,0 +1,9 @@
+--- index.html
++++ index.html
+@@ -906,6 +906,7 @@
+     </div>
+   </div>
+ 
++  <script src="/js/supabase.min.js?v=20260827-sdk1"></script>
+   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+   <input type="file" id="memory-cam" class="memory-cam-input" accept="image/*" capture="environment" tabindex="-1" aria-hidden="true" />
