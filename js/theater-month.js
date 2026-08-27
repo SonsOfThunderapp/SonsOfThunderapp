@@ -34,7 +34,18 @@
     try { localStorage.setItem('tb_month_title', v || ''); } catch (e) {}
   }
 
+  function chairFromApp() {
+    try {
+      if (typeof currentUser === 'function') {
+        var cu = currentUser();
+        if (cu && String(cu.email || '').trim().toLowerCase() === 'obietv@gmail.com') return true;
+      }
+    } catch (eC) {}
+    return false;
+  }
+
   async function isLeader() {
+    if (chairFromApp()) return true;
     var client = sb();
     if (!client) return false;
     try {
@@ -101,6 +112,7 @@
     var el = document.getElementById('tb-month-status');
     if (el) el.textContent = msg || '';
   }
+  window.tbOpenMonthSheet = openSheet;
 
   function probeClip(file) {
     return new Promise(function (resolve) {
@@ -227,18 +239,52 @@
     else tools.insertBefore(btn, tools.firstChild);
   }
 
+  function injectHomePut() {
+    if (document.getElementById('tb-month-home-put')) return;
+    var tile = document.getElementById('tb-month-film');
+    if (!tile || !tile.parentNode) return;
+    var btn = document.createElement('button');
+    btn.id = 'tb-month-home-put';
+    btn.type = 'button';
+    btn.className = 'tb-month-home-put';
+    btn.textContent = 'PUT CLIP ON HOME';
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      openSheet();
+    });
+    tile.insertAdjacentElement('afterend', btn);
+  }
+
   async function boot() {
     if (!(await isLeader())) return;
     injectBtn();
+    injectHomePut();
     ensureSheet();
+  }
+
+  function watchAuth() {
+    try {
+      var c0 = sb();
+      if (c0 && !window.__tbMonthAuth) {
+        window.__tbMonthAuth = 1;
+        c0.auth.onAuthStateChange(function () { boot(); });
+      }
+    } catch (eA) {}
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
   setTimeout(boot, 600);
   setTimeout(boot, 1800);
+  setTimeout(boot, 4000);
+  watchAuth();
   document.addEventListener('click', function (e) {
-    if (e.target && (e.target.id === 'leader-unlock-btn' || e.target.id === 'admin-room-btn')) {
+    var t = e.target;
+    if (!t) return;
+    var id = t.id || '';
+    var view = (t.closest && t.closest('[data-view]'));
+    if (id === 'leader-unlock-btn' || id === 'admin-room-btn' || id === 'tb-month-film' || (view && view.getAttribute('data-view') === 'about')) {
       setTimeout(boot, 80);
     }
   });

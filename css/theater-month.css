@@ -43,3 +43,10 @@
   text-align:center;color:#fff;font-size:11px;pointer-events:none;
 }
 .tb-month-film.is-titled .tb-month-film-label{bottom:22px}
+#tb-month-home-put{
+  display:block;width:100%;box-sizing:border-box;
+  margin:10px 0 0;padding:14px;
+  border:0;border-radius:12px;
+  background:#E30600;color:#fff;
+  font-weight:800;letter-spacing:.04em;
+}
