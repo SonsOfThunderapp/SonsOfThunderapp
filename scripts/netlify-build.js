@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* Thunder Board is a static PWA. Netlify must not run a real compile.
    Never-white: refuse to publish if index.html was cut off.
-   20260826-repair1 / month9 / sdk1 / legal1 / room1 / axum1. */
+   20260826-repair1 / month9 / sdk1 / legal1 / room1 / axum2 lump. */
 const fs = require('fs');
 const { execSync } = require('child_process');
 function loadHtml() {
@@ -17,6 +17,15 @@ function sliceDiv(html, start) {
     else { depth -= 1; i = nxtClose + 6; if (depth === 0) return i; }
   }
   return -1;
+}
+function cutButton(html, id) {
+  var needle = 'id="' + id + '"';
+  var i = html.indexOf(needle);
+  if (i === -1) return html;
+  var start = html.lastIndexOf('<button', i);
+  var end = html.indexOf('</button>', i);
+  if (start === -1 || end === -1) return html;
+  return html.slice(0, start) + html.slice(end + 9);
 }
 let html = loadHtml();
 if (html.length < 45000 || html.indexOf('</html>') === -1 || html.indexOf("I'M IN") === -1) {
@@ -79,22 +88,100 @@ if (html.indexOf('id="axum-chip"') === -1 && fs.existsSync('.github/axum-chip.ht
     html = loadHtml();
   }
 }
-if (html.indexOf('id="axum-card"') === -1 && fs.existsSync('.github/axum-drop-card.html')) {
+if (fs.existsSync('.github/axum-drop-card.html')) {
+  var dropStart = html.indexOf('<div id="axum-drop"');
+  var dropEnd = dropStart === -1 ? -1 : sliceDiv(html, dropStart);
+  var cardStart = html.indexOf('<div id="axum-card"');
+  var cardEnd = cardStart === -1 ? -1 : sliceDiv(html, cardStart);
   var blocks = fs.readFileSync('.github/axum-drop-card.html', 'utf8').replace(/\s+$/, '');
-  var rf = html.indexOf('<!-- LIVE RAFFLE');
-  if (rf === -1) rf = html.indexOf('<div id="raffle-live"');
-  if (rf !== -1) {
-    html = html.slice(0, rf) + blocks + '\n\n  ' + html.slice(rf);
+  if (dropStart !== -1 && dropEnd !== -1 && cardStart !== -1 && cardEnd !== -1 && cardStart >= dropEnd) {
+    html = html.slice(0, dropStart) + blocks + html.slice(cardEnd);
+    fs.writeFileSync('index.html', html);
+    html = loadHtml();
+  } else if (html.indexOf('HOLD TO REDEEM') === -1) {
+    var rf = html.indexOf('<!-- LIVE RAFFLE');
+    if (rf === -1) rf = html.indexOf('<div id="raffle-live"');
+    if (rf !== -1) {
+      html = html.slice(0, rf) + blocks + '\n\n  ' + html.slice(rf);
+      fs.writeFileSync('index.html', html);
+      html = loadHtml();
+    }
+  }
+}
+var nm = html.indexOf('class="next-meeting');
+if (nm !== -1) {
+  var nmEnd = sliceDiv(html, nm);
+  if (nmEnd !== -1) {
+    var chunk = html.slice(nm, nmEnd);
+    if (chunk.indexOf('id="text-leader-btn"') !== -1) {
+      var bi = chunk.indexOf('id="text-leader-btn"');
+      var bs = chunk.lastIndexOf('<button', bi);
+      var be = chunk.indexOf('</button>', bi);
+      if (bs !== -1 && be !== -1) {
+        chunk = chunk.slice(0, bs) + chunk.slice(be + 9);
+        html = html.slice(0, nm) + chunk + html.slice(nmEnd);
+        fs.writeFileSync('index.html', html);
+        html = loadHtml();
+      }
+    }
+  }
+}
+if (html.indexOf('id="view-brothers"') !== -1) {
+  var vg = html.indexOf('id="brothers-grid"');
+  var afterGrid = vg === -1 ? -1 : sliceDiv(html, vg);
+  var vb = html.indexOf('id="view-brothers"');
+  var vbEnd = vb === -1 ? -1 : html.indexOf('</section>', vb);
+  var brothersSlice = (vb !== -1 && vbEnd !== -1) ? html.slice(vb, vbEnd) : '';
+  if (afterGrid !== -1 && brothersSlice.indexOf('id="text-leader-btn"') === -1) {
+    var insertBtn = '\n          <button type="button" id="text-leader-btn" class="btn-text-leader">TEXT A LEADER</button>';
+    html = html.slice(0, afterGrid) + insertBtn + html.slice(afterGrid);
     fs.writeFileSync('index.html', html);
     html = loadHtml();
   }
 }
+html = cutButton(html, 'admin-lastfire-btn');
+fs.writeFileSync('index.html', html);
+html = loadHtml();
+if (html.indexOf('id="who-we-are-kicker"') === -1) {
+  var who = html.indexOf('<h1 class="about-title">WHO WE ARE</h1>');
+  if (who !== -1) {
+    var p1 = html.indexOf('<p class="about-text">', who);
+    var p2 = html.indexOf('<p class="about-text about-text-2">', who);
+    var p2end = p2 === -1 ? -1 : html.indexOf('</p>', p2);
+    if (p1 !== -1 && p2 !== -1 && p2end !== -1) {
+      var paras = html.slice(p1, p2end + 4);
+      var wrapped =
+        '<h1 class="about-title" id="who-we-are-title">WHO WE ARE</h1>\n          ' +
+        '<button type="button" id="who-we-are-kicker" class="about-kicker">Wild men. Need brothers.</button>\n          ' +
+        '<div id="who-we-are-body" class="who-we-are-body">\n          ' +
+        paras +
+        '\n          </div>';
+      html = html.slice(0, who) + wrapped + html.slice(p2end + 4);
+      fs.writeFileSync('index.html', html);
+      html = loadHtml();
+    }
+  }
+}
 if (html.length < 50000 || html.indexOf('</html>') === -1 || html.indexOf("I'M IN") === -1) {
-  console.error('REFUSE: homepage broke after axum/legal/room splice (' + html.length + ' bytes).');
+  console.error('REFUSE: homepage broke after lump splice (' + html.length + ' bytes).');
   process.exit(1);
+}
+var tmjs = fs.readFileSync('js/theater-month.js', 'utf8');
+var oldNeed =
+  "function needSeat() {\n    if (chairFromApp()) {\n      showWritePass(false);\n      status('Chair ready');\n      return;\n    }\n    showWritePass(true);";
+var newNeed = "function needSeat() {\n    showWritePass(true);";
+if (tmjs.indexOf(oldNeed) !== -1) {
+  fs.writeFileSync('js/theater-month.js', tmjs.replace(oldNeed, newNeed));
 }
 let cfg = fs.readFileSync('js/config.js', 'utf8');
 var cfgDirty = false;
+function ensureLine(needle, after, insert) {
+  if (cfg.indexOf(needle) !== -1) return;
+  if (cfg.indexOf(after) !== -1) {
+    cfg = cfg.replace(after, after + '\n    ' + insert);
+    cfgDirty = true;
+  }
+}
 if (cfg.indexOf("addCss('more-legal.css'") === -1 && cfg.indexOf('function addCss') !== -1) {
   cfg = cfg.replace("addJs('more-legal.js', 'js/more-legal.js');", "addCss('more-legal.css', 'css/more-legal.css');\n    addJs('more-legal.js', 'js/more-legal.js');");
   cfgDirty = true;
@@ -111,6 +198,14 @@ if (cfg.indexOf("addJs('axum-wire.js'") === -1 && cfg.indexOf('function addJs') 
   }
   cfgDirty = true;
 }
+ensureLine("addCss('text-leader-brothers.css'", "addJs('axum-wire.js', 'js/axum-wire.js');", "addCss('text-leader-brothers.css', 'css/text-leader-brothers.css');");
+ensureLine("addJs('text-leader-brothers.js'", "addCss('text-leader-brothers.css', 'css/text-leader-brothers.css');", "addJs('text-leader-brothers.js', 'js/text-leader-brothers.js');");
+ensureLine("addJs('text-leader-quiet.js'", "addJs('text-leader-brothers.js', 'js/text-leader-brothers.js');", "addJs('text-leader-quiet.js', 'js/text-leader-quiet.js');");
+ensureLine("addCss('axum-loot.css'", "addJs('axum-wire.js', 'js/axum-wire.js');", "addCss('axum-loot.css', 'css/axum-loot.css');");
+ensureLine("addCss('brothers-seat.css'", "addCss('axum-loot.css', 'css/axum-loot.css');", "addCss('brothers-seat.css', 'css/brothers-seat.css');");
+ensureLine("addCss('memories-tight.css'", "addCss('brothers-seat.css', 'css/brothers-seat.css');", "addCss('memories-tight.css', 'css/memories-tight.css');");
+ensureLine("addCss('code-tight.css'", "addCss('memories-tight.css', 'css/memories-tight.css');", "addCss('code-tight.css', 'css/code-tight.css');");
+ensureLine("addJs('code-tight.js'", "addCss('code-tight.css', 'css/code-tight.css');", "addJs('code-tight.js', 'js/code-tight.js');");
 if (cfgDirty) fs.writeFileSync('js/config.js', cfg);
 const app = fs.readFileSync('js/app.js');
 if (app.indexOf('20260826-repair1: no full reload') === -1) {
@@ -139,5 +234,5 @@ if (app2.indexOf('window.getSb = getSb') === -1) {
   console.error('REFUSE: window.getSb expose did not land.');
   process.exit(1);
 }
-process.stdout.write('Thunder Board: static publish (' + html.length + ' bytes, homepage whole, app.js ' + app2.length + ', sdk1 legal1 room1 axum1)\n');
+process.stdout.write('Thunder Board: static publish (' + html.length + ' bytes, homepage whole, app.js ' + app2.length + ', lump axum2)\n');
 process.exit(0);
