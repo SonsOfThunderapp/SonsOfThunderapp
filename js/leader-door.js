@@ -56,6 +56,13 @@
     btn.tabIndex = -1;
   }
 
+  function openModal(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
   function showTools() {
     var zone = document.querySelector('.admin-zone');
     var tools = document.getElementById('leader-tools');
@@ -80,6 +87,51 @@
       tools.style.removeProperty('display');
     }
     hideButton();
+  }
+
+  function bindEditOpens() {
+    if (window.__tbChairOpens) return;
+    window.__tbChairOpens = 1;
+    document.addEventListener('click', function (e) {
+      if (!pinOn()) return;
+      var t = e.target;
+      if (!t) return;
+      var id = t.id || '';
+      if (!id && t.closest) {
+        var b = t.closest('button');
+        if (b) id = b.id || '';
+      }
+      var map = {
+        'admin-announcements-btn': 'admin-ann-modal',
+        'admin-events-btn': 'admin-events-modal',
+        'admin-code-btn': 'admin-code-modal',
+        'admin-room-btn': 'admin-room-modal'
+      };
+      if (!map[id]) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      openModal(map[id]);
+    }, true);
+    document.addEventListener('click', function (e) {
+      if (!pinOn()) return;
+      var t = e.target;
+      var id = t && t.id;
+      if (id !== 'admin-lastfire-btn') return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      var current = '';
+      try {
+        var lf = JSON.parse(localStorage.getItem('tb_lastFire') || 'null');
+        current = (lf && lf.caption) || '';
+      } catch (err) {}
+      var cap = window.prompt('LAST FIRE — one line worth remembering (empty clears):', current);
+      if (cap === null) return;
+      var trimmed = String(cap).trim();
+      try {
+        if (!trimmed) localStorage.removeItem('tb_lastFire');
+        else localStorage.setItem('tb_lastFire', JSON.stringify({ caption: trimmed, updatedAt: Date.now() }));
+      } catch (e2) {}
+    }, true);
   }
 
   function ensureSheet() {
@@ -199,6 +251,7 @@
     hideButton();
     bindBolt();
     bindLock();
+    bindEditOpens();
     if (pinOn()) showTools();
   }
 
