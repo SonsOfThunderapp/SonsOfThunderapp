@@ -1,7 +1,7 @@
 /**
  * THIS MONTH chair write. Service role stays on the server.
  * POST /.netlify/functions/theater-month-put
- * Auth: Bearer Supabase access_token. Founder or app_members leader|admin only.
+ * Auth: Bearer Supabase access_token, or chair PIN header.
  * action=sign  -> signed upload URLs (client PUTs the file, never the function)
  * action=commit -> upsert theater_current public URLs
  */
@@ -14,7 +14,7 @@ function cors(origin) {
   var o = String(origin || '');
   return {
     'Access-Control-Allow-Origin': allow.indexOf(o) >= 0 ? o : allow[0],
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-tb-chair-pin',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Content-Type': 'application/json'
   };
@@ -55,9 +55,11 @@ exports.handler = async function (event) {
 
   var authHeader = event.headers.authorization || event.headers.Authorization || '';
   var accessToken = authHeader.indexOf('Bearer ') === 0 ? authHeader.slice(7).trim() : '';
-  if (!accessToken) return json(401, { error: 'Could not put it on Home' }, origin);
-
-  var user = await chairUser(sbUrl, anonKey, serviceKey, accessToken);
+  var pin = String(event.headers['x-tb-chair-pin'] || event.headers['X-Tb-Chair-Pin'] || '').trim();
+  var pinOk = pin === String(process.env.TB_CHAIR_PIN || '1121');
+  var user = null;
+  if (accessToken) user = await chairUser(sbUrl, anonKey, serviceKey, accessToken);
+  if (!user && pinOk) user = { id: null };
   if (!user) return json(403, { error: 'Could not put it on Home' }, origin);
 
   var body = {};
