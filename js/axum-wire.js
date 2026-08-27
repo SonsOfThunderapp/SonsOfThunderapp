@@ -112,7 +112,48 @@
     } catch (e5) {}
   }
 
+  function bindHold() {
+    var btn = document.getElementById('axum-redeem-btn');
+    var card = document.getElementById('axum-card');
+    if (!btn || btn.dataset.tbLoot === '1') return;
+    btn.dataset.tbLoot = '1';
+    var holdT = 0;
+    function arm(on) {
+      btn.classList.toggle('is-charging', !!on);
+    }
+    function cancel() {
+      if (holdT) clearTimeout(holdT);
+      holdT = 0;
+      arm(false);
+    }
+    function finish() {
+      holdT = 0;
+      arm(false);
+      if (card) card.classList.add('is-used');
+      var c = read();
+      if (c && !c.redeemedAt) {
+        c.redeemedAt = Date.now();
+        write(c);
+      }
+      paintChip(read());
+      try { if (window.tbFeedback && window.tbFeedback.confirm) window.tbFeedback.confirm(); } catch (eH) {}
+    }
+    btn.addEventListener('pointerdown', function (e) {
+      e.preventDefault();
+      arm(true);
+      holdT = setTimeout(finish, 700);
+    });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach(function (ev) {
+      btn.addEventListener(ev, cancel);
+    });
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }, true);
+  }
+
   function boot() {
+    bindHold();
     ensure();
     setTimeout(ensure, 800);
     try {
