@@ -41,10 +41,13 @@
     try { return sessionStorage.getItem(FLAG) === '1'; } catch (e) { return window.__tbChairPin === 1; }
   }
   function setPinOn() {
-    try { sessionStorage.setItem(FLAG, '1'); } catch (e) { window.__tbChairPin = 1; }
+    try { sessionStorage.setItem(FLAG, '1'); } catch (e) {}
+    try { window.__tbChairPin = 1; } catch (eW) {}
+    try { document.dispatchEvent(new Event('tb-chair-open')); } catch (e2) {}
   }
   function setPinOff() {
-    try { sessionStorage.removeItem(FLAG); } catch (e) { window.__tbChairPin = 0; }
+    try { sessionStorage.removeItem(FLAG); } catch (e) {}
+    try { window.__tbChairPin = 0; } catch (eW) {}
   }
 
   function hideButton() {
