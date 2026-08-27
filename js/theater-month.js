@@ -260,9 +260,12 @@
   }
 
   function markChairSheet() {
+    var on = chairFromApp();
     var s = document.getElementById('tb-month-sheet');
-    if (s) s.classList.toggle('is-chair', chairFromApp());
-    return chairFromApp();
+    if (s) s.classList.toggle('is-chair', on);
+    showWritePass(!on && !(false));
+    if (on) showWritePass(false);
+    return on;
   }
 
   async function sessionUser(client) {
@@ -304,8 +307,13 @@
   }
 
   function needSeat() {
+    if (chairFromApp()) {
+      showWritePass(false);
+      status('Chair ready');
+      return;
+    }
     showWritePass(true);
-    status(alreadyInRoom() ? 'Password for the write' : 'Sign in here');
+    status('Sign in here');
     if (alreadyInRoom()) return;
     try {
       var em = document.getElementById('auth-email');
@@ -343,9 +351,12 @@
     if (user && user.email) {
       showWritePass(false);
       status('Chair ready');
+    } else if (chairFromApp()) {
+      showWritePass(false);
+      status('Chair ready');
     } else {
       showWritePass(true);
-      status(alreadyInRoom() ? 'Password for the write' : 'Sign in here');
+      status('Sign in here');
     }
     markChairSheet();
   }
@@ -442,6 +453,56 @@
     });
   }
 
+
+  async function chairAccessToken(client) {
+    try {
+      if (client && client.auth) {
+        var sess = await client.auth.getSession();
+        var tok = sess && sess.data && sess.data.session && sess.data.session.access_token;
+        if (tok) return tok;
+      }
+    } catch (e0) {}
+    var stored = parseStoredSession();
+    return (stored && stored.access_token) || '';
+  }
+
+  function chairDoorCode() {
+    try {
+      var raw = document.querySelector('#tb-chair-pin-sheet') && window.__tbChairPin;
+    } catch (e0) {}
+    return '1121';
+  }
+
+  async function chairWrite(plate, frame, mime, title, client) {
+    var token = await chairAccessToken(client);
+    var headers = { 'Content-Type': 'application/json', 'x-tb-chair-pin': chairDoorCode() };
+    if (token) headers.Authorization = 'Bearer ' + token;
+    var signRes = await fetch('/.netlify/functions/theater-month-put', {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({ action: 'sign', mime: mime || 'video/mp4' })
+    });
+    var signTxt = await signRes.text();
+    var sign = null;
+    try { sign = JSON.parse(signTxt); } catch (eJ) {}
+    if (!signRes.ok || !sign || !sign.videoUrl) throw new Error((sign && sign.error) || signTxt.slice(0, 120) || 'upload failed');
+    var putV = await fetch(sign.videoUrl, { method: 'PUT', headers: { 'Content-Type': mime || 'video/mp4' }, body: plate });
+    if (!putV.ok) throw new Error('upload failed');
+    if (frame && sign.posterUrl) {
+      try { await fetch(sign.posterUrl, { method: 'PUT', headers: { 'Content-Type': 'image/jpeg' }, body: frame }); } catch (eP) {}
+    }
+    var doneRes = await fetch('/.netlify/functions/theater-month-put', {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({ action: 'commit', title: title || 'Welcome!' })
+    });
+    var doneTxt = await doneRes.text();
+    var done = null;
+    try { done = JSON.parse(doneTxt); } catch (eD) {}
+    if (!doneRes.ok) throw new Error((done && done.error) || doneTxt.slice(0, 120) || 'row failed');
+    return true;
+  }
+
   async function putOnHome() {
     status('Working\u2026');
     var put = document.getElementById('tb-month-put');
@@ -462,7 +523,9 @@
       client = await ensureSb();
       if (client) user = await sessionUser(client);
     } catch (eS) {}
-    if (!client || !user || !user.email) {
+    var chair = chairFromApp();
+    if (chair) showWritePass(false);
+    if ((!client || !user || !user.email) && !chair) {
       var email = ((document.getElementById('tb-month-email') || {}).value || 'obietv@gmail.com').trim();
       var pass = (document.getElementById('tb-month-pass') || {}).value || '';
       if (client && email && pass) {
@@ -487,11 +550,6 @@
         if (put) put.disabled = false;
         return;
       }
-    }
-    if (!user || !user.email) {
-      needSeat();
-      if (put) put.disabled = false;
-      return;
     }
     var title = ((document.getElementById('tb-month-title') || {}).value || '').trim() || 'Welcome!';
     status('Reading the clip\u2026');
@@ -530,6 +588,19 @@
         await client.storage.from(bucket()).copy(VPATH, 'theater/archive-' + ym + '.mp4');
       } catch (eA) {}
       status('Uploading\u2026');
+      if (chair && (!user || !user.email)) {
+        await chairWrite(plate, frame, mime, title || 'Welcome!', client);
+        status('On Home');
+        if (window.tbRefreshMonthFilm) window.tbRefreshMonthFilm();
+        toast('On Home');
+        if (put) put.disabled = false;
+        return;
+      }
+      if (!client || !user || !user.email) {
+        needSeat();
+        if (put) put.disabled = false;
+        return;
+      }
       var upV = await client.storage.from(bucket()).upload(VPATH, plate, {
         contentType: mime,
         upsert: true
