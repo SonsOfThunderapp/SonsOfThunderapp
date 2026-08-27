@@ -81,3 +81,14 @@ body.tb-month-lock{
   overflow:hidden !important;
   touch-action:none;
 }
+
+#tb-month-film-title{
+  margin:8px 0 0;
+  padding:0 6px;
+  color:#FEF105;
+  font-size:15px;
+  font-weight:700;
+  letter-spacing:.03em;
+  text-align:center;
+  line-height:1.25;
+}

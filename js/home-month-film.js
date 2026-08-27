@@ -31,22 +31,26 @@
     var tile = document.getElementById('tb-month-film');
     if (!tile) return;
     var pic = tile.querySelector('.tb-month-film-pic');
-    var sub = tile.querySelector('.tb-month-film-sub');
     if (pic) {
       if (row.poster) pic.style.backgroundImage = "url('" + String(row.poster).replace(/'/g, "\\'") + "')";
       else pic.style.backgroundImage = 'none';
     }
     var t = String(row.title || '').trim();
+    var cap = document.getElementById('tb-month-film-title');
     if (t && t.toUpperCase() !== 'THIS MONTH') {
-      if (!sub) {
-        sub = document.createElement('span');
-        sub.className = 'tb-month-film-sub';
-        tile.appendChild(sub);
+      if (!cap) {
+        cap = document.createElement('p');
+        cap.id = 'tb-month-film-title';
+        var putBtn = document.getElementById('tb-month-home-put');
+        if (putBtn && putBtn.parentNode === tile.parentNode) tile.parentNode.insertBefore(cap, putBtn);
+        else tile.insertAdjacentElement('afterend', cap);
       }
-      sub.textContent = t;
+      cap.textContent = t;
+      cap.hidden = false;
       tile.classList.add('is-titled');
-    } else if (sub) {
-      sub.textContent = '';
+    } else if (cap) {
+      cap.textContent = '';
+      cap.hidden = true;
       tile.classList.remove('is-titled');
     }
   }
