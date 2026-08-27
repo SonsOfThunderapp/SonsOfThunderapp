@@ -1,0 +1,45 @@
+#view-about .code-list {
+  margin: 8px 0 12px;
+}
+#view-about .code-item {
+  padding: 10px 0;
+  border-bottom: 1px solid #1a1a1a;
+  cursor: pointer;
+}
+#view-about .code-line {
+  margin: 0;
+  font-size: 15px;
+  letter-spacing: 0.12em;
+  color: #fff;
+}
+#view-about .code-sub {
+  display: none;
+  margin: 6px 0 0;
+  color: #8a8a8a;
+  font-size: 13px;
+  line-height: 1.35;
+}
+#view-about .code-item.is-open .code-sub {
+  display: block;
+}
+#view-about .code-item.is-open .code-line {
+  color: #FEF105;
+}
+#view-about .about-kicker {
+  display: block;
+  width: 100%;
+  margin: 0 0 10px;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  color: #FEF105;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+}
+#view-about .who-we-are-body {
+  display: none;
+}
+#view-about .who-we-are-body.is-open {
+  display: block;
+}
