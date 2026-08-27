@@ -470,7 +470,7 @@
     try {
       var raw = document.querySelector('#tb-chair-pin-sheet') && window.__tbChairPin;
     } catch (e0) {}
-    return '****';
+    return '1121';
   }
 
   async function chairWrite(plate, frame, mime, title, client) {
