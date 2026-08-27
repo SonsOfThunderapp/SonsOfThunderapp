@@ -36,6 +36,9 @@
 
   function chairFromApp() {
     try {
+      if (sessionStorage.getItem('tb_chair_pin') === '1') return true;
+    } catch (eP) {}
+    try {
       if (typeof currentUser === 'function') {
         var cu = currentUser();
         if (cu && String(cu.email || '').trim().toLowerCase() === 'obietv@gmail.com') return true;
@@ -278,6 +281,7 @@
   setTimeout(boot, 600);
   setTimeout(boot, 1800);
   setTimeout(boot, 4000);
+  document.addEventListener('tb-chair-open', function () { boot(); });
   watchAuth();
   document.addEventListener('click', function (e) {
     var t = e.target;
