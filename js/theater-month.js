@@ -273,8 +273,40 @@
     } catch (e) { return null; }
   }
 
+  function alreadyInRoom() {
+    if (chairFromApp()) return true;
+    try {
+      if (typeof window.isSignedIn === 'function' && window.isSignedIn()) return true;
+    } catch (e0) {}
+    try {
+      var bar = document.getElementById('auth-session-bar');
+      if (bar && !bar.classList.contains('hidden')) return true;
+    } catch (e1) {}
+    try {
+      var cuFn = (typeof window.currentUser === 'function') ? window.currentUser : (typeof currentUser === 'function' ? currentUser : null);
+      var cu = cuFn ? cuFn() : null;
+      if (cu && (cu.email || cu.id || cu.name)) return true;
+    } catch (e2) {}
+    try {
+      if (localStorage.getItem('tb_myProfileId') || localStorage.getItem('myProfileId')) return true;
+    } catch (e3) {}
+    return false;
+  }
+
+  function showWritePass(on) {
+    var box = document.getElementById('tb-month-signin');
+    if (!box) return;
+    box.style.display = on ? 'block' : 'none';
+    try {
+      var em = document.getElementById('tb-month-email');
+      if (em && !em.value) em.value = 'obietv@gmail.com';
+    } catch (e0) {}
+  }
+
   function needSeat() {
-    status('Sign in here');
+    showWritePass(true);
+    status(alreadyInRoom() ? 'Password for the write' : 'Sign in here');
+    if (alreadyInRoom()) return;
     try {
       var em = document.getElementById('auth-email');
       if (em) em.value = 'obietv@gmail.com';
@@ -282,20 +314,6 @@
     try {
       if (typeof window.startMemberSignIn === 'function') window.startMemberSignIn();
     } catch (e1) {}
-    try {
-      var gate = document.getElementById('auth-gate');
-      var entry = document.getElementById('auth-entry-btn');
-      if (gate && gate.classList.contains('hidden') && entry) entry.click();
-      else if (gate) gate.classList.remove('hidden');
-    } catch (e2) {}
-    try {
-      var title = document.getElementById('auth-title');
-      if (title) title.textContent = 'LOCK YOUR SEAT';
-    } catch (e3) {}
-    try {
-      var em2 = document.getElementById('auth-email');
-      if (em2 && !em2.value) em2.value = 'obietv@gmail.com';
-    } catch (e4) {}
   }
 
   async function isLeader() {
@@ -323,9 +341,11 @@
     var client = await ensureSb();
     var user = await sessionUser(client);
     if (user && user.email) {
+      showWritePass(false);
       status('Chair ready');
     } else {
-      status('Sign in here');
+      showWritePass(true);
+      status(alreadyInRoom() ? 'Password for the write' : 'Sign in here');
     }
     markChairSheet();
   }
@@ -336,12 +356,16 @@
     wrap.id = 'tb-month-sheet';
     wrap.innerHTML =
       '<div class="tb-ms-card">' +
-        '<button type="button" class="tb-ms-x" aria-label="Close">×</button>' +
+        '<button type="button" class="tb-ms-x" aria-label="Close">\u00d7</button>' +
         '<h2>THIS MONTH</h2>' +
+        '<div id="tb-month-signin">' +
+          '<input id="tb-month-email" type="email" autocomplete="username" value="obietv@gmail.com">' +
+          '<input id="tb-month-pass" type="password" autocomplete="current-password" placeholder="Password">' +
+        '</div>' +
         '<label class="tb-ms-file">CHOOSE CLIP' +
           '<input id="tb-month-file" type="file" accept="video/*" hidden>' +
         '</label>' +
-        '<input id="tb-month-title" type="text" maxlength="48" placeholder="Joel · AI Night">' +
+        '<input id="tb-month-title" type="text" maxlength="48" placeholder="Joel \u00b7 AI Night">' +
         '<button type="button" class="tb-ms-put" id="tb-month-put">PUT IT ON HOME</button>' +
         '<p class="tb-ms-status" id="tb-month-status"></p>' +
       '</div>';
@@ -419,7 +443,7 @@
   }
 
   async function putOnHome() {
-    status('Working\u2026');
+    status('Working\\u2026');
     var put = document.getElementById('tb-month-put');
     if (!picked) { status('Choose a clip first'); return; }
     if (picked.size > RAW_MAX) {
@@ -439,12 +463,38 @@
       if (client) user = await sessionUser(client);
     } catch (eS) {}
     if (!client || !user || !user.email) {
+      var email = ((document.getElementById('tb-month-email') || {}).value || 'obietv@gmail.com').trim();
+      var pass = (document.getElementById('tb-month-pass') || {}).value || '';
+      if (client && email && pass) {
+        status('Signing in\\u2026');
+        try {
+          var signed = await client.auth.signInWithPassword({ email: email, password: pass });
+          if (signed.error) throw new Error(signed.error.message || 'Sign in here');
+          user = (signed.data && signed.data.user) || await sessionUser(client);
+          try {
+            var pe = document.getElementById('tb-month-pass');
+            if (pe) pe.value = '';
+          } catch (eClr) {}
+          showWritePass(false);
+        } catch (eIn) {
+          showWritePass(true);
+          status((eIn && eIn.message) || 'Sign in here');
+          if (put) put.disabled = false;
+          return;
+        }
+      } else {
+        needSeat();
+        if (put) put.disabled = false;
+        return;
+      }
+    }
+    if (!user || !user.email) {
       needSeat();
       if (put) put.disabled = false;
       return;
     }
     var title = ((document.getElementById('tb-month-title') || {}).value || '').trim() || 'Welcome!';
-    status('Reading the clip\u2026');
+    status('Reading the clip\\u2026');
     try {
       var buf = await picked.arrayBuffer();
       if (!buf || !buf.byteLength) {
@@ -479,7 +529,7 @@
       try {
         await client.storage.from(bucket()).copy(VPATH, 'theater/archive-' + ym + '.mp4');
       } catch (eA) {}
-      status('Uploading\u2026');
+      status('Uploading\\u2026');
       var upV = await client.storage.from(bucket()).upload(VPATH, plate, {
         contentType: mime,
         upsert: true
