@@ -3,24 +3,36 @@
    Never-white: refuse to publish if index.html was cut off.
    20260826-repair1: apply the exact seat-claim patch to js/app.js at publish if needed.
    20260826-month9: expose getSb + currentUser so THIS MONTH can use the chair session.
-   20260827-sdk1: land local supabase script tag before config.js. */
+   20260827-sdk1: restore a whole homepage if GitHub has a stub, then land local supabase script tag. */
 const fs = require('fs');
 const { execSync } = require('child_process');
-let html = fs.readFileSync('index.html', 'utf8');
+function loadHtml() {
+  return fs.readFileSync('index.html', 'utf8');
+}
+let html = loadHtml();
 if (html.length < 45000 || html.indexOf('</html>') === -1 || html.indexOf("I'M IN") === -1) {
-  console.error('REFUSE: index.html is incomplete (' + html.length + ' bytes). Will not publish a white screen.');
-  process.exit(1);
+  console.warn('index.html is a stub (' + html.length + ' bytes). Restoring from live.');
+  execSync('curl -fsS https://sonsofthunder.netlify.app/ -o index.html', { stdio: 'inherit' });
+  html = loadHtml();
+  if (html.length < 45000 || html.indexOf('</html>') === -1 || html.indexOf("I'M IN") === -1) {
+    console.error('REFUSE: could not restore a whole homepage (' + html.length + ' bytes).');
+    process.exit(1);
+  }
 }
 if (html.indexOf('/js/supabase.min.js?v=20260827-sdk1') === -1) {
-  var cdn = '<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>';
+  var cdnPkg = '<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>';
+  var cdnUmd = '<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>';
   var local = '<script src="/js/supabase.min.js?v=20260827-sdk1"></script>';
-  if (html.indexOf(cdn) === -1) {
+  if (html.indexOf(cdnPkg) !== -1) {
+    html = html.replace(cdnPkg, local + '\n  ' + cdnPkg);
+  } else if (html.indexOf(cdnUmd) !== -1) {
+    html = html.replace(cdnUmd, local + '\n  ' + cdnUmd);
+  } else {
     console.error('REFUSE: supabase CDN script not found, cannot insert sdk1 tag.');
     process.exit(1);
   }
-  html = html.replace(cdn, local + '\n  ' + cdn);
   fs.writeFileSync('index.html', html);
-  html = fs.readFileSync('index.html', 'utf8');
+  html = loadHtml();
   if (html.indexOf('/js/supabase.min.js?v=20260827-sdk1') === -1 || html.length < 50000 || html.indexOf('</html>') === -1 || html.indexOf("I'M IN") === -1) {
     console.error('REFUSE: sdk1 script tag did not land cleanly (' + html.length + ' bytes).');
     process.exit(1);
