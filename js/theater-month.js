@@ -8,16 +8,95 @@
   var MAX = 50 * 1024 * 1024;
   var RAW_MAX = 80 * 1024 * 1024;
   var picked = null;
+  var AUTH_DB = 'tb-sot-auth';
+  var AUTH_STORE = 'kv';
 
   function cfg() { return window.TB_CONFIG || {}; }
   function bucket() { return (cfg().THEATER_BUCKET || 'thunder-theater').trim(); }
+
+  function idbOpen() {
+    return new Promise(function (resolve) {
+      try {
+        if (!window.indexedDB) { resolve(null); return; }
+        var req = indexedDB.open(AUTH_DB, 1);
+        req.onupgradeneeded = function () {
+          try {
+            if (!req.result.objectStoreNames.contains(AUTH_STORE)) req.result.createObjectStore(AUTH_STORE);
+          } catch (e0) {}
+        };
+        req.onsuccess = function () { resolve(req.result); };
+        req.onerror = function () { resolve(null); };
+      } catch (e1) { resolve(null); }
+    });
+  }
+  function idbGet(key) {
+    return idbOpen().then(function (db) {
+      if (!db) return null;
+      return new Promise(function (resolve) {
+        try {
+          var tx = db.transaction(AUTH_STORE, 'readonly');
+          var r = tx.objectStore(AUTH_STORE).get(key);
+          r.onsuccess = function () { resolve(r.result == null ? null : r.result); };
+          r.onerror = function () { resolve(null); };
+        } catch (e2) { resolve(null); }
+      });
+    });
+  }
+  function idbSet(key, val) {
+    return idbOpen().then(function (db) {
+      if (!db) return;
+      return new Promise(function (resolve) {
+        try {
+          var tx = db.transaction(AUTH_STORE, 'readwrite');
+          tx.objectStore(AUTH_STORE).put(val, key);
+          tx.oncomplete = function () { resolve(); };
+          tx.onerror = function () { resolve(); };
+        } catch (e3) { resolve(); }
+      });
+    });
+  }
+  function idbDel(key) {
+    return idbOpen().then(function (db) {
+      if (!db) return;
+      return new Promise(function (resolve) {
+        try {
+          var tx = db.transaction(AUTH_STORE, 'readwrite');
+          tx.objectStore(AUTH_STORE).delete(key);
+          tx.oncomplete = function () { resolve(); };
+          tx.onerror = function () { resolve(); };
+        } catch (e4) { resolve(); }
+      });
+    });
+  }
+  var tbAuthStorage = window.__tbAuthStorage || {
+    getItem: function (key) {
+      try { var v = localStorage.getItem(key); if (v != null) return v; } catch (e5) {}
+      return idbGet(key);
+    },
+    setItem: function (key, value) {
+      try { localStorage.setItem(key, value); } catch (e6) {}
+      try { idbSet(key, value); } catch (e7) {}
+    },
+    removeItem: function (key) {
+      try { localStorage.removeItem(key); } catch (e8) {}
+      try { idbDel(key); } catch (e9) {}
+    }
+  };
+  window.__tbAuthStorage = tbAuthStorage;
+
   function sb() {
     var c = cfg();
     if (!c.SUPABASE_URL || !c.SUPABASE_ANON_KEY || !window.supabase) return null;
-    if (!window.__tbTheaterSb) {
+    if (!window.__tbTheaterSb || !window.__tbTheaterSb.__tbChairAuth) {
       window.__tbTheaterSb = window.supabase.createClient(c.SUPABASE_URL, c.SUPABASE_ANON_KEY, {
-        auth: { persistSession: true, detectSessionInUrl: false }
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: false,
+          storage: tbAuthStorage
+        }
       });
+      window.__tbTheaterSb.__tbChairAuth = 1;
     }
     return window.__tbTheaterSb;
   }
@@ -52,8 +131,8 @@
     var client = sb();
     if (!client) return false;
     try {
-      var sess = await client.auth.getUser();
-      var user = sess && sess.data && sess.data.user;
+      var sess = await client.auth.getSession();
+      var user = sess && sess.data && sess.data.session && sess.data.session.user;
       if (!user) return false;
       if (String(user.email || '').trim().toLowerCase() === 'obietv@gmail.com') return true;
       try {
@@ -68,6 +147,21 @@
       }
     } catch (e1) {}
     return false;
+  }
+
+  async function chairWriteOk(client) {
+    if (!client) return { ok: false, why: 'Sign in on Brothers first' };
+    var sess = await client.auth.getSession();
+    var user = sess && sess.data && sess.data.session && sess.data.session.user;
+    if (!user) return { ok: false, why: 'Sign in on Brothers first' };
+    try {
+      var rpc = await client.rpc('is_sot_leader');
+      if (!rpc.error && rpc.data === true) return { ok: true, user: user };
+    } catch (eR) {}
+    if (String(user.email || '').trim().toLowerCase() === 'obietv@gmail.com') {
+      return { ok: false, why: 'Chair is signed in. Database still does not see admin.' };
+    }
+    return { ok: false, why: 'Sign in as the chair on Brothers' };
   }
 
   function ensureSheet() {
@@ -165,12 +259,16 @@
       toast('Shoot HD 30 for 60 seconds.');
       return;
     }
-    var ok = await isLeader();
-    if (!ok) { status('Leaders only'); return; }
-    var sess = await client.auth.getUser();
-    var user = sess && sess.data && sess.data.user;
     if (!picked.size) { status('Choose a clip first'); return; }
     put.disabled = true;
+    status('Checking the chair\u2026');
+    var gate = await chairWriteOk(client);
+    if (!gate.ok) {
+      status(gate.why);
+      put.disabled = false;
+      return;
+    }
+    var user = gate.user;
     status('Reading the clip\u2026');
     try {
       var buf = await picked.arrayBuffer();
@@ -238,7 +336,9 @@
       if (window.tbRefreshMonthFilm) window.tbRefreshMonthFilm();
       toast('On Home');
     } catch (err) {
-      status(err && err.message ? err.message : 'Could not put it on Home');
+      var msg = err && err.message ? err.message : 'Could not put it on Home';
+      if (/row-level security/i.test(msg)) msg = 'Sign in as the chair on Brothers';
+      status(msg);
     }
     put.disabled = false;
   }

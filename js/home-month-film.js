@@ -11,10 +11,16 @@
   function sb() {
     var c = cfg();
     if (!c.SUPABASE_URL || !c.SUPABASE_ANON_KEY || !window.supabase) return null;
-    if (!window.__tbTheaterSb) {
+    if (!window.__tbTheaterSb || !window.__tbTheaterSb.__tbChairAuth) {
       window.__tbTheaterSb = window.supabase.createClient(c.SUPABASE_URL, c.SUPABASE_ANON_KEY, {
-        auth: { persistSession: true, detectSessionInUrl: false }
+        auth: {
+          persistSession: true,
+          autoRefreshToken: true,
+          detectSessionInUrl: false,
+          storage: window.__tbAuthStorage || undefined
+        }
       });
+      if (window.__tbAuthStorage) window.__tbTheaterSb.__tbChairAuth = 1;
     }
     return window.__tbTheaterSb;
   }
