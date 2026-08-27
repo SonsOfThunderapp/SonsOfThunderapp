@@ -1,1 +1,1 @@
-PLACEHOLDER_DO_NOT_USE_LOAD_FROM_FILE
+export { Muxer, ArrayBufferTarget, StreamTarget, FileSystemWritableFileStreamTarget } from 'https://cdn.jsdelivr.net/npm/mp4-muxer@5.2.1/+esm';
