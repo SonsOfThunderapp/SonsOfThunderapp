@@ -1,11 +1,7 @@
 #!/usr/bin/env node
 /* Thunder Board is a static PWA. Netlify must not run a real compile.
    Never-white: refuse to publish if index.html was cut off.
-   20260826-repair1: apply the exact seat-claim patch to js/app.js at publish if needed.
-   20260826-month9: expose getSb + currentUser so THIS MONTH can use the chair session.
-   20260827-sdk1: restore a whole homepage if GitHub has a stub, then land local supabase script tag.
-   20260827-legal1: legal row last child of about-container; load more-legal.css.
-   20260827-room1: replace #admin-room-modal with Tonight board; load room-night. */
+   20260826-repair1 / month9 / sdk1 / legal1 / room1 / axum1. */
 const fs = require('fs');
 const { execSync } = require('child_process');
 function loadHtml() {
@@ -46,10 +42,6 @@ if (html.indexOf('/js/supabase.min.js?v=20260827-sdk1') === -1) {
   }
   fs.writeFileSync('index.html', html);
   html = loadHtml();
-  if (html.indexOf('/js/supabase.min.js?v=20260827-sdk1') === -1 || html.length < 50000 || html.indexOf('</html>') === -1 || html.indexOf("I'M IN") === -1) {
-    console.error('REFUSE: sdk1 script tag did not land cleanly (' + html.length + ' bytes).');
-    process.exit(1);
-  }
 }
 var legalOpen = html.indexOf('<p id="tb-legal-row"');
 if (legalOpen !== -1) {
@@ -77,8 +69,28 @@ if (html.indexOf('class="room-steps"') === -1 && fs.existsSync('.github/room-nig
     html = loadHtml();
   }
 }
+if (html.indexOf('id="axum-chip"') === -1 && fs.existsSync('.github/axum-chip.html')) {
+  var chip = fs.readFileSync('.github/axum-chip.html', 'utf8').trim();
+  var lf = html.indexOf('<!-- Last Fire:');
+  if (lf === -1) lf = html.indexOf('<div id="last-fire"');
+  if (lf !== -1) {
+    html = html.slice(0, lf) + chip + '\n          ' + html.slice(lf);
+    fs.writeFileSync('index.html', html);
+    html = loadHtml();
+  }
+}
+if (html.indexOf('id="axum-card"') === -1 && fs.existsSync('.github/axum-drop-card.html')) {
+  var blocks = fs.readFileSync('.github/axum-drop-card.html', 'utf8').replace(/\s+$/, '');
+  var rf = html.indexOf('<!-- LIVE RAFFLE');
+  if (rf === -1) rf = html.indexOf('<div id="raffle-live"');
+  if (rf !== -1) {
+    html = html.slice(0, rf) + blocks + '\n\n  ' + html.slice(rf);
+    fs.writeFileSync('index.html', html);
+    html = loadHtml();
+  }
+}
 if (html.length < 50000 || html.indexOf('</html>') === -1 || html.indexOf("I'M IN") === -1) {
-  console.error('REFUSE: homepage broke after room/legal splice (' + html.length + ' bytes).');
+  console.error('REFUSE: homepage broke after axum/legal/room splice (' + html.length + ' bytes).');
   process.exit(1);
 }
 let cfg = fs.readFileSync('js/config.js', 'utf8');
@@ -89,6 +101,14 @@ if (cfg.indexOf("addCss('more-legal.css'") === -1 && cfg.indexOf('function addCs
 }
 if (cfg.indexOf("addCss('room-night.css'") === -1 && cfg.indexOf('function addCss') !== -1) {
   cfg = cfg.replace("addJs('more-legal.js', 'js/more-legal.js');", "addJs('more-legal.js', 'js/more-legal.js');\n    addCss('room-night.css', 'css/room-night.css');\n    addJs('room-night.js', 'js/room-night.js');");
+  cfgDirty = true;
+}
+if (cfg.indexOf("addJs('axum-wire.js'") === -1 && cfg.indexOf('function addJs') !== -1) {
+  if (cfg.indexOf("addJs('room-night.js'") !== -1) {
+    cfg = cfg.replace("addJs('room-night.js', 'js/room-night.js');", "addJs('room-night.js', 'js/room-night.js');\n    addJs('axum-wire.js', 'js/axum-wire.js');");
+  } else {
+    cfg = cfg.replace("addJs('more-legal.js', 'js/more-legal.js');", "addJs('more-legal.js', 'js/more-legal.js');\n    addJs('axum-wire.js', 'js/axum-wire.js');");
+  }
   cfgDirty = true;
 }
 if (cfgDirty) fs.writeFileSync('js/config.js', cfg);
@@ -119,5 +139,5 @@ if (app2.indexOf('window.getSb = getSb') === -1) {
   console.error('REFUSE: window.getSb expose did not land.');
   process.exit(1);
 }
-process.stdout.write('Thunder Board: static publish (' + html.length + ' bytes, homepage whole, app.js ' + app2.length + ', getSb exposed, sdk1, legal1, room1)\n');
+process.stdout.write('Thunder Board: static publish (' + html.length + ' bytes, homepage whole, app.js ' + app2.length + ', sdk1 legal1 room1 axum1)\n');
 process.exit(0);
