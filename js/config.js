@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260826-month11',
+  APP_BUILD: '20260826-month12',
   RSVP_PRESENCE: {
     publicOnHome: true,
     seedFloor: 0,
@@ -114,7 +114,7 @@ window.TB_CONFIG = {
 };
 
 if (!window.supabase || !window.supabase.createClient) {
-  document.write('<script src="/js/supabase.min.js?v=20260826-month11"><\/script>');
+  document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"><\/script>');
 }
 
 (function () {
@@ -156,7 +156,7 @@ if (!window.supabase || !window.supabase.createClient) {
       var ev = document.querySelector('.nav-item[data-view="events"] span');
       if (ev) ev.textContent = 'Memories';
     } catch (eNav) {}
-    addJs('supabase.min.js', 'js/supabase.min.js');
+    addJs('supabase-js@2.49.4/dist/umd', 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js');
     addJs('commit-reward.js', 'js/commit-reward.js');
     addJs('memories-grid.js', 'js/memories-grid.js');
     addJs('memories-lead.js', 'js/memories-lead.js');
