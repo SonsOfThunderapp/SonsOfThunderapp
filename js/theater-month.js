@@ -583,9 +583,9 @@
         return;
       }
       var frame = probe.blob;
-      var ym = new Date().toISOString().slice(0, 7);
+      var stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
       try {
-        await client.storage.from(bucket()).copy(VPATH, 'theater/archive-' + ym + '.mp4');
+        await client.storage.from(bucket()).copy(VPATH, 'theater/archive-' + stamp + '.mp4');
       } catch (eA) {}
       status('Uploading\u2026');
       if (chair && (!user || !user.email)) {
@@ -601,18 +601,24 @@
         if (put) put.disabled = false;
         return;
       }
-      var upV = await client.storage.from(bucket()).upload(VPATH, plate, {
-        contentType: mime,
-        upsert: true
-      });
-      if (upV.error) throw new Error(upV.error.message || 'upload failed');
-      if (frame) {
-        var upP = await client.storage.from(bucket()).upload(PPATH, frame, {
-          contentType: 'image/jpeg',
+      async function putObject(path, file, type) {
+        var up = await client.storage.from(bucket()).upload(path, file, {
+          contentType: type,
           upsert: true
         });
-        if (upP.error) throw new Error(upP.error.message || 'poster failed');
+        var msg = String((up && up.error && (up.error.message || up.error.error)) || '');
+        if (up && up.error && /duplicate|already exists/i.test(msg)) {
+          try { await client.storage.from(bucket()).remove([path]); } catch (eR) {}
+          up = await client.storage.from(bucket()).upload(path, file, {
+            contentType: type,
+            upsert: true
+          });
+        }
+        if (up && up.error) throw new Error(up.error.message || 'upload failed');
+        return up;
       }
+      await putObject(VPATH, plate, mime);
+      if (frame) await putObject(PPATH, frame, 'image/jpeg');
       var pubV = client.storage.from(bucket()).getPublicUrl(VPATH);
       var pubP = client.storage.from(bucket()).getPublicUrl(PPATH);
       saveDraft(title);
