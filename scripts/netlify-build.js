@@ -2,13 +2,26 @@
 /* Thunder Board is a static PWA. Netlify must not run a real compile.
    Never-white: refuse to publish if index.html was cut off.
    20260826-repair1: apply the exact seat-claim patch to js/app.js at publish if needed.
-   20260826-month9: expose getSb + currentUser so THIS MONTH can use the chair session. */
+   20260826-month9: expose getSb + currentUser so THIS MONTH can use the chair session.
+   20260827-sdk1: land local supabase script tag before config.js. */
 const fs = require('fs');
 const { execSync } = require('child_process');
-const html = fs.readFileSync('index.html', 'utf8');
+let html = fs.readFileSync('index.html', 'utf8');
 if (html.length < 45000 || html.indexOf('</html>') === -1 || html.indexOf("I'M IN") === -1) {
   console.error('REFUSE: index.html is incomplete (' + html.length + ' bytes). Will not publish a white screen.');
   process.exit(1);
+}
+if (html.indexOf('/js/supabase.min.js?v=20260827-sdk1') === -1) {
+  if (!fs.existsSync('.github/sdk1-index.patch')) {
+    console.error('REFUSE: sdk1 index patch is gone.');
+    process.exit(1);
+  }
+  execSync('patch -p0 < .github/sdk1-index.patch', { stdio: 'inherit' });
+  html = fs.readFileSync('index.html', 'utf8');
+  if (html.indexOf('/js/supabase.min.js?v=20260827-sdk1') === -1 || html.length < 50000 || html.indexOf('</html>') === -1 || html.indexOf("I'M IN") === -1) {
+    console.error('REFUSE: sdk1 script tag did not land cleanly (' + html.length + ' bytes).');
+    process.exit(1);
+  }
 }
 const app = fs.readFileSync('js/app.js');
 if (app.indexOf('20260826-repair1: no full reload') === -1) {
@@ -37,5 +50,5 @@ if (app2.indexOf('window.getSb = getSb') === -1) {
   console.error('REFUSE: window.getSb expose did not land.');
   process.exit(1);
 }
-process.stdout.write('Thunder Board: static publish (' + html.length + ' bytes, homepage whole, app.js ' + app2.length + ', getSb exposed)\n');
+process.stdout.write('Thunder Board: static publish (' + html.length + ' bytes, homepage whole, app.js ' + app2.length + ', getSb exposed, sdk1 supabase tag)\n');
 process.exit(0);
