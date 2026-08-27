@@ -37,6 +37,7 @@
 #tb-month-sheet.is-chair #tb-month-signin,
 #tb-month-signin.is-chair-hide{
   display:none!important;
+  pointer-events:none!important;
 }
 #tb-month-sheet .tb-ms-put,
 #tb-month-put{
