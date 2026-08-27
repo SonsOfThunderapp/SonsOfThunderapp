@@ -169,18 +169,33 @@
     if (!ok) { status('Leaders only'); return; }
     var sess = await client.auth.getUser();
     var user = sess && sess.data && sess.data.user;
+    if (!picked.size) { status('Choose a clip first'); return; }
     put.disabled = true;
-    status('Cooking the plate\u2026');
+    status('Reading the clip\u2026');
     try {
-      if (window.tbCookTheaterPlate) {
-        picked = await window.tbCookTheaterPlate(picked, status);
+      var buf = await picked.arrayBuffer();
+      if (!buf || !buf.byteLength) {
+        status('Choose a clip first');
+        put.disabled = false;
+        return;
       }
-      if (picked.size > MAX) {
+      var mime = String(picked.type || '').toLowerCase();
+      var nm = String(picked.name || '').toLowerCase();
+      if (!mime || mime === 'application/octet-stream') {
+        mime = /\.mov$/.test(nm) ? 'video/quicktime' : 'video/mp4';
+      }
+      var plate = new File([buf], 'current.mp4', { type: mime });
+      if (!plate.size) {
+        status('Choose a clip first');
+        put.disabled = false;
+        return;
+      }
+      if (plate.size > MAX) {
         status('Still over 50 MB. Shoot HD 30, not 4K.');
         put.disabled = false;
         return;
       }
-      var probe = await probeClip(picked);
+      var probe = await probeClip(plate);
       if (probe.duration > 65) {
         status('Keep it to a minute.');
         put.disabled = false;
@@ -192,8 +207,8 @@
         await client.storage.from(bucket()).copy(VPATH, 'theater/archive-' + ym + '.mp4');
       } catch (eA) {}
       status('Uploading\u2026');
-      var upV = await client.storage.from(bucket()).upload(VPATH, picked, {
-        contentType: picked.type || 'video/mp4',
+      var upV = await client.storage.from(bucket()).upload(VPATH, plate, {
+        contentType: mime,
         upsert: true
       });
       if (upV.error) throw new Error(upV.error.message || 'upload failed');
@@ -256,7 +271,8 @@
       e.stopPropagation();
       openSheet();
     });
-    tile.insertAdjacentElement('afterend', btn);
+    var cap = document.getElementById('tb-month-film-title');
+    (cap || tile).insertAdjacentElement('afterend', btn);
   }
 
   async function boot() {
