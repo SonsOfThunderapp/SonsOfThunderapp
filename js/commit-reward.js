@@ -111,10 +111,7 @@
   function wrapLockedIn() {
     var fx = window.ThunderFX;
     if (!fx || fx._tbCommitWrap) return false;
-    var orig = fx.lockedIn && fx.lockedIn.bind(fx);
-    fx.lockedIn = function (el, card) {
-      peakB(el, card, orig);
-    };
+    /* 20260827-imin1: ThunderFX.lockedIn is the only I'm In signature. */
     fx._tbCommitWrap = true;
     return true;
   }

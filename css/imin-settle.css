@@ -1,0 +1,23 @@
+/* 20260827-imin1 — settled I'M IN rim. Same class. No loop. No card scale. */
+.next-meeting.commit-energized {
+  animation: none !important;
+  transform: none !important;
+  border: 1px solid #FEF105;
+  box-shadow:
+    0 0 0 1px #FEF105,
+    0 0 16px rgba(254, 241, 5, 0.28);
+}
+html.tb-commit-breathe .next-meeting {
+  animation: none !important;
+  transform: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .next-meeting.commit-energized {
+    animation: none !important;
+    transform: none !important;
+    border: 1px solid #FEF105;
+    box-shadow:
+      0 0 0 1px #FEF105,
+      0 0 16px rgba(254, 241, 5, 0.28);
+  }
+}
