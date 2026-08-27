@@ -1,0 +1,32 @@
+#tb-text-leader-brothers {
+  display: none !important;
+  pointer-events: none !important;
+}
+#view-home #text-leader-btn,
+#view-home .btn-text-leader,
+#view-about #text-leader-btn,
+#view-events #text-leader-btn {
+  display: none !important;
+}
+#view-brothers #text-leader-btn,
+#view-brothers .btn-text-leader {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  margin: 28px auto 0;
+  padding: 0 16px calc(18px + env(safe-area-inset-bottom, 0px));
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #777;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+  opacity: 0.75;
+}
+#view-brothers #text-leader-btn:active {
+  color: #FEF105;
+  opacity: 1;
+}
