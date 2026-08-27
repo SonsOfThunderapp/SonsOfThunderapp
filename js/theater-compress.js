@@ -6,7 +6,7 @@
   var TARGET_BPS = 5500000;
   var FPS = 30;
   var MAX_SEC = 60;
-  var MUX_URL = 'https://cdn.jsdelivr.net/npm/mp4-muxer@5.2.1/+esm';
+  var MUX_URL = '/js/mp4-muxer.esm.js';
 
   function even(n) { n = Math.round(n); return n - (n % 2); }
 
