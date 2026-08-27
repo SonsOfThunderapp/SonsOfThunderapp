@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260827-proof1',
+  APP_BUILD: '20260827-proof2',
   RSVP_PRESENCE: {
     publicOnHome: true,
     seedFloor: 0,
@@ -141,6 +141,7 @@ if (!window.supabase || !window.supabase.createClient) {
     addCss('memories-page.css', 'css/memories-page.css');
     addCss('events-mission-stack.css', 'css/events-mission-stack.css');
     addCss('choice2-proof.css', 'css/choice2-proof.css');
+    addCss('text-leader-quiet.css', 'css/text-leader-quiet.css');
     addCss('imin-settle.css', 'css/imin-settle.css');
     addCss('lastfire-gone.css', 'css/lastfire-gone.css');
     addCss('chair-no-swipe.css', 'css/chair-no-swipe.css');
@@ -180,6 +181,7 @@ if (!window.supabase || !window.supabase.createClient) {
     addJs('chair-no-swipe.js', 'js/chair-no-swipe.js');
     addJs('ann-keep.js', 'js/ann-keep.js');
     addJs('choice2-proof.js', 'js/choice2-proof.js');
+    addJs('text-leader-quiet.js', 'js/text-leader-quiet.js');
     addJs('thunder-ask.js', 'js/thunder-ask.js');
     addJs('ask-clear.js', 'js/ask-clear.js');
     addJs('hangout-tour.js', 'js/hangout-tour.js');
