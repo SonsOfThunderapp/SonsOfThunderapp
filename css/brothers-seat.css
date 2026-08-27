@@ -1,0 +1,60 @@
+#tb-own-edit-btn.is-on {
+  display: block !important;
+  width: 100%;
+  margin: 12px 0 10px;
+  padding: 14px 12px;
+  border: 1px solid #FEF105;
+  background: #111;
+  color: #FEF105;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+#view-brothers #edit-profile-btn:not(.hidden) {
+  display: inline-flex !important;
+  color: #FEF105;
+  letter-spacing: 0.12em;
+}
+#brother-qr-wrap {
+  display: block !important;
+  margin: 16px auto 8px;
+  text-align: center;
+}
+#brother-qr-wrap .qr-stage-inline {
+  width: 220px;
+  height: 220px;
+  margin: 0 auto;
+}
+#brother-qr-wrap .qr-bolt-pad {
+  width: 40px !important;
+  height: 40px !important;
+  background: #000;
+  border: 2px solid #FEF105;
+}
+#brother-qr-wrap .qr-label {
+  margin-top: 8px;
+  letter-spacing: 0.16em;
+  color: #FEF105;
+}
+#brother-open-chair,
+#auth-entry-btn,
+#empty-brothers-cta {
+  position: relative;
+  border-color: rgba(254, 241, 5, 0.45);
+  box-shadow: 0 0 0 1px rgba(254, 241, 5, 0.22), 0 0 18px rgba(254, 241, 5, 0.16);
+  animation: tbChairSelect 2.8s ease-in-out infinite;
+}
+#brother-open-chair .brother-chair-title {
+  color: #FEF105;
+}
+@keyframes tbChairSelect {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(254, 241, 5, 0.18), 0 0 10px rgba(254, 241, 5, 0.08); }
+  45% { box-shadow: 0 0 0 1px rgba(254, 241, 5, 0.55), 0 0 22px rgba(254, 241, 5, 0.28); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #brother-open-chair,
+  #auth-entry-btn,
+  #empty-brothers-cta {
+    animation: none;
+  }
+}
