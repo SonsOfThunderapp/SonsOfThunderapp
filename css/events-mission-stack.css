@@ -1,0 +1,77 @@
+/* Events & Memories dopamine stack — scoped to #view-events only. 20260827-events1 */
+#view-events .events-hit-line {
+  margin: 2px 0 16px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #8a8a8a;
+}
+
+#view-events .memories-add-btn {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+#view-events #media-feed .media-thumb-featured {
+  grid-column: 1 / -1;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+}
+#view-events #media-feed .media-thumb-featured img,
+#view-events #media-feed .media-thumb-featured video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+#view-events #media-feed .memory-night-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+#view-events #media-feed .memory-night-grid .media-thumb-featured {
+  grid-column: 1 / -1;
+  aspect-ratio: 16 / 10;
+}
+
+#view-events #next-mission-card.mission-mode {
+  border: 1px solid #E30600;
+  box-shadow: 0 10px 28px rgba(227, 6, 0, 0.28);
+}
+
+#view-events #sharpen-section-title {
+  margin-top: 28px;
+  opacity: 0.7;
+}
+
+/* leftover second CTAs under + MEMORY — keep #memory-cam working */
+#view-events #memories-drop-btn,
+#view-events #memories-signin-shot,
+#view-events #memories-library-btn {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+#view-events .empty-memories-quiet {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #8a8a8a;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #view-events .media-thumb.media-enter,
+  #view-events #next-mission-card {
+    animation: none !important;
+    transition: none !important;
+  }
+}
