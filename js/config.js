@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260827-imin1',
+  APP_BUILD: '20260827-more1',
   RSVP_PRESENCE: {
     publicOnHome: true,
     seedFloor: 0,
@@ -172,6 +172,7 @@ if (!window.supabase || !window.supabase.createClient) {
     addJs('tour-kill.js', 'js/tour-kill.js');
     addJs('tour-first.js', 'js/tour-first.js');
     addJs('more-legal.js', 'js/more-legal.js');
+    addJs('more-alias.js', 'js/more-alias.js');
     addJs('thunder-ask.js', 'js/thunder-ask.js');
     addJs('ask-clear.js', 'js/ask-clear.js');
     addJs('hangout-tour.js', 'js/hangout-tour.js');
