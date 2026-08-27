@@ -1,0 +1,7 @@
+/* 20260827-nswipe1: no horizontal tab flick while editing. */
+body.tb-chair.tb-view-about #views,
+body.tb-chair #view-about.active,
+body.tb-chair #view-about,
+body:has(.modal:not(.hidden)) #views {
+  touch-action: pan-y !important;
+}
