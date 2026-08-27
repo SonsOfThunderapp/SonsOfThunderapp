@@ -1,6 +1,9 @@
 # Thunder Board — SPA + deep links (Netlify)
 # Explicit deep links first, then catch-all
 
+# 20260827-sdk1: force the official UMD at this path so PWA does not get index.html
+/js/supabase.min.js  https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.69.1/dist/umd/supabase.js  200!
+
 /tap    /index.html   200
 /tap/*  /index.html   200
 /share-memory  /index.html  200
