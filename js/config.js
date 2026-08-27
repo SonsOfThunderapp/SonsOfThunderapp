@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260826-month7',
+  APP_BUILD: '20260826-month8',
   RSVP_PRESENCE: {
     publicOnHome: true,
     seedFloor: 0,
@@ -172,6 +172,7 @@ window.TB_CONFIG = {
     addCss('theater-month.css', 'css/theater-month.css');
     addJs('theater-compress.js', 'js/theater-compress.js');
     addJs('home-month-film.js', 'js/home-month-film.js');
+    addJs('tb-sb-bridge.js', 'js/tb-sb-bridge.js');
     addJs('theater-month.js', 'js/theater-month.js');
     if (!document.querySelector('script[src*="bday-autotext.js"]')) {
       addJs('bday-autotext.js', 'js/bday-autotext.js');
