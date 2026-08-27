@@ -1,0 +1,18 @@
+/* 20260827-lf1: Last Fire is gone. Do not show the Home card or the Leadership editor. */
+#last-fire,
+#last-fire-label,
+#last-fire-media,
+#last-fire-cap,
+#admin-lastfire-btn,
+#admin-lastfire-modal,
+.last-fire {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  height: 0 !important;
+  max-height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
