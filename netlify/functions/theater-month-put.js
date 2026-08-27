@@ -1,7 +1,8 @@
 /**
  * THIS MONTH chair write. Service role stays on the server.
  * POST /.netlify/functions/theater-month-put
- * Auth: Bearer Supabase access_token, or chair PIN header.
+ * Auth: x-tb-chair-pin must match TB_CHAIR_PIN (fallback CHAIR_PIN).
+ * Header is enough. Bearer optional.
  * action=sign  -> signed upload URLs (client PUTs the file, never the function)
  * action=commit -> upsert theater_current public URLs
  */
@@ -48,19 +49,22 @@ exports.handler = async function (event) {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers: cors(origin), body: '' };
   if (event.httpMethod !== 'POST') return json(405, { error: 'Method not allowed' }, origin);
 
-  var sbUrl = (process.env.SUPABASE_URL || '').replace(/\/$/, '');
+  var sbUrl = (process.env.SUPABASE_URL || 'https://mnsempcgomukcpofgvlm.supabase.co').replace(/\/$/, '');
   var serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
   var anonKey = process.env.SUPABASE_ANON_KEY || '';
-  if (!sbUrl || !serviceKey) return json(503, { error: 'Could not put it on Home' }, origin);
+  if (!serviceKey) return json(503, { error: 'Could not put it on Home' }, origin);
+
+  var pin = String(event.headers['x-tb-chair-pin'] || event.headers['X-Tb-Chair-Pin'] || '').trim();
+  var chairPin = String(process.env.TB_CHAIR_PIN || process.env.CHAIR_PIN || '');
+  if (!pin || !chairPin || pin !== chairPin) return json(403, { error: 'Could not put it on Home' }, origin);
 
   var authHeader = event.headers.authorization || event.headers.Authorization || '';
   var accessToken = authHeader.indexOf('Bearer ') === 0 ? authHeader.slice(7).trim() : '';
-  var pin = String(event.headers['x-tb-chair-pin'] || event.headers['X-Tb-Chair-Pin'] || '').trim();
-  var pinOk = pin === String(process.env.TB_CHAIR_PIN || '');
-  var user = null;
-  if (accessToken) user = await chairUser(sbUrl, anonKey, serviceKey, accessToken);
-  if (!user && pinOk && pin) user = { id: null };
-  if (!user) return json(403, { error: 'Could not put it on Home' }, origin);
+  var user = { id: null };
+  if (accessToken) {
+    var u = await chairUser(sbUrl, anonKey, serviceKey, accessToken);
+    if (u) user = u;
+  }
 
   var body = {};
   try { body = JSON.parse(event.body || '{}'); } catch (e) { body = {}; }
@@ -140,7 +144,7 @@ exports.handler = async function (event) {
       var t = await wr.text();
       return json(500, { error: t.slice(0, 180) || 'row failed' }, origin);
     }
-    return json(200, { ok: true, url: pubV, title: title }, origin);
+    return json(200, { ok: true, title: title }, origin);
   }
 
   return json(400, { error: 'Could not put it on Home' }, origin);
