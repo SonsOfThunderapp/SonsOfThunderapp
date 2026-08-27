@@ -1,0 +1,38 @@
+  <div id="admin-room-modal" class="modal hidden">
+    <div class="modal-content room-night">
+      <div class="modal-header">
+        <h2>Tonight</h2>
+        <button class="modal-close" data-close="admin-room-modal" type="button">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="card-label" id="room-label">THE ROOM</p>
+        <ol class="room-steps" aria-label="Raffle order">
+          <li>Open the patio</li>
+          <li>Men tap I’M HERE</li>
+          <li>Draw beer, then hat</li>
+        </ol>
+        <section class="room-act" data-act="1">
+          <p class="room-act-kicker">1 · DOOR</p>
+          <button type="button" id="patio-toggle-btn" class="btn-rsvp">OPEN THE PATIO</button>
+          <p class="leader-push-hint" id="patio-toggle-hint">Turns on I’M HERE on Home. Check-ins are the raffle list.</p>
+        </section>
+        <section class="room-act" data-act="2">
+          <p class="room-act-kicker">2 · WHO’S HERE</p>
+          <div id="room-stats" class="room-stats">Counting brothers…</div>
+        </section>
+        <section class="room-act" data-act="3">
+          <p class="room-act-kicker">3 · DRAW</p>
+          <p class="leader-push-hint">Only men who tapped I’M HERE. Beer first. Hat second.</p>
+          <button type="button" id="draw-beer-btn" class="btn-rsvp">DRAW BEER</button>
+          <button type="button" id="draw-hat-btn" class="btn-secondary room-draw-hat">DRAW HAT</button>
+        </section>
+        <details class="patio-tap-block" id="patio-tap-block">
+          <summary class="card-label">DOOR CODE</summary>
+          <p class="leader-push-hint">NFC sticker or printed code. Same URL forever.</p>
+          <canvas id="patio-tap-qr" width="200" height="200" aria-label="Patio tap QR"></canvas>
+          <p class="leader-push-hint" id="patio-tap-url"></p>
+        </details>
+        <button data-close="admin-room-modal" type="button" class="btn-secondary" style="width:100%;margin-top:14px;">DONE</button>
+      </div>
+    </div>
+  </div>
