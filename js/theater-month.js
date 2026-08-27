@@ -356,7 +356,7 @@
     wrap.id = 'tb-month-sheet';
     wrap.innerHTML =
       '<div class="tb-ms-card">' +
-        '<button type="button" class="tb-ms-x" aria-label="Close">\u00d7</button>' +
+        '<button type="button" class="tb-ms-x" aria-label="Close">×</button>' +
         '<h2>THIS MONTH</h2>' +
         '<div id="tb-month-signin">' +
           '<input id="tb-month-email" type="email" autocomplete="username" value="obietv@gmail.com">' +
@@ -365,7 +365,7 @@
         '<label class="tb-ms-file">CHOOSE CLIP' +
           '<input id="tb-month-file" type="file" accept="video/*" hidden>' +
         '</label>' +
-        '<input id="tb-month-title" type="text" maxlength="48" placeholder="Joel \u00b7 AI Night">' +
+        '<input id="tb-month-title" type="text" maxlength="48" placeholder="Joel · AI Night">' +
         '<button type="button" class="tb-ms-put" id="tb-month-put">PUT IT ON HOME</button>' +
         '<p class="tb-ms-status" id="tb-month-status"></p>' +
       '</div>';
@@ -443,7 +443,7 @@
   }
 
   async function putOnHome() {
-    status('Working\\u2026');
+    status('Working\u2026');
     var put = document.getElementById('tb-month-put');
     if (!picked) { status('Choose a clip first'); return; }
     if (picked.size > RAW_MAX) {
@@ -466,7 +466,7 @@
       var email = ((document.getElementById('tb-month-email') || {}).value || 'obietv@gmail.com').trim();
       var pass = (document.getElementById('tb-month-pass') || {}).value || '';
       if (client && email && pass) {
-        status('Signing in\\u2026');
+        status('Signing in\u2026');
         try {
           var signed = await client.auth.signInWithPassword({ email: email, password: pass });
           if (signed.error) throw new Error(signed.error.message || 'Sign in here');
@@ -494,7 +494,7 @@
       return;
     }
     var title = ((document.getElementById('tb-month-title') || {}).value || '').trim() || 'Welcome!';
-    status('Reading the clip\\u2026');
+    status('Reading the clip\u2026');
     try {
       var buf = await picked.arrayBuffer();
       if (!buf || !buf.byteLength) {
@@ -529,7 +529,7 @@
       try {
         await client.storage.from(bucket()).copy(VPATH, 'theater/archive-' + ym + '.mp4');
       } catch (eA) {}
-      status('Uploading\\u2026');
+      status('Uploading\u2026');
       var upV = await client.storage.from(bucket()).upload(VPATH, plate, {
         contentType: mime,
         upsert: true
