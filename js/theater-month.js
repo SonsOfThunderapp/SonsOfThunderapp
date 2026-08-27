@@ -174,6 +174,7 @@
         if (main) return main;
       } catch (eM) {}
     }
+    if (window.__tbLastSb) return window.__tbLastSb;
     return window.__tbTheaterSb || null;
   }
 
@@ -358,7 +359,7 @@
     wrap.id = 'tb-month-sheet';
     wrap.innerHTML =
       '<div class="tb-ms-card">' +
-        '<button type="button" class="tb-ms-x" aria-label="Close">×</button>' +
+        '<button type="button" class="tb-ms-x" aria-label="Close">\u00d7</button>' +
         '<h2>THIS MONTH</h2>' +
         '<div id="tb-month-signin">' +
           '<input id="tb-month-email" type="email" autocomplete="username" value="obietv@gmail.com">' +
@@ -367,7 +368,7 @@
         '<label class="tb-ms-file">CHOOSE CLIP' +
           '<input id="tb-month-file" type="file" accept="video/*" hidden>' +
         '</label>' +
-        '<input id="tb-month-title" type="text" maxlength="48" placeholder="Joel · AI Night">' +
+        '<input id="tb-month-title" type="text" maxlength="48" placeholder="Joel \u00b7 AI Night">' +
         '<button type="button" class="tb-ms-put" id="tb-month-put">PUT IT ON HOME</button>' +
         '<p class="tb-ms-status" id="tb-month-status"></p>' +
       '</div>';
@@ -444,6 +445,44 @@
     });
   }
 
+
+  async function chairAccessToken(client) {
+    try {
+      if (client && client.auth) {
+        var sess = await client.auth.getSession();
+        var t = sess && sess.data && sess.data.session && sess.data.session.access_token;
+        if (t) return t;
+      }
+    } catch (e0) {}
+    var tok = parseStoredSession();
+    return (tok && tok.access_token) || '';
+  }
+
+  async function chairSignedPut(plate, frame, mime, title, client) {
+    var token = await chairAccessToken(client);
+    if (!token) return false;
+    var signRes = await fetch('/.netlify/functions/theater-month-put', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+      body: JSON.stringify({ action: 'sign', mime: mime || 'video/mp4' })
+    });
+    var sign = await signRes.json().catch(function () { return null; });
+    if (!signRes.ok || !sign || !sign.videoUrl) throw new Error((sign && sign.error) || 'upload failed');
+    var putV = await fetch(sign.videoUrl, { method: 'PUT', headers: { 'Content-Type': mime || 'video/mp4' }, body: plate });
+    if (!putV.ok) throw new Error('upload failed');
+    if (frame && sign.posterUrl) {
+      try { await fetch(sign.posterUrl, { method: 'PUT', headers: { 'Content-Type': 'image/jpeg' }, body: frame }); } catch (eP) {}
+    }
+    var doneRes = await fetch('/.netlify/functions/theater-month-put', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+      body: JSON.stringify({ action: 'commit', title: title || 'Welcome!' })
+    });
+    var done = await doneRes.json().catch(function () { return null; });
+    if (!doneRes.ok) throw new Error((done && done.error) || 'row failed');
+    return true;
+  }
+
   async function putOnHome() {
     status('Working\u2026');
     var put = document.getElementById('tb-month-put');
@@ -454,7 +493,10 @@
       if (window.__tbSbReady) await window.__tbSbReady;
     } catch (eReady) {}
     try {
-      client = await ensureSb();
+      if (typeof window.getSb === 'function') client = window.getSb();
+    } catch (eG) {}
+    try {
+      if (!client) client = await ensureSb();
       if (client) await attachStoredSession(client);
     } catch (eAtt) {}
     if (!picked) { status('Choose a clip first'); return; }
@@ -520,6 +562,7 @@
       return;
     }
     user = gate.user || user;
+    var title = ((document.getElementById('tb-month-title') || {}).value || '').trim() || 'Welcome!';
     status('Reading the clip\u2026');
     try {
       var buf = await picked.arrayBuffer();
@@ -569,8 +612,6 @@
       }
       var pubV = client.storage.from(bucket()).getPublicUrl(VPATH);
       var pubP = client.storage.from(bucket()).getPublicUrl(PPATH);
-      var title = ((document.getElementById('tb-month-title') || {}).value || '').trim();
-      if (!title) title = 'Welcome!';
       saveDraft(title);
       var row = {
         id: 'current',
@@ -589,7 +630,19 @@
       toast('On Home');
     } catch (err) {
       var msg = err && err.message ? err.message : 'Could not put it on Home';
-      if (/row-level security/i.test(msg)) {
+      if (/row-level security|not allowed|Unauthorized|new row violates/i.test(msg)) {
+        try {
+          var via = await chairSignedPut(plate, frame, mime, title || 'Welcome!', client);
+          if (via) {
+            status('On Home');
+            if (window.tbRefreshMonthFilm) window.tbRefreshMonthFilm();
+            toast('On Home');
+            if (put) put.disabled = false;
+            return;
+          }
+        } catch (eSign) {
+          msg = (eSign && eSign.message) || msg;
+        }
         msg = chairFromApp() ? 'Could not put it on Home' : 'Sign in here';
       }
       status(msg);
