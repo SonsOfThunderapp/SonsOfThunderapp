@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260827-month15',
+  APP_BUILD: '20260827-events1',
   RSVP_PRESENCE: {
     publicOnHome: true,
     seedFloor: 0,
@@ -138,6 +138,7 @@ if (!window.supabase || !window.supabase.createClient) {
     addCss('memories-latest.css', 'css/memories-latest.css');
     addCss('ask-clear.css', 'css/ask-clear.css');
     addCss('memories-page.css', 'css/memories-page.css');
+    addCss('events-mission-stack.css', 'css/events-mission-stack.css');
     var ww = document.querySelector('link[href*="website-wide.css"]');
     var wwHref = 'css/website-wide.css?v=' + encodeURIComponent(__tbB);
     if (!ww) {
