@@ -34,9 +34,17 @@
   width:100%;box-sizing:border-box;margin:0 0 12px;padding:12px;
   border:1px solid #333;border-radius:12px;background:#000;color:#FEF105;
 }
-#tb-month-sheet .tb-ms-put{
+#tb-month-sheet.is-chair #tb-month-signin,
+#tb-month-signin.is-chair-hide{
+  display:none!important;
+}
+#tb-month-sheet .tb-ms-put,
+#tb-month-put{
   width:100%;border:0;border-radius:12px;padding:14px;
   background:#E30600;color:#fff;font-weight:800;letter-spacing:.04em;
+  position:relative;z-index:6;
+  pointer-events:auto;
+  min-height:44px;
 }
 #tb-month-sheet .tb-ms-put:disabled{opacity:.5}
 #tb-month-sheet .tb-ms-status{
