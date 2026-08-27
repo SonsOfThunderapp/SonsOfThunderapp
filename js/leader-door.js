@@ -31,169 +31,124 @@
   setTimeout(bind,2000);
 })();
 
-/* More page: hide the Leadership button. Seven taps on the bolt
-   above Gathering Alerts opens the existing chair tools panel.
-   Live app.js is chair-account only (requireLeader / refreshChairMode).
-   7 taps ask the chair unlock. Guests get nothing.
-   Never force-show #leader-tools. 20260823-lead1 */
+/* More: the glowing O under The Code is the chair door. One tap, four boxes. */
 (function () {
-  var NEED = 7;
-  var GAP_MS = 1400;
-  var FLAG = 'tb_leaderDoor';
-  var taps = 0;
-  var last = 0;
-  var lastEvent = 0;
+  var FLAG = 'tb_chair_pin';
+  var CODE = '1121';
   var bound = false;
-  var keepIv = null;
 
-  function doorOn() {
-    try { return sessionStorage.getItem(FLAG) === '1'; } catch (e) {
-      return window.__tbLeaderDoor === 1;
-    }
+  function pinOn() {
+    try { return sessionStorage.getItem(FLAG) === '1'; } catch (e) { return window.__tbChairPin === 1; }
   }
-
-  function setDoor() {
-    try { sessionStorage.setItem(FLAG, '1'); } catch (e) {
-      window.__tbLeaderDoor = 1;
-    }
+  function setPinOn() {
+    try { sessionStorage.setItem(FLAG, '1'); } catch (e) { window.__tbChairPin = 1; }
+  }
+  function setPinOff() {
+    try { sessionStorage.removeItem(FLAG); } catch (e) { window.__tbChairPin = 0; }
   }
 
   function hideButton() {
     var btn = document.getElementById('leader-unlock-btn');
     if (!btn) return;
     btn.hidden = true;
-    btn.style.display = 'none';
+    btn.style.setProperty('display', 'none', 'important');
     btn.setAttribute('aria-hidden', 'true');
     btn.tabIndex = -1;
   }
 
-  function showEl(el) {
-    if (!el) return;
-    el.classList.remove('hidden');
-    el.hidden = false;
-    el.setAttribute('aria-hidden', 'false');
-    el.style.setProperty('display', 'block', 'important');
-    el.style.setProperty('visibility', 'visible', 'important');
-  }
-
-  function findPinField() {
-    return document.querySelector(
-      '#leader-pin, #leader-pin-input, #pin-input, input[name="leader-pin"], input[id*="leader-pin"]'
-    );
-  }
-
-  function wireExistingPin(input) {
-    if (!input || input.getAttribute('data-tb-pinwire') === '1') return;
-    input.setAttribute('data-tb-pinwire', '1');
-    function go() {
-      var btn = document.getElementById('leader-unlock-btn');
-      if (!btn) return;
-      try {
-        btn.hidden = false;
-        btn.style.display = 'none';
-        btn.click();
-        btn.hidden = true;
-      } catch (e) {}
-    }
-    var form = input.form || input.closest('form');
-    if (form) {
-      form.addEventListener('submit', function (e) {
-        e.preventDefault();
-        go();
-      });
-    }
-    var nearby = input.parentNode && input.parentNode.querySelector('button');
-    if (nearby) {
-      nearby.addEventListener('click', function (e) {
-        e.preventDefault();
-        go();
-      });
-    }
-  }
-
-  function toolsHaveControls() {
+  function showTools() {
+    var zone = document.querySelector('.admin-zone');
     var tools = document.getElementById('leader-tools');
-    return !!(tools && tools.querySelector('button, a, input'));
-  }
-
-  function ensureOverlay() {
-    if (document.getElementById('tb-chair-door')) return;
-    var box = document.createElement('div');
-    box.id = 'tb-chair-door';
-    box.setAttribute('role', 'dialog');
-    box.setAttribute('aria-label', 'Chair tools');
-    box.style.cssText = 'position:fixed;left:12px;right:12px;bottom:88px;z-index:9999;background:#111;color:#f4f0e6;border:1px solid #c8a44e;padding:14px 16px;border-radius:10px;font:15px/1.4 system-ui,sans-serif;';
-    var title = document.createElement('div');
-    title.textContent = 'Chair tools';
-    title.style.cssText = 'font-weight:700;margin-bottom:8px;';
-    box.appendChild(title);
-    var acts = document.createElement('div');
-    box.appendChild(acts);
-    function addIfExists(sel, label) {
-      var src = document.querySelector(sel);
-      if (!src) return;
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.textContent = label;
-      b.style.cssText = 'display:block;width:100%;margin:8px 0 0;padding:10px;background:#1a1a1a;color:#f4f0e6;border:1px solid #c8a44e;';
-      b.addEventListener('click', function () { try { src.click(); } catch (e) {} });
-      acts.appendChild(b);
+    if (zone) {
+      zone.classList.remove('hidden');
+      zone.hidden = false;
+      zone.style.setProperty('display', 'block', 'important');
     }
-    addIfExists('#refresh-app-btn, #leader-refresh-btn, #admin-refresh-btn', 'REFRESH');
-    addIfExists('#ping-btn, #leader-ping-btn, #admin-ping-btn', 'PING');
-    document.body.appendChild(box);
-  }
-
-  function tryChairUnlock() {
+    if (tools) {
+      tools.classList.remove('hidden');
+      tools.hidden = false;
+      tools.style.setProperty('display', 'block', 'important');
+    }
     hideButton();
-    var btn = document.getElementById('leader-unlock-btn');
-    if (!btn) return;
-    try {
-      btn.hidden = false;
-      btn.style.setProperty('display', 'none', 'important');
-      btn.click();
-    } catch (e) {}
-    try { btn.hidden = true; } catch (e2) {}
+    try { document.dispatchEvent(new Event('tb-chair-open')); } catch (e3) {}
+  }
+
+  function hideTools() {
+    var tools = document.getElementById('leader-tools');
+    if (tools) {
+      tools.classList.add('hidden');
+      tools.style.removeProperty('display');
+    }
     hideButton();
   }
 
-  function applyDoor() {
-    hideButton();
-    /* Never force-show THE ROOM. app.js applyChairVisibility is chair-only.
-       7-tap only clicks the hidden unlock; requireLeader blocks guests. */
-    if (!doorOn()) return;
-    tryChairUnlock();
+  function ensureSheet() {
+    if (document.getElementById('tb-chair-pin-sheet')) return;
+    var wrap = document.createElement('div');
+    wrap.id = 'tb-chair-pin-sheet';
+    wrap.innerHTML =
+      '<style>' +
+      '#tb-chair-pin-sheet{position:fixed;inset:0;z-index:2147483000;background:rgba(0,0,0,.72);display:none;align-items:flex-end;justify-content:center}' +
+      '#tb-chair-pin-sheet.is-open{display:flex}' +
+      '#tb-chair-pin-sheet .tb-cp-card{width:100%;max-width:440px;background:#111;border-radius:22px 22px 0 0;padding:22px 18px calc(28px + env(safe-area-inset-bottom,0px));position:relative}' +
+      '#tb-chair-pin-sheet .tb-cp-x{position:absolute;top:10px;right:10px;width:44px;height:44px;border:0;background:transparent;color:#FEF105;font-size:28px;line-height:44px}' +
+      '#tb-chair-pin-sheet .tb-cp-boxes{display:flex;gap:10px;justify-content:center;margin:18px 0 8px}' +
+      '#tb-chair-pin-sheet .tb-cp-box{width:56px;height:64px;border:1px solid #FEF105;border-radius:12px;background:#000;color:#FEF105;font-size:28px;font-weight:800;text-align:center;line-height:64px}' +
+      '#tb-chair-pin-sheet.is-bad .tb-cp-box{border-color:#E30600;color:#E30600}' +
+      '#tb-chair-pin-sheet input{position:absolute;left:12px;right:12px;bottom:12px;height:72px;opacity:0}' +
+      '</style>' +
+      '<div class="tb-cp-card">' +
+        '<button type="button" class="tb-cp-x" aria-label="Close">×</button>' +
+        '<div class="tb-cp-boxes" aria-hidden="true">' +
+          '<div class="tb-cp-box"></div><div class="tb-cp-box"></div><div class="tb-cp-box"></div><div class="tb-cp-box"></div>' +
+        '</div>' +
+        '<input id="tb-chair-pin" type="tel" inputmode="numeric" autocomplete="one-time-code" maxlength="4">' +
+      '</div>';
+    document.body.appendChild(wrap);
+    wrap.querySelector('.tb-cp-x').addEventListener('click', closeSheet);
+    wrap.addEventListener('click', function (e) { if (e.target === wrap) closeSheet(); });
+    var inp = wrap.querySelector('#tb-chair-pin');
+    inp.addEventListener('input', function () {
+      var v = String(inp.value || '').replace(/\D/g, '').slice(0, 4);
+      inp.value = v;
+      paintBoxes(v);
+      wrap.classList.remove('is-bad');
+      if (v.length === 4) tryUnlock(v);
+    });
   }
 
-  function startKeep() {
-    if (!keepIv) keepIv = setInterval(applyDoor, 350);
-    if (window.__tbLeaderDoorObs || !document.body) return;
-    try {
-      var obs = new MutationObserver(function () { applyDoor(); });
-      obs.observe(document.body, {
-        attributes: true,
-        subtree: true,
-        attributeFilter: ['class', 'hidden', 'style', 'aria-hidden']
-      });
-      window.__tbLeaderDoorObs = obs;
-    } catch (e) {}
+  function paintBoxes(v) {
+    var boxes = document.querySelectorAll('#tb-chair-pin-sheet .tb-cp-box');
+    for (var i = 0; i < boxes.length; i++) boxes[i].textContent = v[i] ? '•' : '';
   }
 
-  function openDoor() {
-    setDoor();
-    applyDoor();
+  function openSheet() {
+    ensureSheet();
+    var s = document.getElementById('tb-chair-pin-sheet');
+    var inp = document.getElementById('tb-chair-pin');
+    s.classList.remove('is-bad');
+    inp.value = '';
+    paintBoxes('');
+    s.classList.add('is-open');
+    setTimeout(function () { try { inp.focus(); } catch (e) {} }, 80);
+  }
+  function closeSheet() {
+    var s = document.getElementById('tb-chair-pin-sheet');
+    if (s) s.classList.remove('is-open');
   }
 
-  function onTap() {
-    var now = Date.now();
-    if (now - lastEvent < 280) return;
-    lastEvent = now;
-    if (now - last > GAP_MS) taps = 0;
-    last = now;
-    taps += 1;
-    if (taps < NEED) return;
-    taps = 0;
-    openDoor();
+  function tryUnlock(v) {
+    if (v === CODE) {
+      setPinOn();
+      closeSheet();
+      showTools();
+      return;
+    }
+    var s = document.getElementById('tb-chair-pin-sheet');
+    if (s) s.classList.add('is-bad');
+    var inp = document.getElementById('tb-chair-pin');
+    inp.value = '';
+    paintBoxes('');
   }
 
   function decorate(el) {
@@ -206,40 +161,49 @@
     if (el.getAttribute('aria-hidden') === 'true') el.removeAttribute('aria-hidden');
   }
 
-  function listen(el) {
-    if (!el || el.getAttribute('data-tb-door') === '1') return;
-    el.setAttribute('data-tb-door', '1');
-    decorate(el);
-    el.addEventListener('pointerdown', onTap);
-  }
-
-  function bind() {
-    hideButton();
+  function bindBolt() {
     var bolt = document.querySelector('#view-about .about-bolt-break') ||
       document.querySelector('.about-bolt-break');
     if (!bolt) return false;
+    if (bolt.getAttribute('data-tb-chair') === '1') { bound = true; return true; }
+    bolt.setAttribute('data-tb-chair', '1');
     decorate(bolt);
     bolt.setAttribute('role', 'button');
     bolt.setAttribute('aria-label', 'Sons of Thunder');
-    listen(bolt);
+    function go(e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      if (pinOn()) { showTools(); return; }
+      openSheet();
+    }
+    bolt.addEventListener('click', go);
     var img = bolt.querySelector('img') || document.querySelector('#view-about .about-bolt-glow');
-    if (img) listen(img);
+    if (img) {
+      decorate(img);
+      img.addEventListener('click', go);
+    }
     bound = true;
     return true;
   }
 
-  function boot() {
-    try {
-      bind();
-      if (doorOn()) openDoor();
-    } catch (e) {}
+  function bindLock() {
+    var lock = document.getElementById('leader-lock-btn');
+    if (!lock || lock.getAttribute('data-tb-chairlock') === '1') return;
+    lock.setAttribute('data-tb-chairlock', '1');
+    lock.addEventListener('click', function () {
+      setPinOff();
+      hideTools();
+    });
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot);
-  } else {
-    boot();
+  function boot() {
+    hideButton();
+    bindBolt();
+    bindLock();
+    if (pinOn()) showTools();
   }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
   var n = 0;
   var iv = setInterval(function () {
     n += 1;
