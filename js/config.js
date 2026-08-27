@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260826-bolt2',
+  APP_BUILD: '20260826-own1',
   /* Public "who's in" presence — floor so no brother is ever alone on the card.
      seedFloor: deprecated for display count — keep 0. Truthful attendance only.
      anchorName: always listed first (leadership presence). */
@@ -163,6 +163,7 @@ window.TB_CONFIG = {
     addJs('text-leader-brothers.js', 'js/text-leader-brothers.js');
     addJs('guest-qr-signin.js', 'js/guest-qr-signin.js');
     addJs('brothers-chair.js', 'js/brothers-chair.js');
+    addJs('own-card-edit.js', 'js/own-card-edit.js');
     addJs('leader-door.js', 'js/leader-door.js');
     addJs('nav-wire.js', 'js/nav-wire.js');
     addJs('island-safe.js', 'js/island-safe.js');
