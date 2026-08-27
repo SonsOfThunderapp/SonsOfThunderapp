@@ -12,11 +12,14 @@ if (html.length < 45000 || html.indexOf('</html>') === -1 || html.indexOf("I'M I
   process.exit(1);
 }
 if (html.indexOf('/js/supabase.min.js?v=20260827-sdk1') === -1) {
-  if (!fs.existsSync('.github/sdk1-index.patch')) {
-    console.error('REFUSE: sdk1 index patch is gone.');
+  var cdn = '<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>';
+  var local = '<script src="/js/supabase.min.js?v=20260827-sdk1"></script>';
+  if (html.indexOf(cdn) === -1) {
+    console.error('REFUSE: supabase CDN script not found, cannot insert sdk1 tag.');
     process.exit(1);
   }
-  execSync('patch -p0 < .github/sdk1-index.patch', { stdio: 'inherit' });
+  html = html.replace(cdn, local + '\n  ' + cdn);
+  fs.writeFileSync('index.html', html);
   html = fs.readFileSync('index.html', 'utf8');
   if (html.indexOf('/js/supabase.min.js?v=20260827-sdk1') === -1 || html.length < 50000 || html.indexOf('</html>') === -1 || html.indexOf("I'M IN") === -1) {
     console.error('REFUSE: sdk1 script tag did not land cleanly (' + html.length + ' bytes).');
