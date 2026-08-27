@@ -4,35 +4,87 @@
   window.__tbOwnCardEdit = 1;
 
   var BTN = 'tb-own-edit-btn';
+  var CHAIR = 'obietv@gmail.com';
   var lastIdx = -1;
+  var sessUser = null;
+  var clickBound = false;
 
   function $(id) { return document.getElementById(id); }
 
-  function signedIn() {
-    try { if (typeof window.isSignedIn === 'function') return !!window.isSignedIn(); } catch (e) {}
-    var bar = $('auth-session-bar');
-    return !!(bar && !bar.classList.contains('hidden'));
+  function lsGet(key) {
+    try { return localStorage.getItem(key); } catch (e) { return null; }
   }
 
   function myId() {
-    try { return localStorage.getItem('myProfileId') || ''; } catch (e) { return ''; }
+    return lsGet('tb_myProfileId') || lsGet('myProfileId') || '';
   }
 
   function brothers() {
     try {
-      var raw = localStorage.getItem('brothers');
+      var raw = lsGet('tb_brothers') || lsGet('brothers');
       return raw ? JSON.parse(raw) : [];
     } catch (e) { return []; }
   }
 
-  function uid() {
+  function userObj() {
     try {
       if (typeof currentUser === 'function') {
         var u = currentUser();
-        return (u && u.id) ? String(u.id) : '';
+        if (u) return u;
       }
     } catch (e) {}
+    return sessUser;
+  }
+
+  function uid() {
+    var u = userObj();
+    return (u && u.id) ? String(u.id) : '';
+  }
+
+  function sessionEmail() {
+    var u = userObj();
+    if (u && u.email) return String(u.email).toLowerCase().trim();
+    return (($('auth-who') || {}).textContent || '').toLowerCase().trim();
+  }
+
+  function isChair() {
+    var em = sessionEmail();
+    return em === CHAIR || (em && em.indexOf(CHAIR) !== -1);
+  }
+
+  function myDisplayName() {
+    var u = userObj();
+    if (u) {
+      var meta = u.user_metadata || {};
+      var n = meta.full_name || meta.name || meta.display_name || '';
+      if (n) return String(n).trim();
+    }
+    var who = (($('auth-who') || {}).textContent || '').trim();
+    if (who && who.indexOf('@') === -1) return who;
     return '';
+  }
+
+  function hasSbSession() {
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (!k || k.indexOf('sb-') !== 0) continue;
+        var v = localStorage.getItem(k) || '';
+        if (v.indexOf('access_token') !== -1) return true;
+      }
+    } catch (e) {}
+    return false;
+  }
+
+  function signedIn() {
+    try { if (typeof window.isSignedIn === 'function' && window.isSignedIn()) return true; } catch (e) {}
+    if (uid()) return true;
+    var who = (($('auth-who') || {}).textContent || '').trim();
+    if (who) return true;
+    var bar = $('auth-session-bar');
+    if (bar && !bar.classList.contains('hidden')) return true;
+    if (hasSbSession()) return true;
+    return false;
   }
 
   function isMe(b) {
@@ -41,6 +93,10 @@
     if (id && b.id && String(b.id) === String(id)) return true;
     var owner = uid();
     if (owner && (String(b.owner_id || '') === owner || String(b.user_id || '') === owner)) return true;
+    var mine = myDisplayName();
+    var card = String(b.name || '').trim();
+    if (mine && card && mine.toLowerCase() === card.toLowerCase()) return true;
+    if (isChair() && (String(b.id || '') === 'founder-obie' || card.toLowerCase() === 'obie')) return true;
     return false;
   }
 
@@ -50,10 +106,18 @@
     var name = (($('brother-detail-name') || {}).textContent || '').trim();
     if (!name) return null;
     var id = myId();
+    var i;
     if (id) {
-      for (var i = 0; i < list.length; i++) {
-        if (list[i] && String(list[i].id) === String(id) && String(list[i].name || '').trim() === name) return list[i];
+      for (i = 0; i < list.length; i++) {
+        if (list[i] && String(list[i].id) === String(id)) return list[i];
       }
+    }
+    for (i = 0; i < list.length; i++) {
+      if (list[i] && String(list[i].name || '').trim() === name) return list[i];
+    }
+    var low = name.toLowerCase();
+    for (i = 0; i < list.length; i++) {
+      if (list[i] && String(list[i].name || '').trim().toLowerCase() === low) return list[i];
     }
     return null;
   }
@@ -141,22 +205,54 @@
     (document.head || document.documentElement).appendChild(s);
   }
 
-  function boot() {
-    ensureStyle();
-    stampBirthday();
-    document.addEventListener('click', function (e) {
-      var card = e.target && e.target.closest && e.target.closest('.brother-card[data-brother-index]');
-      if (!card) return;
-      lastIdx = parseInt(card.getAttribute('data-brother-index'), 10);
-      setTimeout(paint, 40);
-      setTimeout(paint, 180);
-    }, true);
+  function watch() {
     var detail = $('brother-detail');
     if (detail && !detail.__tbOwnWatch) {
       detail.__tbOwnWatch = 1;
       try {
         new MutationObserver(paint).observe(detail, { attributes: true, attributeFilter: ['class', 'aria-hidden'] });
       } catch (e2) {}
+    }
+    var nameEl = $('brother-detail-name');
+    if (nameEl && !nameEl.__tbOwnWatch) {
+      nameEl.__tbOwnWatch = 1;
+      try {
+        new MutationObserver(paint).observe(nameEl, { characterData: true, childList: true, subtree: true });
+      } catch (e3) {}
+    }
+  }
+
+  function probeSession() {
+    try {
+      if (typeof getSb !== 'function') return;
+      var sb = getSb();
+      if (!sb || !sb.auth || typeof sb.auth.getSession !== 'function') return;
+      sb.auth.getSession().then(function (res) {
+        try {
+          var u = res && res.data && res.data.session && res.data.session.user;
+          if (u) {
+            sessUser = u;
+            paint();
+          }
+        } catch (e0) {}
+      }).catch(function () {});
+    } catch (e1) {}
+  }
+
+  function boot() {
+    ensureStyle();
+    stampBirthday();
+    watch();
+    probeSession();
+    if (!clickBound) {
+      clickBound = true;
+      document.addEventListener('click', function (e) {
+        var card = e.target && e.target.closest && e.target.closest('.brother-card[data-brother-index]');
+        if (!card) return;
+        lastIdx = parseInt(card.getAttribute('data-brother-index'), 10);
+        setTimeout(paint, 40);
+        setTimeout(paint, 180);
+      }, true);
     }
     paint();
     stampBirthday();
