@@ -3,15 +3,20 @@
   if (window.__tbHomeMonthFilm) return;
   window.__tbHomeMonthFilm = 1;
 
-  var BLACK = '';
   var row = { url: '', poster: '', title: '' };
 
   function cfg() { return window.TB_CONFIG || {}; }
   function bucket() { return (cfg().THEATER_BUCKET || 'thunder-theater').trim(); }
   function sb() {
+    if (typeof window.getSb === 'function') {
+      try {
+        var main = window.getSb();
+        if (main) return main;
+      } catch (e0) {}
+    }
     var c = cfg();
     if (!c.SUPABASE_URL || !c.SUPABASE_ANON_KEY || !window.supabase) return null;
-    if (!window.__tbTheaterSb || !window.__tbTheaterSb.__tbChairAuth) {
+    if (!window.__tbTheaterSb) {
       window.__tbTheaterSb = window.supabase.createClient(c.SUPABASE_URL, c.SUPABASE_ANON_KEY, {
         auth: {
           persistSession: true,
@@ -20,7 +25,6 @@
           storage: window.__tbAuthStorage || undefined
         }
       });
-      if (window.__tbAuthStorage) window.__tbTheaterSb.__tbChairAuth = 1;
     }
     return window.__tbTheaterSb;
   }
@@ -62,48 +66,59 @@
   }
 
   function publicUrl(path, bust) {
-    var client = sb();
-    if (!client || !path) return '';
-    try {
-      var out = client.storage.from(bucket()).getPublicUrl(path);
-      var u = (out && out.data && out.data.publicUrl) || '';
-      if (u && bust) u += (u.indexOf('?') >= 0 ? '&' : '?') + 't=' + encodeURIComponent(bust);
-      return u;
-    } catch (e) {
-      return '';
-    }
-  }
-  async function signed(path) {
-    var client = sb();
-    if (!client || !path) return '';
-    try {
-      var out = await client.storage.from(bucket()).createSignedUrl(path, 604800);
-      return (out && out.data && out.data.signedUrl) || '';
-    } catch (e) {
-      return '';
-    }
+    if (!path) return '';
+    var c = cfg();
+    var base = String(c.SUPABASE_URL || '').replace(/\/$/, '');
+    if (!base) return '';
+    var u = base + '/storage/v1/object/public/' + encodeURI(bucket()) + '/' + String(path).replace(/^\//, '');
+    if (bust) u += (u.indexOf('?') >= 0 ? '&' : '?') + 't=' + encodeURIComponent(bust);
+    return u;
   }
 
   async function pullRow() {
+    var vPath = 'theater/current.mp4';
+    var pPath = 'theater/current.jpg';
+    var bust = '';
+    var title = '';
+    var has = false;
     var client = sb();
-    if (!client) { row = { url: '', poster: '', title: '' }; return; }
-    try {
-      var q = await client.from('theater_current').select('url,poster,title,video_path,poster_path,updated_at').eq('id', 'current').maybeSingle();
-      if (q.error || !q.data) { row = { url: '', poster: '', title: '' }; return; }
-      var d = q.data;
-      var vPath = d.video_path || 'theater/current.mp4';
-      var pPath = d.poster_path || 'theater/current.jpg';
-      var bust = d.updated_at || '';
-      var url = '';
-      var poster = '';
-      if (String(d.url || '').trim() || String(d.title || '').trim()) {
-        url = publicUrl(vPath, bust) || (await signed(vPath)) || d.url || '';
-        poster = publicUrl(pPath, bust) || (await signed(pPath)) || d.poster || '';
-      }
-      row = { url: url, poster: poster, title: d.title || '' };
-    } catch (e1) {
-      row = { url: '', poster: '', title: '' };
+    if (client) {
+      try {
+        var q = await client.from('theater_current').select('url,poster,title,video_path,poster_path,updated_at').eq('id', 'current').maybeSingle();
+        if (!q.error && q.data) {
+          vPath = q.data.video_path || vPath;
+          pPath = q.data.poster_path || pPath;
+          bust = q.data.updated_at || '';
+          title = q.data.title || '';
+          has = !!(String(q.data.url || '').trim() || String(title || '').trim());
+        }
+      } catch (e1) {}
     }
+    if (!has && !client) {
+      try {
+        var c = cfg();
+        if (c.SUPABASE_URL && c.SUPABASE_ANON_KEY) {
+          var res = await fetch(c.SUPABASE_URL.replace(/\/$/, '') + '/rest/v1/theater_current?id=eq.current&select=url,poster,title,video_path,poster_path,updated_at', {
+            headers: { apikey: c.SUPABASE_ANON_KEY, Authorization: 'Bearer ' + c.SUPABASE_ANON_KEY }
+          });
+          var arr = res.ok ? await res.json() : [];
+          var d = arr && arr[0];
+          if (d) {
+            vPath = d.video_path || vPath;
+            pPath = d.poster_path || pPath;
+            bust = d.updated_at || '';
+            title = d.title || '';
+            has = !!(String(d.url || '').trim() || String(title || '').trim());
+          }
+        }
+      } catch (e2) {}
+    }
+    if (!has) { row = { url: '', poster: '', title: '' }; return; }
+    row = {
+      url: publicUrl(vPath, bust),
+      poster: publicUrl(pPath, bust),
+      title: title
+    };
   }
 
   function loadTheater(cb) {

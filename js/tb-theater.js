@@ -34,7 +34,7 @@
     durEl = q('.tb-th-dur');
     video.setAttribute('playsinline', '');
     video.setAttribute('webkit-playsinline', '');
-    video.setAttribute('preload', 'metadata');
+    video.setAttribute('preload', 'auto');
     video.controls = false;
     video.setAttribute('controlslist', 'nodownload nofullscreen noremoteplayback');
     try { video.disablePictureInPicture = true; } catch (e0) {}
@@ -68,6 +68,9 @@
     if (d) scrub.value = String(Math.round((c / d) * 1000));
   }
   function onErr() {
+    var src = '';
+    try { src = video.currentSrc || video.src || ''; } catch (e0) {}
+    if (/supabase\.co/i.test(src)) return;
     try { video.removeAttribute('src'); video.load(); } catch (e1) {}
     if (lastPoster) {
       w.__tbMonthLastPoster = lastPoster;

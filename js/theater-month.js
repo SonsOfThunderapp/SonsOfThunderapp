@@ -153,7 +153,7 @@
   async function attachStoredSession(client) {
     if (!client || !client.auth) return null;
     var user = await sessionUser(client);
-    if (user) return user;
+    if (user && user.email) return user;
     var tok = parseStoredSession();
     if (!tok) return null;
     try {
@@ -261,33 +261,54 @@
 
   function markChairSheet() {
     var s = document.getElementById('tb-month-sheet');
-    var box = document.getElementById('tb-month-signin');
-    var on = chairFromApp();
-    if (s) s.classList.toggle('is-chair', on);
-    if (box) {
-      if (on) {
-        box.classList.add('is-chair-hide');
-        box.style.display = 'none';
-      } else {
-        box.classList.remove('is-chair-hide');
-      }
-    }
-    return on;
+    if (s) s.classList.toggle('is-chair', chairFromApp());
+    return chairFromApp();
+  }
+
+  async function sessionUser(client) {
+    if (!client || !client.auth) return null;
+    try {
+      var sess = await client.auth.getSession();
+      return (sess && sess.data && sess.data.session && sess.data.session.user) || null;
+    } catch (e) { return null; }
+  }
+
+  function needSeat() {
+    status('Sign in here');
+    try {
+      var em = document.getElementById('auth-email');
+      if (em) em.value = 'obietv@gmail.com';
+    } catch (e0) {}
+    try {
+      if (typeof window.startMemberSignIn === 'function') window.startMemberSignIn();
+    } catch (e1) {}
+    try {
+      var gate = document.getElementById('auth-gate');
+      var entry = document.getElementById('auth-entry-btn');
+      if (gate && gate.classList.contains('hidden') && entry) entry.click();
+      else if (gate) gate.classList.remove('hidden');
+    } catch (e2) {}
+    try {
+      var title = document.getElementById('auth-title');
+      if (title) title.textContent = 'LOCK YOUR SEAT';
+    } catch (e3) {}
+    try {
+      var em2 = document.getElementById('auth-email');
+      if (em2 && !em2.value) em2.value = 'obietv@gmail.com';
+    } catch (e4) {}
   }
 
   async function isLeader() {
     if (chairFromApp()) return true;
     var client = await ensureSb();
-    if (!client) return false;
+    var user = await sessionUser(client);
+    if (!user) return false;
+    if (String(user.email || '').trim().toLowerCase() === 'obietv@gmail.com') return true;
     try {
-      var sess = await client.auth.getSession();
-      var user = sess && sess.data && sess.data.session && sess.data.session.user;
-      if (!user) return false;
-      if (String(user.email || '').trim().toLowerCase() === 'obietv@gmail.com') return true;
-      try {
-        var rpc = await client.rpc('is_sot_leader');
-        if (!rpc.error && rpc.data === true) return true;
-      } catch (e0) {}
+      var rpc = await client.rpc('is_sot_leader');
+      if (!rpc.error && rpc.data === true) return true;
+    } catch (e0) {}
+    try {
       var q = await client.from('app_members').select('role,active').eq('user_id', user.id).maybeSingle();
       if (!q.error && q.data) {
         var role = String(q.data.role || '').toLowerCase();
@@ -298,59 +319,15 @@
     return false;
   }
 
-  function chairFail(why) {
-    if (chairFromApp()) return { ok: false, why: why || 'Could not put it on Home' };
-    return { ok: false, why: why || 'Sign in here' };
-  }
-
-  async function chairWriteOk(client) {
-    if (!client) return chairFail();
-    var user = await sessionUser(client);
-    if (!user) return chairFail();
-    try {
-      var rpc = await client.rpc('is_sot_leader');
-      if (!rpc.error && rpc.data === true) return { ok: true, user: user };
-    } catch (eR) {}
-    if (String(user.email || '').trim().toLowerCase() === 'obietv@gmail.com') {
-      return { ok: true, user: user };
-    }
-    return chairFail();
-  }
-
-  async function sessionUser(client) {
-    if (!client) return null;
-    try {
-      var sess = await client.auth.getSession();
-      return (sess && sess.data && sess.data.session && sess.data.session.user) || null;
-    } catch (e) { return null; }
-  }
-
-  function showSignIn(on) {
-    if (chairFromApp()) on = false;
-    var box = document.getElementById('tb-month-signin');
-    if (box) box.style.display = on ? 'block' : 'none';
-    markChairSheet();
-  }
-
   async function refreshChairStatus() {
-    if (chairFromApp()) {
-      showSignIn(false);
-      status('Chair ready');
-      try {
-        var c0 = await ensureSb();
-        await attachStoredSession(c0);
-      } catch (e0) {}
-      return;
-    }
     var client = await ensureSb();
     var user = await sessionUser(client);
-    if (user) {
-      showSignIn(false);
+    if (user && user.email) {
       status('Chair ready');
     } else {
-      showSignIn(true);
       status('Sign in here');
     }
+    markChairSheet();
   }
 
   function ensureSheet() {
@@ -361,10 +338,6 @@
       '<div class="tb-ms-card">' +
         '<button type="button" class="tb-ms-x" aria-label="Close">×</button>' +
         '<h2>THIS MONTH</h2>' +
-        '<div id="tb-month-signin">' +
-          '<input id="tb-month-email" type="email" autocomplete="username" value="obietv@gmail.com">' +
-          '<input id="tb-month-pass" type="password" autocomplete="current-password" placeholder="Password">' +
-        '</div>' +
         '<label class="tb-ms-file">CHOOSE CLIP' +
           '<input id="tb-month-file" type="file" accept="video/*" hidden>' +
         '</label>' +
@@ -445,61 +418,9 @@
     });
   }
 
-
-  async function chairAccessToken(client) {
-    try {
-      if (client && client.auth) {
-        var sess = await client.auth.getSession();
-        var t = sess && sess.data && sess.data.session && sess.data.session.access_token;
-        if (t) return t;
-      }
-    } catch (e0) {}
-    var tok = parseStoredSession();
-    return (tok && tok.access_token) || '';
-  }
-
-  async function chairSignedPut(plate, frame, mime, title, client) {
-    var token = await chairAccessToken(client);
-    var headers = { 'Content-Type': 'application/json', 'x-tb-chair-pin': '1121' };
-    if (token) headers.Authorization = 'Bearer ' + token;
-    var signRes = await fetch('/.netlify/functions/theater-month-put', {
-      method: 'POST',
-      headers: headers,
-      body: JSON.stringify({ action: 'sign', mime: mime || 'video/mp4' })
-    });
-    var sign = await signRes.json().catch(function () { return null; });
-    if (!signRes.ok || !sign || !sign.videoUrl) throw new Error((sign && sign.error) || 'upload failed');
-    var putV = await fetch(sign.videoUrl, { method: 'PUT', headers: { 'Content-Type': mime || 'video/mp4' }, body: plate });
-    if (!putV.ok) throw new Error('upload failed');
-    if (frame && sign.posterUrl) {
-      try { await fetch(sign.posterUrl, { method: 'PUT', headers: { 'Content-Type': 'image/jpeg' }, body: frame }); } catch (eP) {}
-    }
-    var doneRes = await fetch('/.netlify/functions/theater-month-put', {
-      method: 'POST',
-      headers: headers,
-      body: JSON.stringify({ action: 'commit', title: title || 'Welcome!' })
-    });
-    var done = await doneRes.json().catch(function () { return null; });
-    if (!doneRes.ok) throw new Error((done && done.error) || 'row failed');
-    return true;
-  }
-
   async function putOnHome() {
     status('Working\u2026');
     var put = document.getElementById('tb-month-put');
-    var chair = chairFromApp();
-    if (chair) showSignIn(false);
-    var client = null;
-    try {
-      if (window.__tbSbReady) await window.__tbSbReady;
-    } catch (eReady) {}
-    try {
-      if (typeof window.getSb === 'function') client = window.getSb();
-    } catch (eG) {}
-    try {
-      if (!client) client = await ensureSb();
-      if (client) await attachStoredSession(client);
-    } catch (eAtt) {}
     if (!picked) { status('Choose a clip first'); return; }
     if (picked.size > RAW_MAX) {
       status('Shoot HD 30 for 60 seconds, or export under 50 MB.');
@@ -508,61 +429,19 @@
     }
     if (!picked.size) { status('Choose a clip first'); return; }
     if (put) put.disabled = true;
+    var client = null;
     var user = null;
-    try { user = await sessionUser(client); } catch (eU) {}
-    if (!user && client) {
-      try { user = await attachStoredSession(client); } catch (eA2) {}
-    }
-    if (!client || !user) {
-      if (chair || chairFromApp()) {
-        showSignIn(false);
-        if (client) {
-          try { user = await attachStoredSession(client); } catch (eA3) {}
-        }
-        if (!client || !user) {
-          showSignIn(false);
-          /* PIN/Leadership is enough. Signed put uses the chair door. */
-        }
-      } else {
-        if (!client) {
-          status('Sign in here');
-          if (put) put.disabled = false;
-          return;
-        }
-        var email = ((document.getElementById('tb-month-email') || {}).value || '').trim();
-        var pass = (document.getElementById('tb-month-pass') || {}).value || '';
-        if (!email || !pass) {
-          showSignIn(true);
-          status('Sign in here');
-          if (put) put.disabled = false;
-          return;
-        }
-        status('Signing in\u2026');
-        try {
-          var signed = await client.auth.signInWithPassword({ email: email, password: pass });
-          if (signed.error) throw new Error(signed.error.message || 'Sign in here');
-          user = (signed.data && signed.data.user) || await sessionUser(client);
-          try {
-            var pe = document.getElementById('tb-month-pass');
-            if (pe) pe.value = '';
-          } catch (eClr) {}
-          showSignIn(false);
-        } catch (eIn) {
-          status((eIn && eIn.message) || 'Sign in here');
-          if (put) put.disabled = false;
-          return;
-        }
-      }
-    }
-    if (user) {
-      status('Checking the chair\u2026');
-      var gate = await chairWriteOk(client);
-      if (!gate.ok && !(chair || chairFromApp())) {
-        status(gate.why);
-        if (put) put.disabled = false;
-        return;
-      }
-      user = (gate && gate.user) || user;
+    try {
+      if (window.__tbSbReady) await window.__tbSbReady;
+    } catch (eReady) {}
+    try {
+      client = await ensureSb();
+      if (client) user = await sessionUser(client);
+    } catch (eS) {}
+    if (!client || !user || !user.email) {
+      needSeat();
+      if (put) put.disabled = false;
+      return;
     }
     var title = ((document.getElementById('tb-month-title') || {}).value || '').trim() || 'Welcome!';
     status('Reading the clip\u2026');
@@ -598,36 +477,20 @@
       var frame = probe.blob;
       var ym = new Date().toISOString().slice(0, 7);
       try {
-        if (client) await client.storage.from(bucket()).copy(VPATH, 'theater/archive-' + ym + '.mp4');
+        await client.storage.from(bucket()).copy(VPATH, 'theater/archive-' + ym + '.mp4');
       } catch (eA) {}
       status('Uploading\u2026');
-      if (chair || chairFromApp()) {
-        try {
-          var via0 = await chairSignedPut(plate, frame, mime, title || 'Welcome!', client);
-          if (via0) {
-            status('On Home');
-            if (window.tbRefreshMonthFilm) window.tbRefreshMonthFilm();
-            toast('On Home');
-            if (put) put.disabled = false;
-            return;
-          }
-        } catch (eFirst) {}
-      }
-      if (!client || !user) {
-        status('Could not put it on Home');
-        if (put) put.disabled = false;
-        return;
-      }
       var upV = await client.storage.from(bucket()).upload(VPATH, plate, {
         contentType: mime,
         upsert: true
       });
       if (upV.error) throw new Error(upV.error.message || 'upload failed');
       if (frame) {
-        await client.storage.from(bucket()).upload(PPATH, frame, {
+        var upP = await client.storage.from(bucket()).upload(PPATH, frame, {
           contentType: 'image/jpeg',
           upsert: true
         });
+        if (upP.error) throw new Error(upP.error.message || 'poster failed');
       }
       var pubV = client.storage.from(bucket()).getPublicUrl(VPATH);
       var pubP = client.storage.from(bucket()).getPublicUrl(PPATH);
@@ -640,7 +503,7 @@
         video_path: VPATH,
         poster_path: PPATH,
         updated_at: new Date().toISOString(),
-        uploaded_by: user && user.id || null
+        uploaded_by: user.id || null
       };
       var wr = await client.from('theater_current').upsert(row);
       if (wr.error) throw new Error(wr.error.message || 'row failed');
@@ -648,23 +511,7 @@
       if (window.tbRefreshMonthFilm) window.tbRefreshMonthFilm();
       toast('On Home');
     } catch (err) {
-      var msg = err && err.message ? err.message : 'Could not put it on Home';
-      if (/row-level security|not allowed|Unauthorized|new row violates/i.test(msg)) {
-        try {
-          var via = await chairSignedPut(plate, frame, mime, title || 'Welcome!', client);
-          if (via) {
-            status('On Home');
-            if (window.tbRefreshMonthFilm) window.tbRefreshMonthFilm();
-            toast('On Home');
-            if (put) put.disabled = false;
-            return;
-          }
-        } catch (eSign) {
-          msg = (eSign && eSign.message) || msg;
-        }
-        msg = chairFromApp() ? 'Could not put it on Home' : 'Sign in here';
-      }
-      status(msg);
+      status((err && err.message) || 'upload failed');
     }
     if (put) put.disabled = false;
   }
