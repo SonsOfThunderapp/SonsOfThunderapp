@@ -30,8 +30,13 @@
     try { if (sessionStorage.getItem('tb_chair_pin') === '1' && onMore()) return true; } catch (e2) {}
     return false;
   }
+  function keepEditTap(t) {
+    if (!t || !t.closest) return false;
+    return !!t.closest('.modal, #tb-chair-pin-sheet, input, textarea, select, button, a, label');
+  }
   function gate(e) {
     if (!editing()) return;
+    if (keepEditTap(e.target)) return;
     e.stopImmediatePropagation();
   }
   document.addEventListener('touchstart', gate, true);
