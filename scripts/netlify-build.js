@@ -4,11 +4,23 @@
    20260826-repair1: apply the exact seat-claim patch to js/app.js at publish if needed.
    20260826-month9: expose getSb + currentUser so THIS MONTH can use the chair session.
    20260827-sdk1: restore a whole homepage if GitHub has a stub, then land local supabase script tag.
-   20260827-legal1: legal row last child of about-container; load more-legal.css. */
+   20260827-legal1: legal row last child of about-container; load more-legal.css.
+   20260827-room1: replace #admin-room-modal with Tonight board; load room-night. */
 const fs = require('fs');
 const { execSync } = require('child_process');
 function loadHtml() {
   return fs.readFileSync('index.html', 'utf8');
+}
+function sliceDiv(html, start) {
+  var i = start, depth = 0;
+  while (i < html.length) {
+    var nxtOpen = html.indexOf('<div', i);
+    var nxtClose = html.indexOf('</div>', i);
+    if (nxtClose === -1) return -1;
+    if (nxtOpen !== -1 && nxtOpen < nxtClose) { depth += 1; i = nxtOpen + 4; }
+    else { depth -= 1; i = nxtClose + 6; if (depth === 0) return i; }
+  }
+  return -1;
 }
 let html = loadHtml();
 if (html.length < 45000 || html.indexOf('</html>') === -1 || html.indexOf("I'M IN") === -1) {
@@ -45,42 +57,41 @@ if (legalOpen !== -1) {
   if (legalClose !== -1) {
     var legalBlock = html.slice(legalOpen, legalClose + 4);
     var without = html.slice(0, legalOpen) + html.slice(legalClose + 4);
-    var toolsClose = without.indexOf('</div>', without.indexOf('class="more-tools"'));
     var lastTools = -1;
     var searchFrom = without.indexOf('<div class="more-tools">');
-    if (searchFrom !== -1) {
-      var depth = 0;
-      var i = searchFrom;
-      while (i < without.length) {
-        var nextOpen = without.indexOf('<div', i);
-        var nextClose = without.indexOf('</div>', i);
-        if (nextClose === -1) break;
-        if (nextOpen !== -1 && nextOpen < nextClose) {
-          depth += 1;
-          i = nextOpen + 4;
-        } else {
-          depth -= 1;
-          if (depth === 0) { lastTools = nextClose; break; }
-          i = nextClose + 6;
-        }
-      }
-    }
+    if (searchFrom !== -1) lastTools = sliceDiv(without, searchFrom);
     if (lastTools !== -1) {
-      html = without.slice(0, lastTools + 6) + '\n            ' + legalBlock.trim() + without.slice(lastTools + 6);
+      html = without.slice(0, lastTools) + '\n            ' + legalBlock.trim() + without.slice(lastTools);
       fs.writeFileSync('index.html', html);
       html = loadHtml();
     }
   }
 }
+if (html.indexOf('class="room-steps"') === -1 && fs.existsSync('.github/room-night-modal.html')) {
+  var roomStart = html.indexOf('<div id="admin-room-modal"');
+  var roomEnd = roomStart === -1 ? -1 : sliceDiv(html, roomStart);
+  if (roomStart !== -1 && roomEnd !== -1) {
+    var neu = fs.readFileSync('.github/room-night-modal.html', 'utf8').replace(/\s+$/, '');
+    html = html.slice(0, roomStart) + neu + html.slice(roomEnd);
+    fs.writeFileSync('index.html', html);
+    html = loadHtml();
+  }
+}
 if (html.length < 50000 || html.indexOf('</html>') === -1 || html.indexOf("I'M IN") === -1) {
-  console.error('REFUSE: homepage broke after legal move (' + html.length + ' bytes).');
+  console.error('REFUSE: homepage broke after room/legal splice (' + html.length + ' bytes).');
   process.exit(1);
 }
 let cfg = fs.readFileSync('js/config.js', 'utf8');
+var cfgDirty = false;
 if (cfg.indexOf("addCss('more-legal.css'") === -1 && cfg.indexOf('function addCss') !== -1) {
   cfg = cfg.replace("addJs('more-legal.js', 'js/more-legal.js');", "addCss('more-legal.css', 'css/more-legal.css');\n    addJs('more-legal.js', 'js/more-legal.js');");
-  fs.writeFileSync('js/config.js', cfg);
+  cfgDirty = true;
 }
+if (cfg.indexOf("addCss('room-night.css'") === -1 && cfg.indexOf('function addCss') !== -1) {
+  cfg = cfg.replace("addJs('more-legal.js', 'js/more-legal.js');", "addJs('more-legal.js', 'js/more-legal.js');\n    addCss('room-night.css', 'css/room-night.css');\n    addJs('room-night.js', 'js/room-night.js');");
+  cfgDirty = true;
+}
+if (cfgDirty) fs.writeFileSync('js/config.js', cfg);
 const app = fs.readFileSync('js/app.js');
 if (app.indexOf('20260826-repair1: no full reload') === -1) {
   if (!fs.existsSync('.github/repair1-app.js.patch')) {
@@ -108,5 +119,5 @@ if (app2.indexOf('window.getSb = getSb') === -1) {
   console.error('REFUSE: window.getSb expose did not land.');
   process.exit(1);
 }
-process.stdout.write('Thunder Board: static publish (' + html.length + ' bytes, homepage whole, app.js ' + app2.length + ', getSb exposed, sdk1 supabase tag, legal1)\n');
+process.stdout.write('Thunder Board: static publish (' + html.length + ' bytes, homepage whole, app.js ' + app2.length + ', getSb exposed, sdk1, legal1, room1)\n');
 process.exit(0);
