@@ -359,7 +359,7 @@
     wrap.id = 'tb-month-sheet';
     wrap.innerHTML =
       '<div class="tb-ms-card">' +
-        '<button type="button" class="tb-ms-x" aria-label="Close">\u00d7</button>' +
+        '<button type="button" class="tb-ms-x" aria-label="Close">×</button>' +
         '<h2>THIS MONTH</h2>' +
         '<div id="tb-month-signin">' +
           '<input id="tb-month-email" type="email" autocomplete="username" value="obietv@gmail.com">' +
@@ -368,7 +368,7 @@
         '<label class="tb-ms-file">CHOOSE CLIP' +
           '<input id="tb-month-file" type="file" accept="video/*" hidden>' +
         '</label>' +
-        '<input id="tb-month-title" type="text" maxlength="48" placeholder="Joel \u00b7 AI Night">' +
+        '<input id="tb-month-title" type="text" maxlength="48" placeholder="Joel · AI Night">' +
         '<button type="button" class="tb-ms-put" id="tb-month-put">PUT IT ON HOME</button>' +
         '<p class="tb-ms-status" id="tb-month-status"></p>' +
       '</div>';
@@ -598,7 +598,7 @@
       var frame = probe.blob;
       var ym = new Date().toISOString().slice(0, 7);
       try {
-        await client.storage.from(bucket()).copy(VPATH, 'theater/archive-' + ym + '.mp4');
+        if (client) await client.storage.from(bucket()).copy(VPATH, 'theater/archive-' + ym + '.mp4');
       } catch (eA) {}
       status('Uploading\u2026');
       if (chair || chairFromApp()) {
