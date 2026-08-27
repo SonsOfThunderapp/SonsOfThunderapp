@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260826-theater4',
+  APP_BUILD: '20260826-bolt1',
   /* Public "who's in" presence — floor so no brother is ever alone on the card.
      seedFloor: deprecated for display count — keep 0. Truthful attendance only.
      anchorName: always listed first (leadership presence). */
@@ -12,12 +12,6 @@ window.TB_CONFIG = {
     openChairCopy: true
   },
 
-  /* HEADER MARK — ETERNAL 2026-08-23. Phone-approved (IMG_7978).
-     White SONS + gold 3D bolt through O + red OF THUNDER.
-     Sticky top of Home / Brothers / Memories / More. z-index 8000.
-     Source: assets/CANONICAL/logo-print-diecut.png → logo@2x/@3x/@4x.
-     NEVER crop, hide, stretch, AI-redraw, or swap this mark.
-     NEVER max-height / overflow:hidden / clip-path on #main-header or #header-logo. */
   HEADER_ANCHOR: {
     eternal: true,
     approved: '2026-08-23',
@@ -29,19 +23,7 @@ window.TB_CONFIG = {
     pages: ['home', 'brothers', 'events', 'about'],
     forbid: ['max-height-cap', 'overflow-hidden-header', 'clip-path-header', 'ai-redraw']
   },
-  /* First-run tour does NOT auto-start. New phone lands in the room.
-     Already finished (thunderTourV42 done) = no nag. More → TAKE THE TOUR remains. */
-  /* I'M IN vault locked 2026-08-21 — live-coal rest, bolt strike, yellow settle,
-     Thunder nod then drift. Sign-in / A2HS wait until the lock lands. */
-  /* ONE-PUSH DEPLOY locked 2026-08-21
-     After every finished piece: commit → push origin main.
-     Netlify auto-publishes https://sonsofthunderboard.com (custom domain on this site). Grok "Publish App" is not the brothers' site. */
   ONE_PUSH_DEPLOY: true,
-  /* WAR ROOM locked 2026-08-21 — WAR-ROOM.md. Eight chairs. Assassin last. */
-  /* QR LAW locked 2026-08-20 — EVERY code in the app (profile, contact modal, Axum).
-     Local integer modules. ECC H. Quiet zone 4 modules. Black on white.
-     No remote QR API. No fuzzy strokes. Short payload (profile = FN + TEL only).
-     Contact QR may keep bolt-for-qr center. paintThunderQr() is the only painter. */
   QR_LAW: {
     engine: 'paintThunderQr',
     ecc: 'H',
@@ -122,18 +104,11 @@ window.TB_CONFIG = {
   },
   INSTALL_EXPLAINER: {
     src: 'assets/install-explainer.mp4',
-    keepAudio: false,  /* a2hs short silent tutorial 20260825 */
+    keepAudio: false,
     loop: true,
     noNativeControls: true
   },
   PUBLIC_ORIGIN: 'https://sonsofthunderboard.com',
-  /* SECURITY MODEL (cyber handoff — not marketing copy)
-     LEADER_PIN = mild client UI gate ONLY. View Source reveals it.
-     It must NEVER authorize push-broadcast, DB writes, or Netlify privileges.
-     Server authority = Supabase session + app_members leader/admin (see push-broadcast.js).
-     LEADER_SMS_PARTS = intentional public leadership contact for sms: deep links — NOT a secret.
-     SUPABASE_ANON_KEY + VAPID_PUBLIC_KEY = browser-expected public material.
-     Service role / XAI / VAPID private = Netlify env only. */
   LEADER_PIN: 'thunder-board-lead',
   LEADER_SMS_PARTS: ['40', '77', '39', '62', '43'],
   SUPABASE_URL: 'https://mnsempcgomukcpofgvlm.supabase.co',
@@ -143,37 +118,27 @@ window.TB_CONFIG = {
   VAPID_PUBLIC_KEY: 'BGRjLCD3QnLBxb2VFNgxpGcJ1Ptxosp8yGq8yiJTGm2YS8OHVYsOhVvCFpmyREbeQsmsq6NaJ42j9yMx19Vl6hE'
 };
 
-/* 20260821-bday2: ghost-wordmark + birthday-honor lock companion */
 (function () {
   try {
     var __tbB = (window.TB_CONFIG && window.TB_CONFIG.APP_BUILD) || '1';
-    if (!document.querySelector('link[href*="chief1-ghost.css"]')) {
+    function addCss(needle, href) {
+      if (document.querySelector('link[href*="' + needle + '"]')) return;
       var l = document.createElement('link');
       l.rel = 'stylesheet';
-      l.href = 'css/chief1-ghost.css?v=' + encodeURIComponent(__tbB);
+      l.href = href + '?v=' + encodeURIComponent(__tbB);
       (document.head || document.documentElement).appendChild(l);
     }
-
-    if (!document.querySelector('link[href*="memories-latest.css"]')) {
-      var m = document.createElement('link');
-      m.rel = 'stylesheet';
-      m.href = 'css/memories-latest.css?v=' + encodeURIComponent(__tbB);
-      (document.head || document.documentElement).appendChild(m);
+    function addJs(needle, src) {
+      if (document.querySelector('script[src*="' + needle + '"]')) return;
+      var s = document.createElement('script');
+      s.src = src + '?v=' + encodeURIComponent(__tbB);
+      s.defer = true;
+      (document.body || document.documentElement).appendChild(s);
     }
-
-    if (!document.querySelector('link[href*="ask-clear.css"]')) {
-      var ac = document.createElement('link');
-      ac.rel = 'stylesheet';
-      ac.href = 'css/ask-clear.css?v=' + encodeURIComponent(__tbB);
-      (document.head || document.documentElement).appendChild(ac);
-    }
-
-    if (!document.querySelector('link[href*="memories-page.css"]')) {
-      var p = document.createElement('link');
-      p.rel = 'stylesheet';
-      p.href = 'css/memories-page.css?v=' + encodeURIComponent(__tbB);
-      (document.head || document.documentElement).appendChild(p);
-    }
+    addCss('chief1-ghost.css', 'css/chief1-ghost.css');
+    addCss('memories-latest.css', 'css/memories-latest.css');
+    addCss('ask-clear.css', 'css/ask-clear.css');
+    addCss('memories-page.css', 'css/memories-page.css');
     var ww = document.querySelector('link[href*="website-wide.css"]');
     var wwHref = 'css/website-wide.css?v=' + encodeURIComponent(__tbB);
     if (!ww) {
@@ -184,185 +149,40 @@ window.TB_CONFIG = {
     } else if ((ww.getAttribute('href') || '').indexOf('v=' + __tbB) === -1) {
       ww.href = wwHref;
     }
-
-    if (!document.querySelector('link[href*="header-mark.css"]')) {
-      var hm = document.createElement('link');
-      hm.rel = 'stylesheet';
-      hm.href = 'css/header-mark.css?v=' + encodeURIComponent(__tbB);
-      (document.head || document.documentElement).appendChild(hm);
-    }
-
-    if (!document.querySelector('link[href*="hangout-tour.css"]')) {
-      var ht = document.createElement('link');
-      ht.rel = 'stylesheet';
-      ht.href = 'css/hangout-tour.css?v=' + encodeURIComponent(__tbB);
-      (document.head || document.documentElement).appendChild(ht);
-    }
-
-    if (!document.querySelector('link[href*="tour-roundtable.css"]')) {
-      var rt = document.createElement('link');
-      rt.rel = 'stylesheet';
-      rt.href = 'css/tour-roundtable.css?v=' + encodeURIComponent(__tbB);
-      (document.head || document.documentElement).appendChild(rt);
-    }
-
+    addCss('header-mark.css', 'css/header-mark.css');
+    addCss('hangout-tour.css', 'css/hangout-tour.css');
+    addCss('tour-roundtable.css', 'css/tour-roundtable.css');
+    addCss('seat-footer.css', 'css/seat-footer.css');
     try {
       var ev = document.querySelector('.nav-item[data-view="events"] span');
       if (ev) ev.textContent = 'Memories';
     } catch (eNav) {}
-
-  } catch (e) {}
-  try {
-    if (!document.querySelector('script[src*="commit-reward.js"]')) {
-      var cr = document.createElement('script');
-      cr.src = 'js/commit-reward.js?v=' + encodeURIComponent(__tbB);
-      cr.defer = true;
-      (document.body || document.documentElement).appendChild(cr);
+    addJs('commit-reward.js', 'js/commit-reward.js');
+    addJs('memories-grid.js', 'js/memories-grid.js');
+    addJs('memories-lead.js', 'js/memories-lead.js');
+    addJs('text-leader-brothers.js', 'js/text-leader-brothers.js');
+    addJs('guest-qr-signin.js', 'js/guest-qr-signin.js');
+    addJs('brothers-chair.js', 'js/brothers-chair.js');
+    addJs('leader-door.js', 'js/leader-door.js');
+    addJs('nav-wire.js', 'js/nav-wire.js');
+    addJs('island-safe.js', 'js/island-safe.js');
+    addJs('tour-kill.js', 'js/tour-kill.js');
+    addJs('tour-first.js', 'js/tour-first.js');
+    addJs('more-legal.js', 'js/more-legal.js');
+    addJs('thunder-ask.js', 'js/thunder-ask.js');
+    addJs('ask-clear.js', 'js/ask-clear.js');
+    addJs('hangout-tour.js', 'js/hangout-tour.js');
+    addCss('home-month-film.css', 'css/home-month-film.css');
+    addCss('theater-month.css', 'css/theater-month.css');
+    addJs('theater-compress.js', 'js/theater-compress.js');
+    addJs('home-month-film.js', 'js/home-month-film.js');
+    addJs('theater-month.js', 'js/theater-month.js');
+    if (!document.querySelector('script[src*="bday-autotext.js"]')) {
+      addJs('bday-autotext.js', 'js/bday-autotext.js');
     }
-    if (!document.querySelector('script[src*="memories-grid.js"]')) {
-      var mg = document.createElement('script');
-      mg.src = 'js/memories-grid.js?v=' + encodeURIComponent(__tbB);
-      mg.defer = true;
-      (document.body || document.documentElement).appendChild(mg);
-    }
-  } catch (eSeed) {}
-  try {
-    if (!document.querySelector('script[src*="memories-lead.js"]')) {
-      var mlc = document.createElement('script');
-      mlc.src = 'js/memories-lead.js?v=' + encodeURIComponent(__tbB);
-      mlc.defer = true;
-      (document.body || document.documentElement).appendChild(mlc);
-    }
-  } catch (eMl) {}
-  try {
-    if (!document.querySelector('script[src*="text-leader-brothers.js"]')) {
-      var tlb = document.createElement('script');
-      tlb.src = 'js/text-leader-brothers.js?v=' + encodeURIComponent(__tbB);
-      tlb.defer = true;
-      (document.body || document.documentElement).appendChild(tlb);
-    }
-  } catch (eTl) {}
-  try {
-    if (!document.querySelector('script[src*="guest-qr-signin.js"]')) {
-      var gq = document.createElement('script');
-      gq.src = 'js/guest-qr-signin.js?v=' + encodeURIComponent(__tbB);
-      gq.defer = true;
-      (document.body || document.documentElement).appendChild(gq);
-    }
-    if (!document.querySelector('script[src*="brothers-chair.js"]')) {
-      var bc = document.createElement('script');
-      bc.src = 'js/brothers-chair.js?v=' + encodeURIComponent(__tbB);
-      bc.defer = true;
-      (document.body || document.documentElement).appendChild(bc);
-    }
-  } catch (eGq) {}
-  try {
-
-    if (!document.querySelector('script[src*="leader-door.js"]')) {
-      var ld = document.createElement('script');
-      ld.src = 'js/leader-door.js?v=' + encodeURIComponent(__tbB);
-      ld.defer = true;
-      (document.body || document.documentElement).appendChild(ld);
-    }
-
-    if (!document.querySelector('script[src*="nav-wire.js"]')) {
-      var nw = document.createElement('script');
-      nw.src = 'js/nav-wire.js?v=' + encodeURIComponent(__tbB);
-      nw.defer = true;
-      (document.body || document.documentElement).appendChild(nw);
-    }
-
-
-    if (!document.querySelector('script[src*="island-safe.js"]')) {
-      var isf = document.createElement('script');
-      isf.src = 'js/island-safe.js?v=' + encodeURIComponent(__tbB);
-      isf.defer = true;
-      (document.head || document.documentElement).appendChild(isf);
-    }
-
-    if (!document.querySelector('script[src*="tour-kill.js"]')) {
-      var tk = document.createElement('script');
-      tk.src = 'js/tour-kill.js?v=' + encodeURIComponent(__tbB);
-      tk.defer = true;
-      (document.body || document.documentElement).appendChild(tk);
-    }
-
-    if (!document.querySelector('script[src*="tour-first.js"]')) {
-      var tf = document.createElement('script');
-      tf.src = 'js/tour-first.js?v=' + encodeURIComponent(__tbB);
-      tf.defer = true;
-      (document.body || document.documentElement).appendChild(tf);
-    }
-
-    if (!document.querySelector('script[src*="more-legal.js"]')) {
-      var ml = document.createElement('script');
-      ml.src = 'js/more-legal.js?v=' + encodeURIComponent(__tbB);
-      ml.defer = true;
-      (document.body || document.documentElement).appendChild(ml);
-    }
-
-    if (!document.querySelector('script[src*="thunder-ask.js"]')) {
-      var ta = document.createElement('script');
-      ta.src = 'js/thunder-ask.js?v=' + encodeURIComponent(__tbB);
-      ta.defer = true;
-      (document.body || document.documentElement).appendChild(ta);
-    }
-
-    if (!document.querySelector('script[src*="ask-clear.js"]')) {
-      var aj = document.createElement('script');
-      aj.src = 'js/ask-clear.js?v=' + encodeURIComponent(__tbB);
-      aj.defer = true;
-      (document.body || document.documentElement).appendChild(aj);
-    }
-
-
-    if (!document.querySelector('script[src*="hangout-tour.js"]')) {
-      var htj = document.createElement('script');
-      htj.src = 'js/hangout-tour.js?v=' + encodeURIComponent(__tbB);
-      htj.defer = true;
-      (document.body || document.documentElement).appendChild(htj);
-    }
-    if (!document.querySelector('link[href*="home-month-film.css"]')) {
-      var hmfc = document.createElement('link');
-      hmfc.rel = 'stylesheet';
-      hmfc.href = 'css/home-month-film.css?v=' + encodeURIComponent(__tbB);
-      (document.head || document.documentElement).appendChild(hmfc);
-    }
-    if (!document.querySelector('link[href*="theater-month.css"]')) {
-      var tmcss = document.createElement('link');
-      tmcss.rel = 'stylesheet';
-      tmcss.href = 'css/theater-month.css?v=' + encodeURIComponent(__tbB);
-      (document.head || document.documentElement).appendChild(tmcss);
-    }
-    if (!document.querySelector('script[src*="theater-compress.js"]')) {
-      var tcj = document.createElement('script');
-      tcj.src = 'js/theater-compress.js?v=' + encodeURIComponent(__tbB);
-      tcj.defer = true;
-      (document.body || document.documentElement).appendChild(tcj);
-    }
-    if (!document.querySelector('script[src*="home-month-film.js"]')) {
-      var hmj = document.createElement('script');
-      hmj.src = 'js/home-month-film.js?v=' + encodeURIComponent(__tbB);
-      hmj.defer = true;
-      (document.body || document.documentElement).appendChild(hmj);
-    }
-    if (!document.querySelector('script[src*="theater-month.js"]')) {
-      var tmj = document.createElement('script');
-      tmj.src = 'js/theater-month.js?v=' + encodeURIComponent(__tbB);
-      tmj.defer = true;
-      (document.body || document.documentElement).appendChild(tmj);
-    }
-
-    if (document.querySelector('script[src*="bday-autotext.js"]')) return;
-
-    var s = document.createElement('script');
-    s.src = 'js/bday-autotext.js?v=' + encodeURIComponent(__tbB);
-    s.defer = true;
-    (document.body || document.documentElement).appendChild(s);
   } catch (e2) {}
 })();
 
-/* 20260823-auto1: old Home Screen copies fetch live build on open and retarget extras. */
 (function () {
   var here = (window.TB_CONFIG && window.TB_CONFIG.APP_BUILD) || '';
   try {
