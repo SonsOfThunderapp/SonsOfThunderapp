@@ -27,6 +27,16 @@ function cutButton(html, id) {
   if (start === -1 || end === -1) return html;
   return html.slice(0, start) + html.slice(end + 9);
 }
+function cutAllButtons(html, id) {
+  var guard = 0;
+  while (html.indexOf('id="' + id + '"') !== -1 && guard < 8) {
+    var next = cutButton(html, id);
+    if (next === html) break;
+    html = next;
+    guard += 1;
+  }
+  return html;
+}
 let html = loadHtml();
 if (html.length < 45000 || html.indexOf('</html>') === -1 || html.indexOf("I'M IN") === -1) {
   console.warn('index.html is a stub (' + html.length + ' bytes). Restoring from live.');
@@ -108,33 +118,13 @@ if (fs.existsSync('.github/axum-drop-card.html')) {
     }
   }
 }
-var nm = html.indexOf('class="next-meeting');
-if (nm !== -1) {
-  var nmEnd = sliceDiv(html, nm);
-  if (nmEnd !== -1) {
-    var chunk = html.slice(nm, nmEnd);
-    if (chunk.indexOf('id="text-leader-btn"') !== -1) {
-      var bi = chunk.indexOf('id="text-leader-btn"');
-      var bs = chunk.lastIndexOf('<button', bi);
-      var be = chunk.indexOf('</button>', bi);
-      if (bs !== -1 && be !== -1) {
-        chunk = chunk.slice(0, bs) + chunk.slice(be + 9);
-        html = html.slice(0, nm) + chunk + html.slice(nmEnd);
-        fs.writeFileSync('index.html', html);
-        html = loadHtml();
-      }
-    }
-  }
-}
-if (html.indexOf('id="view-brothers"') !== -1) {
-  var vg = html.indexOf('id="brothers-grid"');
-  var afterGrid = vg === -1 ? -1 : sliceDiv(html, vg);
-  var vb = html.indexOf('id="view-brothers"');
-  var vbEnd = vb === -1 ? -1 : html.indexOf('</section>', vb);
-  var brothersSlice = (vb !== -1 && vbEnd !== -1) ? html.slice(vb, vbEnd) : '';
-  if (afterGrid !== -1 && brothersSlice.indexOf('id="text-leader-btn"') === -1) {
-    var insertBtn = '\n          <button type="button" id="text-leader-btn" class="btn-text-leader">TEXT A LEADER</button>';
-    html = html.slice(0, afterGrid) + insertBtn + html.slice(afterGrid);
+html = cutAllButtons(html, 'text-leader-btn');
+var vg = html.indexOf('id="brothers-grid"');
+if (vg !== -1) {
+  var vgStart = html.lastIndexOf('<div', vg);
+  var afterGrid = sliceDiv(html, vgStart);
+  if (afterGrid !== -1) {
+    html = html.slice(0, afterGrid) + '\n          <button type="button" id="text-leader-btn" class="btn-text-leader">TEXT A LEADER</button>' + html.slice(afterGrid);
     fs.writeFileSync('index.html', html);
     html = loadHtml();
   }
@@ -161,6 +151,19 @@ if (html.indexOf('id="who-we-are-kicker"') === -1) {
       html = loadHtml();
     }
   }
+}
+var homeView = html.indexOf('id="view-home"');
+var brosView = html.indexOf('id="view-brothers"');
+var homeChunk = (homeView !== -1 && brosView !== -1) ? html.slice(homeView, brosView) : '';
+if (homeChunk.indexOf('id="text-leader-btn"') !== -1) {
+  console.error('REFUSE: text-leader still on Home');
+  process.exit(1);
+}
+var brosEnd = brosView === -1 ? -1 : html.indexOf('</section>', brosView);
+var brosChunk = (brosView !== -1 && brosEnd !== -1) ? html.slice(brosView, brosEnd) : '';
+if (brosChunk.indexOf('id="text-leader-btn"') === -1) {
+  console.error('REFUSE: text-leader missing on Brothers');
+  process.exit(1);
 }
 if (html.length < 50000 || html.indexOf('</html>') === -1 || html.indexOf("I'M IN") === -1) {
   console.error('REFUSE: homepage broke after lump splice (' + html.length + ' bytes).');
