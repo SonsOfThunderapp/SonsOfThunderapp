@@ -23,20 +23,14 @@
   }
 
   function isOwnCard(card) {
-    if (!card) return false;
+    if (!card || !signedIn()) return false;
     var idx = parseInt(card.getAttribute('data-brother-index'), 10);
     var list = brothers();
     var b = list[idx];
     if (!b) return false;
     var id = myId();
     if (id && b.id && String(b.id) === String(id)) return true;
-    var name = String(b.name || '').trim().toLowerCase();
-    try {
-      var who = $('auth-who');
-      var w = who ? String(who.textContent || '').trim().toLowerCase() : '';
-      if (w && name && (name === w || name.indexOf(w) === 0 || w.indexOf(name) === 0)) return true;
-    } catch (e) {}
-    return !!(name && (name === 'obie' || name === 'obie diaz') && signedIn());
+    return false;
   }
 
   function ensureStyle() {
@@ -71,18 +65,7 @@
   }
 
   function openOwnEdit(ev) {
-    var card = ev.target && ev.target.closest && ev.target.closest('.brother-card[data-brother-index]');
-    if (!card) return;
-    if (!isOwnCard(card)) return;
-    ev.preventDefault();
-    ev.stopImmediatePropagation();
-    try {
-      if (typeof window.startMemberSignIn === 'function') window.startMemberSignIn();
-      else {
-        var edit = $('edit-profile-btn');
-        if (edit) edit.click();
-      }
-    } catch (e) {}
+    /* Card opens. EDIT MY SEAT lives on the profile sheet. */
   }
 
   function showChairTools() {
