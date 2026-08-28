@@ -1,4 +1,4 @@
-/* 20260827-seat-lock */
+/* 20260827-seat-forgot */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
