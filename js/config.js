@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260828-paint-calm',
+  APP_BUILD: '20260828-refresh-lock',
   RSVP_PRESENCE: {
     publicOnHome: true,
     seedFloor: 0,
@@ -227,8 +227,13 @@ if (!window.supabase || !window.supabase.createClient) {
       return r.ok ? r.json() : null;
     }).then(function (j) {
       if (!j || !here) return;
-      if (String(j.APP_BUILD || '') === String(here)) return;
-      try { sessionStorage.setItem('tb_reloading', String(j.APP_BUILD)); } catch (e0) {}
+      var live = String(j.APP_BUILD || '');
+      if (!live || live === String(here)) return;
+      try {
+        if (sessionStorage.getItem('tb_reloading') === live) return;
+        if (sessionStorage.getItem('tb_fleet_done') === live) return;
+      } catch (eL) {}
+      try { sessionStorage.setItem('tb_reloading', live); } catch (e0) {}
       try { location.reload(); } catch (e1) {}
     }).catch(function () {});
   } catch (e2) {}
