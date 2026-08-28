@@ -1,0 +1,15 @@
+#main-header .logo-bolt-life,
+#main-header img[src*="logo@2x"],
+header#main-header img.logo-bolt-life {
+  display: none !important;
+}
+#tb-tour:not(.tb-tour-open) img,
+#tb-tour[hidden] img,
+#tb-tour.hidden img {
+  display: none !important;
+}
+#tb-month-film video,
+#home-film video,
+video.tb-month-video {
+  background: #000;
+}
