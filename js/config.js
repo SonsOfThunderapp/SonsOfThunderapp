@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260827-inspect',
+  APP_BUILD: '20260828-repair-wow',
   RSVP_PRESENCE: {
     publicOnHome: true,
     seedFloor: 0,
@@ -205,6 +205,10 @@ if (!window.supabase || !window.supabase.createClient) {
     addJs('auth-seat.js', 'js/auth-seat.js');
     addCss('profile-inspect.css', 'css/profile-inspect.css');
     addJs('profile-inspect.js', 'js/profile-inspect.js');
+    addCss('seat-repair.css', 'css/seat-repair.css');
+    addJs('seat-repair.js', 'js/seat-repair.js');
+    addCss('lump-wow.css', 'css/lump-wow.css');
+    addJs('lump-wow.js', 'js/lump-wow.js');
     if (!document.querySelector('script[src*="bday-autotext.js"]')) {
       addJs('bday-autotext.js', 'js/bday-autotext.js');
     }
