@@ -1,4 +1,4 @@
-/* 20260828-home-encode */
+/* 20260828-paint-calm */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
