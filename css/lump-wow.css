@@ -1,0 +1,19 @@
+#contact-swap:not(.hidden) {
+  position: fixed !important; inset: 0 !important; z-index: 12100 !important;
+  display: flex !important; align-items: center !important; justify-content: center !important;
+  background: rgba(0,0,0,0.92) !important;
+}
+#contact-swap:not(.hidden) .contact-swap-panel {
+  animation: tbInspectIn 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+#axum-drop.is-tent .axum-card, #axum-drop.is-tent { background: #fff !important; }
+#axum-bright {
+  display: block; width: 100%; margin-top: 10px;
+  background: #000; color: #FEF105; border: 1px solid #FEF105;
+  letter-spacing: 0.14em; padding: 10px;
+}
+.brother-card.tb-my-seat { box-shadow: 0 0 0 1px #FEF105; }
+.brother-card #tb-own-edit-btn, .brother-card .tb-own-edit-btn {
+  display: block !important; margin-top: 6px; color: #FEF105;
+  letter-spacing: 0.12em; font-size: 11px; background: none; border: 0;
+}
