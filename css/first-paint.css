@@ -13,3 +13,13 @@ header#main-header img.logo-bolt-life {
 video.tb-month-video {
   background: #000;
 }
+#splash,
+#splash.splash,
+#splash.hidden,
+#splash.splash-done,
+#splash.splash-out {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
