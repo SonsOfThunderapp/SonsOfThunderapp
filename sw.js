@@ -1,4 +1,4 @@
-/* 20260828-chair-mem */
+/* 20260828-wake */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
