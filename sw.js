@@ -1,4 +1,4 @@
-/* 20260828-repair-wow */
+/* 20260828-ghost-kill */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
