@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* Thunder Board is a static PWA. Netlify must not run a real compile.
    Never-white: refuse to publish if index.html was cut off.
-   20260826-repair1 / month9 / sdk1 / legal1 / room1 / axum2 / seat-lock. */
+   20260826-repair1 / month9 / sdk1 / legal1 / room1 / axum2 / seat-lock / refresh-bust. */
 const fs = require('fs');
 const { execSync } = require('child_process');
 function loadHtml() {
@@ -179,6 +179,15 @@ if (brosChunk.indexOf('id="text-leader-btn"') === -1) {
   console.error('REFUSE: text-leader missing on Brothers');
   process.exit(1);
 }
+var stamp = '1';
+try {
+  var bj = JSON.parse(fs.readFileSync('build.json', 'utf8'));
+  if (bj && bj.APP_BUILD) stamp = String(bj.APP_BUILD);
+} catch (eStamp) {}
+html = html.replace(/\/js\/config\.js\?v=[^"'>\s]+/g, '/js/config.js?v=' + stamp);
+html = html.replace(/\/js\/app\.js\?v=[^"'>\s]+/g, '/js/app.js?v=' + stamp);
+fs.writeFileSync('index.html', html);
+html = loadHtml();
 if (html.length < 50000 || html.indexOf('</html>') === -1 || html.indexOf("I'M IN") === -1) {
   console.error('REFUSE: homepage broke after lump splice (' + html.length + ' bytes).');
   process.exit(1);
