@@ -1,4 +1,4 @@
-/* 20260828-refresh-own */
+/* 20260828-open-calm */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
