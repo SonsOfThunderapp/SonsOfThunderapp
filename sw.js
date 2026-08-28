@@ -1,4 +1,4 @@
-/* 20260828-wake */
+/* 20260828-first-paint */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
