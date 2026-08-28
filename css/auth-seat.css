@@ -8,5 +8,23 @@
   color: #fff;
   border: 1px solid #333;
 }
-#auth-gate #auth-magic-btn,
-#auth-gate #auth-forgot-btn { display: none !important; }
+#auth-gate #auth-magic-btn { display: none !important; }
+#auth-gate #auth-forgot-btn {
+  display: inline-block !important;
+  visibility: visible !important;
+  margin-top: 8px;
+  background: none;
+  border: 0;
+  color: #FEF105;
+  letter-spacing: 0.12em;
+}
+#auth-gate #auth-reset-code {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px 14px;
+  background: #111;
+  color: #FEF105;
+  border: 1px solid #FEF105;
+  letter-spacing: 0.28em;
+}
