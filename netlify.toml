@@ -43,6 +43,16 @@
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
+[[headers]]
+  for = "/js/config.js"
+  [headers.values]
+    Cache-Control = "no-store"
+
+[[headers]]
+  for = "/js/app.js"
+  [headers.values]
+    Cache-Control = "no-store"
+
 # Service worker must revalidate
 [[headers]]
   for = "/sw.js"
@@ -52,4 +62,9 @@
 [[headers]]
   for = "/index.html"
   [headers.values]
-    Cache-Control = "public, max-age=0, must-revalidate"
+    Cache-Control = "no-store"
+
+[[headers]]
+  for = "/"
+  [headers.values]
+    Cache-Control = "no-store"
