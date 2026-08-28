@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260828-open-html',
+  APP_BUILD: '20260828-glass-up',
   RSVP_PRESENCE: {
     publicOnHome: true,
     seedFloor: 0,
