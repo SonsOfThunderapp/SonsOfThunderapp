@@ -170,11 +170,17 @@
     if (!tile) return;
     await pullRow();
     paintTile();
-    loadTheater(function () {
-      if (window.ThunderTheater) {
-        window.ThunderTheater.ensure();
+    if (tile.dataset.tbFilmArm === '1') return;
+    tile.dataset.tbFilmArm = '1';
+    tile.addEventListener('click', function (ev) {
+      if (tile.__tbTheaterBound) return;
+      ev.preventDefault();
+      ev.stopPropagation();
+      loadTheater(function () {
+        if (!window.ThunderTheater) return;
         window.ThunderTheater.bindTile(tile, film);
-      }
+        try { window.ThunderTheater.open(film()); } catch (eO) {}
+      });
     });
   }
 
