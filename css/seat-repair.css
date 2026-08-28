@@ -24,3 +24,13 @@ body.tb-seated #auth-entry-btn,
 }
 #auth-gate #auth-forgot-btn { display: inline-block !important; }
 .brother-card.tb-ghost-hide { display: none !important; }
+#view-brothers #edit-profile-btn.tb-header-edit-off { display: none !important; }
+#thunder-fab.thunder-fab {
+  right: -6px !important;
+  bottom: calc(72px + var(--safe-bottom, env(safe-area-inset-bottom, 0px))) !important;
+  width: 60px !important;
+  height: 60px !important;
+  z-index: 150 !important;
+  pointer-events: auto !important;
+}
+#thunder-fab .thunder-fab-img { width: 56px !important; height: 56px !important; }
