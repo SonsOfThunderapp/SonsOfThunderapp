@@ -1,4 +1,4 @@
-/* 20260828-home-visible */
+/* 20260828-open-light */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
