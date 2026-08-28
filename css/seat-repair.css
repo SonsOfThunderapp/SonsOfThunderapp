@@ -1,0 +1,26 @@
+#auth-session-bar:not(.hidden) ~ #auth-entry-btn,
+body.tb-seated #auth-entry-btn,
+#auth-entry-btn.tb-seated-hide { display: none !important; }
+#auth-gate:not(.hidden) {
+  position: fixed !important; inset: 0 !important; z-index: 12000 !important;
+  display: flex !important; align-items: stretch !important;
+  background: #000 !important; overflow: hidden !important;
+}
+#auth-gate .auth-card {
+  width: 100% !important; height: 100% !important; max-height: 100dvh !important;
+  margin: 0 !important; border-radius: 0 !important; overflow: hidden !important;
+  padding: max(14px, env(safe-area-inset-top)) 18px calc(16px + env(safe-area-inset-bottom)) !important;
+  display: flex !important; flex-direction: column !important; justify-content: center !important;
+  background: #000 !important;
+}
+#auth-gate .auth-field { margin: 0 0 8px !important; }
+#auth-gate .auth-field input, #auth-gate #auth-password, #auth-gate #auth-reset-code {
+  width: 100% !important; box-sizing: border-box !important;
+  padding: 11px 12px !important; font-size: 16px !important;
+}
+#auth-gate .auth-link-row {
+  display: flex !important; justify-content: space-between !important;
+  align-items: center !important; margin-top: 10px !important;
+}
+#auth-gate #auth-forgot-btn { display: inline-block !important; }
+.brother-card.tb-ghost-hide { display: none !important; }
