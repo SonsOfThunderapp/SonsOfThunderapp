@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260827-seat-forgot',
+  APP_BUILD: '20260827-inspect',
   RSVP_PRESENCE: {
     publicOnHome: true,
     seedFloor: 0,
@@ -203,6 +203,8 @@ if (!window.supabase || !window.supabase.createClient) {
     addJs('theater-month.js', 'js/theater-month.js');
     addCss('auth-seat.css', 'css/auth-seat.css');
     addJs('auth-seat.js', 'js/auth-seat.js');
+    addCss('profile-inspect.css', 'css/profile-inspect.css');
+    addJs('profile-inspect.js', 'js/profile-inspect.js');
     if (!document.querySelector('script[src*="bday-autotext.js"]')) {
       addJs('bday-autotext.js', 'js/bday-autotext.js');
     }
