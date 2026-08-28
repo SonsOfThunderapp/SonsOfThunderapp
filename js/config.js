@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260828-refresh-own',
+  APP_BUILD: '20260828-open-calm',
   RSVP_PRESENCE: {
     publicOnHome: true,
     seedFloor: 0,
@@ -115,7 +115,10 @@ window.TB_CONFIG = {
 };
 
 if (!window.supabase || !window.supabase.createClient) {
-  document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"><\/script>');
+  var sb = document.createElement('script');
+  sb.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js';
+  sb.async = false;
+  (document.head || document.documentElement).appendChild(sb);
 }
 
 (function () {
@@ -135,6 +138,21 @@ if (!window.supabase || !window.supabase.createClient) {
       s.defer = true;
       (document.body || document.documentElement).appendChild(s);
     }
+    function addPaint(hrefCss, srcJs) {
+      if (!document.querySelector('link[href*="first-paint.css"]')) {
+        var l = document.createElement('link');
+        l.rel = 'stylesheet';
+        l.href = hrefCss + '?v=' + encodeURIComponent(__tbB);
+        (document.head || document.documentElement).appendChild(l);
+      }
+      if (!document.querySelector('script[src*="first-paint.js"]')) {
+        var s = document.createElement('script');
+        s.src = srcJs + '?v=' + encodeURIComponent(__tbB);
+        s.defer = false;
+        (document.head || document.documentElement).appendChild(s);
+      }
+    }
+    addPaint('css/first-paint.css', 'js/first-paint.js');
     addCss('chief1-ghost.css', 'css/chief1-ghost.css');
     addCss('memories-latest.css', 'css/memories-latest.css');
     addCss('ask-clear.css', 'css/ask-clear.css');
