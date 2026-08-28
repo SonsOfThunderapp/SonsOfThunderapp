@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260828-home-visible',
+  APP_BUILD: '20260828-open-light',
   RSVP_PRESENCE: {
     publicOnHome: true,
     seedFloor: 0,
@@ -153,6 +153,9 @@ if (!window.supabase || !window.supabase.createClient) {
       }
     }
     addPaint('css/first-paint.css', 'js/first-paint.js');
+    function laterSidecars() {
+      if (window.__tbSidecars) return;
+      window.__tbSidecars = 1;
     addCss('chief1-ghost.css', 'css/chief1-ghost.css');
     addCss('memories-latest.css', 'css/memories-latest.css');
     addCss('ask-clear.css', 'css/ask-clear.css');
@@ -230,10 +233,11 @@ if (!window.supabase || !window.supabase.createClient) {
     addJs('chair-copy.js', 'js/chair-copy.js');
     addCss('memories-bottom.css', 'css/memories-bottom.css');
     addJs('memories-bottom.js', 'js/memories-bottom.js');
-    addCss('first-paint.css', 'css/first-paint.css');
-    addJs('first-paint.js', 'js/first-paint.js');
     if (!document.querySelector('script[src*="bday-autotext.js"]')) {
       addJs('bday-autotext.js', 'js/bday-autotext.js');
     }
+    }
+    if (window.requestIdleCallback) window.requestIdleCallback(laterSidecars, { timeout: 2500 });
+    else setTimeout(laterSidecars, 1500);
   } catch (e2) {}
 })();
