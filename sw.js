@@ -1,4 +1,4 @@
-/* 20260827-lump-wake */
+/* 20260827-seat-lock */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
