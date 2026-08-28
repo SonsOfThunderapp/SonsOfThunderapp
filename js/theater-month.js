@@ -113,7 +113,7 @@
             if (!c) { resolve(); return; }
             try {
               if (isTbAuthKey(c.key) && c.value != null && !localStorage.getItem(c.key)) {
-                localStorage.setItem(c.key, typeof c.value === 'string' ? c.value : String(c.value));
+                localStorage.setItem(c.key, typeof c.value === 'string' ? c.value === 'string' ? c.value : String(c.value) : String(c.value));
               }
             } catch (e2) {}
             c.continue();
@@ -450,7 +450,7 @@
 
 
   async function putOnHome() {
-    status('Working\u2026');
+    status('Working…');
     var put = document.getElementById('tb-month-put');
     if (!picked) { status('Choose a clip first'); return; }
     if (picked.size > RAW_MAX) {
@@ -475,7 +475,7 @@
       var email = ((document.getElementById('tb-month-email') || {}).value || 'obietv@gmail.com').trim();
       var pass = (document.getElementById('tb-month-pass') || {}).value || '';
       if (client && email && pass) {
-        status('Signing in\u2026');
+        status('Signing in…');
         try {
           var signed = await client.auth.signInWithPassword({ email: email, password: pass });
           if (signed.error) throw new Error(signed.error.message || 'Sign in here');
@@ -505,7 +505,19 @@
       return;
     }
     var title = ((document.getElementById('tb-month-title') || {}).value || '').trim() || 'Welcome!';
-    status('Reading the clip\u2026');
+    status('Encoding for Home…');
+    try {
+      var cook = window.tbEncodeHomePlate || window.tbCookTheaterPlate;
+      if (typeof cook === 'function') {
+        var plate = await cook(picked, status);
+        if (plate) picked = (plate instanceof File) ? plate : new File([plate], 'current.mp4', { type: 'video/mp4' });
+      }
+    } catch (eEnc) {
+      status((eEnc && eEnc.message) || 'Drop this clip in the kitchen.');
+      if (put) put.disabled = false;
+      return;
+    }
+    status('Reading the clip…');
     try {
       var buf = await picked.arrayBuffer();
       if (!buf || !buf.byteLength) {
@@ -540,7 +552,7 @@
       try {
         await client.storage.from(bucket()).copy(VPATH, 'theater/archive-' + stamp + '.mp4');
       } catch (eA) {}
-      status('Uploading\u2026');
+      status('Uploading…');
       async function putObject(path, file, type) {
         var up = await client.storage.from(bucket()).upload(path, file, {
           contentType: type,
