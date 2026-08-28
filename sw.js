@@ -1,4 +1,4 @@
-/* 20260827-inspect */
+/* 20260828-repair-wow */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
