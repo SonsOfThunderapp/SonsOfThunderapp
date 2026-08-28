@@ -1,0 +1,43 @@
+#brother-detail:not(.hidden) .brother-detail-panel {
+  animation: tbInspectIn 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes tbInspectIn {
+  0% { opacity: 0; transform: scale(1.08); filter: brightness(1.35); }
+  100% { opacity: 1; transform: scale(1); filter: none; }
+}
+#brother-detail:not(.hidden) #brother-qr-wrap {
+  display: block !important;
+  margin: 18px auto 8px;
+  text-align: center;
+}
+#brother-detail:not(.hidden) #brother-qr-wrap .qr-stage-inline {
+  width: 220px;
+  height: 220px;
+  margin: 0 auto;
+  animation: tbQrHit 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both;
+}
+@keyframes tbQrHit {
+  0% { opacity: 0; transform: scale(0.86); filter: brightness(2); }
+  100% { opacity: 1; transform: scale(1); filter: none; }
+}
+#brother-detail:not(.hidden) #brother-qr-wrap .qr-bolt-pad {
+  width: 40px !important;
+  height: 40px !important;
+  background: #000;
+  border: 2px solid #FEF105;
+}
+#brother-detail:not(.hidden) #brother-qr-wrap .qr-label {
+  color: #FEF105;
+  letter-spacing: 0.16em;
+}
+.brother-card .tb-card-meta {
+  color: #FEF105;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin: 4px 0 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  #brother-detail:not(.hidden) .brother-detail-panel,
+  #brother-detail:not(.hidden) #brother-qr-wrap .qr-stage-inline { animation: none; }
+}
