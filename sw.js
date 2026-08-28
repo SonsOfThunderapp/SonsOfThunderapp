@@ -1,4 +1,4 @@
-/* 20260828-open-html */
+/* 20260828-glass-up */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
