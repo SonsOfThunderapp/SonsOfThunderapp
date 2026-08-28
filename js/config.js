@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260828-own-slide',
+  APP_BUILD: '20260828-chair-mem',
   RSVP_PRESENCE: {
     publicOnHome: true,
     seedFloor: 0,
@@ -209,6 +209,9 @@ if (!window.supabase || !window.supabase.createClient) {
     addJs('seat-repair.js', 'js/seat-repair.js');
     addCss('lump-wow.css', 'css/lump-wow.css');
     addJs('lump-wow.js', 'js/lump-wow.js');
+    addJs('chair-copy.js', 'js/chair-copy.js');
+    addCss('memories-bottom.css', 'css/memories-bottom.css');
+    addJs('memories-bottom.js', 'js/memories-bottom.js');
     if (!document.querySelector('script[src*="bday-autotext.js"]')) {
       addJs('bday-autotext.js', 'js/bday-autotext.js');
     }
