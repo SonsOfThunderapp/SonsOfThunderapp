@@ -23,3 +23,10 @@ video.tb-month-video {
   opacity: 0 !important;
   pointer-events: none !important;
 }
+#splash { display: none !important; visibility: hidden !important; pointer-events: none !important; }
+#main-header, #header-logo { display: block !important; visibility: visible !important; }
+#view-home, #view-home.view, #view-home.view.active {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
