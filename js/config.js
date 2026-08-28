@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260827-seat-lock',
+  APP_BUILD: '20260827-seat-forgot',
   RSVP_PRESENCE: {
     publicOnHome: true,
     seedFloor: 0,
@@ -176,7 +176,17 @@ if (!window.supabase || !window.supabase.createClient) {
     addJs('island-safe.js', 'js/island-safe.js');
     addJs('tour-kill.js', 'js/tour-kill.js');
     addJs('tour-first.js', 'js/tour-first.js');
+    addCss('more-legal.css', 'css/more-legal.css');
     addJs('more-legal.js', 'js/more-legal.js');
+    addCss('room-night.css', 'css/room-night.css');
+    addJs('room-night.js', 'js/room-night.js');
+    addJs('axum-wire.js', 'js/axum-wire.js');
+    addCss('axum-loot.css', 'css/axum-loot.css');
+    addCss('brothers-seat.css', 'css/brothers-seat.css');
+    addCss('memories-tight.css', 'css/memories-tight.css');
+    addCss('code-tight.css', 'css/code-tight.css');
+    addJs('code-tight.js', 'js/code-tight.js');
+    addCss('text-leader-brothers.css', 'css/text-leader-brothers.css');
     addJs('more-alias.js', 'js/more-alias.js');
     addJs('chair-no-swipe.js', 'js/chair-no-swipe.js');
     addJs('ann-keep.js', 'js/ann-keep.js');
