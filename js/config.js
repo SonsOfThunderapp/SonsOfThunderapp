@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260828-refresh-lock',
+  APP_BUILD: '20260828-refresh-own',
   RSVP_PRESENCE: {
     publicOnHome: true,
     seedFloor: 0,
@@ -217,24 +217,5 @@ if (!window.supabase || !window.supabase.createClient) {
     if (!document.querySelector('script[src*="bday-autotext.js"]')) {
       addJs('bday-autotext.js', 'js/bday-autotext.js');
     }
-  } catch (e2) {}
-})();
-
-(function () {
-  var here = (window.TB_CONFIG && window.TB_CONFIG.APP_BUILD) || '';
-  try {
-    fetch('build.json?_=' + Date.now(), { cache: 'no-store' }).then(function (r) {
-      return r.ok ? r.json() : null;
-    }).then(function (j) {
-      if (!j || !here) return;
-      var live = String(j.APP_BUILD || '');
-      if (!live || live === String(here)) return;
-      try {
-        if (sessionStorage.getItem('tb_reloading') === live) return;
-        if (sessionStorage.getItem('tb_fleet_done') === live) return;
-      } catch (eL) {}
-      try { sessionStorage.setItem('tb_reloading', live); } catch (e0) {}
-      try { location.reload(); } catch (e1) {}
-    }).catch(function () {});
   } catch (e2) {}
 })();
