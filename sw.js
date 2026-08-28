@@ -1,4 +1,4 @@
-/* 20260828-own-slide */
+/* 20260828-chair-mem */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
