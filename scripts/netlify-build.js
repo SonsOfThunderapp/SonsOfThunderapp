@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* Thunder Board is a static PWA. Netlify must not run a real compile.
    Never-white: refuse to publish if index.html was cut off.
-   20260826-repair1 / month9 / sdk1 / legal1 / room1 / axum2 lump. */
+   20260826-repair1 / month9 / sdk1 / legal1 / room1 / axum2 / seat-lock. */
 const fs = require('fs');
 const { execSync } = require('child_process');
 function loadHtml() {
@@ -36,6 +36,15 @@ function cutAllButtons(html, id) {
     guard += 1;
   }
   return html;
+}
+function replaceInputById(html, id, neu) {
+  var needle = 'id="' + id + '"';
+  var i = html.indexOf(needle);
+  if (i === -1) return html;
+  var start = html.lastIndexOf('<input', i);
+  var end = html.indexOf('>', i);
+  if (start === -1 || end === -1) return html;
+  return html.slice(0, start) + neu + html.slice(end + 1);
 }
 let html = loadHtml();
 if (html.length < 45000 || html.indexOf('</html>') === -1 || html.indexOf("I'M IN") === -1) {
@@ -152,6 +161,11 @@ if (html.indexOf('id="who-we-are-kicker"') === -1) {
     }
   }
 }
+html = replaceInputById(html, 'auth-password', '<input type="password" id="auth-password" name="password" placeholder="Password" autocomplete="new-password" />');
+html = replaceInputById(html, 'auth-email', '<input type="email" id="auth-email" name="email" placeholder="Email" autocomplete="username" inputmode="email" required />');
+html = replaceInputById(html, 'auth-phone', '<input type="tel" id="auth-phone" name="tel" placeholder="Phone" autocomplete="tel" inputmode="tel" maxlength="20" />');
+fs.writeFileSync('index.html', html);
+html = loadHtml();
 var homeView = html.indexOf('id="view-home"');
 var brosView = html.indexOf('id="view-brothers"');
 var homeChunk = (homeView !== -1 && brosView !== -1) ? html.slice(homeView, brosView) : '';
@@ -209,6 +223,8 @@ ensureLine("addCss('brothers-seat.css'", "addCss('axum-loot.css', 'css/axum-loot
 ensureLine("addCss('memories-tight.css'", "addCss('brothers-seat.css', 'css/brothers-seat.css');", "addCss('memories-tight.css', 'css/memories-tight.css');");
 ensureLine("addCss('code-tight.css'", "addCss('memories-tight.css', 'css/memories-tight.css');", "addCss('code-tight.css', 'css/code-tight.css');");
 ensureLine("addJs('code-tight.js'", "addCss('code-tight.css', 'css/code-tight.css');", "addJs('code-tight.js', 'js/code-tight.js');");
+ensureLine("addCss('auth-seat.css'", "addJs('theater-month.js', 'js/theater-month.js');", "addCss('auth-seat.css', 'css/auth-seat.css');");
+ensureLine("addJs('auth-seat.js'", "addCss('auth-seat.css', 'css/auth-seat.css');", "addJs('auth-seat.js', 'js/auth-seat.js');");
 if (cfgDirty) fs.writeFileSync('js/config.js', cfg);
 const app = fs.readFileSync('js/app.js');
 if (app.indexOf('20260826-repair1: no full reload') === -1) {
@@ -237,5 +253,5 @@ if (app2.indexOf('window.getSb = getSb') === -1) {
   console.error('REFUSE: window.getSb expose did not land.');
   process.exit(1);
 }
-process.stdout.write('Thunder Board: static publish (' + html.length + ' bytes, homepage whole, app.js ' + app2.length + ', lump axum2)\n');
+process.stdout.write('Thunder Board: static publish (' + html.length + ' bytes, homepage whole, app.js ' + app2.length + ', seat-lock)\n');
 process.exit(0);
