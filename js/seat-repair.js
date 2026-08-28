@@ -57,7 +57,7 @@
     var grid = $('brothers-grid');
     if (grid && grid.dataset.tbRepair !== '1') {
       grid.dataset.tbRepair = '1';
-      new MutationObserver(function () { setTimeout(tick, 50); }).observe(grid, { childList: true, subtree: true });
+      new MutationObserver(function () { tick(); }).observe(grid, { childList: true, subtree: true });
     }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
