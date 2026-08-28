@@ -1,0 +1,12 @@
+#auth-gate #auth-password {
+  display: block !important;
+  visibility: visible !important;
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px 14px;
+  background: #111;
+  color: #fff;
+  border: 1px solid #333;
+}
+#auth-gate #auth-magic-btn,
+#auth-gate #auth-forgot-btn { display: none !important; }
