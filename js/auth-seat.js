@@ -200,6 +200,10 @@
       if (!allowed) throw new Error('Ask a leader for an invite.');
       var inn = await sb.auth.signInWithPassword({ email: email, password: pass });
       if (inn && inn.error) {
+        var raw = String((inn.error && inn.error.message) || '');
+        if (/invalid login|invalid credentials|invalid email or password/i.test(raw)) {
+          throw inn.error;
+        }
         var up = await sb.auth.signUp({
           email: email,
           password: pass,
