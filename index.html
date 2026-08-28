@@ -9,3 +9,159 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Thunder Board" />
   <title>Thunder Board | Sons of Thunder</title>
+  <style>
+    html, body { background: #000 !important; color: #fff; margin: 0; }
+    /* ETERNAL HEADER MARK — phone-approved 2026-08-23. Do not crop, hide, or swap. */
+    #app > #main-header.header, #main-header.header, #main-header {
+      display: block !important; visibility: visible !important; position: sticky !important;
+      top: 0 !important; z-index: 8000 !important; overflow: visible !important;
+      max-height: none !important; height: auto !important; contain: none !important;
+      clip-path: none !important; background: #000 !important;
+      padding: calc(6px + env(safe-area-inset-top, 0px)) 12px 6px !important;
+    }
+    #main-header #header-logo, #main-header.header img.logo {
+      display: block !important; width: min(58vw, 256px) !important; height: auto !important;
+      max-height: none !important; aspect-ratio: 3000 / 2077 !important;
+      object-fit: contain !important; object-position: center top !important;
+    }
+  </style>
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Thunder Board | Sons of Thunder" />
+  <meta property="og:description" content="Thunder doesn’t dull. Put this on your Home Screen." />
+  <link rel="canonical" href="https://sonsofthunderboard.com/" />
+  <meta property="og:url" content="https://sonsofthunderboard.com/" />
+  <meta property="og:image" content="https://sonsofthunderboard.com/assets/og-share.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Thunder Board | Sons of Thunder" />
+  <meta name="twitter:description" content="Thunder doesn’t dull. Put this on your Home Screen." />
+  <meta name="twitter:image" content="https://sonsofthunderboard.com/assets/og-share.jpg" />
+  <meta name="description" content="Sons of Thunder — Thunder doesn’t dull. Private brotherhood board." />
+  
+  <!-- App Icons -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon-v4.png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/icon-192-v4.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/assets/icon-512-v4.png" />
+  
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="/manifest.json" />
+  
+  <link rel="stylesheet" href="/css/styles.css?v=20260826-repair1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <!-- Opening splash (once per session) -->
+  <div id="splash" class="splash" aria-hidden="true">
+    <div class="splash-inner">
+      <div class="splash-logo-wrap">
+        <img src="/assets/logo@2x.png?v=20260826-repair1"
+             srcset="assets/logo@2x.png?v=20260826-repair1 1200w, assets/logo@3x.png?v=20260826-repair1 1800w"
+             sizes="min(82vw, 340px)"
+             alt="Sons of Thunder"
+             class="splash-mark splash-logo"
+             width="1200"
+             height="831" />
+      </div>
+      <p class="splash-line hidden" aria-hidden="true">THUNDER DOESN’T DULL</p>
+    </div>
+  </div>
+  <script>
+    /* Dad lock: opening screen must leave even if app.js never runs. */
+    (function () {
+      function killSplash() {
+        var s = document.getElementById('splash');
+        if (!s) return;
+        s.classList.add('splash-done', 'splash-out', 'hidden');
+        s.style.setProperty('display', 'none', 'important');
+        s.style.setProperty('visibility', 'hidden', 'important');
+        s.style.setProperty('pointer-events', 'none', 'important');
+        s.style.setProperty('opacity', '0', 'important');
+      }
+      setTimeout(killSplash, 200);
+      window.addEventListener('load', function () { setTimeout(killSplash, 200); });
+      killSplash();
+    })();
+  </script>
+
+  <!-- OLD welcome popup and retired product tour physically deleted -->
+
+  <div id="app">
+    <header id="main-header" class="header">
+      <div class="logo-wrap">
+        <img
+          src="/assets/logo@3x.png?v=20260826-repair1"
+          srcset="assets/logo@2x.png?v=20260826-repair1 1200w, assets/logo@3x.png?v=20260826-repair1 1800w, assets/logo@4x.png?v=20260826-repair1 2400w"
+          sizes="(max-width: 480px) 58vw, 256px"
+          alt="Sons of Thunder"
+          class="logo"
+          id="header-logo"
+          width="1200"
+          height="831"
+          decoding="async"
+          fetchpriority="high"
+        />
+      </div>
+    </header>
+    <div id="ptr-indicator" class="ptr-indicator hidden" aria-live="polite" aria-hidden="true">PULL TO REFRESH</div>
+
+
+    <main id="views">
+      <!-- HOME -->
+      <section id="view-home" class="view active">
+        <div class="container">
+          <p class="identity-line">Thunder doesn’t dull</p>
+          <p id="home-personal" class="home-personal hidden" aria-live="polite"></p>
+          <div id="home-a2hs" class="home-a2hs hidden" role="region" aria-label="Add to Home Screen">
+            <p class="home-a2hs-copy">Put Thunder on your Home Screen. That’s how the 7-day ping lands.</p>
+            <div class="home-a2hs-actions">
+              <button type="button" class="home-a2hs-put" id="home-a2hs-put">PUT IT ON</button>
+              <button type="button" class="home-a2hs-later" id="home-a2hs-later">NOT NOW</button>
+            </div>
+          </div>
+
+          <div class="next-meeting card">
+            <div class="card-label" id="meeting-phase-label">NEXT GATHERING</div>
+            <div id="meeting-countdown" class="meeting-countdown">—</div>
+            <div id="meeting-date" class="meeting-date">Calculating…</div>
+            <div class="meeting-time" id="meeting-time">6:30 PM</div>
+            <div class="meeting-loc" id="meeting-loc">Crooked Can Brewery Patio, Winter Garden</div>
+            <p id="rsvp-prompt" class="rsvp-prompt">Your seat is open. Lock it in.</p>
+            <button id="rsvp-btn" class="btn-rsvp">I'M IN</button>
+            <div id="rsvp-status" class="rsvp-status hidden">⚡ YOU'RE LOCKED IN</div>
+            <div id="in-count" class="in-count hidden" aria-live="polite">
+              <div id="in-count-num" class="in-count-num"></div>
+              <div id="in-count-names" class="in-count-names"></div>
+              <div id="open-chair-line" class="open-chair-line hidden"></div>
+            </div>
+            <!-- Who's In: public presence with seed floor (RSVP_PRESENCE). Obie always first. -->
+            <label for="memory-cam" id="drop-shot-btn" class="btn-drop-shot hidden">DROP A PIC</label>
+            <div id="raffle-board" class="raffle-board hidden"></div>
+            <button id="reminder-btn" class="btn-reminder btn-reminder-compact">SET REMINDER</button>
+            <div id="reminder-status" class="reminder-status hidden"></div>
+            
+          </div>
+
+          <button type="button" id="axum-chip" class="axum-chip hidden">FREE AXUM COFFEE</button>
+          <!-- Last Fire: one photo + one line between gatherings -->
+          <div id="last-fire" class="last-fire card hidden" role="button" tabindex="0" aria-label="Tonight">
+            <div class="card-label last-fire-label" id="last-fire-label">TONIGHT</div>
+            <div class="last-fire-media last-fire-strip" id="last-fire-media"></div>
+            <div class="last-fire-cap" id="last-fire-cap"></div>
+          </div>
+
+
+          <div class="section-title" id="announcements-title">Announcements</div>
+          <div id="announcements" class="feed"></div>
+          <!-- Sharpening Iron KILLED permanently — replaced by member sign-in CTA -->
+          <button type="button" id="home-member-cta" class="home-member-cta" aria-label="Already a member? Sign in" onclick="if(window.startMemberSignIn)window.startMemberSignIn();">
+            <span class="home-member-cta-title">Already a Member?</span>
+            <span class="home-member-cta-sub">Sign in for shared roster &amp; memories</span>
+          </button>
+        </div>
+      </section>
