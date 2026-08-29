@@ -1,4 +1,4 @@
-/* 20260829-ghost-sweep */
+/* 20260829-qr-install */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

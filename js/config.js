@@ -211,6 +211,7 @@ window.TB_CONFIG = {
     addJs('room-show.js', 'js/room-show.js');
     addCss('room-kill-door.css', 'css/room-kill-door.css');
     addCss('ghost-sweep.css', 'css/ghost-sweep.css');
+    addJs('qr-install.js', 'js/qr-install.js');
     addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();
