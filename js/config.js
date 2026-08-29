@@ -174,6 +174,8 @@ window.TB_CONFIG = {
     } catch (eNav) {}
     addCss('tab-hold.css', 'css/tab-hold.css');
     addJs('tab-hold.js', 'js/tab-hold.js');
+    addCss('home-only-pull.css', 'css/home-only-pull.css');
+    addJs('home-only-pull.js', 'js/home-only-pull.js');
     addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();
