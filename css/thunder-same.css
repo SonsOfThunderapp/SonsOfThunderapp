@@ -1,0 +1,27 @@
+#thunder-fab,
+#thunder-fab.thunder-fab,
+#thunder-fab.thunder-fab--character,
+body.tb-view-home #thunder-fab,
+body.tb-view-brothers #thunder-fab,
+body.tb-view-events #thunder-fab,
+body.tb-view-about #thunder-fab,
+#view-home ~ #thunder-fab,
+#view-events.active ~ #thunder-fab {
+  width: 60px !important;
+  height: 60px !important;
+  min-width: 60px !important;
+  min-height: 60px !important;
+  transform: none !important;
+  right: -6px !important;
+  bottom: calc(72px + var(--safe-bottom, env(safe-area-inset-bottom, 0px))) !important;
+}
+#thunder-fab .thunder-fab-img,
+#thunder-fab.thunder-fab--character .thunder-fab-img {
+  width: 56px !important;
+  height: 56px !important;
+  max-width: 56px !important;
+  max-height: 56px !important;
+}
+#thunder-fab:active {
+  transform: scale(0.96) !important;
+}

@@ -1,4 +1,4 @@
-/* 20260829-mem-tight */
+/* 20260829-thunder-same */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
