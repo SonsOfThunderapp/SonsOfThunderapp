@@ -1,0 +1,68 @@
+#leader-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-top: 8px;
+}
+#leader-tools .tb-chair-kicker {
+  display: block;
+  color: #FEF105;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin: 0 0 8px;
+}
+#leader-tools .tb-chair-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+#leader-tools .leader-push-hint {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.35;
+  color: #8a8a8a;
+}
+#leader-tools #admin-announcements-btn,
+#leader-tools #admin-events-btn,
+#leader-tools #admin-code-btn,
+#leader-tools #admin-room-btn,
+#leader-tools #admin-sms-club-btn,
+#leader-tools #leader-lock-btn {
+  width: 100% !important;
+  margin: 0 !important;
+  min-height: 48px;
+  border-radius: 12px;
+  border: 1px solid #2a2a2a !important;
+  background: #141414 !important;
+  color: #f2f2f2 !important;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  font-weight: 600;
+  opacity: 1 !important;
+}
+#leader-tools #admin-push-btn {
+  width: 100% !important;
+  margin: 0 !important;
+  min-height: 52px;
+  border-radius: 12px;
+  background: #E10600 !important;
+  color: #fff !important;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+#leader-tools #admin-sms-club-btn {
+  border-color: #D4A83A !important;
+  color: #FEF105 !important;
+}
+#leader-tools #admin-room-btn {
+  border-color: #D4A83A !important;
+  color: #FEF105 !important;
+}
+#leader-tools #leader-lock-btn {
+  color: #888 !important;
+  border-style: dashed !important;
+}
+#leader-tools #tb-week-box {
+  margin: 0 !important;
+}

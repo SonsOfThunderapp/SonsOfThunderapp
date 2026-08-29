@@ -196,6 +196,8 @@ window.TB_CONFIG = {
     addJs('seat-dead.js', 'js/seat-dead.js');
     addCss('proof-pipe.css', 'css/proof-pipe.css');
     addJs('proof-pipe.js', 'js/proof-pipe.js');
+    addCss('chair-stack.css', 'css/chair-stack.css');
+    addJs('chair-stack.js', 'js/chair-stack.js');
     addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();
