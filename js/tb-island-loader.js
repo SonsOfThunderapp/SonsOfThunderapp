@@ -237,5 +237,4 @@
   observeUnhide('auth-session-bar', function () { requestIsland('axum'); });
   observeUnhide('auth-gate', function () { loadOneJs('js/bday-autotext.js'); });
 
-  filmB();
 })();
