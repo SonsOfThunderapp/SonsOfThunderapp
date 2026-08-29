@@ -1,6 +1,0 @@
-html, body, #app, #views, .view {
-  overscroll-behavior-y: none;
-}
-#view-home.active {
-  overscroll-behavior-y: contain;
-}
