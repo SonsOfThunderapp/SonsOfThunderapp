@@ -1,0 +1,23 @@
+#brother-open-chair.brother-chair {
+  outline: 1px solid rgba(255, 200, 60, 0.55);
+  box-shadow: 0 0 18px rgba(255, 180, 40, 0.28);
+  animation: tb-chair-claim 2.8s ease-in-out infinite;
+}
+@keyframes tb-chair-claim {
+  0%, 100% { box-shadow: 0 0 10px rgba(255, 180, 40, 0.18); }
+  50% { box-shadow: 0 0 22px rgba(255, 200, 60, 0.45); }
+}
+#brother-open-chair .brother-slot-sub {
+  font-size: 0 !important;
+  line-height: 0 !important;
+}
+#brother-open-chair .brother-slot-sub::after {
+  content: "This chair is yours. Sit down.";
+  font-size: 13px;
+  line-height: 1.25;
+  color: #f3c14a;
+  display: block;
+}
+@media (prefers-reduced-motion: reduce) {
+  #brother-open-chair.brother-chair { animation: none; }
+}
