@@ -3,7 +3,7 @@
   window.__tbHomeFilmPoster = true;
 
   var SRC = 'https://mnsempcgomukcpofgvlm.supabase.co/storage/v1/object/public/thunder-theater/theater/current.mp4';
-  var POSTER = 'https://mnsempcgomukcpofgvlm.supabase.co/storage/v1/object/public/thunder-theater/theater/current.jpg';
+  var POSTER = '/assets/tb-film-poster.jpg';
   var BOLT = '/assets/icon-official.png';
 
   function addTheater(done) {
@@ -58,11 +58,7 @@
     btn.type = 'button';
     btn.id = 'tb-home-film-tile';
     btn.setAttribute('aria-label', 'Play this month');
-    btn.innerHTML =
-      '<img alt="" width="720" height="1280">' +
-      '<span class="tb-film-veil"></span>' +
-      '<span class="tb-film-play"></span>' +
-      '<span class="tb-film-label">THIS MONTH</span>';
+    btn.innerHTML = '<img alt="This Month" width="720" height="1280">';
     var img = btn.querySelector('img');
     img.src = POSTER;
     img.addEventListener('error', function () {
