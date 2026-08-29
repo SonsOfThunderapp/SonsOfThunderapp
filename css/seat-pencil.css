@@ -1,0 +1,11 @@
+#tb-sheet-edit {
+  display: block !important;
+  width: 100%;
+  margin: 8px 0 12px;
+  background: #000;
+  color: #FEF105;
+  border: 1px solid #FEF105;
+  letter-spacing: 0.14em;
+  font-size: 12px;
+  padding: 12px 10px;
+}
