@@ -1,0 +1,17 @@
+#view-events .events-hit-line {
+  display: block !important;
+  margin: 10px 0 16px;
+  padding: 22px 16px 20px;
+  border: 1px solid #D4A83A;
+  border-radius: 16px;
+  text-align: center;
+  color: #FEF105 !important;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-shadow: 0 0 8px rgba(254,241,5,0.55), 0 0 18px rgba(254,241,5,0.28);
+}
+#view-events #next-mission-card,
+#view-events #next-mission-card.mission-mode {
+  display: none !important;
+}
