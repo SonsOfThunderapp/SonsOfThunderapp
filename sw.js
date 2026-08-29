@@ -1,4 +1,4 @@
-/* 20260829-name-sot */
+/* 20260829-pull-strict */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

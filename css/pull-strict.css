@@ -1,0 +1,16 @@
+body:has(.view.active:not(#view-home)) #main-header,
+body:has(.view.active:not(#view-home)) #header-logo {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+#view-events #memories-drop-btn,
+#view-events #drop-shot-btn,
+#view-events #memories-signin-shot,
+#view-events .btn-drop-shot,
+#view-events .tb-live-drop,
+#view-events .memories-add-btn,
+#view-events #upload-media-btn,
+#view-events #next-mission-card {
+  display: none !important;
+}
