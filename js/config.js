@@ -185,6 +185,7 @@ window.TB_CONFIG = {
     addCss('logo-home.css', 'css/logo-home.css');
     addCss('live-home.css', 'css/live-home.css');
     addCss('ask-hit.css', 'css/ask-hit.css');
+    addJs('first-job.js', 'js/first-job.js');
     addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();
