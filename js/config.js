@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260828-open-slim',
+  APP_BUILD: '20260829-door-own',
   RSVP_PRESENCE: {
     publicOnHome: true,
     seedFloor: 0,
@@ -114,12 +114,6 @@ window.TB_CONFIG = {
   VAPID_PUBLIC_KEY: 'BGRjLCD3QnLBxb2VFNgxpGcJ1Ptxosp8yGq8yiJTGm2YS8OHVYsOhVvCFpmyREbeQsmsq6NaJ42j9yMx19Vl6hE'
 };
 
-if (!window.supabase || !window.supabase.createClient) {
-  var sb = document.createElement('script');
-  sb.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js';
-  sb.async = false;
-  (document.head || document.documentElement).appendChild(sb);
-}
 
 (function () {
   try {
@@ -153,91 +147,19 @@ if (!window.supabase || !window.supabase.createClient) {
       }
     }
     addPaint('css/first-paint.css', 'js/first-paint.js');
-    function laterSidecars() {
-      if (window.__tbSidecars) return;
-      window.__tbSidecars = 1;
-    addCss('chief1-ghost.css', 'css/chief1-ghost.css');
-    addCss('memories-latest.css', 'css/memories-latest.css');
-    addCss('ask-clear.css', 'css/ask-clear.css');
-    addCss('memories-page.css', 'css/memories-page.css');
-    addCss('events-mission-stack.css', 'css/events-mission-stack.css');
-    addCss('choice2-proof.css', 'css/choice2-proof.css');
     addCss('text-leader-quiet.css', 'css/text-leader-quiet.css');
     addCss('imin-settle.css', 'css/imin-settle.css');
     addCss('lastfire-gone.css', 'css/lastfire-gone.css');
-    addCss('chair-no-swipe.css', 'css/chair-no-swipe.css');
-    var ww = document.querySelector('link[href*="website-wide.css"]');
-    var wwHref = 'css/website-wide.css?v=' + encodeURIComponent(__tbB);
-    if (!ww) {
-      ww = document.createElement('link');
-      ww.rel = 'stylesheet';
-      ww.href = wwHref;
-      (document.head || document.documentElement).appendChild(ww);
-    } else if ((ww.getAttribute('href') || '').indexOf('v=' + __tbB) === -1) {
-      ww.href = wwHref;
-    }
     addCss('header-mark.css', 'css/header-mark.css');
-    addCss('hangout-tour.css', 'css/hangout-tour.css');
-    addCss('tour-roundtable.css', 'css/tour-roundtable.css');
     addCss('seat-footer.css', 'css/seat-footer.css');
+    addCss('auth-seat.css', 'css/auth-seat.css');
+    addCss('seat-repair.css', 'css/seat-repair.css');
+    addJs('auth-seat.js', 'js/auth-seat.js');
+    addJs('seat-repair.js', 'js/seat-repair.js');
     try {
       var ev = document.querySelector('.nav-item[data-view="events"] span');
       if (ev) ev.textContent = 'Memories';
     } catch (eNav) {}
-    addJs('supabase-js@2.49.4/dist/umd', 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js');
-    addJs('commit-reward.js', 'js/commit-reward.js');
-    addJs('memories-grid.js', 'js/memories-grid.js');
-    addJs('memories-lead.js', 'js/memories-lead.js');
-    addJs('text-leader-brothers.js', 'js/text-leader-brothers.js');
-    addJs('guest-qr-signin.js', 'js/guest-qr-signin.js');
-    addJs('brothers-chair.js', 'js/brothers-chair.js');
-    addJs('own-card-edit.js', 'js/own-card-edit.js');
-    addJs('leader-door.js', 'js/leader-door.js');
-    addJs('nav-wire.js', 'js/nav-wire.js');
-    addJs('island-safe.js', 'js/island-safe.js');
-    addJs('tour-kill.js', 'js/tour-kill.js');
-    addJs('tour-first.js', 'js/tour-first.js');
-    addCss('more-legal.css', 'css/more-legal.css');
-    addJs('more-legal.js', 'js/more-legal.js');
-    addCss('room-night.css', 'css/room-night.css');
-    addJs('room-night.js', 'js/room-night.js');
-    addJs('axum-wire.js', 'js/axum-wire.js');
-    addCss('axum-loot.css', 'css/axum-loot.css');
-    addCss('brothers-seat.css', 'css/brothers-seat.css');
-    addCss('memories-tight.css', 'css/memories-tight.css');
-    addCss('code-tight.css', 'css/code-tight.css');
-    addJs('code-tight.js', 'js/code-tight.js');
-    addCss('text-leader-brothers.css', 'css/text-leader-brothers.css');
-    addJs('more-alias.js', 'js/more-alias.js');
-    addJs('chair-no-swipe.js', 'js/chair-no-swipe.js');
-    addJs('ann-keep.js', 'js/ann-keep.js');
-    addJs('choice2-proof.js', 'js/choice2-proof.js');
-    addJs('text-leader-quiet.js', 'js/text-leader-quiet.js');
-    addJs('thunder-ask.js', 'js/thunder-ask.js');
-    addJs('ask-clear.js', 'js/ask-clear.js');
-    addJs('hangout-tour.js', 'js/hangout-tour.js');
-    addCss('home-month-film.css', 'css/home-month-film.css');
-    addCss('theater-month.css', 'css/theater-month.css');
-    addJs('theater-compress.js', 'js/theater-compress.js');
-    addJs('home-month-film.js', 'js/home-month-film.js');
-    addJs('tb-sb-bridge.js', 'js/tb-sb-bridge.js');
-    addJs('theater-month.js', 'js/theater-month.js');
-    addCss('auth-seat.css', 'css/auth-seat.css');
-    addJs('auth-seat.js', 'js/auth-seat.js');
-    addCss('profile-inspect.css', 'css/profile-inspect.css');
-    addJs('profile-inspect.js', 'js/profile-inspect.js');
-    addCss('seat-repair.css', 'css/seat-repair.css');
-    addJs('seat-repair.js', 'js/seat-repair.js');
-    addCss('lump-wow.css', 'css/lump-wow.css');
-    addJs('lump-wow.js', 'js/lump-wow.js');
-    addJs('chair-copy.js', 'js/chair-copy.js');
-    addCss('memories-bottom.css', 'css/memories-bottom.css');
-    addJs('memories-bottom.js', 'js/memories-bottom.js');
-    if (!document.querySelector('script[src*="bday-autotext.js"]')) {
-      addJs('bday-autotext.js', 'js/bday-autotext.js');
-    }
-    }
-    if (window.requestIdleCallback) window.requestIdleCallback(laterSidecars, { timeout: 2500 });
-    else setTimeout(laterSidecars, 1500);
+    addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();

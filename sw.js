@@ -1,4 +1,4 @@
-/* 20260828-open-slim */
+/* 20260829-door-own */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
