@@ -201,6 +201,7 @@ window.TB_CONFIG = {
     addJs('mem-more-stay.js', 'js/mem-more-stay.js');
     addCss('mem-tight.css', 'css/mem-tight.css');
     addCss('thunder-same.css', 'css/thunder-same.css');
+    addJs('theater-loud.js', 'js/theater-loud.js');
     addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();
