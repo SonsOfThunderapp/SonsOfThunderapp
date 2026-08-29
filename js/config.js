@@ -204,6 +204,8 @@ window.TB_CONFIG = {
     addJs('theater-loud.js', 'js/theater-loud.js');
     addCss('grid-back.css', 'css/grid-back.css');
     addJs('grid-back.js', 'js/grid-back.js');
+    addCss('proof-one.css', 'css/proof-one.css');
+    addJs('proof-one.js', 'js/proof-one.js');
     addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();
