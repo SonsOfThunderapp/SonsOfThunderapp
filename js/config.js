@@ -214,6 +214,7 @@ window.TB_CONFIG = {
     addJs('qr-install.js', 'js/qr-install.js');
     addCss('pull-strict.css', 'css/pull-strict.css');
     addJs('pull-strict.js', 'js/pull-strict.js');
+    addCss('ghost-library.css', 'css/ghost-library.css');
     addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();

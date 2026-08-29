@@ -1,0 +1,23 @@
+#ptr-indicator, .ptr-indicator { display: none !important; }
+#last-fire, #lastfire-card, .last-fire-card { display: none !important; }
+#next-mission-card, .mission-cta { display: none !important; }
+#sharpen-section-title, #sharpen-feed { display: none !important; }
+#view-events #memories-drop-btn,
+#view-events #drop-shot-btn,
+#view-events #memories-signin-shot,
+#view-events .btn-drop-shot,
+#view-events .tb-live-drop,
+#view-events .memories-add-btn,
+#view-events #upload-media-btn { display: none !important; }
+#view-events #upcoming-events { display: none !important; }
+#admin-room-modal #patio-tap-block,
+#admin-room-modal #patio-tap-qr,
+#admin-room-modal #patio-tap-url { display: none !important; }
+#view-brothers #edit-profile-btn { display: none !important; }
+body:has(.view.active:not(#view-home)) #main-header,
+body:has(.view.active:not(#view-home)) #header-logo {
+  display: none !important;
+  visibility: hidden !important;
+}
+#view-events .events-hit-line { display: block !important; }
+#view-events #media-feed { display: grid !important; }
