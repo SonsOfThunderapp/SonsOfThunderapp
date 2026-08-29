@@ -8,9 +8,13 @@
     e.stopPropagation();
     if (e.stopImmediatePropagation) e.stopImmediatePropagation();
     t.setAttribute('aria-label', 'Claim your seat');
-    var open = window.openAuthGate || window.openAuth || window.lockSeat;
-    if (typeof open === 'function') {
-      try { open('chair'); } catch (err) {}
+    if (typeof window.startMemberSignIn === 'function') {
+      try { window.startMemberSignIn(); } catch (err) {}
+      return;
+    }
+    var edit = document.getElementById('edit-profile-btn');
+    if (edit && !edit.classList.contains('hidden')) {
+      edit.click();
       return;
     }
     var btn = document.getElementById('auth-entry-btn') || document.getElementById('home-member-cta');
