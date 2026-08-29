@@ -191,6 +191,8 @@ window.TB_CONFIG = {
     addJs('proof-btn.js', 'js/proof-btn.js');
     addJs('hush-bubble.js', 'js/hush-bubble.js');
     addCss('ptr-kill.css', 'css/ptr-kill.css');
+    addCss('week-lines.css', 'css/week-lines.css');
+    addJs('week-lines.js', 'js/week-lines.js');
     addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();
