@@ -1,4 +1,4 @@
-/* 20260829-seat-pencil */
+/* 20260829-tab-hold */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

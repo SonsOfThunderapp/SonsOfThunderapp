@@ -172,6 +172,8 @@ window.TB_CONFIG = {
       var ev = document.querySelector('.nav-item[data-view="events"] span');
       if (ev) ev.textContent = 'Memories';
     } catch (eNav) {}
+    addCss('tab-hold.css', 'css/tab-hold.css');
+    addJs('tab-hold.js', 'js/tab-hold.js');
     addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();
