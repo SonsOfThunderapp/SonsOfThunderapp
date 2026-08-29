@@ -1,0 +1,10 @@
+#main-header #header-logo,
+#main-header.header img.logo,
+#main-header.header #header-logo {
+  width: min(46vw, 200px) !important;
+  height: auto !important;
+}
+body.tb-view-brothers #main-header #header-logo,
+body.tb-view-events #main-header #header-logo {
+  width: min(36vw, 156px) !important;
+}
