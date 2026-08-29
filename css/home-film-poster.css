@@ -14,14 +14,16 @@
   box-shadow: inset 0 0 0 1px rgba(212, 168, 58, 0.7), 0 12px 40px rgba(0, 0, 0, 0.55);
 }
 #tb-home-film-tile img {
-  width: 100%;
-  height: 100%;
+  width: 145%;
+  height: 145%;
+  max-width: none;
   object-fit: contain;
-  object-position: center 38%;
-  padding: 16% 18% 30%;
+  object-position: center 46%;
+  padding: 0;
+  margin: -18% 0 0 -22%;
   display: block;
   pointer-events: none;
-  filter: drop-shadow(0 0 22px rgba(255, 176, 32, 0.4));
+  filter: drop-shadow(0 0 34px rgba(255, 176, 32, 0.5));
 }
 #tb-home-film-tile::after {
   content: "▶";
