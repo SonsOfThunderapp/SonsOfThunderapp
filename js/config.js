@@ -165,6 +165,7 @@ window.TB_CONFIG = {
     addCss('seat-attach.css', 'css/seat-attach.css');
     addJs('seat-attach.js', 'js/seat-attach.js');
     addJs('memories-wake.js', 'js/memories-wake.js');
+    addCss('mission-gone.css', 'css/mission-gone.css');
     try {
       var ev = document.querySelector('.nav-item[data-view="events"] span');
       if (ev) ev.textContent = 'Memories';

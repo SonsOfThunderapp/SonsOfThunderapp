@@ -1,0 +1,12 @@
+#view-events #next-mission-card,
+#next-mission-card,
+#view-home #next-mission-card {
+  display: none !important;
+}
+#view-events .events-hit-line {
+  color: #FEF105 !important;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-shadow: 0 0 8px rgba(254, 241, 5, 0.55), 0 0 18px rgba(254, 241, 5, 0.28);
+}
