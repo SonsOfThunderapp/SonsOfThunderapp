@@ -52,3 +52,22 @@ body.tb-view-about #app > #main-header.header #header-logo {
   visibility: hidden !important;
   pointer-events: none !important;
 }
+#sharpen-section-title,
+#activity-tags,
+#activity-feed {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+#view-events .container {
+  display: flex !important;
+  flex-direction: column !important;
+}
+#view-events #events-section-title,
+#view-events #events-note,
+#view-events #upcoming-events {
+  order: 99 !important;
+}
