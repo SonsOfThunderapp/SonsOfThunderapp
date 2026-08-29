@@ -3,6 +3,8 @@
   window.__tbSeatAttach = true;
 
   var CHAIR = 'obietv@gmail.com';
+  window.__tbSeatAllow = false;
+  var press = { t: 0, x: 0, y: 0, id: '' };
 
   function loadBrothers() {
     try {
@@ -48,19 +50,18 @@
   }
 
   function isChair() {
-    var em = sessionEmail();
-    if (em === CHAIR) return true;
+    if (sessionEmail() === CHAIR) return true;
     var bar = document.getElementById('auth-session-bar');
-    if (bar && !bar.classList.contains('hidden') && !em) {
-      return true;
-    }
-    return false;
+    return !!(bar && !bar.classList.contains('hidden'));
+  }
+
+  function seated() {
+    return !!(isChair() && obieRow());
   }
 
   function attach() {
-    if (!isChair()) return false;
     var row = obieRow();
-    if (!row || !row.id) return false;
+    if (!row || !row.id || !isChair()) return false;
     try {
       localStorage.setItem('myProfileId', row.id);
       localStorage.setItem('tb_myProfileId', row.id);
@@ -68,38 +69,68 @@
     return true;
   }
 
-  function hideInvite() {
-    if (!isChair()) return;
-    var slot = document.getElementById('brother-slot-invite');
-    if (slot) {
-      slot.classList.add('hidden');
-      slot.setAttribute('hidden', 'hidden');
-      slot.style.display = 'none';
-    }
+  function hideInviteIfSeated() {
+    if (!seated()) return;
+    ['brother-slot-invite', 'empty-brothers-cta', 'brother-open-chair'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.classList.add('hidden');
+      el.setAttribute('hidden', 'hidden');
+      el.style.display = 'none';
+    });
   }
 
   function hideHeaderEdit() {
     var header = document.getElementById('edit-profile-btn');
-    if (header) {
-      header.classList.add('hidden');
-      header.setAttribute('hidden', 'hidden');
-      header.style.display = 'none';
-    }
+    if (!header) return;
+    header.classList.add('hidden');
+    header.setAttribute('hidden', 'hidden');
+    header.style.display = 'none';
+  }
+
+  function closeSeatModal() {
+    var modal = document.getElementById('profile-modal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+
+  function policeModal() {
+    var modal = document.getElementById('profile-modal');
+    if (!modal || modal.classList.contains('hidden')) return;
+    if (window.__tbSeatAllow) return;
+    if (seated()) closeSeatModal();
+  }
+
+  function chairEl(t) {
+    return t && t.closest && t.closest('#brother-slot-invite, #empty-brothers-cta, #brother-open-chair');
+  }
+
+  function goodPress(dt, dx, dy) {
+    if (dt < 140) return false;
+    if (dt > 420) return false;
+    if ((dx * dx + dy * dy) > 256) return false;
+    return true;
   }
 
   function fireEdit() {
     attach();
+    window.__tbSeatAllow = true;
+    var title = document.getElementById('profile-modal-title');
+    if (title) title.innerHTML = 'EDIT <span class="accent-yellow">PROFILE</span>';
     var ghost = document.getElementById('edit-profile-btn');
-    if (!ghost) return;
-    ghost.removeAttribute('hidden');
-    ghost.classList.remove('hidden');
-    ghost.style.display = '';
-    ghost.click();
-    hideHeaderEdit();
+    if (ghost) {
+      ghost.removeAttribute('hidden');
+      ghost.classList.remove('hidden');
+      ghost.style.display = '';
+      ghost.click();
+      hideHeaderEdit();
+    }
+    setTimeout(function () { window.__tbSeatAllow = false; }, 900);
   }
 
   function stampGrid() {
-    if (!isChair()) return;
+    if (!seated()) return;
     var grid = document.getElementById('brothers-grid');
     if (!grid) return;
     grid.querySelectorAll('.brother-card[data-brother-index]').forEach(function (card) {
@@ -122,7 +153,7 @@
   }
 
   function stampSheet() {
-    if (!isChair()) return;
+    if (!seated()) return;
     var sheet = document.getElementById('brother-detail');
     if (!sheet || sheet.classList.contains('hidden')) return;
     var nm = document.getElementById('brother-detail-name');
@@ -148,12 +179,70 @@
     else sheet.appendChild(btn);
   }
 
+  document.addEventListener('pointerdown', function (e) {
+    var el = chairEl(e.target);
+    if (!el) return;
+    press.t = Date.now();
+    press.x = e.clientX || 0;
+    press.y = e.clientY || 0;
+    press.id = el.id;
+    el.classList.add('tb-chair-press');
+  }, true);
+
+  document.addEventListener('pointerup', function (e) {
+    var el = chairEl(e.target);
+    var node = el || document.getElementById(press.id);
+    if (node) node.classList.remove('tb-chair-press');
+    if (!el || seated()) {
+      press.t = 0;
+      return;
+    }
+    var dt = Date.now() - press.t;
+    var dx = (e.clientX || 0) - press.x;
+    var dy = (e.clientY || 0) - press.y;
+    press.t = 0;
+    if (!goodPress(dt, dx, dy)) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+      return;
+    }
+    window.__tbSeatAllow = true;
+    setTimeout(function () { window.__tbSeatAllow = false; }, 900);
+  }, true);
+
+  document.addEventListener('pointercancel', function () {
+    var node = document.getElementById(press.id);
+    if (node) node.classList.remove('tb-chair-press');
+    press.t = 0;
+  }, true);
+
+  document.addEventListener('click', function (e) {
+    var invite = chairEl(e.target);
+    if (invite) {
+      if (seated() || !window.__tbSeatAllow) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+        hideInviteIfSeated();
+      }
+      return;
+    }
+    var header = e.target && e.target.closest && e.target.closest('#edit-profile-btn');
+    if (header && !window.__tbSeatAllow) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+    }
+  }, true);
+
   function tick() {
     attach();
-    hideInvite();
     hideHeaderEdit();
+    hideInviteIfSeated();
     stampGrid();
     stampSheet();
+    policeModal();
   }
 
   window.stashSeatFromGate = function () { tick(); };
@@ -171,5 +260,10 @@
   if (detail && !detail.dataset.tbSeatAttach) {
     detail.dataset.tbSeatAttach = '1';
     new MutationObserver(function () { setTimeout(tick, 30); }).observe(detail, { attributes: true, childList: true, subtree: true });
+  }
+  var modal = document.getElementById('profile-modal');
+  if (modal && !modal.dataset.tbSeatOnce) {
+    modal.dataset.tbSeatOnce = '1';
+    new MutationObserver(function () { policeModal(); }).observe(modal, { attributes: true, attributeFilter: ['class'] });
   }
 })();
