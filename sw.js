@@ -1,4 +1,4 @@
-/* 20260829-page-swipe */
+/* 20260829-sheet-x */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
