@@ -1,4 +1,4 @@
-/* 20260829-header-slim */
+/* 20260829-film-bolt */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

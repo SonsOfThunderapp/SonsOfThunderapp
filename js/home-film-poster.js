@@ -3,8 +3,8 @@
   window.__tbHomeFilmPoster = true;
 
   var SRC = 'https://mnsempcgomukcpofgvlm.supabase.co/storage/v1/object/public/thunder-theater/theater/current.mp4';
-  var POSTER = '/assets/icon-official.png';
-  var BOLT = '/assets/icon-official.png';
+  var POSTER = '/assets/logo-bolt-isolated.png';
+  var BOLT = POSTER;
 
   function addTheater(done) {
     function ready() {
