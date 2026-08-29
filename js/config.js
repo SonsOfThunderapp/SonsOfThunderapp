@@ -180,6 +180,8 @@ window.TB_CONFIG = {
     addCss('proof-plate.css', 'css/proof-plate.css');
     addCss('imin-hit.css', 'css/imin-hit.css');
     addCss('chair-ring.css', 'css/chair-ring.css');
+    addCss('card-chips.css', 'css/card-chips.css');
+    addJs('card-chips.js', 'js/card-chips.js');
     addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();

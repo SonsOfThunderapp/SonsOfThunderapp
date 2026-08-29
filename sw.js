@@ -1,4 +1,4 @@
-/* 20260829-chair-ring */
+/* 20260829-card-chips */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
