@@ -1,0 +1,52 @@
+#admin-room-modal .room-steps,
+#admin-room-modal .room-grid,
+#admin-room-modal .room-stat,
+#admin-room-modal #room-label,
+#admin-room-modal #patio-toggle-hint,
+#admin-room-modal [data-act="3"] .leader-push-hint {
+  display: none !important;
+}
+#admin-room-modal .room-person:not(.is-showed) {
+  display: none !important;
+}
+#admin-room-modal .room-act {
+  margin: 0 0 10px !important;
+  padding: 0 0 10px !important;
+  border: 0 !important;
+}
+#admin-room-modal .room-act-kicker {
+  color: #FEF105 !important;
+  letter-spacing: 0.14em !important;
+  font-size: 11px !important;
+}
+#admin-room-modal #patio-toggle-btn,
+#admin-room-modal #draw-beer-btn {
+  width: 100% !important;
+  min-height: 52px;
+  border-radius: 14px !important;
+  background: #E10600 !important;
+  color: #fff !important;
+}
+#admin-room-modal #draw-hat-btn {
+  width: 100% !important;
+  min-height: 48px;
+  border-radius: 14px !important;
+  border: 1px solid #D4A83A !important;
+  background: transparent !important;
+  color: #FEF105 !important;
+}
+#tb-here-count {
+  display: block;
+  color: #FEF105;
+  letter-spacing: 0.14em;
+  font-size: 11px;
+  text-transform: uppercase;
+  margin: 8px 0 6px;
+}
+#admin-room-modal .room-person.is-showed .room-person-name {
+  color: #fff;
+  font-size: 18px;
+}
+#admin-room-modal .room-person.is-showed .room-person-meta {
+  color: #D4A83A;
+}

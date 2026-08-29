@@ -207,6 +207,8 @@ window.TB_CONFIG = {
     addCss('proof-one.css', 'css/proof-one.css');
     addJs('proof-one.js', 'js/proof-one.js');
     addCss('room-tight.css', 'css/room-tight.css');
+    addCss('room-show.css', 'css/room-show.css');
+    addJs('room-show.js', 'js/room-show.js');
     addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();
