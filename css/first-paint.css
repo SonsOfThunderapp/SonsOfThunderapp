@@ -66,8 +66,6 @@ body.tb-view-about #app > #main-header.header #header-logo {
   display: flex !important;
   flex-direction: column !important;
 }
-#view-events #events-section-title,
-#view-events #events-note,
-#view-events #upcoming-events {
+#view-events #events-note {
   order: 99 !important;
 }

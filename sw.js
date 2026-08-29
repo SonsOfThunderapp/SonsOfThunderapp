@@ -1,4 +1,4 @@
-/* 20260829-sharpen-up */
+/* 20260829-note-bottom */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
