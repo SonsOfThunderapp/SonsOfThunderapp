@@ -30,3 +30,8 @@ video.tb-month-video {
   visibility: visible !important;
   opacity: 1 !important;
 }
+#view-home.view:not(.active) {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}

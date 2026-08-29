@@ -1,4 +1,4 @@
-/* 20260829-door-nonav */
+/* 20260829-home-release */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
