@@ -1,4 +1,4 @@
-/* 20260829-live-home */
+/* 20260829-ask-hit */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

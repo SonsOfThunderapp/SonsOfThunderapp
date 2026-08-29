@@ -1,0 +1,12 @@
+.thunder-action,
+.tb-thunder-action,
+#thunder-messages [data-action] {
+  border: 1px solid #FEF105 !important;
+  color: #FEF105 !important;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.thunder-action:active,
+.tb-thunder-action:active {
+  box-shadow: 0 0 12px rgba(254,241,5,0.45);
+}
