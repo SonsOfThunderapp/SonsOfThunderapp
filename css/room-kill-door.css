@@ -1,0 +1,9 @@
+#admin-room-modal #patio-tap-block,
+#admin-room-modal #patio-tap-qr,
+#admin-room-modal #patio-tap-url,
+#admin-room-modal .room-steps,
+#admin-room-modal .room-grid,
+#admin-room-modal .room-stat,
+#admin-room-modal .room-person:not(.is-showed) {
+  display: none !important;
+}
