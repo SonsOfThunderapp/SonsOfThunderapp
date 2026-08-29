@@ -11,14 +11,46 @@
   aspect-ratio: 9 / 16;
   max-height: 58vh;
   cursor: pointer;
-  box-shadow: 0 0 0 1px rgba(255, 200, 60, 0.35), 0 12px 40px rgba(0, 0, 0, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(212, 168, 58, 0.7), 0 12px 40px rgba(0, 0, 0, 0.55);
 }
 #tb-home-film-tile img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center;
+  object-fit: contain;
+  object-position: center 38%;
+  padding: 16% 18% 30%;
   display: block;
+  pointer-events: none;
+  filter: drop-shadow(0 0 22px rgba(255, 176, 32, 0.4));
+}
+#tb-home-film-tile::after {
+  content: "▶";
+  position: absolute;
+  left: 50%;
+  bottom: 22%;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 44px;
+  border: 1.5px solid #d4a83a;
+  border-radius: 50%;
+  color: #d4a83a;
+  font-size: 16px;
+  line-height: 44px;
+  text-align: center;
+  text-indent: 3px;
+  pointer-events: none;
+}
+#tb-home-film-tile::before {
+  content: "THIS MONTH";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 8%;
+  color: #d4a83a;
+  font-family: "Bebas Neue", "Oswald", sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.28em;
+  text-align: center;
   pointer-events: none;
 }
 #tb-home-film-tile.tb-film-rise {
