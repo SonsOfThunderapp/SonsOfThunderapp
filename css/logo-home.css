@@ -1,0 +1,5 @@
+body:not(:has(#view-home.active)) #main-header,
+body:not(:has(#view-home.active)) #header-logo {
+  touch-action: pan-x;
+  overscroll-behavior: none;
+}

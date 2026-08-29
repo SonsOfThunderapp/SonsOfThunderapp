@@ -2,7 +2,7 @@
   if (window.__tbHomeOnlyPull) return;
   window.__tbHomeOnlyPull = true;
 
-  var startY = 0, startX = 0, armed = false, fired = false;
+  var startY = 0, startX = 0, armed = false, fired = false, headerLock = false;
 
   function onHome() {
     var home = document.getElementById('view-home');
@@ -11,6 +11,10 @@
   function inSheet(t) {
     if (!t || !t.closest) return false;
     return !!t.closest('.modal, #brother-detail, #profile-modal, #memory-viewer, #tb-theater, #thunder-panel, #axum-drop, #tb-tour');
+  }
+  function inHeader(t) {
+    if (!t || !t.closest) return false;
+    return !!t.closest('#main-header, #header-logo, .header');
   }
   function soft() {
     if (fired) return;
@@ -42,10 +46,16 @@
 
   document.addEventListener('touchstart', function (e) {
     armed = false;
+    headerLock = false;
     if (!e.touches || !e.touches[0]) return;
     startY = e.touches[0].clientY || 0;
     startX = e.touches[0].clientX || 0;
-    if (!onHome() || inSheet(e.target)) return;
+    if (inSheet(e.target)) return;
+    if (!onHome() && inHeader(e.target)) {
+      headerLock = true;
+      return;
+    }
+    if (!onHome()) return;
     if (startY > 120) return;
     armed = true;
   }, true);
@@ -54,10 +64,15 @@
     if (!e.touches || !e.touches[0]) return;
     if (inSheet(e.target)) return;
     var y = e.touches[0].clientY || 0;
+    if (headerLock && !onHome()) {
+      e.preventDefault();
+      return;
+    }
     if (onHome() && armed && (y - startY) > 10) e.preventDefault();
   }, { capture: true, passive: false });
 
   document.addEventListener('touchend', function (e) {
+    headerLock = false;
     if (!armed) return;
     armed = false;
     if (!onHome() || inSheet(e.target)) return;
@@ -67,5 +82,8 @@
     if (dy >= 56 && Math.abs(dx) <= 40) soft();
   }, true);
 
-  document.addEventListener('touchcancel', function () { armed = false; }, true);
+  document.addEventListener('touchcancel', function () {
+    armed = false;
+    headerLock = false;
+  }, true);
 })();

@@ -1,4 +1,4 @@
-/* 20260829-brothers-scroll */
+/* 20260829-logo-home */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
