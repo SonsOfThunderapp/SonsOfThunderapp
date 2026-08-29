@@ -6,13 +6,13 @@
     if (document.querySelector('link[href*="' + href.split('/').pop() + '"]')) return;
     var l = document.createElement('link');
     l.rel = 'stylesheet';
-    l.href = href + '?v=20260829-memories-wake';
+    l.href = href + '?v=20260829-mission-last';
     document.head.appendChild(l);
   }
   function addJs(src) {
     if (document.querySelector('script[src*="' + src.split('/').pop() + '"]')) return;
     var s = document.createElement('script');
-    s.src = src + '?v=20260829-memories-wake';
+    s.src = src + '?v=20260829-mission-last';
     s.defer = true;
     document.body.appendChild(s);
   }
@@ -22,6 +22,7 @@
     addCss('css/memories-page.css');
     addCss('css/choice2-proof.css');
     addCss('css/events-mission-stack.css');
+    addCss('css/mission-last.css');
     addJs('js/memories-grid.js');
     addJs('js/choice2-proof.js');
   }

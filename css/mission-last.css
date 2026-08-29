@@ -1,0 +1,16 @@
+#view-events #next-mission-card,
+#view-events #next-mission-card.mission-mode,
+#view-events #next-mission-card.mission-strip,
+#view-events #next-mission-card.card.tappable-card.mission-mode {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+}
+#view-events #activity-tags,
+#view-events #activity-feed {
+  display: none !important;
+}
