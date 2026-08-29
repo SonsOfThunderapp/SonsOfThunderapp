@@ -1,0 +1,72 @@
+#tb-home-film-tile {
+  display: block;
+  width: 100%;
+  margin: 16px 0 8px;
+  padding: 0;
+  border: 0;
+  background: #000;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  aspect-ratio: 9 / 16;
+  max-height: 58vh;
+  cursor: pointer;
+  box-shadow: 0 0 0 1px rgba(255, 200, 60, 0.35), 0 12px 40px rgba(0, 0, 0, 0.55);
+}
+#tb-home-film-tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  pointer-events: none;
+}
+#tb-home-film-tile .tb-film-veil {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.55) 100%);
+  pointer-events: none;
+}
+#tb-home-film-tile .tb-film-play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 76px;
+  height: 76px;
+  margin: -38px 0 0 -38px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  box-shadow: 0 0 0 2px #f3c14a, 0 0 28px rgba(243, 193, 74, 0.45);
+  pointer-events: none;
+}
+#tb-home-film-tile .tb-film-play::after {
+  content: "";
+  position: absolute;
+  left: 29px;
+  top: 24px;
+  border-style: solid;
+  border-width: 14px 0 14px 24px;
+  border-color: transparent transparent transparent #f3c14a;
+}
+#tb-home-film-tile .tb-film-label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 14px;
+  text-align: center;
+  font-family: "Bebas Neue", Impact, sans-serif;
+  letter-spacing: 0.14em;
+  font-size: 15px;
+  color: #f3c14a;
+  pointer-events: none;
+}
+#tb-theater video {
+  object-fit: cover;
+}
+#tb-home-film-tile.tb-film-rise {
+  transform: scale(1.03);
+  transition: transform 0.28s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  #tb-home-film-tile.tb-film-rise { transform: none; }
+}

@@ -158,6 +158,8 @@ window.TB_CONFIG = {
     addJs('seat-repair.js', 'js/seat-repair.js');
     addCss('chair-claim.css', 'css/chair-claim.css');
     addJs('chair-claim.js', 'js/chair-claim.js');
+    addCss('home-film-poster.css', 'css/home-film-poster.css');
+    addJs('home-film-poster.js', 'js/home-film-poster.js');
     try {
       var ev = document.querySelector('.nav-item[data-view="events"] span');
       if (ev) ev.textContent = 'Memories';

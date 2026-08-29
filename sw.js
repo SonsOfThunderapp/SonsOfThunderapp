@@ -1,4 +1,4 @@
-/* 20260829-note-bottom */
+/* 20260829-film-tap */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
