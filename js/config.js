@@ -206,6 +206,7 @@ window.TB_CONFIG = {
     addJs('grid-back.js', 'js/grid-back.js');
     addCss('proof-one.css', 'css/proof-one.css');
     addJs('proof-one.js', 'js/proof-one.js');
+    addCss('room-tight.css', 'css/room-tight.css');
     addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();

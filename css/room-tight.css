@@ -1,0 +1,35 @@
+#admin-room-modal .room-steps,
+#admin-room-modal .room-grid,
+#admin-room-modal .room-stat,
+#admin-room-modal #room-label {
+  display: none !important;
+}
+#admin-room-modal .room-act {
+  margin: 0 0 12px !important;
+  padding: 0 0 12px !important;
+}
+#admin-room-modal .room-act-kicker {
+  margin: 0 0 6px !important;
+}
+#admin-room-modal #patio-toggle-hint,
+#admin-room-modal [data-act="3"] .leader-push-hint {
+  display: none !important;
+}
+#admin-room-modal #patio-toggle-btn,
+#admin-room-modal #draw-beer-btn,
+#admin-room-modal #draw-hat-btn {
+  width: 100% !important;
+  min-height: 48px;
+  margin: 0 0 8px !important;
+  border-radius: 12px !important;
+}
+#admin-room-modal .room-list {
+  max-height: 180px;
+}
+#admin-room-modal .room-person-meta {
+  font-size: 11px;
+  color: #888;
+}
+#admin-room-modal #patio-tap-block {
+  margin-top: 8px !important;
+}
