@@ -54,14 +54,7 @@
     if (!e.touches || !e.touches[0]) return;
     if (inSheet(e.target)) return;
     var y = e.touches[0].clientY || 0;
-    if (onHome()) {
-      if (armed && (y - startY) > 10) e.preventDefault();
-      return;
-    }
-    var sc = document.scrollingElement || document.documentElement;
-    if (sc && sc.scrollTop <= 0 && y > startY) {
-      e.preventDefault();
-    }
+    if (onHome() && armed && (y - startY) > 10) e.preventDefault();
   }, { capture: true, passive: false });
 
   document.addEventListener('touchend', function (e) {

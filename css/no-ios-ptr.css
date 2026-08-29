@@ -4,13 +4,24 @@ html, body, #app {
   overflow: hidden !important;
   overscroll-behavior: none !important;
 }
+#app {
+  display: flex !important;
+  flex-direction: column !important;
+}
+#main-header,
+.bottom-nav,
+#bottom-nav {
+  flex-shrink: 0;
+}
 #views {
-  height: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
   overflow: hidden;
 }
 .view.active {
   height: 100%;
-  overflow-y: auto;
+  overflow-y: auto !important;
   overscroll-behavior-y: none;
   -webkit-overflow-scrolling: touch;
 }
