@@ -3,9 +3,120 @@
 <head>
   <meta charset="UTF-8" />
   <base href="/" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <style id="tb-home-visible">
+html, body { background: #000 !important; color: #fff; }
+#splash { display: none !important; visibility: hidden !important; pointer-events: none !important; }
+#main-header, #header-logo { display: block !important; visibility: visible !important; }
+#view-home, #view-home.view, #view-home.view.active {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+</style>
+  <meta name="theme-color" content="#000000" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Sons of Thunder" />
   <title>Sons of Thunder</title>
+  <style>
+    html, body { background: #000 !important; color: #fff; margin: 0; }
+    #app > #main-header.header, #main-header.header, #main-header {
+      display: block !important; visibility: visible !important; position: sticky !important;
+      top: 0 !important; z-index: 8000 !important; overflow: visible !important;
+      max-height: none !important; height: auto !important; contain: none !important;
+      clip-path: none !important; background: #000 !important;
+      padding: calc(6px + env(safe-area-inset-top, 0px)) 12px 6px !important;
+    }
+    #main-header #header-logo, #main-header.header img.logo {
+      display: block !important; width: min(58vw, 256px) !important; height: auto !important;
+      max-height: none !important; aspect-ratio: 3000 / 2077 !important;
+      object-fit: contain !important; object-position: center top !important;
+    }
+  </style>
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Sons of Thunder" />
+  <meta property="og:description" content="Thunder doesn’t dull. Put this on your Home Screen." />
+  <link rel="canonical" href="https://sonsofthunderboard.com/" />
+  <meta property="og:url" content="https://sonsofthunderboard.com/" />
+  <meta property="og:image" content="https://sonsofthunderboard.com/assets/og-share.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Sons of Thunder" />
+  <meta name="description" content="Sons of Thunder. Private brotherhood board." />
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon-v4.png" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="stylesheet" href="/css/styles.css?v=20260826-repair1" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 </head>
 <body>
-<button id="rsvp-btn" class="btn-rsvp">I'M IN</button>
+  <div id="splash" class="splash" aria-hidden="true"></div>
+  <script>(function(){function k(){var s=document.getElementById('splash');if(!s)return;s.style.display='none';}setTimeout(k,200);k();})();</script>
+  <div id="app">
+    <header id="main-header" class="header">
+      <div class="logo-wrap">
+        <img src="/assets/logo@3x.png?v=20260828-open-slim" alt="Sons of Thunder" class="logo" id="header-logo" width="1200" height="831" />
+      </div>
+    </header>
+    <main id="views">
+      <section id="view-home" class="view active">
+        <div class="container">
+          <p class="identity-line">Thunder doesn’t dull</p>
+          <div class="next-meeting card">
+            <div class="card-label" id="meeting-phase-label">NEXT GATHERING</div>
+            <div id="meeting-countdown" class="meeting-countdown">—</div>
+            <div id="meeting-date" class="meeting-date">Calculating…</div>
+            <div class="meeting-time" id="meeting-time">6:30 PM</div>
+            <div class="meeting-loc" id="meeting-loc">Crooked Can Brewery Patio, Winter Garden</div>
+            <p id="rsvp-prompt" class="rsvp-prompt">Your seat is open. Lock it in.</p>
+            <button id="rsvp-btn" class="btn-rsvp">I'M IN</button>
+            <div id="rsvp-status" class="rsvp-status hidden">YOU'RE LOCKED IN</div>
+            <div id="in-count" class="in-count hidden" aria-live="polite"></div>
+            <div id="raffle-board" class="raffle-board hidden"></div>
+            <button id="reminder-btn" class="btn-reminder btn-reminder-compact">SET REMINDER</button>
+          </div>
+          <button type="button" id="home-member-cta" class="home-member-cta">Already a Member?</button>
+          <div class="section-title" id="announcements-title">Announcements</div>
+          <div id="announcements" class="feed"></div>
+        </div>
+      </section>
+      <section id="view-brothers" class="view">
+        <div class="container">
+          <div class="section-header"><h1 id="brothers-section-title">Brothers</h1></div>
+          <button type="button" id="auth-entry-btn" class="btn-auth-entry">SIGN IN</button>
+          <div id="brothers-grid" class="brothers-grid"></div>
+        </div>
+      </section>
+      <section id="view-events" class="view">
+        <div class="container">
+          <div class="section-header">
+            <h1>Events &amp; Memories</h1>
+            <button type="button" id="upload-media-btn" class="btn-primary memories-add-btn">+ MEMORY</button>
+          </div>
+          <div id="media-feed" class="media-feed"></div>
+        </div>
+      </section>
+      <section id="view-about" class="view">
+        <div class="container about-container">
+          <h1 class="about-title" id="who-we-are-title">WHO WE ARE</h1>
+          <h1 class="about-title code-title">THE CODE</h1>
+          <div class="code-list" id="code-list"></div>
+        </div>
+      </section>
+    </main>
+    <nav class="bottom-nav">
+      <button class="nav-item active" data-view="home"><span>Home</span></button>
+      <button class="nav-item" data-view="brothers"><span>Brothers</span></button>
+      <button class="nav-item" data-view="events"><span>Events</span></button>
+      <button class="nav-item" data-view="about"><span>More</span></button>
+    </nav>
+    <button id="thunder-fab" class="thunder-fab" aria-label="Thunder"></button>
+  </div>
+  <input type="file" id="memory-cam" class="memory-cam-input" accept="image/*" capture="environment" tabindex="-1" aria-hidden="true" />
+  <input type="file" id="memory-lib" class="memory-cam-input" accept="image/*" tabindex="-1" aria-hidden="true" />
+  <script src="/js/config.js?v=20260829-funeral1"></script>
+  <script defer src="/js/qrcode.min.js?v=20260816LOCKED6"></script>
+  <script defer src="/js/supabase.min.js?v=20260827-sdk1"></script>
+  <script defer src="/js/app.js?v=20260829-funeral1"></script>
 </body>
 </html>
