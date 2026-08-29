@@ -3,7 +3,7 @@
   window.__tbHomeFilmPoster = true;
 
   var SRC = 'https://mnsempcgomukcpofgvlm.supabase.co/storage/v1/object/public/thunder-theater/theater/current.mp4';
-  var POSTER = '/assets/tb-film-poster.jpg';
+  var POSTER = '/assets/icon-official.png';
   var BOLT = '/assets/icon-official.png';
 
   function addTheater(done) {
