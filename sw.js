@@ -1,4 +1,4 @@
-/* 20260829-hush-bubble */
+/* 20260829-thunder-map */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
