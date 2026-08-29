@@ -12,7 +12,7 @@ window.TB_CONFIG = {
     approved: '2026-08-23',
     proof: 'IMG_7978',
     source: 'assets/CANONICAL/logo-print-diecut.png',
-    slots: ['assets/logo@2x.png', 'assets/logo@3x.png', 'assets/logo@4x.png'],
+    slots: ['assets/logo@2x.png', 'assets/logo@3x.png', 'assets/logo@4k.png'],
     aspect: '3000/2077',
     z: 8000,
     pages: ['home', 'brothers', 'events', 'about'],
@@ -186,6 +186,9 @@ window.TB_CONFIG = {
     addCss('live-home.css', 'css/live-home.css');
     addCss('ask-hit.css', 'css/ask-hit.css');
     addJs('first-job.js', 'js/first-job.js');
+    addJs('theater-sound.js', 'js/theater-sound.js');
+    addCss('proof-btn.css', 'css/proof-btn.css');
+    addJs('proof-btn.js', 'js/proof-btn.js');
     addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();

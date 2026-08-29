@@ -1,4 +1,4 @@
-/* 20260829-first-job */
+/* 20260829-proof-sound */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
