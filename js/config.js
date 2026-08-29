@@ -189,6 +189,7 @@ window.TB_CONFIG = {
     addJs('theater-sound.js', 'js/theater-sound.js');
     addCss('proof-btn.css', 'css/proof-btn.css');
     addJs('proof-btn.js', 'js/proof-btn.js');
+    addJs('hush-bubble.js', 'js/hush-bubble.js');
     addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();
