@@ -56,7 +56,7 @@
       return;
     }
     if (!onHome()) return;
-    if (startY > 120) return;
+    if (!inHeader(e.target) && startY > 120) return;
     armed = true;
   }, true);
 
