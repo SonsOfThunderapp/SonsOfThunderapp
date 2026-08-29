@@ -1,0 +1,9 @@
+#rsvp-btn.confirmed,
+.next-meeting.commit-energized #rsvp-btn {
+  box-shadow: 0 0 0 1px #FEF105, 0 0 18px rgba(254,241,5,0.45);
+  text-shadow: 0 0 8px rgba(254,241,5,0.35);
+}
+#rsvp-status:not(.hidden) {
+  color: #FEF105 !important;
+  letter-spacing: 0.08em;
+}

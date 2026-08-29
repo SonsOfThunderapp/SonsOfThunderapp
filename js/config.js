@@ -178,6 +178,7 @@ window.TB_CONFIG = {
     addJs('home-only-pull.js', 'js/home-only-pull.js');
     addCss('no-ios-ptr.css', 'css/no-ios-ptr.css');
     addCss('proof-plate.css', 'css/proof-plate.css');
+    addCss('imin-hit.css', 'css/imin-hit.css');
     addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();
