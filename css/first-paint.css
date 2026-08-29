@@ -35,3 +35,14 @@ video.tb-month-video {
   visibility: hidden !important;
   pointer-events: none !important;
 }
+body:has(#view-about.active) #main-header,
+body:has(#view-about.active) #header-logo {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+#announcements img:not([src]),
+#announcements img[src=""],
+#announcements img[src="#"] {
+  display: none !important;
+}

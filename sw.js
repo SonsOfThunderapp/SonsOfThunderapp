@@ -1,4 +1,4 @@
-/* 20260829-home-release */
+/* 20260829-chrome-more */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
