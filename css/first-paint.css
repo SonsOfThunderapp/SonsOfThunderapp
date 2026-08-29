@@ -46,3 +46,9 @@ body:has(#view-about.active) #header-logo {
 #announcements img[src="#"] {
   display: none !important;
 }
+body.tb-view-about #app > #main-header.header,
+body.tb-view-about #app > #main-header.header #header-logo {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}

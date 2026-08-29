@@ -1,4 +1,4 @@
-/* 20260829-chrome-more */
+/* 20260829-about-head */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
