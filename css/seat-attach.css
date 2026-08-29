@@ -1,0 +1,15 @@
+#edit-profile-btn,
+#edit-profile-btn.hidden {
+  display: none !important;
+}
+.brother-card.tb-my-seat .tb-own-edit-btn {
+  display: inline-block;
+  margin-top: 8px;
+  background: #000;
+  color: #FEF105;
+  border: 1px solid #FEF105;
+  letter-spacing: 0.14em;
+  font-size: 11px;
+  padding: 6px 10px;
+}
+body.tb-view-brothers #brother-slot-invite[hidden] { display: none !important; }

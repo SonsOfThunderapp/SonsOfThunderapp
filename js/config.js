@@ -162,6 +162,8 @@ window.TB_CONFIG = {
     addJs('home-film-poster.js', 'js/home-film-poster.js');
     addCss('header-slim.css', 'css/header-slim.css');
     addCss('sharpen-up.css', 'css/sharpen-up.css');
+    addCss('seat-attach.css', 'css/seat-attach.css');
+    addJs('seat-attach.js', 'js/seat-attach.js');
     try {
       var ev = document.querySelector('.nav-item[data-view="events"] span');
       if (ev) ev.textContent = 'Memories';
