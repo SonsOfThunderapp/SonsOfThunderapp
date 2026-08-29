@@ -179,6 +179,7 @@ window.TB_CONFIG = {
     addCss('no-ios-ptr.css', 'css/no-ios-ptr.css');
     addCss('proof-plate.css', 'css/proof-plate.css');
     addCss('imin-hit.css', 'css/imin-hit.css');
+    addCss('chair-ring.css', 'css/chair-ring.css');
     addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();

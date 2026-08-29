@@ -1,0 +1,6 @@
+#brother-slot-invite.tb-chair-press,
+#empty-brothers-cta.tb-chair-press,
+#brother-open-chair.tb-chair-press {
+  transform: scale(0.97);
+  box-shadow: 0 0 0 2px #FEF105, 0 0 16px rgba(254,241,5,0.4);
+}
