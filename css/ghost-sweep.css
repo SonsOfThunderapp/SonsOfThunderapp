@@ -1,0 +1,31 @@
+body:has(#view-events.active) #main-header,
+body:has(#view-events.active) #header-logo,
+body.tb-view-events #main-header,
+body.tb-view-events #header-logo,
+body:has(#view-about.active) #main-header,
+body:has(#view-about.active) #header-logo,
+body.tb-view-about #main-header,
+body.tb-view-about #header-logo {
+  display: none !important;
+}
+#view-events #memories-drop-btn,
+#view-events #drop-shot-btn,
+#view-events #memories-signin-shot,
+#view-events .btn-drop-shot,
+#view-events .tb-live-drop,
+#view-events .memories-add-btn,
+#view-events #upload-media-btn,
+#view-events #next-mission-card,
+#view-events .mission-cta,
+#view-events #sharpen-section-title,
+#view-events #sharpen-feed,
+#view-home #next-mission-card,
+#view-home .mission-cta {
+  display: none !important;
+}
+#view-events .events-hit-line {
+  display: block !important;
+}
+#view-events #media-feed {
+  display: grid !important;
+}

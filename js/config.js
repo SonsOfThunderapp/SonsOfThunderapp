@@ -210,6 +210,7 @@ window.TB_CONFIG = {
     addCss('room-show.css', 'css/room-show.css');
     addJs('room-show.js', 'js/room-show.js');
     addCss('room-kill-door.css', 'css/room-kill-door.css');
+    addCss('ghost-sweep.css', 'css/ghost-sweep.css');
     addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();
