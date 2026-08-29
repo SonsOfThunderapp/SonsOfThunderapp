@@ -182,6 +182,7 @@ window.TB_CONFIG = {
     addCss('chair-ring.css', 'css/chair-ring.css');
     addCss('card-chips.css', 'css/card-chips.css');
     addJs('card-chips.js', 'js/card-chips.js');
+    addCss('logo-home.css', 'css/logo-home.css');
     addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();
