@@ -208,10 +208,6 @@
     if (!t || !t.closest) return;
     var nav = t.closest('.nav-item[data-view]');
     if (nav) {
-      var view = nav.getAttribute('data-view');
-      if (view === 'brothers') requestIsland('brothers');
-      else if (view === 'events') requestIsland('memories');
-      else if (view === 'about') requestIsland('more');
       return;
     }
     if (t.closest('#replay-tour-btn, #take-tour-btn')) {
