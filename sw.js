@@ -1,4 +1,4 @@
-/* 20260829-chair-stack */
+/* 20260829-mem-more-stay */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
