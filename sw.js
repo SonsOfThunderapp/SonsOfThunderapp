@@ -1,4 +1,4 @@
-/* 20260829-door-nofilm */
+/* 20260829-door-noobserve */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
