@@ -40,8 +40,20 @@
       if (e.stopImmediatePropagation) e.stopImmediatePropagation();
     }
   }, true);
-  document.addEventListener('touchend', function () { tab.on = false; }, true);
-  document.addEventListener('touchcancel', function () { tab.on = false; }, true);
+  function killTab(e) {
+    if (!tab.on) return;
+    var t = (e.changedTouches && e.changedTouches[0]) || (e.touches && e.touches[0]);
+    var dx = t ? (t.clientX - tab.x) : 0;
+    var dy = t ? (t.clientY - tab.y) : 0;
+    tab.on = false;
+    if (inSheet(e.target)) return;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
+      e.stopPropagation();
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+    }
+  }
+  document.addEventListener('touchend', killTab, true);
+  document.addEventListener('touchcancel', killTab, true);
 
   var hold = { root: null, panel: null, y: 0, dy: 0, on: false };
   function resetPanel() {
