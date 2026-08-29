@@ -1,0 +1,18 @@
+#view-home .next-meeting.phase-week {
+  box-shadow: 0 0 0 1px rgba(212,168,58,0.55);
+}
+#view-home .next-meeting.phase-soon,
+#view-home .next-meeting.phase-tonight {
+  box-shadow: 0 0 0 1px #FEF105, 0 0 18px rgba(254,241,5,0.28);
+}
+#view-home .next-meeting.phase-tonight #meeting-phase-label,
+#view-home .next-meeting.phase-soon #meeting-phase-label {
+  color: #FEF105 !important;
+  text-shadow: 0 0 8px rgba(254,241,5,0.45);
+}
+#view-home .next-meeting.phase-post {
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.18);
+}
+#view-home .next-meeting.phase-post #meeting-phase-label {
+  letter-spacing: 0.12em;
+}
