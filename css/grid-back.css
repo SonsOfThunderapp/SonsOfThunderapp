@@ -1,0 +1,26 @@
+#view-events #media-feed.mem-grid,
+#view-events #media-feed.mem-has-grid,
+#view-events #media-feed {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin: 0 !important;
+}
+#view-events #media-feed .mem-tile,
+#view-events #media-feed .media-thumb {
+  margin: 0 !important;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #111;
+}
+#view-events #media-feed img,
+#view-events #media-feed video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+#view-events #media-feed .empty-memories-cta {
+  grid-column: 1 / -1;
+}
