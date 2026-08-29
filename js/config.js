@@ -190,6 +190,7 @@ window.TB_CONFIG = {
     addCss('proof-btn.css', 'css/proof-btn.css');
     addJs('proof-btn.js', 'js/proof-btn.js');
     addJs('hush-bubble.js', 'js/hush-bubble.js');
+    addCss('ptr-kill.css', 'css/ptr-kill.css');
     addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();

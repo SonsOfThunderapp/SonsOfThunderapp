@@ -2,21 +2,21 @@
   if (window.__tbHomeOnlyPull) return;
   window.__tbHomeOnlyPull = true;
 
-  var startY = 0, startX = 0, armed = false, fired = false, headerLock = false;
+  var startY = 0, startX = 0, armed = false, fired = false;
 
   function onHome() {
     var home = document.getElementById('view-home');
     return !!(home && home.classList.contains('active'));
   }
+  function activeView() {
+    return document.querySelector('#views .view.active') || document.querySelector('.view.active');
+  }
   function inSheet(t) {
     if (!t || !t.closest) return false;
     return !!t.closest('.modal, #brother-detail, #profile-modal, #memory-viewer, #tb-theater, #thunder-panel, #axum-drop, #tb-tour');
   }
-  function inHeader(t) {
-    if (!t || !t.closest) return false;
-    return !!t.closest('#main-header, #header-logo, .header');
-  }
   function soft() {
+    if (!onHome()) return;
     if (fired) return;
     fired = true;
     try { if (typeof window.tbToast === 'function') window.tbToast('BOARD UPDATED', 1800); } catch (e0) {}
@@ -46,17 +46,12 @@
 
   document.addEventListener('touchstart', function (e) {
     armed = false;
-    headerLock = false;
     if (!e.touches || !e.touches[0]) return;
     startY = e.touches[0].clientY || 0;
     startX = e.touches[0].clientX || 0;
     if (inSheet(e.target)) return;
-    if (!onHome() && inHeader(e.target)) {
-      headerLock = true;
-      return;
-    }
     if (!onHome()) return;
-    if (!inHeader(e.target) && startY > 120) return;
+    if (startY > 140) return;
     armed = true;
   }, true);
 
@@ -64,16 +59,21 @@
     if (!e.touches || !e.touches[0]) return;
     if (inSheet(e.target)) return;
     var y = e.touches[0].clientY || 0;
-    if (headerLock && !onHome()) {
-      e.preventDefault();
+    var dy = y - startY;
+    if (onHome()) {
+      if (armed && dy > 8) e.preventDefault();
       return;
     }
-    if (onHome() && armed && (y - startY) > 10) e.preventDefault();
+    var view = activeView();
+    var top = view ? view.scrollTop : 0;
+    if (top <= 0 && dy > 6) {
+      e.preventDefault();
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+    }
   }, { capture: true, passive: false });
 
   document.addEventListener('touchend', function (e) {
-    headerLock = false;
-    if (!armed) return;
+    if (!armed) { armed = false; return; }
     armed = false;
     if (!onHome() || inSheet(e.target)) return;
     var t = (e.changedTouches && e.changedTouches[0]) || {};
@@ -82,8 +82,5 @@
     if (dy >= 56 && Math.abs(dx) <= 40) soft();
   }, true);
 
-  document.addEventListener('touchcancel', function () {
-    armed = false;
-    headerLock = false;
-  }, true);
+  document.addEventListener('touchcancel', function () { armed = false; }, true);
 })();
