@@ -194,6 +194,8 @@ window.TB_CONFIG = {
     addCss('week-lines.css', 'css/week-lines.css');
     addJs('week-lines.js', 'js/week-lines.js');
     addJs('seat-dead.js', 'js/seat-dead.js');
+    addCss('proof-pipe.css', 'css/proof-pipe.css');
+    addJs('proof-pipe.js', 'js/proof-pipe.js');
     addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();

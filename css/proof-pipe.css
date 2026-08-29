@@ -1,0 +1,37 @@
+#tb-proof-pipe {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: #000;
+  flex-direction: column;
+}
+#tb-proof-pipe.is-on { display: flex; }
+#tb-proof-pipe img {
+  flex: 1;
+  width: 100%;
+  object-fit: contain;
+  background: #000;
+}
+#tb-proof-pipe-bar {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+}
+#tb-proof-pipe-bar button {
+  flex: 1;
+  border: 0;
+  border-radius: 10px;
+  padding: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+#tb-proof-cancel { background: #222; color: #fff; }
+#tb-proof-use { background: #E10600; color: #fff; }
+#tb-proof-status {
+  color: #FEF105;
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  padding-bottom: 8px;
+}
