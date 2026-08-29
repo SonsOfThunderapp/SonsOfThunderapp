@@ -2,6 +2,8 @@
   if (window.__tbTabHold) return;
   window.__tbTabHold = true;
 
+  var ORDER = ['home', 'brothers', 'events', 'about'];
+
   function inSheet(t) {
     if (!t || !t.closest) return false;
     return !!t.closest('.modal, #brother-detail, #profile-modal, #memory-viewer, #tb-theater, #thunder-panel, #axum-drop, #tb-tour');
@@ -21,6 +23,20 @@
     root.classList.add('hidden');
     root.setAttribute('aria-hidden', 'true');
   }
+  function activeView() {
+    var v = document.querySelector('#views .view.active') || document.querySelector('.view.active');
+    if (!v || !v.id) return 'home';
+    return v.id.replace('view-', '');
+  }
+  function go(dir) {
+    var now = activeView();
+    var i = ORDER.indexOf(now);
+    if (i < 0) return;
+    var next = ORDER[i + dir];
+    if (!next) return;
+    var btn = document.querySelector('.bottom-nav [data-view="' + next + '"], #nav-' + next);
+    if (btn) btn.click();
+  }
 
   var tab = { x: 0, y: 0, on: false };
   document.addEventListener('touchstart', function (e) {
@@ -30,30 +46,21 @@
     tab.x = e.touches[0].clientX;
     tab.y = e.touches[0].clientY;
   }, true);
-  document.addEventListener('touchmove', function (e) {
-    if (!tab.on || !e.touches || !e.touches[0]) return;
-    if (inSheet(e.target)) return;
-    var dx = e.touches[0].clientX - tab.x;
-    var dy = e.touches[0].clientY - tab.y;
-    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
-      e.stopPropagation();
-      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-    }
-  }, true);
-  function killTab(e) {
+
+  document.addEventListener('touchend', function (e) {
     if (!tab.on) return;
-    var t = (e.changedTouches && e.changedTouches[0]) || (e.touches && e.touches[0]);
-    var dx = t ? (t.clientX - tab.x) : 0;
-    var dy = t ? (t.clientY - tab.y) : 0;
     tab.on = false;
     if (inSheet(e.target)) return;
-    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
-      e.stopPropagation();
-      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-    }
-  }
-  document.addEventListener('touchend', killTab, true);
-  document.addEventListener('touchcancel', killTab, true);
+    var t = (e.changedTouches && e.changedTouches[0]) || {};
+    var dx = (t.clientX || 0) - tab.x;
+    var dy = (t.clientY || 0) - tab.y;
+    if (Math.abs(dx) < 56) return;
+    if (Math.abs(dx) < Math.abs(dy) * 1.2) return;
+    if (dx < 0) go(1);
+    else go(-1);
+  }, true);
+
+  document.addEventListener('touchcancel', function () { tab.on = false; }, true);
 
   var hold = { root: null, panel: null, y: 0, dy: 0, on: false };
   function resetPanel() {
@@ -81,32 +88,17 @@
   document.addEventListener('touchmove', function (e) {
     if (!hold.on || !hold.panel || !e.touches || !e.touches[0]) return;
     hold.dy = e.touches[0].clientY - hold.y;
-    if (hold.dy < 0) hold.dy = 0;
-    hold.panel.style.transform = 'translateY(' + hold.dy + 'px)';
-    hold.panel.style.opacity = String(Math.max(0.45, 1 - hold.dy / 420));
-    if (hold.dy > 8) {
-      e.stopPropagation();
-      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+    if (hold.dy > 0) {
+      hold.panel.style.transform = 'translateY(' + hold.dy + 'px)';
+      hold.panel.style.opacity = String(Math.max(0.35, 1 - hold.dy / 400));
     }
-  }, true);
+  }, { capture: true, passive: true });
   document.addEventListener('touchend', function () {
     if (!hold.on) return;
-    var root = hold.root;
     var dy = hold.dy;
+    var root = hold.root;
     hold.on = false;
-    if (dy >= 120) {
-      closeSheet(root);
-      resetPanel();
-    } else {
-      resetPanel();
-    }
-    hold.root = null;
-    hold.panel = null;
-    hold.dy = 0;
-  }, true);
-  document.addEventListener('touchcancel', function () {
-    if (!hold.on) return;
-    hold.on = false;
+    if (dy > 120) closeSheet(root);
     resetPanel();
     hold.root = null;
     hold.panel = null;

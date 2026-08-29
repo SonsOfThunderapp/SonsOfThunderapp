@@ -1,4 +1,4 @@
-/* 20260829-theater-loud */
+/* 20260829-page-swipe */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
