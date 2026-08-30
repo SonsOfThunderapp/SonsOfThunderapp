@@ -1,0 +1,16 @@
+/* 20260830-more-mark
+   More header stays hidden. Page gets a small official bolt, not the Home wordmark.
+   Island pad already owned by safe-island if that pulse is live. */
+#view-about .about-more-mark,
+#about-more-mark {
+  display: block !important;
+  width: 52px !important;
+  height: 52px !important;
+  max-width: 52px !important;
+  margin: 8px auto 14px !important;
+  object-fit: contain !important;
+  filter: drop-shadow(0 0 10px rgba(254, 241, 5, 0.28));
+}
+#view-about .about-container {
+  text-align: center;
+}
