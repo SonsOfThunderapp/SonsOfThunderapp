@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260830-more-mark3',
+  APP_BUILD: '20260830-home-pull',
   RSVP_PRESENCE: {
     publicOnHome: true,
     seedFloor: 0,
@@ -12,7 +12,7 @@ window.TB_CONFIG = {
     approved: '2026-08-23',
     proof: 'IMG_7978',
     source: 'assets/CANONICAL/logo-print-diecut.png',
-    slots: ['assets/logo@2x.png', 'assets/logo@3x.png', 'assets/logo@4x.png'],
+    slots: ['assets/logo@2x.png', 'assets/logo@3x.png', 'assets/logo@4k.png'],
     aspect: '3000/2077',
     z: 8000,
     pages: ['home', 'brothers', 'events', 'about'],

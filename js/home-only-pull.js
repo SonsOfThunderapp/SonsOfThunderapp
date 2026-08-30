@@ -1,14 +1,14 @@
-/* 20260830-pull-look
-   Home only. Slow committed pull. Pretty bolt ring, not a shoved wordmark.
-   Same latest-build on iPhone and Android. Seat / sb-* stay. No app.js. */
+/* 20260830-home-pull
+   Home only. Pull from the top of Home, not a 160px strip.
+   Slow enough to be committed. Reload stays on Home. Seat / sb-* stay. */
 (function () {
-  if (window.__tbHomeOnlyPull) return;
-  window.__tbHomeOnlyPull = true;
+  if (window.__tbHomePull) return;
+  window.__tbHomePull = true;
 
-  var THRESH = 128;
+  var THRESH = 88;
+  var DEEP = 128;
   var MAX_PULL = 176;
-  var TOP_ZONE = 160;
-  var SLOW_MS = 450;
+  var SLOW_MS = 180;
   var startY = 0;
   var startX = 0;
   var startT = 0;
@@ -29,6 +29,24 @@
         document.body.classList.contains('tb-view-about')) return false;
     var home = document.getElementById('view-home');
     return !!(home && home.classList.contains('active'));
+  }
+
+  function atTop() {
+    var t = 0;
+    var nodes = [
+      document.getElementById('view-home'),
+      document.querySelector('#view-home .container'),
+      document.getElementById('views'),
+      document.getElementById('app'),
+      document.scrollingElement,
+      document.documentElement,
+      document.body
+    ];
+    for (var i = 0; i < nodes.length; i++) {
+      if (nodes[i] && typeof nodes[i].scrollTop === 'number' && nodes[i].scrollTop > t) t = nodes[i].scrollTop;
+    }
+    t = Math.max(t, window.scrollY || window.pageYOffset || 0);
+    return t <= 2;
   }
 
   function inSheet(t) {
@@ -126,10 +144,11 @@
     chain.catch(function () {}).then(function () {
       try {
         var u = new URL(window.location.href);
+        u.searchParams.set('view', 'home');
         u.searchParams.set('_tb', String(t));
         window.location.replace(u.pathname + u.search);
       } catch (e1) {
-        window.location.href = '/?_tb=' + t;
+        window.location.href = '/?view=home&_tb=' + t;
       }
     });
   }
@@ -138,11 +157,10 @@
     armed = false;
     pulling = false;
     if (!e.touches || !e.touches[0]) return;
-    if (!onHome() || inSheet(e.target)) return;
+    if (!onHome() || !atTop() || inSheet(e.target)) return;
     startY = e.touches[0].clientY || 0;
     startX = e.touches[0].clientX || 0;
     startT = Date.now();
-    if (startY > TOP_ZONE) return;
     armed = true;
     hud();
   }, true);
@@ -163,7 +181,7 @@
       snap();
       return;
     }
-    if (dy > 10) {
+    if (dy > 10 && atTop()) {
       pulling = true;
       rubber(dy);
       e.preventDefault();
@@ -177,7 +195,8 @@
     var dy = (t.clientY || 0) - startY;
     var dx = (t.clientX || 0) - startX;
     var held = (Date.now() - startT) >= SLOW_MS;
-    var go = pulling && onHome() && !inSheet(e.target) && dy >= THRESH && held && Math.abs(dx) <= 48;
+    var go = pulling && onHome() && !inSheet(e.target) && Math.abs(dx) <= 48 &&
+      ((dy >= THRESH && held) || dy >= DEEP);
     pulling = false;
     if (go) latest();
     else snap();
