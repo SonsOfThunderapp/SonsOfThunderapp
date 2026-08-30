@@ -222,6 +222,7 @@ window.TB_CONFIG = {
     addJs('mem-stay.js', 'js/mem-stay.js');
     addJs('week-badge.js', 'js/week-badge.js');
     addCss('profile-inspect.css', 'css/profile-inspect.css');
+    addCss('safe-island.css', 'css/safe-island.css');
     addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();
