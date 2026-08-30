@@ -1,4 +1,4 @@
-/* 20260829-mem-stay */
+/* 20260829-week-badge */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
