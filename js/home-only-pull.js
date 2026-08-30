@@ -18,7 +18,8 @@
 
   function onHome() {
     var home = document.getElementById('view-home');
-    return !!(home && home.classList.contains('active'));
+    if (!(home && home.classList.contains('active'))) return false;
+    return !document.querySelector('.view.active:not(#view-home)');
   }
 
   function inSheet(t) {

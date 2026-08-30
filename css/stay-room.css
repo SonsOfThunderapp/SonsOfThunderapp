@@ -1,0 +1,6 @@
+/* 20260830-stay-room
+   Safari PTR reloads the standalone PWA. Reload paints Home.
+   Kill the bounce. Do not lock overflow. */
+html, body, #app, #views, .view {
+  overscroll-behavior-y: none;
+}

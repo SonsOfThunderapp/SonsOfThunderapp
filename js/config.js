@@ -226,6 +226,7 @@ window.TB_CONFIG = {
     addJs('home-only-pull.js', 'js/home-only-pull.js');
     addCss('more-mark.css', 'css/more-mark.css');
     addJs('more-mark.js', 'js/more-mark.js');
+    addCss('stay-room.css', 'css/stay-room.css');
     addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();
