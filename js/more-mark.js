@@ -6,9 +6,9 @@
   window.__tbMoreMark4 = true;
 
   var SRC = [
-    '/assets/icon-official.png',
-    '/assets/icon-official-180.png',
-    '/assets/bolt-only.png'
+    '/assets/bolt-only.png',
+    '/assets/logo-bolt-isolated.png',
+    '/assets/icon-official.png'
   ];
 
   function paint(img) {
@@ -57,7 +57,7 @@
     var img = document.getElementById('about-more-mark');
     if (img) {
       paint(img);
-      if (!img.getAttribute('src')) bindSrc(img);
+      if ((img.getAttribute('src') || '').indexOf('bolt-only') === -1) bindSrc(img);
       return;
     }
     img = document.createElement('img');

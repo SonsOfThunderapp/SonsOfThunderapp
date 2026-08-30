@@ -40,8 +40,14 @@ html {
   filter: none !important;
 }
 
-/* Every bolt reads the same number. */
-#about-more-mark,
+/* More header: isolated bolt. Token glow follows the bolt, not a box. */
+#view-about #about-more-mark,
+#about-more-mark {
+  box-shadow: none !important;
+  filter: drop-shadow(0 0 10px rgba(254, 241, 5, var(--tb-glow))) !important;
+}
+
+/* Every other bolt reads the same number. */
 .about-bolt-glow,
 .qr-bolt-img,
 .qr-bolt-img.qr-bolt-glow,
