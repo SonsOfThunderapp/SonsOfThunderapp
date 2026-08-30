@@ -1,0 +1,48 @@
+/* 20260830-seat-welcome — first lock looks like a chair, not a form. */
+#auth-gate:not(.hidden) {
+  padding-top: var(--tb-island-top, 72px) !important;
+}
+#auth-gate .auth-card {
+  justify-content: flex-start !important;
+  padding-top: 12px !important;
+}
+#auth-gate .tb-seat-mark {
+  display: block;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 10px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(254, 241, 5, 0.4));
+}
+#auth-gate #auth-title {
+  text-align: center !important;
+  color: #fff !important;
+}
+#auth-gate #auth-sub {
+  display: block !important;
+  margin: 0 auto 16px !important;
+  max-width: 20em;
+  text-align: center;
+  color: #bdbdbd;
+  font-size: 14px;
+  line-height: 1.4;
+}
+#auth-gate #auth-signup-btn,
+#auth-gate #auth-magic-btn {
+  display: none !important;
+}
+#auth-gate #auth-password {
+  margin-top: 8px !important;
+}
+#auth-gate .tb-pass-label {
+  display: block;
+  margin: 0 0 8px;
+  color: #bdbdbd;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+#auth-gate #auth-signin-btn {
+  background: #E30600 !important;
+  color: #fff !important;
+  letter-spacing: 0.14em;
+}

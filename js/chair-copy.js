@@ -1,13 +1,17 @@
+/* Open Chair = you take the seat. Not bring-a-buddy. Survives renderBrothers. */
 (function () {
   function stamp() {
     var chair = document.getElementById('brother-open-chair');
     if (!chair) return;
     chair.setAttribute('aria-label', 'Take this seat');
     var sub = chair.querySelector('.brother-slot-sub');
-    if (sub) sub.textContent = 'Take this seat';
+    if (sub) {
+      sub.innerHTML = 'Welcome to the Brotherhood.<br>Sign in. Be a real part of the room.';
+    }
     var title = chair.querySelector('.brother-chair-title');
     if (title) title.textContent = 'OPEN CHAIR';
   }
+
   function bind() {
     stamp();
     var grid = document.getElementById('brothers-grid');
@@ -16,8 +20,15 @@
       new MutationObserver(stamp).observe(grid, { childList: true, subtree: true });
     }
   }
+
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
   else bind();
   setTimeout(bind, 400);
   setTimeout(stamp, 1200);
+  if (!document.querySelector('script[src*="seat-welcome.js"]')) {
+    var s = document.createElement('script');
+    s.src = 'js/seat-welcome.js';
+    s.defer = true;
+    (document.body || document.documentElement).appendChild(s);
+  }
 })();

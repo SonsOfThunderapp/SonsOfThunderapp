@@ -8,15 +8,13 @@
   50% { box-shadow: 0 0 22px rgba(255, 200, 60, 0.45); }
 }
 #brother-open-chair .brother-slot-sub {
-  font-size: 0 !important;
-  line-height: 0 !important;
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+  color: #E8B923 !important;
+  font-weight: 400 !important;
 }
 #brother-open-chair .brother-slot-sub::after {
-  content: "This seat is open.";
-  font-size: 13px;
-  line-height: 1.25;
-  color: #f3c14a;
-  display: block;
+  content: none !important;
 }
 @media (prefers-reduced-motion: reduce) {
   #brother-open-chair.brother-chair { animation: none; }
