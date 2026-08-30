@@ -1,4 +1,4 @@
-/* 20260829-chair-door */
+/* 20260829-grid-lazy */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
