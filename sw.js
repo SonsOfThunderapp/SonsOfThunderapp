@@ -1,4 +1,4 @@
-/* 20260829-safe-top */
+/* 20260829-week-cloud */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
