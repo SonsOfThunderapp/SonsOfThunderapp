@@ -1,22 +1,53 @@
-/* 20260830-more-mark2
-   More header stays hidden. Small official bolt above WHO WE ARE.
-   One-shot at boot missed the node. Wake on More tap too. */
+/* 20260830-more-mark4
+   Do not use class about-logo. styles.css FIX 1 hides that class.
+   Repair an existing dead node. Wake on More tap. */
 (function () {
-  if (window.__tbMoreMark2) return;
-  window.__tbMoreMark2 = true;
+  if (window.__tbMoreMark4) return;
+  window.__tbMoreMark4 = true;
 
-  function place() {
-    var box = document.querySelector('#view-about .about-container');
-    if (!box) return;
-    if (document.getElementById('about-more-mark')) return;
-    var img = document.createElement('img');
+  var SRC = [
+    '/assets/icon-official.png',
+    '/assets/icon-official-180.png',
+    '/assets/bolt-only.png'
+  ];
+
+  function paint(img) {
     img.id = 'about-more-mark';
-    img.className = 'about-logo about-more-mark';
-    img.src = '/assets/icon-official-180.png';
+    img.className = 'about-more-mark';
+    img.removeAttribute('hidden');
+    img.style.display = 'block';
+    img.style.visibility = 'visible';
+    img.style.opacity = '1';
+    img.style.width = '88px';
+    img.style.height = '88px';
     img.alt = 'Sons of Thunder';
     img.width = 88;
     img.height = 88;
     img.decoding = 'async';
+  }
+
+  function bindSrc(img) {
+    var i = 0;
+    img.src = SRC[0];
+    img.onerror = function () {
+      i += 1;
+      if (i < SRC.length) img.src = SRC[i];
+      else if (img.parentNode) img.parentNode.removeChild(img);
+    };
+  }
+
+  function place() {
+    var box = document.querySelector('#view-about .about-container');
+    if (!box) return;
+    var img = document.getElementById('about-more-mark');
+    if (img) {
+      paint(img);
+      if (!img.getAttribute('src')) bindSrc(img);
+      return;
+    }
+    img = document.createElement('img');
+    paint(img);
+    bindSrc(img);
     var title = document.getElementById('who-we-are-title');
     if (title && title.parentNode === box) box.insertBefore(img, title);
     else box.insertBefore(img, box.firstChild);
@@ -32,11 +63,9 @@
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', place);
   else place();
-
   document.addEventListener('pointerdown', function (e) {
     if (isMore(e.target)) place();
   }, true);
-
   var about = document.getElementById('view-about');
   if (about && window.MutationObserver) {
     new MutationObserver(function () {
