@@ -2,10 +2,21 @@
   function $(id) { return document.getElementById(id); }
 
   function seated() {
+    if (document.body.classList.contains('tb-seated')) return true;
     var bar = $('auth-session-bar');
     var who = $('auth-who');
     if (bar && !bar.classList.contains('hidden')) return true;
     if (who && String(who.textContent || '').indexOf('@') !== -1) return true;
+    try {
+      if (localStorage.getItem('tb_seat_locked')) return true;
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i) || '';
+        if (k.indexOf('auth-token') !== -1 || (k.indexOf('sb-') === 0 && k.indexOf('auth') !== -1)) {
+          var v = localStorage.getItem(k) || '';
+          if (v.indexOf('access_token') !== -1) return true;
+        }
+      }
+    } catch (eS) {}
     return false;
   }
 
@@ -16,9 +27,10 @@
     if (sub) sub.textContent = 'Phone, email, password.';
     if (!seated()) {
       entry.classList.remove('tb-seated-hide');
-      document.body.classList.remove('tb-seated');
+      /* do not strip tb-seated here if a session stamp already set it */
       return;
     }
+    document.body.classList.add('tb-seated');
     entry.classList.add('hidden');
     entry.classList.add('tb-seated-hide');
     entry.setAttribute('hidden', 'hidden');
@@ -73,6 +85,18 @@
     }
   }
 
+
+  function ownFirst() {
+    var grid = $('brothers-grid');
+    if (!grid) return;
+    var btn = grid.querySelector('#tb-own-edit-btn, .tb-own-edit-btn');
+    if (!btn) return;
+    var card = btn.closest('.brother-card');
+    if (!card) return;
+    if (grid.firstElementChild === card) return;
+    grid.insertBefore(card, grid.firstChild);
+  }
+
   function parkThunder() {
     var fab = $('thunder-fab');
     if (!fab) return;
@@ -89,6 +113,7 @@
     hideGhostOd();
     hideHeaderEdit();
     parkThunder();
+    ownFirst();
   }
 
   function bind() {

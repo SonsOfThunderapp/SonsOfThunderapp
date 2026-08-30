@@ -16,3 +16,15 @@
 #view-home .next-meeting.phase-post #meeting-phase-label {
   letter-spacing: 0.12em;
 }
+
+/* 20260830-first-minute
+   Guest Home = gathering + I'm In. Other Home jobs wait.
+   Seated brothers keep announcements / member chrome. */
+body:not(.tb-seated) #view-home #home-a2hs,
+body:not(.tb-seated) #view-home #home-member-cta,
+body:not(.tb-seated) #view-home #announcements-title,
+body:not(.tb-seated) #view-home #announcements,
+body:not(.tb-seated) #view-home #axum-chip,
+body:not(.tb-seated) #view-home #last-fire {
+  display: none !important;
+}

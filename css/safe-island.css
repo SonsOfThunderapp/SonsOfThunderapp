@@ -73,7 +73,7 @@
 
 /* One-screen profile. QR stays scannable. No poster. */
 #brother-detail:not(.hidden) {
-  overflow-y: hidden !important;
+  overflow-y: auto !important;
 }
 #brother-detail:not(.hidden) .brother-detail-panel {
   max-height: calc(100dvh - var(--tb-island-top) - 12px) !important;
@@ -115,4 +115,16 @@
 #brother-detail:not(.hidden) .brother-qr-hint {
   font-size: 11px !important;
   margin: 4px 0 0 !important;
+}
+
+/* Beat bros-safe / safe-top. Same pad. Higher specificity. */
+#view-brothers.active.view,
+#view-events.active.view,
+#view-about.active.view {
+  padding-top: var(--tb-island-top) !important;
+  box-sizing: border-box !important;
+}
+#view-brothers.active.view > .container,
+#view-events.active.view > .container {
+  padding-top: 8px !important;
 }
