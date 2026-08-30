@@ -1,4 +1,4 @@
-/* 20260829-glow-token */
+/* 20260829-scroll-back */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
