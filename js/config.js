@@ -224,6 +224,8 @@ window.TB_CONFIG = {
     addCss('safe-island.css', 'css/safe-island.css');
     addCss('home-only-pull.css', 'css/home-only-pull.css');
     addJs('home-only-pull.js', 'js/home-only-pull.js');
+    addCss('more-mark.css', 'css/more-mark.css');
+    addJs('more-mark.js', 'js/more-mark.js');
     addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();
