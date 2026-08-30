@@ -1,17 +1,15 @@
-/* 20260830-more-mark3
-   More header stays hidden. Page gets a small official bolt, not the Home wordmark. */
+/* 20260830-more-mark
+   More header stays hidden. Official bolt above WHO WE ARE.
+   52px was a pin. 88px fills a little of the open black. Not the Home wordmark. */
 #view-about .about-more-mark,
 #about-more-mark {
   display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  width: 52px !important;
-  height: 52px !important;
-  max-width: 52px !important;
-  margin: 8px auto 14px !important;
+  width: 88px !important;
+  height: 88px !important;
+  max-width: 88px !important;
+  margin: 4px auto 16px !important;
   object-fit: contain !important;
-  filter: drop-shadow(0 0 10px rgba(254, 241, 5, 0.28));
-  pointer-events: none;
+  filter: drop-shadow(0 0 14px rgba(254, 241, 5, 0.32));
 }
 #view-about .about-container {
   text-align: center;
