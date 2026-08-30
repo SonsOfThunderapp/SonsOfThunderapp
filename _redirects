@@ -4,6 +4,9 @@
 # 20260827-sdk1: official UMD at this path so PWA does not get index.html
 /js/supabase.min.js  https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js  200!
 
+# 20260830-more-mark: kitchen copy of official bolt at the 180 path
+/assets/icon-official-180.png  /assets/icon-official.png  200
+
 /tap    /index.html   200
 /tap/*  /index.html   200
 /share-memory  /index.html  200
