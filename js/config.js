@@ -171,7 +171,6 @@ window.TB_CONFIG = {
     } catch (eNav) {}
     addCss('tab-hold.css', 'css/tab-hold.css');
     addJs('tab-hold.js', 'js/tab-hold.js');
-    addCss('no-ios-ptr.css', 'css/no-ios-ptr.css');
     addCss('proof-plate.css', 'css/proof-plate.css');
     addCss('imin-hit.css', 'css/imin-hit.css');
     addCss('chair-ring.css', 'css/chair-ring.css');
@@ -223,6 +222,8 @@ window.TB_CONFIG = {
     addJs('week-badge.js', 'js/week-badge.js');
     addCss('profile-inspect.css', 'css/profile-inspect.css');
     addCss('safe-island.css', 'css/safe-island.css');
+    addCss('home-only-pull.css', 'css/home-only-pull.css');
+    addJs('home-only-pull.js', 'js/home-only-pull.js');
     addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();
