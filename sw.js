@@ -1,4 +1,4 @@
-/* 20260829-theater-sound-win */
+/* 20260829-chair-door */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();

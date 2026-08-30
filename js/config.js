@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260829-theater-sound-win',
+  APP_BUILD: '20260829-chair-door',
   RSVP_PRESENCE: {
     publicOnHome: true,
     seedFloor: 0,
@@ -211,6 +211,7 @@ window.TB_CONFIG = {
     addCss('ghost-library.css', 'css/ghost-library.css');
     addJs('phone-signin.js', 'js/phone-signin.js');
     addJs('theater-sound-win.js', 'js/theater-sound-win.js');
+    addJs('chair-door.js', 'js/chair-door.js');
     addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();
