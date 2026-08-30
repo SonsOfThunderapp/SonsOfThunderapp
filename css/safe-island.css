@@ -1,0 +1,61 @@
+/* 20260830-safe-island
+   LAW: nothing bleeds into native time / battery / Dynamic Island.
+   Full-screen sheets and sticky headers share one top pad.
+   Does not shrink logos. Does not restyle buttons. Does not touch app.js. */
+
+:root {
+  --tb-island-top: max(72px, calc(env(safe-area-inset-top, 0px) + 54px));
+}
+
+/* Full-screen inspect / event / auth / confirm */
+#brother-detail:not(.hidden),
+#info-detail:not(.hidden),
+#auth-gate:not(.hidden),
+.cal-confirm-sheet:not(.hidden),
+#imin-a2hs-sheet:not(.hidden) {
+  padding-top: var(--tb-island-top) !important;
+  box-sizing: border-box !important;
+}
+
+/* Bottom-sheet .modal family — keep them off the island when tall */
+.modal:not(.hidden),
+#profile-modal:not(.hidden),
+#contact-qr-modal:not(.hidden),
+#qr-explainer-modal:not(.hidden),
+#thunder-modal:not(.hidden),
+#install-modal:not(.hidden),
+#media-modal:not(.hidden),
+#admin-room-modal:not(.hidden),
+#admin-sms-modal:not(.hidden),
+#admin-ann-modal:not(.hidden),
+#admin-events-modal:not(.hidden),
+#admin-code-modal:not(.hidden),
+#admin-push-modal:not(.hidden),
+#ios-install-overlay:not(.hidden),
+#inapp-install-overlay:not(.hidden) {
+  padding-top: var(--tb-island-top) !important;
+  box-sizing: border-box !important;
+}
+
+/* Chrome that pins to the top of a full-screen player */
+.memory-viewer-top {
+  padding-top: var(--tb-island-top) !important;
+}
+#tb-theater-top {
+  padding-top: var(--tb-island-top) !important;
+}
+
+/* Auth card used to use 14px. That is the island. */
+#auth-gate:not(.hidden) .auth-card {
+  padding-top: var(--tb-island-top) !important;
+}
+
+/* Pages whose own header is hidden (More) or whose wordmark sits high */
+#view-about .about-container,
+.about-container {
+  padding-top: var(--tb-island-top) !important;
+}
+#main-header.header,
+.header {
+  padding-top: var(--tb-island-top) !important;
+}
