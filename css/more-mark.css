@@ -1,14 +1,17 @@
-/* 20260830-more-mark
+/* 20260830-more-mark3
    More header stays hidden. Page gets a small official bolt, not the Home wordmark. */
 #view-about .about-more-mark,
 #about-more-mark {
   display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
   width: 52px !important;
   height: 52px !important;
   max-width: 52px !important;
   margin: 8px auto 14px !important;
   object-fit: contain !important;
   filter: drop-shadow(0 0 10px rgba(254, 241, 5, 0.28));
+  pointer-events: none;
 }
 #view-about .about-container {
   text-align: center;

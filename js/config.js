@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260830-plate-gate',
+  APP_BUILD: '20260830-more-mark3',
   RSVP_PRESENCE: {
     publicOnHome: true,
     seedFloor: 0,
