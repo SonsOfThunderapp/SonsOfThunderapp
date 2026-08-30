@@ -1,4 +1,4 @@
-/* 20260829-phone-signin */
+/* 20260829-theater-sound-win */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
