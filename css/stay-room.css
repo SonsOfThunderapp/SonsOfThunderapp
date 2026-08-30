@@ -1,6 +1,6 @@
-/* 20260830-stay-bros
-   Safari PTR on Brothers reloads the PWA. Reload paints Home.
-   Kill the bounce. Do not lock overflow. */
+/* 20260830-no-flash
+   Last room paints before Home can flash.
+   Kill Safari PTR off Home. Do not lock overflow. */
 html, body, #app, #views, .view {
   overscroll-behavior-y: none !important;
 }
@@ -11,4 +11,18 @@ html:has(#view-events.active) #view-home,
 html:has(#view-about.active) #view-home {
   overscroll-behavior-y: none !important;
   pointer-events: none;
+}
+html[data-tb-last="brothers"] #view-home,
+html[data-tb-last="events"] #view-home,
+html[data-tb-last="about"] #view-home {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+html[data-tb-last="brothers"] #view-brothers,
+html[data-tb-last="events"] #view-events,
+html[data-tb-last="about"] #view-about {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }

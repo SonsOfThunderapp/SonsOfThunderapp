@@ -147,6 +147,13 @@ window.TB_CONFIG = {
       }
     }
     addPaint('css/first-paint.css', 'js/first-paint.js');
+    addCss('stay-room.css', 'css/stay-room.css');
+    if (!document.querySelector('script[src*="stay-room.js"]')) {
+      var sStay = document.createElement('script');
+      sStay.src = 'js/stay-room.js?v=' + encodeURIComponent(__tbB);
+      sStay.defer = false;
+      (document.head || document.documentElement).appendChild(sStay);
+    }
     addCss('text-leader-quiet.css', 'css/text-leader-quiet.css');
     addCss('imin-settle.css', 'css/imin-settle.css');
     addCss('header-mark.css', 'css/header-mark.css');
@@ -226,8 +233,6 @@ window.TB_CONFIG = {
     addJs('home-only-pull.js', 'js/home-only-pull.js');
     addCss('more-mark.css', 'css/more-mark.css');
     addJs('more-mark.js', 'js/more-mark.js');
-    addCss('stay-room.css', 'css/stay-room.css');
-    addJs('stay-room.js', 'js/stay-room.js');
     addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();
