@@ -221,6 +221,26 @@
       box.appendChild(tile(src));
     });
     box.classList.add('mem-grid', 'mem-has-grid');
+    stampCount();
+  }
+
+  function stampCount() {
+    var box = feed();
+    if (!box) return;
+    var n = box.querySelectorAll('.mem-tile, .media-thumb').length;
+    var el = document.getElementById('tb-mem-count');
+    if (!el) {
+      el = document.createElement('p');
+      el.id = 'tb-mem-count';
+      box.insertAdjacentElement('afterend', el);
+    }
+    if (n < 2) {
+      el.hidden = true;
+      el.textContent = '';
+      return;
+    }
+    el.hidden = false;
+    el.textContent = n + ' PROOF';
   }
 
   function wallReady() {
@@ -230,11 +250,16 @@
   }
 
   function requestPaint() {
-    if (ticking || wallReady()) return;
+    if (wallReady()) {
+      stampCount();
+      return;
+    }
+    if (ticking) return;
     ticking = true;
     setTimeout(function () {
       ticking = false;
       paint();
+      stampCount();
     }, 60);
   }
 
@@ -269,10 +294,11 @@
       if (onEvents()) requestPaint();
     });
   }
-  if (!document.querySelector('link[href*="mem-pop.css"]')) {
+  ['css/mem-pop.css', 'css/mem-count.css'].forEach(function (href) {
+    if (document.querySelector('link[href*="' + href.split('/').pop() + '"]')) return;
     var l = document.createElement('link');
     l.rel = 'stylesheet';
-    l.href = 'css/mem-pop.css';
+    l.href = href;
     (document.head || document.documentElement).appendChild(l);
-  }
+  });
 })();

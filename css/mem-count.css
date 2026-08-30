@@ -1,0 +1,16 @@
+/* 20260830-mem-count — signpost under the wall. Not a title. Not a chip. */
+#view-events #tb-mem-count {
+  margin: 10px 0 4px;
+  padding: 0;
+  text-align: center;
+  font-family: "Bebas Neue", Impact, "Arial Narrow", sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  color: #8a8a8a;
+  text-transform: uppercase;
+}
+#view-home #tb-mem-count,
+#view-brothers #tb-mem-count,
+#view-about #tb-mem-count {
+  display: none !important;
+}
