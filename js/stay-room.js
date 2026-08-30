@@ -1,6 +1,6 @@
-/* 20260830-no-flash
-   Kill-app reopen boots Home for a beat. Stamp last room on <html> first.
-   Then click the tab. No 1s Home flash. */
+/* 20260830-all-rooms
+   Last room is every page: Home, Brothers, Memories, More.
+   Stamp the tab you tap. Restore that tab. No Home flash. */
 (function () {
   var KEY = 'tbLastRoom';
   var ALLOW = { home: 1, brothers: 1, events: 1, about: 1 };
@@ -29,10 +29,16 @@
     } catch (eP) {}
   }
 
+  function stamp(room) {
+    if (!ALLOW[room]) return;
+    try { localStorage.setItem(KEY, room); } catch (eS) {}
+    paintLast(room);
+  }
+
   function currentRoom() {
-    var v = document.querySelector('#views .view.active') || document.querySelector('.view.active');
-    if (v && v.id) {
-      var id = v.id.replace('view-', '');
+    var other = document.querySelector('#view-brothers.active, #view-events.active, #view-about.active, .view.active:not(#view-home)');
+    if (other && other.id) {
+      var id = other.id.replace('view-', '');
       if (ALLOW[id]) return id;
     }
     var nav = document.querySelector('.bottom-nav [data-view].active, .nav-item[data-view].active');
@@ -40,17 +46,14 @@
       var d = nav.getAttribute('data-view') || '';
       if (ALLOW[d]) return d;
     }
+    var home = document.getElementById('view-home');
+    if (home && home.classList.contains('active')) return 'home';
     return '';
   }
 
   function save() {
-    try {
-      var r = currentRoom();
-      if (r) {
-        localStorage.setItem(KEY, r);
-        paintLast(r);
-      }
-    } catch (e0) {}
+    var r = currentRoom();
+    if (r) stamp(r);
   }
 
   function urlWants() {
@@ -94,8 +97,12 @@
   }
 
   document.addEventListener('click', function (e) {
-    var n = e.target && e.target.closest && e.target.closest('[data-view], .nav-item');
-    if (n) setTimeout(save, 40);
+    var n = e.target && e.target.closest && e.target.closest('[data-view]');
+    if (n) {
+      var d = n.getAttribute('data-view') || '';
+      if (ALLOW[d]) stamp(d);
+    }
+    setTimeout(save, 40);
   }, true);
 
   function watch() {
@@ -146,7 +153,9 @@
       document.getElementById('app'),
       document.getElementById('views'),
       document.querySelector('.view.active'),
-      document.getElementById('view-brothers')
+      document.getElementById('view-brothers'),
+      document.getElementById('view-events'),
+      document.getElementById('view-about')
     ];
     for (var i = 0; i < nodes.length; i++) {
       if (nodes[i] && typeof nodes[i].scrollTop === 'number' && nodes[i].scrollTop > t) t = nodes[i].scrollTop;
