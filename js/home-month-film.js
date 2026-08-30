@@ -172,15 +172,20 @@
     paintTile();
     if (tile.dataset.tbFilmArm === '1') return;
     tile.dataset.tbFilmArm = '1';
+    loadTheater(function () {
+      if (window.ThunderTheater && window.ThunderTheater.ensure) {
+        try { window.ThunderTheater.ensure(); } catch (eE) {}
+      }
+    });
     tile.addEventListener('click', function (ev) {
-      if (tile.__tbTheaterBound) return;
       ev.preventDefault();
       ev.stopPropagation();
-      loadTheater(function () {
+      function go() {
         if (!window.ThunderTheater) return;
-        window.ThunderTheater.bindTile(tile, film);
         try { window.ThunderTheater.open(film()); } catch (eO) {}
-      });
+      }
+      if (window.ThunderTheater) go();
+      else loadTheater(go);
     });
   }
 

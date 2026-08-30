@@ -22,7 +22,7 @@
     root.setAttribute('aria-modal', 'true');
     root.innerHTML =
       '<button type="button" class="tb-th-done" aria-label="Done">DONE</button>' +
-      '<video playsinline webkit-playsinline muted></video>' +
+      '<video playsinline webkit-playsinline></video>' +
       '<div class="tb-th-chrome">' +
         '<div class="tb-th-time"><span class="tb-th-cur">0:00</span> / <span class="tb-th-dur">0:00</span></div>' +
         '<input class="tb-th-scrub" type="range" min="0" max="1000" value="0" step="1" aria-label="Seek">' +
@@ -77,10 +77,25 @@
       root.style.background = '#000 url(' + lastPoster + ') center / contain no-repeat';
     }
   }
+  function armSound() {
+    try {
+      video.removeAttribute('muted');
+      video.defaultMuted = false;
+      video.muted = false;
+      video.volume = 0.85;
+    } catch (eA) {}
+    try {
+      var AC = w.AudioContext || w.webkitAudioContext;
+      if (AC) {
+        if (!w.__tbAudioCtx) w.__tbAudioCtx = new AC();
+        if (w.__tbAudioCtx.state === 'suspended') w.__tbAudioCtx.resume();
+      }
+    } catch (eB) {}
+  }
   function onTap(e) {
     e.stopPropagation();
     wakeChrome();
-    try { video.muted = false; video.volume = 1; } catch (e2) {}
+    armSound();
     if (video.paused) {
       var p = video.play();
       if (p && p.catch) p.catch(function () {});
@@ -117,11 +132,11 @@
     root.style.background = '#000';
     video.poster = lastPoster || '';
     if (opts.src) {
-      video.src = opts.src;
+      if (video.getAttribute('src') !== opts.src) video.src = opts.src;
     } else {
       try { video.removeAttribute('src'); video.load(); } catch (e3) {}
     }
-    try { video.muted = true; } catch (e4) {}
+    armSound();
     document.body.classList.add('tb-theater-open');
     root.classList.add('is-open');
     root.classList.remove('is-faded');
@@ -129,13 +144,10 @@
       try { history.pushState({ tbTheater: 1 }, '', location.href); pushed = true; } catch (e5) {}
     }
     wakeChrome();
-    try { video.muted = false; } catch (e4b) {}
     var p = video.play();
     if (p && p.catch) {
       p.catch(function () {
-        try { video.muted = true; } catch (e4c) {}
-        var p2 = video.play();
-        if (p2 && p2.catch) p2.catch(function () {});
+        /* Do not fall back to muted. Wait for the next tap (onTap). */
       });
     }
   }
