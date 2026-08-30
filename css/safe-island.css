@@ -59,3 +59,11 @@
 .header {
   padding-top: var(--tb-island-top) !important;
 }
+
+/* Inner rooms hide the wordmark. The first card then sits in the clock.
+   Pad the room, not the hidden header. */
+#view-events.active,
+#view-brothers.active {
+  padding-top: var(--tb-island-top) !important;
+  box-sizing: border-box !important;
+}
