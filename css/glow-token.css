@@ -1,0 +1,37 @@
+@property --tb-glow {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0.34;
+}
+@keyframes tbToken {
+  0%, 100% { --tb-glow: 0.26; }
+  50% { --tb-glow: 0.48; }
+}
+html {
+  animation: tbToken 4s ease-in-out infinite;
+}
+#rsvp-btn {
+  box-shadow: 0 0 16px rgba(225, 6, 0, var(--tb-glow)) !important;
+}
+#view-events .events-hit-line {
+  box-shadow: 0 0 16px rgba(225, 6, 0, var(--tb-glow)) !important;
+}
+.code-title-glow,
+#the-code-title {
+  text-shadow: 0 0 12px rgba(225, 6, 0, var(--tb-glow)) !important;
+}
+#tb-home-film-tile {
+  box-shadow: 0 0 14px rgba(212, 168, 58, var(--tb-glow)) !important;
+}
+.brother-slot-invite,
+#empty-brothers-cta {
+  box-shadow: 0 0 12px rgba(254, 241, 5, var(--tb-glow)) !important;
+}
+.modal-header h2,
+.modal-title {
+  text-shadow: 0 0 10px rgba(254, 241, 5, var(--tb-glow)) !important;
+  filter: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  html { animation: none; }
+}
