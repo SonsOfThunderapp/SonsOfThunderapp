@@ -1,21 +1,27 @@
-/* 20260830-home-only-pull
-   Pull-to-latest lives on Home only.
-   Hold the page. Release past the line. Then BOARD UPDATED.
-   Other views never reload from a down swipe.
-   Seat / sb-* stay. No app.js. */
+/* 20260830-home-pull-spring
+   Home only. Logo is a mass. Finger = resist. Release = one overshoot.
+   BOARD UPDATED after settle. Other views never reload. No app.js. */
 (function () {
-  if (window.__tbHomeOnlyPull2) return;
-  window.__tbHomeOnlyPull2 = true;
+  if (window.__tbHomeOnlyPull3) return;
+  window.__tbHomeOnlyPull3 = true;
   window.__tbHomePull = true;
 
   var THRESH = 64;
   var MAX_PULL = 96;
-  var TOP_ZONE = 120;
+  var K = 0.22;
+  var C = 0.72;
   var startY = 0;
   var startX = 0;
   var armed = false;
   var pulling = false;
   var fired = false;
+  var pos = 0;
+  var vel = 0;
+  var raf = 0;
+  var reduce = false;
+  try {
+    reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  } catch (eR) {}
 
   function onHome() {
     var home = document.getElementById('view-home');
@@ -35,41 +41,96 @@
     return document.getElementById('header-logo') || document.querySelector('#main-header img');
   }
 
+  function inPullZone(t, y) {
+    if (t && t.closest && t.closest('#main-header, #header-logo')) return true;
+    var head = document.getElementById('main-header');
+    if (head) {
+      var r = head.getBoundingClientRect();
+      if (y <= r.bottom + 24) return true;
+    }
+    var home = document.getElementById('view-home');
+    if (home && (home.scrollTop || 0) <= 2 && y < 280) return true;
+    return false;
+  }
+
   function resist(dy) {
     var t = Math.max(0, dy);
-    return MAX_PULL * (1 - Math.exp(-t / 88));
+    var y = MAX_PULL * (1 - Math.exp(-t / 88));
+    if (t >= THRESH) y += 4;
+    return y;
+  }
+
+  function paint(y, pullingNow) {
+    var el = mark();
+    pos = y;
+    document.body.classList.toggle('tb-home-pulling', y > 6);
+    document.body.classList.toggle('tb-home-armed', pullingNow && y >= resist(THRESH) - 1);
+    if (!el) return;
+    el.style.transition = 'none';
+    el.style.transform = 'translateY(' + y.toFixed(2) + 'px) scale(' + (1 + y / 420).toFixed(3) + ')';
+    el.classList.toggle('is-pulling', y > 6);
+    el.classList.toggle('is-armed', pullingNow && y >= resist(THRESH) - 1);
+    el.classList.toggle('is-release', !pullingNow && y > 0.4);
+  }
+
+  function stopRaf() {
+    if (raf) {
+      cancelAnimationFrame(raf);
+      raf = 0;
+    }
+  }
+
+  function restMark() {
+    var el = mark();
+    document.body.classList.remove('tb-home-pulling', 'tb-home-armed');
+    pos = 0;
+    vel = 0;
+    if (!el) return;
+    el.classList.remove('is-pulling', 'is-release', 'is-armed');
+    el.style.transition = '';
+    el.style.transform = '';
+  }
+
+  function spring(done) {
+    stopRaf();
+    var el = mark();
+    if (reduce || !el) {
+      restMark();
+      if (done) done();
+      return;
+    }
+    vel = Math.min(18, pos * 0.08);
+    function tick() {
+      vel += (-K * pos) - (C * vel);
+      pos += vel;
+      if (pos < -6) {
+        pos = -6;
+        vel *= -0.35;
+      }
+      paint(Math.max(0, pos), false);
+      if (Math.abs(pos) < 0.35 && Math.abs(vel) < 0.18) {
+        restMark();
+        raf = 0;
+        if (done) done();
+        return;
+      }
+      raf = requestAnimationFrame(tick);
+    }
+    raf = requestAnimationFrame(tick);
   }
 
   function rubber(dy) {
-    var el = mark();
-    var y = resist(dy);
-    document.body.classList.toggle('tb-home-pulling', y > 6);
-    if (!el) return;
-    el.classList.remove('is-release');
-    el.style.transition = 'none';
-    el.style.transform = 'translateY(' + y.toFixed(1) + 'px) scale(' + (1 + y / 420).toFixed(3) + ')';
-    el.classList.toggle('is-pulling', y > 6);
+    stopRaf();
+    paint(resist(dy), true);
   }
 
-  function snap() {
-    var el = mark();
-    document.body.classList.remove('tb-home-pulling');
-    if (!el) return;
-    el.classList.add('is-release');
-    el.style.transition = 'transform 0.48s cubic-bezier(0.22, 1.55, 0.32, 1)';
-    el.style.transform = 'translateY(0) scale(1)';
-    el.classList.remove('is-pulling');
-    window.setTimeout(function () {
-      el.classList.remove('is-release');
-      el.style.transition = '';
-      el.style.transform = '';
-    }, 520);
+  function snap(done) {
+    spring(done);
   }
 
   function soft() {
     if (fired) return;
     fired = true;
-    snap();
     try {
       if (typeof window.tbToast === 'function') window.tbToast('BOARD UPDATED', 1800);
     } catch (e0) {}
@@ -82,21 +143,23 @@
         window.location.reload();
       }
     };
-    var chain = Promise.resolve();
-    try {
-      if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
-        chain = navigator.serviceWorker.getRegistrations().then(function (regs) {
-          return Promise.all((regs || []).map(function (r) { return r.unregister(); }));
-        });
-      }
-    } catch (e2) {}
-    chain.then(function () {
-      if (window.caches && caches.keys) {
-        return caches.keys().then(function (keys) {
-          return Promise.all((keys || []).map(function (k) { return caches.delete(k); }));
-        });
-      }
-    }).catch(function () {}).then(finish);
+    spring(function () {
+      var chain = Promise.resolve();
+      try {
+        if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+          chain = navigator.serviceWorker.getRegistrations().then(function (regs) {
+            return Promise.all((regs || []).map(function (r) { return r.unregister(); }));
+          });
+        }
+      } catch (e2) {}
+      chain.then(function () {
+        if (window.caches && caches.keys) {
+          return caches.keys().then(function (keys) {
+            return Promise.all((keys || []).map(function (k) { return caches.delete(k); }));
+          });
+        }
+      }).catch(function () {}).then(finish);
+    });
   }
 
   document.addEventListener('touchstart', function (e) {
@@ -106,7 +169,8 @@
     if (!onHome() || inSheet(e.target)) return;
     startY = e.touches[0].clientY || 0;
     startX = e.touches[0].clientX || 0;
-    if (startY > TOP_ZONE) return;
+    if (!inPullZone(e.target, startY)) return;
+    stopRaf();
     armed = true;
   }, true);
 

@@ -20,6 +20,11 @@ html, body, #app, #views, .view {
 #main-header img.is-release {
   filter: drop-shadow(0 0 10px rgba(254, 241, 5, 0.22));
 }
+#header-logo.is-armed,
+#main-header img.is-armed,
+body.tb-home-armed #header-logo {
+  filter: drop-shadow(0 0 22px rgba(254, 241, 5, 0.62));
+}
 body.tb-home-pulling #main-header {
   box-shadow: 0 8px 20px rgba(254, 241, 5, 0.10);
 }
