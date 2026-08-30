@@ -1,9 +1,98 @@
-/* 20260830-stay-bros
-   Off Home, a down-swipe must not reload the PWA.
-   Reload always paints Home. Kill Safari PTR. No overflow:hidden. */
+/* 20260830-last-room
+   Kill-app reopen boots start_url /. That paints Home.
+   Remember the room. Restore it. Keep Safari PTR killed off Home. */
 (function () {
   if (window.__tbStayRoom) return;
   window.__tbStayRoom = true;
+
+  var KEY = 'tbLastRoom';
+  var ALLOW = { home: 1, brothers: 1, events: 1, about: 1 };
+
+  function currentRoom() {
+    var v = document.querySelector('#views .view.active') || document.querySelector('.view.active');
+    if (v && v.id) {
+      var id = v.id.replace('view-', '');
+      if (ALLOW[id]) return id;
+    }
+    var nav = document.querySelector('.bottom-nav [data-view].active, .nav-item[data-view].active');
+    if (nav) {
+      var d = nav.getAttribute('data-view') || '';
+      if (ALLOW[d]) return d;
+    }
+    return '';
+  }
+
+  function save() {
+    try {
+      var r = currentRoom();
+      if (r) localStorage.setItem(KEY, r);
+    } catch (e0) {}
+  }
+
+  function urlWants() {
+    try {
+      var u = new URL(window.location.href);
+      if (u.searchParams.get('imin')) return 'home';
+      if (u.searchParams.get('ask')) return '';
+      if (u.searchParams.get('shared') || u.searchParams.get('add')) return 'events';
+      var v = u.searchParams.get('view');
+      if (v && ALLOW[v]) return v;
+    } catch (e1) {}
+    return null;
+  }
+
+  function go(room) {
+    if (!ALLOW[room]) return;
+    var btn = document.querySelector('.bottom-nav [data-view="' + room + '"], #nav-' + room + ', .nav-item[data-view="' + room + '"]');
+    if (btn) btn.click();
+  }
+
+  function restore() {
+    var want = urlWants();
+    if (want === 'home') return;
+    if (want === '') return;
+    if (want) {
+      if (currentRoom() !== want) go(want);
+      return;
+    }
+    var last = '';
+    try { last = localStorage.getItem(KEY) || ''; } catch (e2) {}
+    if (!ALLOW[last] || last === 'home') return;
+    var now = currentRoom();
+    if (now === last) return;
+    if (now && now !== 'home') return;
+    var tries = 0;
+    function tick() {
+      tries++;
+      if (currentRoom() === last) { save(); return; }
+      go(last);
+      if (tries < 10) setTimeout(tick, 180);
+    }
+    tick();
+  }
+
+  document.addEventListener('click', function (e) {
+    var n = e.target && e.target.closest && e.target.closest('[data-view], .nav-item');
+    if (n) setTimeout(save, 40);
+  }, true);
+
+  function watch() {
+    var box = document.getElementById('views') || document.body;
+    if (!box || !window.MutationObserver) return;
+    new MutationObserver(save).observe(box, { attributes: true, subtree: true, attributeFilter: ['class'] });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { watch(); restore(); });
+  } else {
+    watch();
+    restore();
+  }
+  setTimeout(restore, 400);
+  setTimeout(restore, 1200);
+  window.addEventListener('pageshow', function (e) {
+    if (e.persisted) restore();
+  });
 
   var startY = 0;
   var startX = 0;

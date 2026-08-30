@@ -1,4 +1,4 @@
-/* 20260830-stay-bros */
+/* 20260830-last-room */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
