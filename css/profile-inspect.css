@@ -1,19 +1,76 @@
+/* Inspect a brother — the code is the hit. Weight + electric. No spring.
+   20260830-profile-center: sheet under the island, stack centered, buttons share width. */
+
+#brother-detail:not(.hidden) {
+  align-items: center !important;
+  justify-content: center !important;
+  padding-left: 18px !important;
+  padding-right: 18px !important;
+  padding-top: max(72px, calc(env(safe-area-inset-top, 0px) + 54px)) !important;
+  padding-bottom: max(20px, env(safe-area-inset-bottom, 0px)) !important;
+}
 #brother-detail:not(.hidden) .brother-detail-panel {
+  width: 100% !important;
+  max-width: 360px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
   animation: tbInspectIn 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 @keyframes tbInspectIn {
   0% { opacity: 0; transform: scale(1.08); filter: brightness(1.35); }
   100% { opacity: 1; transform: scale(1); filter: none; }
 }
-#brother-detail:not(.hidden) #brother-qr-wrap {
+#brother-detail:not(.hidden) .brother-detail-photo,
+#brother-detail:not(.hidden) .brother-detail-photo img {
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+#brother-detail:not(.hidden) .brother-detail-name,
+#brother-detail:not(.hidden) .brother-detail-bio,
+#brother-detail:not(.hidden) .brother-detail-meta {
+  width: 100%;
+  text-align: center !important;
+  padding-left: 18px;
+  padding-right: 18px;
+  box-sizing: border-box;
+}
+#brother-detail:not(.hidden) #tb-sheet-edit,
+#brother-detail:not(.hidden) #brother-share-contact {
   display: block !important;
-  margin: 18px auto 8px;
-  text-align: center;
+  width: calc(100% - 36px) !important;
+  max-width: 320px !important;
+  margin: 8px auto !important;
+  box-sizing: border-box !important;
+  border-radius: 14px !important;
+  text-align: center !important;
+}
+#brother-detail:not(.hidden) #tb-sheet-edit {
+  background: #000 !important;
+  color: #FEF105 !important;
+  border: 1px solid #FEF105 !important;
+  letter-spacing: 0.14em;
+}
+#brother-detail:not(.hidden) #brother-qr-wrap {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  margin: 18px auto 8px !important;
+  padding-left: 18px !important;
+  padding-right: 18px !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
 }
 #brother-detail:not(.hidden) #brother-qr-wrap .qr-stage-inline {
   width: 220px;
   height: 220px;
-  margin: 0 auto;
+  margin: 0 auto !important;
   animation: tbQrHit 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both;
 }
 @keyframes tbQrHit {
