@@ -1,0 +1,10 @@
+#view-home #memory-viewer,
+#view-home #media-feed,
+#view-home .mem-tile,
+#view-home #memory-viewer-stage {
+  display: none !important;
+}
+body.tb-view-home #memory-viewer,
+body:has(#view-home.active) #memory-viewer {
+  display: none !important;
+}

@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260829-grid-dedupe',
+  APP_BUILD: '20260829-mem-stay',
   RSVP_PRESENCE: {
     publicOnHome: true,
     seedFloor: 0,
@@ -218,6 +218,8 @@ window.TB_CONFIG = {
     addCss('safe-top.css', 'css/safe-top.css');
     addJs('week-cloud.js', 'js/week-cloud.js');
     addJs('grid-dedupe.js', 'js/grid-dedupe.js');
+    addCss('mem-stay.css', 'css/mem-stay.css');
+    addJs('mem-stay.js', 'js/mem-stay.js');
     addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();
