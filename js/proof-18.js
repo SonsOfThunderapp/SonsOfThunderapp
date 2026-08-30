@@ -208,7 +208,7 @@
 
   function paint() {
     var box = feed();
-    if (!box) return;
+    if (!box || wallReady()) return;
     box.querySelectorAll('.empty-memories-cta, .empty-memories, .empty-state').forEach(function (n) {
       n.setAttribute('hidden', 'hidden');
       n.style.display = 'none';
@@ -223,8 +223,14 @@
     box.classList.add('mem-grid', 'mem-has-grid');
   }
 
+  function wallReady() {
+    var box = feed();
+    if (!box) return false;
+    return box.querySelectorAll('.mem-tile img, .media-thumb img').length >= WALL.length;
+  }
+
   function requestPaint() {
-    if (ticking) return;
+    if (ticking || wallReady()) return;
     ticking = true;
     setTimeout(function () {
       ticking = false;

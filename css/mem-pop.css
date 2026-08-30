@@ -31,4 +31,5 @@
 #media-feed .media-thumb {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  animation: none !important;
 }

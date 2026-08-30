@@ -624,22 +624,11 @@
       viewer._tbCapObs = vobs;
     }
     var feed = document.getElementById('media-feed');
-    if (feed && !feed._tbMemObs) {
-      var obs = new MutationObserver(function () {
-        if (painting) return;
-        paint();
-      });
-      obs.observe(feed, { childList: true });
-      var hero = document.getElementById('media-hero');
-      if (hero) obs.observe(hero, { childList: true });
-      feed._tbMemObs = obs;
-      feedObs = obs;
-    } else if (feed && feed._tbMemObs) {
-      feedObs = feed._tbMemObs;
+    if (feed && feed._tbMemObs) {
+      try { feed._tbMemObs.disconnect(); } catch (eOff) {}
+      feed._tbMemObs = null;
     }
-    setInterval(function () {
-      paint();
-    }, 400);
+    feedObs = null;
   }
 
   if (document.readyState === 'loading') {
