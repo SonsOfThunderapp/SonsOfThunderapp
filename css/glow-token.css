@@ -42,13 +42,13 @@ html {
 
 /* More header: isolated bolt. Token glow follows the bolt, not a box. */
 #view-about #about-more-mark,
-#about-more-mark {
+#about-more-mark,
+#view-about .about-bolt-glow {
   box-shadow: none !important;
   filter: drop-shadow(0 0 10px rgba(254, 241, 5, var(--tb-glow))) !important;
 }
 
 /* Every other bolt reads the same number. */
-.about-bolt-glow,
 .qr-bolt-img,
 .qr-bolt-img.qr-bolt-glow,
 #thunder-fab .thunder-fab-img,
