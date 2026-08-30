@@ -28,3 +28,15 @@ body:not(.tb-seated) #view-home #axum-chip,
 body:not(.tb-seated) #view-home #last-fire {
   display: none !important;
 }
+
+/* Quiet-yes week card stays off Home. Chair still approves texts in More. */
+#view-home #tb-week-home,
+#tb-week-home,
+#tb-week-home.is-on {
+  display: none !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+}

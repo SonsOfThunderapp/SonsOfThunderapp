@@ -1,3 +1,6 @@
+/* 20260830-glow-bolts
+   One token. One timer. Bolts read --tb-glow.
+   box-shadow / text-shadow only. No filter. No JS. */
 @property --tb-glow {
   syntax: "<number>";
   inherits: true;
@@ -10,6 +13,7 @@
 html {
   animation: tbToken 4s ease-in-out infinite;
 }
+
 #rsvp-btn {
   box-shadow: 0 0 16px rgba(225, 6, 0, var(--tb-glow)) !important;
 }
@@ -22,16 +26,34 @@ html {
 }
 #tb-home-film-tile {
   box-shadow: 0 0 14px rgba(212, 168, 58, var(--tb-glow)) !important;
+  filter: none !important;
 }
 .brother-slot-invite,
-#empty-brothers-cta {
+#empty-brothers-cta,
+#brother-open-chair.brother-chair {
   box-shadow: 0 0 12px rgba(254, 241, 5, var(--tb-glow)) !important;
+  animation: none !important;
 }
 .modal-header h2,
 .modal-title {
   text-shadow: 0 0 10px rgba(254, 241, 5, var(--tb-glow)) !important;
   filter: none !important;
 }
+
+/* Every bolt reads the same number. */
+#about-more-mark,
+.about-bolt-glow,
+.qr-bolt-img,
+.qr-bolt-img.qr-bolt-glow,
+#thunder-fab .thunder-fab-img,
+.mission-bolt.bolt-glow,
+.qr-explainer-bolt,
+span.bolt-glow {
+  animation: none !important;
+  filter: none !important;
+  box-shadow: 0 0 14px rgba(254, 241, 5, var(--tb-glow)) !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { animation: none; }
 }

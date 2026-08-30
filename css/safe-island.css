@@ -57,9 +57,7 @@
 
 .memory-viewer-top,
 #tb-theater-top,
-#auth-gate:not(.hidden) .auth-card,
-#view-about .about-container,
-.about-container {
+#auth-gate:not(.hidden) .auth-card {
   padding-top: var(--tb-island-top) !important;
 }
 
@@ -123,6 +121,8 @@
   box-sizing: border-box !important;
 }
 #view-brothers.active.view > .container,
-#view-events.active.view > .container {
-  padding-top: 8px !important;
+#view-events.active.view > .container,
+#view-about.active.view > .about-container,
+#view-about .about-container {
+  padding-top: 4px !important;
 }

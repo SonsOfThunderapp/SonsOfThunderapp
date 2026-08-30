@@ -9,9 +9,10 @@
   width: 88px !important;
   height: 88px !important;
   max-width: 88px !important;
-  margin: 8px auto 16px !important;
+  margin: 0 auto 12px !important;
   object-fit: contain !important;
-  filter: drop-shadow(0 0 14px rgba(254, 241, 5, 0.32));
+  filter: none !important;
+  box-shadow: 0 0 14px rgba(254, 241, 5, var(--tb-glow, 0.34));
   pointer-events: none;
 }
 #view-about .about-container {
