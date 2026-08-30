@@ -1,43 +1,41 @@
+/* 20260830-film-tile-slim
+   Smaller Home poster. Same 9:16 tap. Same Theater. */
 #tb-home-film-tile {
   display: block;
-  width: 100%;
-  margin: 16px 0 8px;
+  width: min(64vw, 248px);
+  max-height: 40vh;
+  margin: 12px auto 10px;
   padding: 0;
   border: 0;
   background: #000;
-  border-radius: 16px;
+  border-radius: 14px;
   overflow: hidden;
   position: relative;
   aspect-ratio: 9 / 16;
-  max-height: 58vh;
   cursor: pointer;
-  box-shadow: inset 0 0 0 1px rgba(212, 168, 58, 0.7), 0 12px 40px rgba(0, 0, 0, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(212, 168, 58, 0.7), 0 8px 24px rgba(0, 0, 0, 0.45);
 }
 #tb-home-film-tile img {
-  width: 145%;
-  height: 145%;
-  max-width: none;
-  object-fit: contain;
-  object-position: center 46%;
-  padding: 0;
-  margin: -18% 0 0 -22%;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 28%;
   display: block;
   pointer-events: none;
-  filter: drop-shadow(0 0 34px rgba(255, 176, 32, 0.5));
 }
 #tb-home-film-tile::after {
   content: "▶";
   position: absolute;
   left: 50%;
-  bottom: 22%;
+  bottom: 18%;
   transform: translateX(-50%);
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border: 1.5px solid #d4a83a;
   border-radius: 50%;
   color: #d4a83a;
-  font-size: 16px;
-  line-height: 44px;
+  font-size: 15px;
+  line-height: 40px;
   text-align: center;
   text-indent: 3px;
   pointer-events: none;
@@ -47,10 +45,10 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 8%;
+  bottom: 6%;
   color: #d4a83a;
   font-family: "Bebas Neue", "Oswald", sans-serif;
-  font-size: 13px;
+  font-size: 11px;
   letter-spacing: 0.28em;
   text-align: center;
   pointer-events: none;
@@ -62,4 +60,3 @@
 @media (prefers-reduced-motion: reduce) {
   #tb-home-film-tile.tb-film-rise { transform: none; }
 }
-#tb-theater video { object-fit: cover; }
