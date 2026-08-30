@@ -1,30 +1,55 @@
+/* Morning repair pack. Signed-in door, glass sheet, ghost hide. */
 #auth-session-bar:not(.hidden) ~ #auth-entry-btn,
 body.tb-seated #auth-entry-btn,
-#auth-entry-btn.tb-seated-hide { display: none !important; }
+#auth-entry-btn.tb-seated-hide {
+  display: none !important;
+}
+
 #auth-gate:not(.hidden) {
-  position: fixed !important; inset: 0 !important; z-index: 12000 !important;
-  display: flex !important; align-items: stretch !important;
-  background: #000 !important; overflow: hidden !important;
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 12000 !important;
+  display: flex !important;
+  align-items: stretch !important;
+  background: #000 !important;
+  overflow: hidden !important;
 }
 #auth-gate .auth-card {
-  width: 100% !important; height: 100% !important; max-height: 100dvh !important;
-  margin: 0 !important; border-radius: 0 !important; overflow: hidden !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: 100dvh !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
   padding: max(14px, env(safe-area-inset-top)) 18px calc(16px + env(safe-area-inset-bottom)) !important;
-  display: flex !important; flex-direction: column !important; justify-content: center !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
   background: #000 !important;
 }
 #auth-gate .auth-field { margin: 0 0 8px !important; }
-#auth-gate .auth-field input, #auth-gate #auth-password, #auth-gate #auth-reset-code {
-  width: 100% !important; box-sizing: border-box !important;
-  padding: 11px 12px !important; font-size: 16px !important;
+#auth-gate .auth-field input,
+#auth-gate #auth-password,
+#auth-gate #auth-reset-code {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 11px 12px !important;
+  font-size: 16px !important;
 }
 #auth-gate .auth-link-row {
-  display: flex !important; justify-content: space-between !important;
-  align-items: center !important; margin-top: 10px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-top: 10px !important;
 }
 #auth-gate #auth-forgot-btn { display: inline-block !important; }
+
 .brother-card.tb-ghost-hide { display: none !important; }
+
+/* Edit lives on YOUR tile. Not the Brothers header. */
 #view-brothers #edit-profile-btn.tb-header-edit-off { display: none !important; }
+
+/* Thunder further off-stage. Size law 60 / 56. Slide only. */
 #thunder-fab.thunder-fab {
   right: -6px !important;
   bottom: calc(72px + var(--safe-bottom, env(safe-area-inset-bottom, 0px))) !important;
@@ -32,5 +57,51 @@ body.tb-seated #auth-entry-btn,
   height: 60px !important;
   z-index: 150 !important;
   pointer-events: auto !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  overflow: visible !important;
 }
-#thunder-fab .thunder-fab-img { width: 56px !important; height: 56px !important; }
+#thunder-fab .thunder-fab-img {
+  width: 56px !important;
+  height: 56px !important;
+  object-fit: contain !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Ask Thunder hero — same cut character, larger, light file */
+#thunder-modal .thunder-title-img {
+  display: none !important;
+}
+#thunder-modal .thunder-ask-hero {
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  margin: 28px 0 10px;
+  padding: 0 16px 8px;
+  min-height: 176px;
+  max-height: 228px;
+  flex-shrink: 0;
+  background: transparent !important;
+}
+#thunder-modal .thunder-ask-hero-img {
+  display: block !important;
+  width: auto !important;
+  height: auto !important;
+  max-width: min(48vw, 200px) !important;
+  max-height: 208px !important;
+  object-fit: contain !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform-origin: center center;
+  animation: boltLive var(--tb-breathe, 4s ease-in-out infinite) !important;
+}
+@media (max-height: 700px) {
+  #thunder-modal .thunder-ask-hero { min-height: 128px; max-height: 160px; margin-top: 18px; }
+  #thunder-modal .thunder-ask-hero-img { max-height: 148px !important; max-width: min(40vw, 160px) !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #thunder-modal .thunder-ask-hero-img { animation: none !important; }
+}

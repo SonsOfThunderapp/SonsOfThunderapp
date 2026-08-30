@@ -51,13 +51,19 @@ html {
 /* Every other bolt reads the same number. */
 .qr-bolt-img,
 .qr-bolt-img.qr-bolt-glow,
-#thunder-fab .thunder-fab-img,
 .mission-bolt.bolt-glow,
 .qr-explainer-bolt,
 span.bolt-glow {
   animation: none !important;
   filter: none !important;
   box-shadow: 0 0 14px rgba(254, 241, 5, var(--tb-glow)) !important;
+}
+#thunder-fab .thunder-fab-img {
+  animation: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  filter: drop-shadow(0 0 8px rgba(254, 241, 5, var(--tb-glow, 0.55)))
+          drop-shadow(0 0 18px rgba(255, 160, 0, 0.35)) !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

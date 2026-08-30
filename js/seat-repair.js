@@ -130,8 +130,21 @@
     }
   }
 
+  function askHero() {
+    var img = document.querySelector('#thunder-modal .thunder-ask-hero-img');
+    if (img && img.dataset.tbAskHero !== '1') {
+      img.dataset.tbAskHero = '1';
+      img.src = 'assets/thunder-cool-fab.png';
+      img.removeAttribute('srcset');
+      img.setAttribute('width', '200');
+      img.setAttribute('height', '348');
+    }
+  }
+
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
   else bind();
   setTimeout(bind, 400);
   setTimeout(tick, 1200);
+  askHero();
+  setTimeout(askHero, 400);
 })();
