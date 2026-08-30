@@ -36,3 +36,28 @@
   color: #8a8a8a !important;
   text-align: left !important;
 }
+
+#admin-chair-line-modal.modal:not(.hidden) {
+  display: flex !important;
+  align-items: flex-start;
+  justify-content: center;
+}
+.tb-chair-edit-card {
+  margin-top: var(--tb-island-top, 72px);
+  width: min(92vw, 420px);
+}
+.tb-chair-edit-hint {
+  color: #8a8a8a;
+  font-size: 13px;
+  margin: 0 0 10px;
+}
+#tb-chair-line-input {
+  width: 100%;
+  min-height: 84px;
+  background: #111;
+  color: #fff;
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 15px;
+}
