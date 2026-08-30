@@ -59,9 +59,7 @@
 #tb-theater-top,
 #auth-gate:not(.hidden) .auth-card,
 #view-about .about-container,
-.about-container,
-#main-header.header,
-.header {
+.about-container {
   padding-top: var(--tb-island-top) !important;
 }
 

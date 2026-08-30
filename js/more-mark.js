@@ -36,7 +36,22 @@
     };
   }
 
+  function fixBreak() {
+    var b = document.querySelector('#view-about .about-bolt-glow');
+    if (!b) return;
+    var dead = !b.getAttribute('src') || b.getAttribute('src') === '' || b.getAttribute('src') === '#';
+    if (dead) {
+      var d = b.getAttribute('data-tb-src') || SRC[0];
+      b.src = d;
+    }
+    b.onerror = function () {
+      var wrap = b.closest('.about-bolt-break');
+      if (wrap) wrap.style.display = 'none';
+    };
+  }
+
   function place() {
+    fixBreak();
     var box = document.querySelector('#view-about .about-container');
     if (!box) return;
     var img = document.getElementById('about-more-mark');
