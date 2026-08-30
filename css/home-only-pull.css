@@ -1,23 +1,35 @@
-/* 20260830-home-only-pull
-   Kill Safari PTR. Do not lock overflow (that killed scroll).
-   Rubber lives on the Home wordmark only. */
+/* 20260830-slow-pull
+   Home only. Slow committed pull. Do not lock overflow. */
 html, body, #app, #views, .view {
   overscroll-behavior-y: none;
 }
 #view-home.active {
-  overscroll-behavior-y: contain;
+  overscroll-behavior-y: none;
+}
+#header-logo,
+#main-header img {
+  will-change: transform;
 }
 #header-logo.is-pulling,
 #main-header img.is-pulling {
   filter: drop-shadow(0 0 14px rgba(254, 241, 5, 0.45));
-  transition: filter 0.16s ease;
+  transition: filter 0.22s ease;
+}
+#header-logo.is-armed,
+#main-header img.is-armed {
+  filter: drop-shadow(0 0 22px rgba(254, 241, 5, 0.85));
 }
 body.tb-home-pulling #main-header {
   box-shadow: 0 8px 20px rgba(254, 241, 5, 0.10);
 }
+body.tb-home-armed #main-header {
+  box-shadow: 0 10px 28px rgba(254, 241, 5, 0.22);
+}
 @media (prefers-reduced-motion: reduce) {
   #header-logo.is-pulling,
-  #main-header img.is-pulling {
+  #main-header img.is-pulling,
+  #header-logo.is-armed,
+  #main-header img.is-armed {
     filter: none;
   }
 }
