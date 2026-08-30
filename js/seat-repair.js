@@ -130,6 +130,13 @@
     }
   }
 
+  if (!document.querySelector('link[href*="page-titles.css"]')) {
+    var t = document.createElement('link');
+    t.rel = 'stylesheet';
+    t.href = 'css/page-titles.css';
+    (document.head || document.documentElement).appendChild(t);
+  }
+
   function askHero() {
     var img = document.querySelector('#thunder-modal .thunder-ask-hero-img');
     if (img && img.dataset.tbAskHero !== '1') {

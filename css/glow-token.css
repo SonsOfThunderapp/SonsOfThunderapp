@@ -20,10 +20,7 @@ html {
 #view-events .events-hit-line {
   box-shadow: 0 0 16px rgba(225, 6, 0, var(--tb-glow)) !important;
 }
-.code-title-glow,
-#the-code-title {
-  text-shadow: 0 0 12px rgba(225, 6, 0, var(--tb-glow)) !important;
-}
+/* THE CODE keeps codeTitleGlow in styles.css — do not flatten. */
 #tb-home-film-tile {
   box-shadow: 0 0 14px rgba(212, 168, 58, var(--tb-glow)) !important;
   filter: none !important;

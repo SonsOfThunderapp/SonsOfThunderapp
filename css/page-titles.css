@@ -1,0 +1,41 @@
+/* 20260830-page-titles
+   Page marks only: Brothers, Events & Memories, WHO WE ARE.
+   White fill. Hairline brand red. Not THE CODE yellow+red.
+   Not Upcoming / Past Gatherings / tools / Home / modals. */
+#view-brothers .section-header h1,
+#view-brothers #brothers-section-title,
+#view-events .section-header h1,
+#view-events .memories-page-head h1,
+#view-about #who-we-are-title,
+#view-about h1.about-title:not(.code-title) {
+  font-family: "Bebas Neue", Impact, "Arial Narrow", sans-serif !important;
+  font-weight: 400 !important;
+  font-size: clamp(30px, 8.2vw, 36px) !important;
+  line-height: 0.92 !important;
+  letter-spacing: 0.07em !important;
+  text-transform: uppercase !important;
+  color: #fff !important;
+  -webkit-text-stroke: 0.65px #E30600;
+  paint-order: stroke fill;
+  text-shadow: none !important;
+}
+/* THE CODE — restore locked yellow fill + red breath. Not the page-title hairline. */
+#view-about h1.code-title,
+#view-about h1.code-title-glow,
+#the-code-title {
+  color: #FEF105 !important;
+  -webkit-text-stroke: 0 !important;
+  animation: codeTitleGlow var(--tb-breathe, 4s ease-in-out infinite) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #view-brothers .section-header h1,
+  #view-events .section-header h1,
+  #view-about #who-we-are-title {
+    -webkit-text-stroke: 0.5px #E30600;
+  }
+  #view-about h1.code-title,
+  #view-about h1.code-title-glow {
+    animation: none !important;
+  }
+}
