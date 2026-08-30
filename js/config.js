@@ -12,7 +12,7 @@ window.TB_CONFIG = {
     approved: '2026-08-23',
     proof: 'IMG_7978',
     source: 'assets/CANONICAL/logo-print-diecut.png',
-    slots: ['assets/logo@2x.png', 'assets/logo@3x.png', 'assets/logo@4k.png'],
+    slots: ['assets/logo@2x.png', 'assets/logo@3x.png', 'assets/logo@4x.png'],
     aspect: '3000/2077',
     z: 8000,
     pages: ['home', 'brothers', 'events', 'about'],
