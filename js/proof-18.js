@@ -294,11 +294,17 @@
       if (onEvents()) requestPaint();
     });
   }
-  ['css/mem-pop.css', 'css/mem-count.css'].forEach(function (href) {
+  ['css/mem-pop.css', 'css/mem-count.css', 'css/was-there.css'].forEach(function (href) {
     if (document.querySelector('link[href*="' + href.split('/').pop() + '"]')) return;
     var l = document.createElement('link');
     l.rel = 'stylesheet';
     l.href = href;
     (document.head || document.documentElement).appendChild(l);
   });
+  if (!document.querySelector('script[src*="was-there.js"]')) {
+    var s = document.createElement('script');
+    s.src = 'js/was-there.js';
+    s.defer = true;
+    (document.body || document.documentElement).appendChild(s);
+  }
 })();
