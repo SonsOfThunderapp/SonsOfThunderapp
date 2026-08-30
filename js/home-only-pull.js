@@ -1,6 +1,6 @@
-/* 20260830-slow-pull
-   Home only. Slow committed pull. Then latest build on iPhone and Android.
-   Flick does nothing. Other views never reload. Seat / sb-* stay. No app.js. */
+/* 20260830-pull-look
+   Home only. Slow committed pull. Pretty bolt ring, not a shoved wordmark.
+   Same latest-build on iPhone and Android. Seat / sb-* stay. No app.js. */
 (function () {
   if (window.__tbHomeOnlyPull) return;
   window.__tbHomeOnlyPull = true;
@@ -9,7 +9,6 @@
   var MAX_PULL = 176;
   var TOP_ZONE = 160;
   var SLOW_MS = 450;
-  var DAMP = 0.2;
   var startY = 0;
   var startX = 0;
   var startT = 0;
@@ -39,35 +38,62 @@
     );
   }
 
-  function mark() {
-    return document.getElementById('header-logo') || document.querySelector('#main-header img');
+  function hud() {
+    var el = document.getElementById('tb-home-pull');
+    if (el) return el;
+    el = document.createElement('div');
+    el.id = 'tb-home-pull';
+    el.setAttribute('aria-hidden', 'true');
+    el.innerHTML =
+      '<div class="tb-home-pull-track">' +
+        '<span class="tb-home-pull-ring"></span>' +
+        '<img class="tb-home-pull-bolt" src="assets/bolt-only.png" alt="">' +
+      '</div>';
+    (document.body || document.documentElement).appendChild(el);
+    return el;
+  }
+
+  function place(el) {
+    var h = document.getElementById('main-header');
+    var top = 88;
+    if (h) top = h.getBoundingClientRect().bottom;
+    el.style.top = Math.round(top - 6) + 'px';
   }
 
   function rubber(dy) {
-    var el = mark();
     var y = Math.max(0, Math.min(MAX_PULL, dy));
-    var ready = y >= THRESH;
+    var p = Math.max(0, Math.min(1, y / THRESH));
+    var el = hud();
+    place(el);
+    el.style.setProperty('--tb-pull', String(p));
+    el.style.setProperty('--tb-pull-y', Math.round(8 + y * 0.38) + 'px');
+    el.classList.toggle('is-on', y > 8);
+    el.classList.toggle('is-armed', y >= THRESH);
+    el.classList.remove('is-snap', 'is-fire');
     document.body.classList.toggle('tb-home-pulling', y > 8);
-    document.body.classList.toggle('tb-home-armed', ready);
-    if (!el) return;
-    el.style.transform = y ? 'translateY(' + Math.round(y * DAMP) + 'px)' : '';
-    el.classList.toggle('is-pulling', y > 8);
-    el.classList.toggle('is-armed', ready);
+    document.body.classList.toggle('tb-home-armed', y >= THRESH);
   }
 
   function snap() {
-    var el = mark();
+    var el = document.getElementById('tb-home-pull');
     document.body.classList.remove('tb-home-pulling', 'tb-home-armed');
-    if (el) {
-      el.style.transform = '';
-      el.classList.remove('is-pulling', 'is-armed');
-    }
+    if (!el) return;
+    el.classList.remove('is-armed', 'is-fire');
+    el.classList.add('is-snap');
+    el.style.setProperty('--tb-pull', '0');
+    el.style.setProperty('--tb-pull-y', '0px');
+    el.classList.remove('is-on');
+    window.setTimeout(function () {
+      el.classList.remove('is-snap');
+    }, 320);
   }
 
   function latest() {
     if (fired) return;
     fired = true;
-    snap();
+    var el = hud();
+    el.classList.add('is-armed', 'is-fire', 'is-on');
+    document.body.classList.remove('tb-home-pulling', 'tb-home-armed');
     try {
       if (typeof window.tbToast === 'function') window.tbToast('BOARD UPDATED', 1800);
     } catch (e0) {}
@@ -118,6 +144,7 @@
     startT = Date.now();
     if (startY > TOP_ZONE) return;
     armed = true;
+    hud();
   }, true);
 
   document.addEventListener('touchmove', function (e) {

@@ -1,4 +1,4 @@
-/* 20260830-slow-pull */
+/* 20260830-pull-look */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
