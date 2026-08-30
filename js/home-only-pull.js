@@ -1,52 +1,27 @@
-/* 20260830-home-pull
-   Home only. Pull from the top of Home, not a 160px strip.
-   Slow enough to be committed. Reload stays on Home. Seat / sb-* stay. */
+/* 20260830-home-only-pull
+   Pull-to-latest lives on Home only.
+   Hold the page. Release past the line. Then BOARD UPDATED.
+   Other views never reload from a down swipe.
+   Seat / sb-* stay. No app.js. */
 (function () {
-  if (window.__tbHomePull) return;
+  if (window.__tbHomeOnlyPull2) return;
+  window.__tbHomeOnlyPull2 = true;
   window.__tbHomePull = true;
 
-  var THRESH = 88;
-  var DEEP = 128;
-  var MAX_PULL = 176;
-  var SLOW_MS = 180;
+  var THRESH = 64;
+  var MAX_PULL = 96;
+  var TOP_ZONE = 120;
   var startY = 0;
   var startX = 0;
-  var startT = 0;
   var armed = false;
   var pulling = false;
   var fired = false;
 
   function onHome() {
-    if (document.querySelector('#view-brothers.active, #view-events.active, #view-about.active')) return false;
-    if (document.querySelector('.view.active:not(#view-home)')) return false;
-    var nav = document.querySelector('.bottom-nav [data-view].active, .nav-item[data-view].active');
-    if (nav) {
-      var dv = nav.getAttribute('data-view') || '';
-      if (dv && dv !== 'home') return false;
-    }
-    if (document.body.classList.contains('tb-view-brothers') ||
-        document.body.classList.contains('tb-view-events') ||
-        document.body.classList.contains('tb-view-about')) return false;
     var home = document.getElementById('view-home');
-    return !!(home && home.classList.contains('active'));
-  }
-
-  function atTop() {
-    var t = 0;
-    var nodes = [
-      document.getElementById('view-home'),
-      document.querySelector('#view-home .container'),
-      document.getElementById('views'),
-      document.getElementById('app'),
-      document.scrollingElement,
-      document.documentElement,
-      document.body
-    ];
-    for (var i = 0; i < nodes.length; i++) {
-      if (nodes[i] && typeof nodes[i].scrollTop === 'number' && nodes[i].scrollTop > t) t = nodes[i].scrollTop;
-    }
-    t = Math.max(t, window.scrollY || window.pageYOffset || 0);
-    return t <= 2;
+    if (!home || !home.classList.contains('active')) return false;
+    if (document.querySelector('.view.active:not(#view-home)')) return false;
+    return true;
   }
 
   function inSheet(t) {
@@ -56,113 +31,83 @@
     );
   }
 
-  function hud() {
-    var el = document.getElementById('tb-home-pull');
-    if (el) return el;
-    el = document.createElement('div');
-    el.id = 'tb-home-pull';
-    el.setAttribute('aria-hidden', 'true');
-    el.innerHTML =
-      '<div class="tb-home-pull-track">' +
-        '<span class="tb-home-pull-ring"></span>' +
-        '<img class="tb-home-pull-bolt" src="assets/bolt-only.png" alt="">' +
-      '</div>';
-    (document.body || document.documentElement).appendChild(el);
-    return el;
+  function mark() {
+    return document.getElementById('header-logo') || document.querySelector('#main-header img');
   }
 
-  function place(el) {
-    var h = document.getElementById('main-header');
-    var top = 88;
-    if (h) top = h.getBoundingClientRect().bottom;
-    el.style.top = Math.round(top - 6) + 'px';
+  function resist(dy) {
+    var t = Math.max(0, dy);
+    return MAX_PULL * (1 - Math.exp(-t / 88));
   }
 
   function rubber(dy) {
-    var y = Math.max(0, Math.min(MAX_PULL, dy));
-    var p = Math.max(0, Math.min(1, y / THRESH));
-    var el = hud();
-    place(el);
-    el.style.setProperty('--tb-pull', String(p));
-    el.style.setProperty('--tb-pull-y', Math.round(8 + y * 0.38) + 'px');
-    el.classList.toggle('is-on', y > 8);
-    el.classList.toggle('is-armed', y >= THRESH);
-    el.classList.remove('is-snap', 'is-fire');
-    document.body.classList.toggle('tb-home-pulling', y > 8);
-    document.body.classList.toggle('tb-home-armed', y >= THRESH);
+    var el = mark();
+    var y = resist(dy);
+    document.body.classList.toggle('tb-home-pulling', y > 6);
+    if (!el) return;
+    el.classList.remove('is-release');
+    el.style.transition = 'none';
+    el.style.transform = 'translateY(' + y.toFixed(1) + 'px) scale(' + (1 + y / 420).toFixed(3) + ')';
+    el.classList.toggle('is-pulling', y > 6);
   }
 
   function snap() {
-    var el = document.getElementById('tb-home-pull');
-    document.body.classList.remove('tb-home-pulling', 'tb-home-armed');
+    var el = mark();
+    document.body.classList.remove('tb-home-pulling');
     if (!el) return;
-    el.classList.remove('is-armed', 'is-fire');
-    el.classList.add('is-snap');
-    el.style.setProperty('--tb-pull', '0');
-    el.style.setProperty('--tb-pull-y', '0px');
-    el.classList.remove('is-on');
+    el.classList.add('is-release');
+    el.style.transition = 'transform 0.48s cubic-bezier(0.22, 1.55, 0.32, 1)';
+    el.style.transform = 'translateY(0) scale(1)';
+    el.classList.remove('is-pulling');
     window.setTimeout(function () {
-      el.classList.remove('is-snap');
-    }, 320);
+      el.classList.remove('is-release');
+      el.style.transition = '';
+      el.style.transform = '';
+    }, 520);
   }
 
-  function latest() {
+  function soft() {
     if (fired) return;
     fired = true;
-    var el = hud();
-    el.classList.add('is-armed', 'is-fire', 'is-on');
-    document.body.classList.remove('tb-home-pulling', 'tb-home-armed');
+    snap();
     try {
       if (typeof window.tbToast === 'function') window.tbToast('BOARD UPDATED', 1800);
     } catch (e0) {}
-    var t = Date.now();
-    var keep = 'tb-share';
-    var bust = function (path) {
-      return fetch(path + (path.indexOf('?') >= 0 ? '&' : '?') + 'v=' + t, { cache: 'reload', credentials: 'same-origin' }).catch(function () {});
-    };
-    var chain = Promise.all([
-      bust('/sw.js'),
-      bust('/build.json'),
-      bust('/js/config.js'),
-      bust('/js/home-only-pull.js'),
-      bust('/css/home-only-pull.css')
-    ]);
-    chain = chain.then(function () {
-      if (!navigator.serviceWorker || !navigator.serviceWorker.getRegistrations) return;
-      return navigator.serviceWorker.getRegistrations().then(function (regs) {
-        return Promise.all((regs || []).map(function (r) { return r.unregister(); }));
-      });
-    });
-    chain = chain.then(function () {
-      if (!window.caches || !caches.keys) return;
-      return caches.keys().then(function (keys) {
-        return Promise.all((keys || []).filter(function (k) { return k !== keep; }).map(function (k) {
-          return caches.delete(k);
-        }));
-      });
-    });
-    chain.catch(function () {}).then(function () {
+    var finish = function () {
       try {
         var u = new URL(window.location.href);
-        u.searchParams.set('view', 'home');
-        u.searchParams.set('_tb', String(t));
-        window.location.replace(u.pathname + u.search);
+        u.searchParams.set('_tb', String(Date.now()));
+        window.location.replace(u.toString());
       } catch (e1) {
-        window.location.href = '/?view=home&_tb=' + t;
+        window.location.reload();
       }
-    });
+    };
+    var chain = Promise.resolve();
+    try {
+      if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+        chain = navigator.serviceWorker.getRegistrations().then(function (regs) {
+          return Promise.all((regs || []).map(function (r) { return r.unregister(); }));
+        });
+      }
+    } catch (e2) {}
+    chain.then(function () {
+      if (window.caches && caches.keys) {
+        return caches.keys().then(function (keys) {
+          return Promise.all((keys || []).map(function (k) { return caches.delete(k); }));
+        });
+      }
+    }).catch(function () {}).then(finish);
   }
 
   document.addEventListener('touchstart', function (e) {
     armed = false;
     pulling = false;
     if (!e.touches || !e.touches[0]) return;
-    if (!onHome() || !atTop() || inSheet(e.target)) return;
+    if (!onHome() || inSheet(e.target)) return;
     startY = e.touches[0].clientY || 0;
     startX = e.touches[0].clientX || 0;
-    startT = Date.now();
+    if (startY > TOP_ZONE) return;
     armed = true;
-    hud();
   }, true);
 
   document.addEventListener('touchmove', function (e) {
@@ -176,12 +121,12 @@
     var x = e.touches[0].clientX || 0;
     var dy = y - startY;
     var dx = x - startX;
-    if (Math.abs(dx) > 48 && dy < THRESH) {
+    if (Math.abs(dx) > 40 && dy < THRESH) {
       armed = false;
       snap();
       return;
     }
-    if (dy > 10 && atTop()) {
+    if (dy > 10) {
       pulling = true;
       rubber(dy);
       e.preventDefault();
@@ -194,13 +139,19 @@
     var t = (e.changedTouches && e.changedTouches[0]) || {};
     var dy = (t.clientY || 0) - startY;
     var dx = (t.clientX || 0) - startX;
-    var held = (Date.now() - startT) >= SLOW_MS;
-    var go = pulling && onHome() && !inSheet(e.target) && Math.abs(dx) <= 48 &&
-      ((dy >= THRESH && held) || dy >= DEEP);
+    var go = pulling && onHome() && !inSheet(e.target) && dy >= THRESH && Math.abs(dx) <= 40;
     pulling = false;
-    if (go) latest();
-    else snap();
+    if (go) {
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+      e.stopPropagation();
+      soft();
+    } else {
+      snap();
+    }
   }, true);
+
+  var logo = mark();
+  if (logo) logo.dataset.tbPull = '1';
 
   document.addEventListener('touchcancel', function () {
     armed = false;

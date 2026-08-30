@@ -1,89 +1,35 @@
-/* 20260830-pull-look
-   Home pull HUD. Official bolt + yellow ring. Do not shove the wordmark.
-   Do not lock overflow. */
+/* 20260830-home-only-pull
+   Kill Safari PTR. Do not lock overflow (that killed scroll).
+   Rubber lives on the Home wordmark only. */
 html, body, #app, #views, .view {
   overscroll-behavior-y: none;
 }
 #view-home.active {
-  overscroll-behavior-y: none;
+  overscroll-behavior-y: contain;
 }
-
-#tb-home-pull {
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: 88px;
-  height: 72px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  pointer-events: none;
-  z-index: 7900;
-  opacity: 0;
-  --tb-pull: 0;
-  --tb-pull-y: 0px;
-  transform: translateY(-12px);
+#header-logo,
+#main-header img {
+  transform-origin: center top;
+  will-change: transform;
 }
-#tb-home-pull.is-on {
-  opacity: 1;
-  transform: translateY(var(--tb-pull-y, 0px));
+#header-logo.is-pulling,
+#main-header img.is-pulling {
+  filter: drop-shadow(0 0 16px rgba(254, 241, 5, 0.42));
 }
-#tb-home-pull.is-snap {
-  opacity: 0;
-  transform: translateY(-12px);
-  transition: opacity 0.28s ease, transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+#header-logo.is-release,
+#main-header img.is-release {
+  filter: drop-shadow(0 0 10px rgba(254, 241, 5, 0.22));
 }
-
-.tb-home-pull-track {
-  position: relative;
-  width: 52px;
-  height: 52px;
-  margin-top: 6px;
+body.tb-home-pulling #main-header {
+  box-shadow: 0 8px 20px rgba(254, 241, 5, 0.10);
 }
-.tb-home-pull-ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: conic-gradient(
-    #FEF105 calc(var(--tb-pull, 0) * 1turn),
-    rgba(254, 241, 5, 0.14) 0
-  );
-  -webkit-mask: radial-gradient(farthest-side, transparent 62%, #000 64%);
-  mask: radial-gradient(farthest-side, transparent 62%, #000 64%);
+body.tb-home-pulling #header-logo.is-pulling,
+body.tb-home-pulling #main-header img.is-pulling {
+  transition: none !important;
 }
-.tb-home-pull-bolt {
-  position: absolute;
-  left: 12px;
-  top: 12px;
-  width: 28px;
-  height: 28px;
-  object-fit: contain;
-  opacity: calc(0.22 + var(--tb-pull, 0) * 0.78);
-  transform: scale(calc(0.7 + var(--tb-pull, 0) * 0.3));
-  filter: drop-shadow(0 0 6px rgba(254, 241, 5, 0.25));
-}
-#tb-home-pull.is-armed .tb-home-pull-bolt {
-  filter: drop-shadow(0 0 12px rgba(254, 241, 5, 0.9));
-  animation: tb-pull-ready 1.1s ease-in-out infinite;
-}
-#tb-home-pull.is-fire .tb-home-pull-bolt {
-  animation: none;
-  transform: scale(1.08);
-  filter: drop-shadow(0 0 16px rgba(254, 241, 5, 1));
-}
-
-@keyframes tb-pull-ready {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.08); }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  #tb-home-pull.is-armed .tb-home-pull-bolt,
-  #tb-home-pull.is-fire .tb-home-pull-bolt {
-    animation: none;
+  #header-logo.is-pulling,
+  #main-header img.is-pulling {
     filter: none;
-  }
-  #tb-home-pull.is-snap {
-    transition: none;
   }
 }
