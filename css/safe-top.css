@@ -1,0 +1,15 @@
+#view-events,
+#view-brothers,
+#view-about {
+  padding-top: calc(env(safe-area-inset-top, 47px) + 8px) !important;
+}
+#view-events .section-header,
+#view-brothers .section-header,
+#view-about .section-header {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+#view-events .section-header h1,
+#view-brothers .section-header h1 {
+  line-height: 1 !important;
+}
