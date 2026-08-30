@@ -1,10 +1,17 @@
+/* Patio plate cooker.
+   Gate first. Recook only when the file is not already a plate.
+   Filters / captions / voice work live in the pixels+audio.
+   Recooking a ready plate is the overcook. */
 (function (w) {
   w.tbCookTheaterPlate = null;
+  w.tbClassifyPlate = null;
 
   var MAX = 50 * 1024 * 1024;
+  var PASS_MAX = 80 * 1024 * 1024;
   var TARGET_BPS = 5500000;
   var FPS = 30;
   var MAX_SEC = 60;
+  var PASS_SEC = 90;
   var PW = 1080;
   var PH = 1920;
   var MUX_URL = 'https://cdn.jsdelivr.net/npm/mp4-muxer@5.2.1/+esm';
@@ -56,19 +63,50 @@
     });
   }
 
-  async function alreadyPlate(file) {
-    if (!file || file.size > MAX) return false;
+  function classifyFromProbe(file, w0, h0, dur) {
+    var name = String(file && file.name || '').toLowerCase();
+    var type = String(file && file.type || '').toLowerCase();
+    var size = file && file.size || 0;
+    if (!file || !size) return { action: 'REJECT', reason: 'empty' };
+    if (size > PASS_MAX) return { action: 'REJECT', reason: 'over-80mb' };
+    if (dur && dur > PASS_SEC + 0.4) return { action: 'REJECT', reason: 'over-90s' };
+    if (name.slice(-4) === '.mov' || type.indexOf('quicktime') !== -1) {
+      return { action: 'COOK', reason: 'mov' };
+    }
+    if (w0 === PW && h0 === PH && dur && dur <= PASS_SEC + 0.4) {
+      return { action: 'PASS', reason: 'already-plate' };
+    }
+    return { action: 'COOK', reason: 'geometry' };
+  }
+
+  async function classifyPlate(file) {
+    if (!file || !file.size) return { action: 'REJECT', reason: 'empty' };
+    if (file.size > PASS_MAX) return { action: 'REJECT', reason: 'over-80mb' };
     var name = String(file.name || '').toLowerCase();
-    if (name.slice(-4) === '.mov') return false;
+    var type = String(file.type || '').toLowerCase();
     var buf = await file.slice(0, 256).arrayBuffer();
-    if (sniffHevc(buf)) return false;
+    if (sniffHevc(buf)) return { action: 'COOK', reason: 'hevc' };
     var brand = ftypBrand(buf);
-    if (!(brand === 'isom' || brand === 'mp41' || brand === 'mp42' || brand === 'avc1' || brand === 'iso2')) return false;
+    var mp4 = brand === 'isom' || brand === 'mp41' || brand === 'mp42' || brand === 'avc1' || brand === 'iso2';
+    if (name.slice(-4) === '.mov' || type.indexOf('quicktime') !== -1 || !mp4) {
+      return { action: 'COOK', reason: name.slice(-4) === '.mov' ? 'mov' : 'not-mp4' };
+    }
     var loaded = await loadVideo(file);
     try { URL.revokeObjectURL(loaded.url); } catch (e0) {}
     var w0 = loaded.v.videoWidth || 0;
     var h0 = loaded.v.videoHeight || 0;
-    return w0 === PW && h0 === PH;
+    var dur = Number(loaded.v.duration || 0);
+    var out = classifyFromProbe(file, w0, h0, dur);
+    out.width = w0;
+    out.height = h0;
+    out.dur = dur;
+    out.brand = brand;
+    return out;
+  }
+
+  async function alreadyPlate(file) {
+    var c = await classifyPlate(file);
+    return c.action === 'PASS';
   }
 
   async function cook(file, status) {
@@ -180,15 +218,27 @@
     return blob;
   }
 
+  w.tbClassifyPlate = classifyPlate;
+
   w.tbCookTheaterPlate = async function (file, status) {
     status = status || function () {};
     if (!file) throw new Error('Choose a clip first');
+    var gate;
     try {
-      if (await alreadyPlate(file)) {
-        status('Already a plate.');
-        return file;
-      }
-    } catch (eA) {}
+      gate = await classifyPlate(file);
+    } catch (eA) {
+      throw new Error('Could not read that clip. Drop it in the kitchen.');
+    }
+    if (gate.action === 'PASS') {
+      status('Ready as-is. Filters kept.');
+      return file;
+    }
+    if (gate.action === 'REJECT') {
+      if (gate.reason === 'over-90s') throw new Error('Keep it under 90 seconds.');
+      if (gate.reason === 'over-80mb') throw new Error('Still over 80 MB. Drop it in the kitchen.');
+      throw new Error('Drop this clip in the kitchen.');
+    }
+    status('Needs a plate. Cooking geometry only.');
     var plate = await cook(file, status);
     if (plate.size > MAX) throw new Error('Still over 50 MB. Shoot HD 30, not 4K.');
     if (plate.size < 20 * 1024) throw new Error('Encode was empty. Drop the clip in the kitchen.');

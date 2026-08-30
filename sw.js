@@ -1,4 +1,4 @@
-/* 20260829-wall-crush */
+/* 20260830-plate-gate */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
