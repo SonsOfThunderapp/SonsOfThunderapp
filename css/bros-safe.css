@@ -1,0 +1,14 @@
+body:has(#view-brothers.active) #main-header,
+body:has(#view-brothers.active) #header-logo,
+body.tb-view-brothers #main-header,
+body.tb-view-brothers #header-logo {
+  display: none !important;
+  visibility: hidden !important;
+}
+#view-brothers,
+#view-brothers.view.active {
+  padding-top: env(safe-area-inset-top, 47px) !important;
+}
+#view-brothers > .container {
+  padding-top: 8px !important;
+}

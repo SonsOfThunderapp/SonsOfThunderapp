@@ -1,6 +1,6 @@
 window.TB_CONFIG = {
   // Bumped with each production zip so phones can detect a new build
-  APP_BUILD: '20260829-glow-token',
+  APP_BUILD: '20260829-bros-safe',
   RSVP_PRESENCE: {
     publicOnHome: true,
     seedFloor: 0,
@@ -214,6 +214,7 @@ window.TB_CONFIG = {
     addJs('chair-door.js', 'js/chair-door.js');
     addJs('grid-lazy.js', 'js/grid-lazy.js');
     addCss('glow-token.css', 'css/glow-token.css');
+    addCss('bros-safe.css', 'css/bros-safe.css');
     addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();
