@@ -227,6 +227,7 @@ window.TB_CONFIG = {
     addCss('more-mark.css', 'css/more-mark.css');
     addJs('more-mark.js', 'js/more-mark.js');
     addCss('stay-room.css', 'css/stay-room.css');
+    addJs('stay-room.js', 'js/stay-room.js');
     addJs('tb-island-loader.js', 'js/tb-island-loader.js');
   } catch (e2) {}
 })();

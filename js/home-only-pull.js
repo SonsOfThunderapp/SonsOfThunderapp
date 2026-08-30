@@ -17,9 +17,18 @@
   var fired = false;
 
   function onHome() {
+    if (document.querySelector('#view-brothers.active, #view-events.active, #view-about.active')) return false;
+    if (document.querySelector('.view.active:not(#view-home)')) return false;
+    var nav = document.querySelector('.bottom-nav [data-view].active, .nav-item[data-view].active');
+    if (nav) {
+      var dv = nav.getAttribute('data-view') || '';
+      if (dv && dv !== 'home') return false;
+    }
+    if (document.body.classList.contains('tb-view-brothers') ||
+        document.body.classList.contains('tb-view-events') ||
+        document.body.classList.contains('tb-view-about')) return false;
     var home = document.getElementById('view-home');
-    if (!(home && home.classList.contains('active'))) return false;
-    return !document.querySelector('.view.active:not(#view-home)');
+    return !!(home && home.classList.contains('active'));
   }
 
   function inSheet(t) {

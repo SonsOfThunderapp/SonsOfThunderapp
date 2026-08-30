@@ -1,6 +1,14 @@
-/* 20260830-stay-room
-   Safari PTR reloads the standalone PWA. Reload paints Home.
+/* 20260830-stay-bros
+   Safari PTR on Brothers reloads the PWA. Reload paints Home.
    Kill the bounce. Do not lock overflow. */
 html, body, #app, #views, .view {
-  overscroll-behavior-y: none;
+  overscroll-behavior-y: none !important;
+}
+html:has(.view.active:not(#view-home)) #view-home,
+html:has(.view.active:not(#view-home)) #view-home.active,
+html:has(#view-brothers.active) #view-home,
+html:has(#view-events.active) #view-home,
+html:has(#view-about.active) #view-home {
+  overscroll-behavior-y: none !important;
+  pointer-events: none;
 }
