@@ -1,4 +1,4 @@
-/* 20260829-week-badge */
+/* 20260829-wall-crush */
 /* Thunder Board service worker — push, badge, share-in, deep-link */
 self.addEventListener('install', (event) => {
   self.skipWaiting();
