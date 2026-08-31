@@ -1,0 +1,30 @@
+/* 20260831-film-still — wordmark poster, shorter tile, tap-only. */
+#tb-month-film,
+#tb-home-film-tile,
+#home-film {
+  width: min(58vw, 220px) !important;
+  max-height: 34vh !important;
+  margin: 10px auto 8px !important;
+  aspect-ratio: 9 / 16 !important;
+  border-radius: 14px !important;
+  overflow: hidden !important;
+}
+#tb-month-film .tb-month-film-pic,
+#tb-home-film-tile img,
+#home-film img,
+#home-film .tb-month-film-pic {
+  background-size: cover !important;
+  background-position: center 30% !important;
+  object-fit: cover !important;
+  object-position: center 30% !important;
+}
+#tb-month-film .tb-month-film-ring {
+  animation: tbFilmRing 3.6s ease-in-out infinite;
+}
+@keyframes tbFilmRing {
+  0%, 100% { opacity: 0.72; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.06); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #tb-month-film .tb-month-film-ring { animation: none; }
+}

@@ -62,4 +62,10 @@
   paintPoster();
   setTimeout(paintPoster, 400);
   setTimeout(bind, 800);
+  if (!document.querySelector('script[src*="film-still.js"]')) {
+    var s = document.createElement('script');
+    s.src = 'js/film-still.js';
+    s.defer = true;
+    (document.body || document.documentElement).appendChild(s);
+  }
 })();
