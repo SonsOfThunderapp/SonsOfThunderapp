@@ -42,6 +42,12 @@
   setTimeout(hideHomeJobs, 400);
   setTimeout(placeLeader, 400);
 
+  if (!document.querySelector('script[src*="thunder-type.js"]')) {
+    var t = document.createElement('script');
+    t.src = 'js/thunder-type.js';
+    t.defer = true;
+    (document.body || document.documentElement).appendChild(t);
+  }
   if (!document.querySelector('link[href*="recon-90.css"]')) {
     var l = document.createElement('link');
     l.rel = 'stylesheet';

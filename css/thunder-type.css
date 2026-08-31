@@ -1,0 +1,39 @@
+/* Type first on Ask Thunder. Voice is secondary. FAB size unchanged. */
+#thunder-modal .thunder-content {
+  display: flex;
+  flex-direction: column;
+}
+#thunder-modal .thunder-input-row {
+  order: 5;
+  display: flex;
+  gap: 8px;
+  margin: 8px 0 4px;
+}
+#thunder-modal #thunder-input {
+  flex: 1;
+  min-height: 44px;
+}
+#thunder-modal #thunder-send {
+  min-width: 72px;
+}
+#thunder-modal .thunder-examples {
+  order: 4;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0;
+}
+#thunder-modal .thunder-examples button {
+  background: #111;
+  border: 1px solid rgba(254, 241, 5, 0.35);
+  color: #FEF105;
+  font-size: 13px;
+  padding: 8px 10px;
+}
+#thunder-modal .thunder-voice-bar {
+  order: 6;
+  opacity: 0.55;
+}
+#thunder-modal .thunder-messages { order: 3; }
+#thunder-modal .thunder-ask-hero { order: 2; }
+#thunder-modal .thunder-header { order: 1; }
