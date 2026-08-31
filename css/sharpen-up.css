@@ -1,0 +1,19 @@
+/* 20260829-sharpen-up — chips dead. Upcoming lives at the bottom. Photos stay. */
+#view-events #sharpen-section-title,
+#view-events #activity-tags,
+#view-events #activity-feed {
+  display: none !important;
+}
+#view-events .container {
+  display: flex;
+  flex-direction: column;
+}
+#view-events #events-section-title,
+#view-events #events-note,
+#view-events #upcoming-events {
+  display: block !important;
+  order: 80;
+}
+#view-events #upcoming-events {
+  margin-top: 18px;
+}

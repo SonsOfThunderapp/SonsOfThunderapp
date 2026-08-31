@@ -1,39 +1,11 @@
-/* 20260827-proof2: quiet TEXT A LEADER. Unhide Leadership Last Fire editor only. */
-#view-home #text-leader-btn.btn-text-leader {
-  display: block;
-  width: auto;
-  max-width: none;
-  float: none !important;
-  position: static !important;
-  margin: 8px 0 0;
-  padding: 0;
-  border: none !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  color: #888;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  text-align: left;
-  min-height: 0;
-  line-height: 1.4;
-}
-#view-home #text-leader-btn.btn-text-leader:active {
-  border: none !important;
-  color: #aaa;
-  transform: none;
-}
-
-/* This pass: keep Last Fire off Home. Do not hide the Leadership editor. */
-#admin-lastfire-btn {
-  display: block !important;
-  visibility: visible !important;
-  pointer-events: auto !important;
-  height: auto !important;
-  max-height: none !important;
-  overflow: visible !important;
-  margin: revert !important;
-  padding: revert !important;
-  border: revert !important;
+/* float killed — rules live in text-leader-brothers.css */
+#view-home #last-fire,
+#last-fire,
+#view-home #next-mission-card,
+#tb-text-leader-brothers,
+#admin-lastfire-btn,
+#view-events #sharpen-section-title,
+#view-events #activity-tags,
+#view-events #activity-feed {
+  display: none !important;
 }

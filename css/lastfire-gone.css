@@ -1,0 +1,5 @@
+/* Last Fire stays off Home. */
+#view-home #last-fire,
+#last-fire {
+  display: none !important;
+}

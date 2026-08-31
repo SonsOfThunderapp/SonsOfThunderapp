@@ -30,10 +30,11 @@
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
-  if (!document.querySelector('script[src*="hq-card.js"]')) {
+  ['js/hq-card.js', 'js/ghost-park.js'].forEach(function (src) {
+    if (document.querySelector('script[src*="' + src.split('/').pop() + '"]')) return;
     var s = document.createElement('script');
-    s.src = 'js/hq-card.js';
+    s.src = src;
     s.defer = true;
     (document.body || document.documentElement).appendChild(s);
-  }
+  });
 })();

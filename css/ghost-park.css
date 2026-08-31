@@ -1,0 +1,17 @@
+/* 20260830-ghost-park — named kills only. Does not touch I’m In, dock, seat, film player. */
+#view-home #last-fire,
+#last-fire.last-fire,
+#view-home #next-mission-card,
+#tb-text-leader-brothers,
+#admin-lastfire-btn,
+#view-events #sharpen-section-title,
+#view-events #activity-tags,
+#view-events #activity-feed {
+  display: none !important;
+  pointer-events: none !important;
+}
+#view-home #text-leader-btn,
+#view-about #text-leader-btn,
+#view-events #text-leader-btn {
+  display: none !important;
+}
