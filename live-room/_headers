@@ -1,0 +1,9 @@
+/assets/current.jpg
+  Content-Type: image/jpeg
+  Cache-Control: public, max-age=120, must-revalidate
+  X-Content-Type-Options: nosniff
+
+/assets/current.mp4
+  Content-Type: video/mp4
+  Cache-Control: public, max-age=120, must-revalidate
+  X-Content-Type-Options: nosniff
