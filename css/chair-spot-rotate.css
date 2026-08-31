@@ -1,0 +1,21 @@
+/* 20260831-chair-spot-rotate — hide Bring a brother. Joke lives in ::after. */
+#brother-open-chair .brother-slot-sub,
+#view-brothers .brother-chair .brother-slot-sub {
+  font-size: 0 !important;
+  line-height: 0 !important;
+  color: transparent !important;
+}
+#brother-open-chair .brother-slot-sub::after,
+#view-brothers .brother-chair .brother-slot-sub::after {
+  content: "This chair isn’t getting any warmer.";
+  display: block;
+  font-size: 15px;
+  line-height: 1.35;
+  font-weight: 600;
+  color: #F2C94C;
+  text-shadow: 0 0 10px rgba(242, 201, 76, 0.28);
+}
+#brother-open-chair .brother-slot-sub[data-tb-spot]::after,
+#view-brothers .brother-chair .brother-slot-sub[data-tb-spot]::after {
+  content: attr(data-tb-spot);
+}

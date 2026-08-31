@@ -63,6 +63,11 @@
   }
 
   function stamp() {
+    var chair = document.getElementById('brother-open-chair');
+    if (chair) {
+      var sub = chair.querySelector('.brother-slot-sub, .empty-brothers-sub, .brother-chair-sub');
+      if (sub) paint(sub);
+    }
     var root = document.getElementById('view-brothers');
     if (!root) return;
     var nodes = root.querySelectorAll('div, span, p, strong, em, button, h2, h3');

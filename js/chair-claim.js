@@ -161,4 +161,21 @@
   function boot() { placeBtn(); sheet(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
+
+  if (!document.getElementById('tb-chair-spot-css')) {
+    var st = document.createElement('style');
+    st.id = 'tb-chair-spot-css';
+    st.textContent =
+      '#brother-open-chair .brother-slot-sub,#view-brothers .brother-chair .brother-slot-sub{font-size:0!important;line-height:0!important;color:transparent!important}' +
+      '#brother-open-chair .brother-slot-sub::after,#view-brothers .brother-chair .brother-slot-sub::after{content:"This chair isn’t getting any warmer.";font-size:15px;line-height:1.35;font-weight:600;color:#F2C94C;display:block;text-shadow:0 0 10px rgba(242,201,76,.28)}' +
+      '#brother-open-chair .brother-slot-sub[data-tb-spot]::after,#view-brothers .brother-chair .brother-slot-sub[data-tb-spot]::after{content:attr(data-tb-spot)}';
+    (document.head || document.documentElement).appendChild(st);
+  }
+  if (!document.querySelector('script[src*="chair-spot-rotate.js"]')) {
+    var r = document.createElement('script');
+    r.src = 'js/chair-spot-rotate.js';
+    r.defer = true;
+    (document.body || document.documentElement).appendChild(r);
+  }
 })();
+
