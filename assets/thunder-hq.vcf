@@ -1,0 +1,9 @@
+BEGIN:VCARD
+VERSION:3.0
+FN:Sons of Thunder HQ
+N:HQ;Sons of Thunder;;;
+ORG:Sons of Thunder
+TEL;TYPE=CELL:+19314042031
+NOTE:Thunder HQ. Save this so club texts show a name.
+PHOTO;VALUE=URI:https://sonsofthunder.netlify.app/assets/logo-bolt-isolated.png
+END:VCARD
