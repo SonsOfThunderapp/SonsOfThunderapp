@@ -616,7 +616,11 @@
     paint();
     silenceLightbox();
     syncEventsFabClass();
-    setInterval(syncEventsFabClass, 400);
+    var ev = document.getElementById('view-events');
+    if (ev && window.MutationObserver && !ev.dataset.tbFabSync) {
+      ev.dataset.tbFabSync = '1';
+      new MutationObserver(syncEventsFabClass).observe(ev, { attributes: true, attributeFilter: ['class'] });
+    }
     var viewer = document.getElementById('memory-viewer');
     if (viewer && !viewer._tbCapObs) {
       var vobs = new MutationObserver(silenceLightbox);
