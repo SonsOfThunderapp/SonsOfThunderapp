@@ -7,9 +7,9 @@
   window.__tbHomePull = true;
 
   var THRESH = 64;
-  var MAX_PULL = 96;
-  var K = 0.22;
-  var C = 0.72;
+  var MAX_PULL = 140;
+  var K = 0.14;
+  var C = 0.52;
   var startY = 0;
   var startX = 0;
   var armed = false;
@@ -55,7 +55,7 @@
 
   function resist(dy) {
     var t = Math.max(0, dy);
-    var y = MAX_PULL * (1 - Math.exp(-t / 88));
+    var y = MAX_PULL * (1 - Math.exp(-t / 120));
     if (t >= THRESH) y += 4;
     return y;
   }
@@ -67,7 +67,12 @@
     document.body.classList.toggle('tb-home-armed', pullingNow && y >= resist(THRESH) - 1);
     if (!el) return;
     el.style.transition = 'none';
-    el.style.transform = 'translateY(' + y.toFixed(2) + 'px) scale(' + (1 + y / 420).toFixed(3) + ')';
+    el.style.transform = 'translateY(' + y.toFixed(2) + 'px) scale(' + (1 + y / 260).toFixed(3) + ')';
+    var home = document.getElementById('view-home');
+    if (home && home.classList.contains('active')) {
+      home.style.transition = 'none';
+      home.style.transform = 'translateY(' + (y * 0.38).toFixed(2) + 'px)';
+    }
     el.classList.toggle('is-pulling', y > 6);
     el.classList.toggle('is-armed', pullingNow && y >= resist(THRESH) - 1);
     el.classList.toggle('is-release', !pullingNow && y > 0.4);
@@ -89,6 +94,11 @@
     el.classList.remove('is-pulling', 'is-release', 'is-armed');
     el.style.transition = '';
     el.style.transform = '';
+    var home = document.getElementById('view-home');
+    if (home) {
+      home.style.transition = '';
+      home.style.transform = '';
+    }
   }
 
   function spring(done) {
@@ -103,9 +113,9 @@
     function tick() {
       vel += (-K * pos) - (C * vel);
       pos += vel;
-      if (pos < -6) {
-        pos = -6;
-        vel *= -0.35;
+      if (pos < -12) {
+        pos = -12;
+        vel *= -0.28;
       }
       paint(Math.max(0, pos), false);
       if (Math.abs(pos) < 0.35 && Math.abs(vel) < 0.18) {
@@ -128,9 +138,19 @@
     spring(done);
   }
 
+  function buzz() {
+    if (reduce) return;
+    try {
+      if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+        navigator.vibrate(12);
+      }
+    } catch (eT) {}
+  }
+
   function soft() {
     if (fired) return;
     fired = true;
+    buzz();
     try {
       if (typeof window.tbToast === 'function') window.tbToast('BOARD UPDATED', 1800);
     } catch (e0) {}

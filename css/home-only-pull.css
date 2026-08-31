@@ -6,6 +6,8 @@ html, body, #app, #views, .view {
 }
 #view-home.active {
   overscroll-behavior-y: contain;
+  will-change: transform;
+  transform-origin: center top;
 }
 #header-logo,
 #main-header img {
