@@ -21,13 +21,18 @@
       sub.classList.remove('hidden');
       sub.textContent = 'Welcome to the Brotherhood. Lock this seat so the room knows your name.';
     }
+    var nameEl = document.getElementById('auth-name');
+    if (nameEl && !String(nameEl.value || '').trim()) {
+      try { nameEl.focus(); } catch (eF) {}
+    }
     var pass = document.getElementById('auth-password');
     if (pass) {
       pass.classList.remove('hidden');
       pass.removeAttribute('hidden');
       pass.setAttribute('aria-hidden', 'false');
       pass.setAttribute('tabindex', '0');
-      pass.setAttribute('autocomplete', 'new-password');
+      pass.setAttribute('autocomplete', 'current-password');
+      pass.setAttribute('name', 'password');
       if (!pass.previousElementSibling || !pass.previousElementSibling.classList.contains('tb-pass-label')) {
         var lab = document.createElement('label');
         lab.className = 'tb-pass-label';

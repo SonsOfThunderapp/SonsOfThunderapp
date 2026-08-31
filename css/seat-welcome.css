@@ -1,6 +1,14 @@
 /* 20260830-seat-welcome — first lock looks like a chair, not a form. */
 #auth-gate:not(.hidden) {
   padding-top: var(--tb-island-top, 72px) !important;
+  animation: tbGateIn 240ms ease both;
+}
+@keyframes tbGateIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #auth-gate:not(.hidden) { animation: none; }
 }
 #auth-gate .auth-card {
   justify-content: flex-start !important;

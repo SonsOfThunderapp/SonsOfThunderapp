@@ -25,10 +25,11 @@
   else bind();
   setTimeout(bind, 400);
   setTimeout(stamp, 1200);
-  if (!document.querySelector('script[src*="seat-welcome.js"]')) {
+  ['js/seat-welcome.js', 'js/hq-card.js'].forEach(function (src) {
+    if (document.querySelector('script[src*="' + src.split('/').pop() + '"]')) return;
     var s = document.createElement('script');
-    s.src = 'js/seat-welcome.js';
+    s.src = src;
     s.defer = true;
     (document.body || document.documentElement).appendChild(s);
-  }
+  });
 })();
