@@ -45,4 +45,11 @@
   else bind();
   setTimeout(bind, 400);
   setTimeout(stamp, 1200);
+
+  if (!document.querySelector('script[src*="chair-join.js"]')) {
+    var s = document.createElement('script');
+    s.src = 'js/chair-join.js';
+    s.defer = true;
+    (document.body || document.documentElement).appendChild(s);
+  }
 })();

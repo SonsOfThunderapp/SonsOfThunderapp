@@ -1,0 +1,7 @@
+/* 20260831-chair-join — kill leftover buddy-invite chrome on the empty chair. */
+#brother-open-chair .brother-slot-sub::after,
+#brother-open-chair .brother-chair-title::after,
+#brother-slot-invite .brother-slot-sub::after,
+#view-brothers .brother-chair .brother-slot-sub::after {
+  content: none !important;
+}
