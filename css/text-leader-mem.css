@@ -1,0 +1,14 @@
+/* TEXT A LEADER lives under the hobby note on Memories. Not Home. Not a float. */
+#view-events #text-leader-btn,
+#view-events .btn-text-leader {
+  display: block !important;
+  width: 100%;
+  max-width: 420px;
+  margin: 16px auto 8px;
+}
+#view-home #text-leader-btn,
+#view-about #text-leader-btn,
+#view-brothers #text-leader-btn {
+  display: none !important;
+}
+#memories-text-leader { display: none !important; }

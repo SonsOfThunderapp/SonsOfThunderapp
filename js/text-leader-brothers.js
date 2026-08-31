@@ -1,4 +1,4 @@
-/* TEXT A LEADER = last line on Brothers. Never a float. Never Home / More / Memories. */
+/* TEXT A LEADER = under the hobby note on Memories. Float stays dead. */
 (function () {
   var FLOAT_ID = 'tb-text-leader-brothers';
 
@@ -14,27 +14,26 @@
   function place() {
     buryFloat();
     var btn = document.getElementById('text-leader-btn');
-    var box = document.querySelector('#view-brothers .container');
+    var box = document.querySelector('#view-events .container');
     if (!btn || !box) return;
     btn.textContent = 'TEXT A LEADER';
     btn.setAttribute('aria-label', 'Text a leader');
-    if (btn.parentNode !== box || box.lastElementChild !== btn) {
+    var note = document.getElementById('events-note');
+    if (note && note.parentNode === box) {
+      if (btn.previousElementSibling !== note) note.insertAdjacentElement('afterend', btn);
+    } else if (box.lastElementChild !== btn) {
       box.appendChild(btn);
     }
   }
 
-  function boot() {
-    place();
-    setInterval(place, 1600);
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', place);
+  else place();
+  setTimeout(place, 400);
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
-  else boot();
-  ['js/hq-card.js', 'js/ghost-park.js'].forEach(function (src) {
-    if (document.querySelector('script[src*="' + src.split('/').pop() + '"]')) return;
+  if (!document.querySelector('script[src*="text-leader-mem.js"]')) {
     var s = document.createElement('script');
-    s.src = src;
+    s.src = 'js/text-leader-mem.js';
     s.defer = true;
     (document.body || document.documentElement).appendChild(s);
-  });
+  }
 })();

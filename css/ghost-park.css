@@ -1,4 +1,4 @@
-/* 20260830-ghost-park — named kills only. Does not touch I’m In, dock, seat, film player. */
+/* 20260830-ghost-park — named kills only. TEXT A LEADER allowed on Memories. */
 #view-home #last-fire,
 #last-fire.last-fire,
 #view-home #next-mission-card,
@@ -12,6 +12,6 @@
 }
 #view-home #text-leader-btn,
 #view-about #text-leader-btn,
-#view-events #text-leader-btn {
+#view-brothers #text-leader-btn {
   display: none !important;
 }

@@ -1,15 +1,19 @@
+/* Kill the gold float over the dock */
 #tb-text-leader-brothers {
   display: none !important;
   pointer-events: none !important;
 }
+
 #view-home #text-leader-btn,
 #view-home .btn-text-leader,
 #view-about #text-leader-btn,
-#view-events #text-leader-btn {
+#view-brothers #text-leader-btn {
   display: none !important;
 }
-#view-brothers #text-leader-btn,
-#view-brothers .btn-text-leader {
+
+/* Memories — under the hobby note */
+#view-events #text-leader-btn,
+#view-events .btn-text-leader {
   display: block;
   width: 100%;
   max-width: 420px;
