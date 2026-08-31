@@ -1,0 +1,16 @@
+/* 20260831-raffle-charm — whisper under the sleeping raffle. */
+#tb-raffle-charm {
+  margin: 8px 16px 18px;
+  padding: 0;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: #F2C94C;
+  text-align: center;
+  text-shadow: 0 0 10px rgba(242, 201, 76, 0.28);
+}
+#view-about #tb-more-raffle.is-live + #tb-raffle-charm,
+#view-about #tb-more-raffle.is-in + #tb-raffle-charm {
+  display: none !important;
+}
