@@ -84,4 +84,10 @@
       if (about.classList.contains('active')) place();
     }).observe(about, { attributes: true, attributeFilter: ['class'] });
   }
+  if (!document.querySelector('script[src*="more-raffle.js"]')) {
+    var s = document.createElement('script');
+    s.src = 'js/more-raffle.js';
+    s.defer = true;
+    (document.body || document.documentElement).appendChild(s);
+  }
 })();
