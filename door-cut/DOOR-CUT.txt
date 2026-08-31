@@ -1,0 +1,46 @@
+THUNDER BOARD — 20260831-door-cut
+Kitchen only. Not live. Do not drop this folder on Netlify as a full site.
+Do not push GitHub main — repo index.html is still ?v=20260829-funeral1.
+That push would roll the table backward.
+
+WHAT CHANGED
+js/config.js only (IIFE inject list).
+TB_CONFIG object is the live 20260830-home-pull object.
+APP_BUILD stamped 20260831-door-cut.
+
+BOOT NOW REQUESTS
+first-paint + stay-room + text-leader-quiet + imin-settle
++ header-mark + seat-footer
++ auth-seat + seat-repair
++ chair-claim
++ safe-island
++ home-only-pull
+
+ASLEEP (files stay on the server, not fetched)
+proof-18, memories-wake, tb-island-loader
+home-film-poster, theater-sound, theater-loud, theater-sound-win
+grid-back, grid-lazy, grid-dedupe
+week-lines, week-cloud, week-badge
+seat-attach, seat-edit-btn, seat-dead, chair-stack, chair-door
+card-chips, first-job, hush-bubble, proof-*, room-show
+qr-install, more-mark, phone-signin, pull-strict
+mem-stay, mem-tight, mem-more-stay, profile-inspect
+ghost-sweep, ghost-library, glow-token, bros-safe, safe-top
+header-slim, live-home, logo-home, ask-hit, tab-hold
+
+MATH
+Live parse dump: 81 sidecar files, ~160 KB extra JS/CSS, plus app.js 434 KB + logo@3x 873 KB.
+After cut: 17 sidecar files, ~61 KB.
+Request cut: 81 → 17.
+Cannot cut app.js or logo from this chair (protected).
+
+IDENTITY
+If this ships, Chief must also stamp:
+build.json APP_BUILD 20260831-door-cut
+sw.js first comment /* 20260831-door-cut */
+index.html ?v= on config.js and app.js
+If only config.js APP_BUILD changes and build.json stays home-pull,
+checkStaleBuild will reload the phone in a loop. Ship as a set.
+
+STOP
+No app.js. No index body rewrite. No breaker-pass. No film-still. No charms.
