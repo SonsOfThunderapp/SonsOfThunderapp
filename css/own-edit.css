@@ -1,16 +1,23 @@
-/* Own tile EDIT — visible on his card only. */
 #view-brothers .tb-own-edit-btn,
-#view-brothers #tb-sheet-edit {
-  display: block;
+#view-brothers #tb-sheet-edit,
+#brother-detail #tb-sheet-edit {
+  display: block !important;
   margin-top: 8px;
   width: 100%;
   border: 1px solid rgba(254, 241, 5, 0.35);
   background: #111;
   color: #FEF105;
   font-family: "Bebas Neue", Impact, "Arial Narrow", sans-serif;
-  font-size: 14px;
+  font-size: 15px;
   letter-spacing: 0.12em;
+  padding: 10px 12px;
+  z-index: 3;
+  pointer-events: auto;
 }
 #view-brothers #edit-profile-btn {
   display: none !important;
+}
+#profile-modal:not(.hidden) {
+  z-index: 80 !important;
+  display: flex !important;
 }
