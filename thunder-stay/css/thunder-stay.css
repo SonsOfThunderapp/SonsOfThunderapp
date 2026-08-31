@@ -1,0 +1,15 @@
+#thunder-modal {
+  overscroll-behavior: contain;
+  touch-action: manipulation;
+}
+#thunder-modal .thunder-content {
+  overscroll-behavior: contain;
+}
+#thunder-modal .modal-close,
+#thunder-modal [data-close="thunder-modal"] {
+  min-width: 44px;
+  min-height: 44px;
+  font-size: 28px;
+  line-height: 1;
+  z-index: 5;
+}
