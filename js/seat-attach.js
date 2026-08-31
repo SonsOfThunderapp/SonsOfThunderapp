@@ -97,10 +97,8 @@
   }
 
   function policeModal() {
-    var modal = document.getElementById('profile-modal');
-    if (!modal || modal.classList.contains('hidden')) return;
-    if (window.__tbSeatAllow) return;
-    if (seated()) closeSeatModal();
+    /* Seated brothers must keep EDIT PROFILE open. Do not slam the sheet. */
+    return;
   }
 
   function chairEl(t) {
@@ -265,12 +263,13 @@
     grid.dataset.tbSeatAttach = '1';
     new MutationObserver(function () { setTimeout(tick, 30); }).observe(grid, { childList: true });
   }
-  if (!document.querySelector('script[src*="recon-90.js"]')) {
-    var r = document.createElement('script');
-    r.src = 'js/recon-90.js';
-    r.defer = true;
-    (document.body || document.documentElement).appendChild(r);
-  }
+  ['js/recon-90.js', 'js/own-edit.js'].forEach(function (src) {
+    if (document.querySelector('script[src*="' + src.split('/').pop() + '"]')) return;
+    var x = document.createElement('script');
+    x.src = src;
+    x.defer = true;
+    (document.body || document.documentElement).appendChild(x);
+  });
   var detail = document.getElementById('brother-detail');
   if (detail && !detail.dataset.tbSeatAttach) {
     detail.dataset.tbSeatAttach = '1';
