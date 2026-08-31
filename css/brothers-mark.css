@@ -1,0 +1,16 @@
+/* 20260831-brothers-mark — Brothers title + rotating line, one notch louder. */
+#view-brothers .section-header h1,
+#view-brothers #brothers-section-title {
+  font-size: clamp(34px, 9.4vw, 42px) !important;
+  letter-spacing: 0.08em !important;
+  line-height: 0.9 !important;
+}
+#view-brothers #tb-chair-line,
+#tb-chair-line {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  line-height: 1.38 !important;
+  color: #F2C94C !important;
+  text-shadow: 0 0 10px rgba(242, 201, 76, 0.28) !important;
+  max-width: 24em !important;
+}
