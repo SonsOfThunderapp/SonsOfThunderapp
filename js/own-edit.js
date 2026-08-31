@@ -1,7 +1,56 @@
-/* 20260831-own-edit-2 — card / sheet EDIT opens profile-modal on top. */
+/* 20260831-own-edit-3 — EDIT your existing card. Never the open chair. Never a second Obie. */
 (function () {
-  if (window.__tbOwnEdit2) return;
-  window.__tbOwnEdit2 = true;
+  if (window.__tbOwnEdit3) return;
+  window.__tbOwnEdit3 = true;
+
+  function list() {
+    try {
+      var raw = localStorage.getItem('brothers');
+      var arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    } catch (e) { return []; }
+  }
+
+  function clean(s) {
+    return String(s || '').replace(/TODAY/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
+  }
+
+  function isObie(b) {
+    var n = clean(b && b.name);
+    var e = String((b && b.email) || '').toLowerCase();
+    return n === 'obie' || n === 'obie diaz' || e === 'obietv@gmail.com';
+  }
+
+  function obieRow() {
+    var rows = list().filter(isObie);
+    if (!rows.length) return null;
+    rows.sort(function (a, b) {
+      var ap = a.photo ? 1 : 0;
+      var bp = b.photo ? 1 : 0;
+      if (bp !== ap) return bp - ap;
+      return (b.updatedAt || 0) - (a.updatedAt || 0);
+    });
+    return rows[0];
+  }
+
+  function pin(id) {
+    if (!id) return;
+    try {
+      localStorage.setItem('myProfileId', JSON.stringify(id).indexOf('"') === 0 ? JSON.parse(JSON.stringify(id)) : id);
+      localStorage.setItem('myProfileId', id);
+      localStorage.setItem('tb_myProfileId', id);
+    } catch (e) {}
+  }
+
+  function hideChair() {
+    ['brother-slot-invite', 'empty-brothers-cta', 'brother-open-chair'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.classList.add('hidden');
+      el.setAttribute('hidden', 'hidden');
+      el.style.display = 'none';
+    });
+  }
 
   function hideDetail() {
     var d = document.getElementById('brother-detail');
@@ -10,23 +59,40 @@
     d.setAttribute('aria-hidden', 'true');
   }
 
-  function fillFromCard() {
-    var nameEl = document.getElementById('brother-detail-name') || document.querySelector('.tb-my-seat .brother-name');
-    var bioEl = document.querySelector('.tb-my-seat .brother-bio');
+  function fill(row) {
+    if (!row) return;
     var pn = document.getElementById('profile-name');
     var pb = document.getElementById('profile-bio');
-    if (pn && nameEl && !pn.value) {
-      pn.value = String(nameEl.textContent || '').replace(/TODAY/g, '').trim();
+    var pp = document.getElementById('profile-phone');
+    if (pn) pn.value = row.name || 'Obie';
+    if (pb) pb.value = row.bio || '';
+    if (pp) pp.value = row.phone || '';
+    var preview = document.getElementById('photo-preview');
+    if (preview && row.photo) {
+      preview.innerHTML = '<img alt="" src="' + String(row.photo).replace(/"/g, '') + '">';
+      preview.classList.add('visible');
     }
-    if (pb && bioEl && !pb.value) pb.value = String(bioEl.textContent || '').trim();
+  }
+
+  function collapse() {
+    var rows = list();
+    var keep = obieRow();
+    if (!keep) return;
+    var next = rows.filter(function (b) { return !isObie(b) || b.id === keep.id; });
+    try {
+      localStorage.setItem('brothers', JSON.stringify(next));
+      pin(keep.id);
+    } catch (e) {}
   }
 
   function fire() {
+    var row = obieRow();
+    if (row) pin(row.id);
     window.__tbSeatAllow = true;
+    hideChair();
     hideDetail();
     var title = document.getElementById('profile-modal-title');
     if (title) title.innerHTML = 'EDIT <span class="accent-yellow">PROFILE</span>';
-    fillFromCard();
     var modal = document.getElementById('profile-modal');
     if (modal) {
       modal.classList.remove('hidden');
@@ -35,56 +101,65 @@
       modal.style.zIndex = '80';
     }
     try { document.body.style.overflow = 'hidden'; } catch (e0) {}
-    var ghost = document.getElementById('edit-profile-btn');
-    if (ghost) {
-      ghost.removeAttribute('hidden');
-      ghost.classList.remove('hidden');
-      try { ghost.click(); } catch (e1) {}
-      ghost.classList.add('hidden');
-      ghost.setAttribute('hidden', 'hidden');
-    }
+    fill(row);
+    setTimeout(function () { fill(row); }, 80);
     setTimeout(function () { window.__tbSeatAllow = false; }, 1500);
+  }
+
+  function fromChair(el) {
+    return !!(el && el.closest && el.closest('#brother-open-chair, #brother-slot-invite, #empty-brothers-cta'));
   }
 
   function isEditTarget(el) {
     if (!el || !el.closest) return null;
-    var btn = el.closest('.tb-own-edit-btn, #tb-sheet-edit, #tb-own-edit-btn');
-    if (btn) return btn;
-    var t = el.closest('button, a, .btn');
-    if (!t) return null;
-    var label = String(t.textContent || '').replace(/\s+/g, ' ').trim().toUpperCase();
-    if (label === 'EDIT' || label === 'EDIT PROFILE') return t;
-    return null;
+    if (fromChair(el)) return null;
+    return el.closest('.tb-own-edit-btn, #tb-sheet-edit, #tb-own-edit-btn');
   }
 
   document.addEventListener('click', function (e) {
     var btn = isEditTarget(e.target);
     if (!btn) return;
-    if (btn.id === 'edit-profile-btn' && !window.__tbSeatAllow) return;
     e.preventDefault();
     e.stopPropagation();
     if (e.stopImmediatePropagation) e.stopImmediatePropagation();
     fire();
   }, true);
 
-  function stampCard() {
+  document.addEventListener('click', function (e) {
+    if (!e.target || !e.target.closest || !e.target.closest('#save-profile')) return;
+    setTimeout(collapse, 400);
+  }, true);
+
+  function stamp() {
     var grid = document.getElementById('brothers-grid');
     if (!grid) return;
-    var mine = grid.querySelector('.brother-card.tb-my-seat, .brother-card[data-brother-index="0"]');
-    if (!mine) return;
-    if (mine.querySelector('.tb-own-edit-btn')) return;
-    var seated = document.body.classList.contains('tb-seated') || localStorage.getItem('tb_seat_locked');
-    if (!seated) return;
-    var b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'tb-own-edit-btn';
-    b.textContent = 'EDIT PROFILE';
-    mine.appendChild(b);
-    mine.classList.add('tb-my-seat');
+    var row = obieRow();
+    if (row) {
+      pin(row.id);
+      hideChair();
+    }
+    var cards = grid.querySelectorAll('.brother-card');
+    var i, card, name, label;
+    for (i = 0; i < cards.length; i++) {
+      card = cards[i];
+      if (fromChair(card)) continue;
+      name = card.querySelector('.brother-name');
+      label = clean(name && name.textContent);
+      if (label !== 'obie' && label !== 'obie diaz') continue;
+      card.classList.add('tb-my-seat');
+      if (!card.querySelector('.tb-own-edit-btn')) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'tb-own-edit-btn';
+        b.textContent = 'EDIT PROFILE';
+        card.appendChild(b);
+      }
+    }
   }
 
-  stampCard();
-  setTimeout(stampCard, 400);
+  stamp();
+  setTimeout(stamp, 400);
+  setTimeout(stamp, 1200);
 
   if (!document.querySelector('link[href*="own-edit.css"]')) {
     var l = document.createElement('link');
