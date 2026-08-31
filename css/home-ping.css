@@ -1,0 +1,19 @@
+/* 20260830-home-ping — sits with ADD TO CALENDAR under LOCKED IN. */
+#view-home #tb-home-ping {
+  display: block;
+  width: 100%;
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(254, 241, 5, 0.35);
+  background: #111;
+  color: #FEF105;
+  font-family: "Bebas Neue", Impact, "Arial Narrow", sans-serif;
+  font-size: 15px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+#view-home #tb-home-ping.hidden { display: none !important; }
+#view-home #tb-home-ping.is-on {
+  border-color: #2a2a2a;
+  color: #8a8a8a;
+}
