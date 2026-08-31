@@ -1,4 +1,4 @@
-/* 20260831-chair-spot-rotate — ten patio-funny invites. New draw on each Brothers open. */
+/* 20260831-chair-spot-rotate — kill Bring a brother. Ten jokes on that gold line. */
 (function () {
   if (window.__tbChairSpotRotate) return;
   window.__tbChairSpotRotate = true;
@@ -16,8 +16,10 @@
     'If this seat stays empty, we start assigning nicknames.'
   ];
   var LAST = 'tb_chair_spot_last';
+  var GHOST = /^(bring a brother\.?|claim your spot\.?|this seat is yours\.?|tap to add your profile\.?)$/i;
   var chosen = null;
   var onBrothers = false;
+  var writing = false;
 
   function pick() {
     var last = -1;
@@ -35,27 +37,47 @@
     return chosen;
   }
 
-  function setSub(el) {
-    if (!el) return;
-    el.style.display = '';
-    el.textContent = line();
+  function ownText(el) {
+    if (!el || !el.childNodes) return '';
+    var s = '';
+    for (var i = 0; i < el.childNodes.length; i++) {
+      if (el.childNodes[i].nodeType === 3) s += el.childNodes[i].nodeValue;
+    }
+    return s.replace(/\s+/g, ' ').trim();
   }
 
-  function walk(root) {
-    if (!root) return;
-    root.setAttribute('aria-label', line());
-    var sub = root.querySelector('.brother-slot-sub, .empty-brothers-sub, .brother-chair-sub');
-    if (sub) setSub(sub);
+  function skip(el) {
+    if (!el || !el.closest) return true;
+    if (el.id === 'tb-chair-line' || el.closest('#tb-chair-line')) return true;
+    if (el.id === 'brothers-section-title') return true;
+    return false;
+  }
+
+  function paint(el) {
+    if (!el || skip(el)) return;
+    writing = true;
+    el.textContent = line();
+    el.style.display = '';
+    el.setAttribute('data-tb-spot', line());
+    writing = false;
   }
 
   function stamp() {
-    walk(document.getElementById('brother-open-chair'));
-    walk(document.getElementById('brother-slot-invite'));
-    walk(document.getElementById('empty-brothers-cta'));
-    var cards = document.querySelectorAll('#view-brothers .brother-card, #view-brothers .brother-chair, #brothers-grid button');
-    for (var i = 0; i < cards.length; i++) {
-      if (/open chair/i.test(cards[i].textContent || '') || /bring a brother/i.test(cards[i].textContent || '')) {
-        walk(cards[i]);
+    var root = document.getElementById('view-brothers');
+    if (!root) return;
+    var nodes = root.querySelectorAll('div, span, p, strong, em, button, h2, h3');
+    for (var i = 0; i < nodes.length; i++) {
+      var el = nodes[i];
+      if (skip(el)) continue;
+      var own = ownText(el);
+      if (GHOST.test(own)) {
+        paint(el);
+        continue;
+      }
+      if (/^open chair$/i.test(own)) continue;
+      if (el.matches && el.matches('.brother-slot-sub, .empty-brothers-sub, .brother-chair-sub')) {
+        var card = el.closest('.brother-card, .brother-chair, button, #brother-open-chair, #brother-slot-invite, #empty-brothers-cta');
+        if (card && /open chair|bring a brother/i.test(card.textContent || '')) paint(el);
       }
     }
   }
@@ -82,8 +104,10 @@
   }
 
   onOpen();
-  setTimeout(onOpen, 400);
-  setTimeout(stamp, 900);
+  setTimeout(onOpen, 200);
+  setTimeout(stamp, 600);
+  setTimeout(stamp, 1400);
+  setTimeout(stamp, 2400);
 
   document.addEventListener('pointerdown', function (e) {
     var t = e.target;
@@ -93,22 +117,18 @@
     var id = n.getAttribute('data-view') || n.id || '';
     if (id === 'brothers' || id === 'nav-brothers') {
       onBrothers = false;
-      setTimeout(onOpen, 60);
+      setTimeout(onOpen, 40);
     } else {
       onBrothers = false;
     }
   }, true);
 
-  document.addEventListener('visibilitychange', function () {
-    if (document.visibilityState === 'visible' && brothersOpen()) {
-      onBrothers = false;
-      onOpen();
-    }
-  });
-
-  var grid = document.getElementById('brothers-grid');
-  if (grid && grid.dataset.tbSpotRot !== '1') {
-    grid.dataset.tbSpotRot = '1';
-    new MutationObserver(function () { if (onBrothers) stamp(); }).observe(grid, { childList: true, subtree: true });
+  var view = document.getElementById('view-brothers');
+  if (view && view.dataset.tbSpotRot !== '1') {
+    view.dataset.tbSpotRot = '1';
+    new MutationObserver(function () {
+      if (writing) return;
+      if (onBrothers || brothersOpen()) stamp();
+    }).observe(view, { childList: true, subtree: true, characterData: true });
   }
 })();
