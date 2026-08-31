@@ -113,7 +113,7 @@
             if (!c) { resolve(); return; }
             try {
               if (isTbAuthKey(c.key) && c.value != null && !localStorage.getItem(c.key)) {
-                localStorage.setItem(c.key, typeof c.value === 'string' ? c.value === 'string' ? c.value : String(c.value) : String(c.value));
+                localStorage.setItem(c.key, typeof c.value === 'string' ? c.value : String(c.value));
               }
             } catch (e2) {}
             c.continue();
@@ -195,15 +195,23 @@
     }
     var c = cfg();
     if (!c.SUPABASE_URL || !c.SUPABASE_ANON_KEY || !window.supabase) return null;
+    var shared = (typeof window.getSb === 'function') ? window.getSb() : null;
+    if (shared) {
+      window.__tbTheaterSb = shared;
+      window.__tbLastSb = shared;
+      await attachStoredSession(shared);
+      return shared;
+    }
     if (!window.__tbTheaterSb) {
       window.__tbTheaterSb = window.supabase.createClient(c.SUPABASE_URL, c.SUPABASE_ANON_KEY, {
         auth: {
           persistSession: true,
           autoRefreshToken: true,
           detectSessionInUrl: false,
-          storage: tbAuthStorage
+          storage: window.localStorage
         }
       });
+      window.__tbLastSb = window.__tbTheaterSb;
     }
     await attachStoredSession(window.__tbTheaterSb);
     return window.__tbTheaterSb;
@@ -305,11 +313,6 @@
   }
 
   function needSeat() {
-    if (chairFromApp()) {
-      showWritePass(false);
-      status('Chair ready');
-      return;
-    }
     showWritePass(true);
     status('Sign in here');
     if (alreadyInRoom()) return;
@@ -450,7 +453,7 @@
 
 
   async function putOnHome() {
-    status('Working…');
+    status('Working\u2026');
     var put = document.getElementById('tb-month-put');
     if (!picked) { status('Choose a clip first'); return; }
     if (picked.size > RAW_MAX) {
@@ -475,7 +478,7 @@
       var email = ((document.getElementById('tb-month-email') || {}).value || 'obietv@gmail.com').trim();
       var pass = (document.getElementById('tb-month-pass') || {}).value || '';
       if (client && email && pass) {
-        status('Signing in…');
+        status('Signing in\u2026');
         try {
           var signed = await client.auth.signInWithPassword({ email: email, password: pass });
           if (signed.error) throw new Error(signed.error.message || 'Sign in here');
@@ -505,19 +508,17 @@
       return;
     }
     var title = ((document.getElementById('tb-month-title') || {}).value || '').trim() || 'Welcome!';
-    status('Encoding for Home…');
+    status('Encoding for Home\u2026');
     try {
-      var cook = window.tbEncodeHomePlate || window.tbCookTheaterPlate;
-      if (typeof cook === 'function') {
-        var plate = await cook(picked, status);
-        if (plate) picked = (plate instanceof File) ? plate : new File([plate], 'current.mp4', { type: 'video/mp4' });
+      if (typeof window.tbEncodeHomePlate === 'function') {
+        picked = await window.tbEncodeHomePlate(picked, status);
       }
     } catch (eEnc) {
       status((eEnc && eEnc.message) || 'Drop this clip in the kitchen.');
       if (put) put.disabled = false;
       return;
     }
-    status('Reading the clip…');
+    status('Reading the clip\u2026');
     try {
       var buf = await picked.arrayBuffer();
       if (!buf || !buf.byteLength) {
@@ -552,7 +553,7 @@
       try {
         await client.storage.from(bucket()).copy(VPATH, 'theater/archive-' + stamp + '.mp4');
       } catch (eA) {}
-      status('Uploading…');
+      status('Uploading\u2026');
       async function putObject(path, file, type) {
         var up = await client.storage.from(bucket()).upload(path, file, {
           contentType: type,
