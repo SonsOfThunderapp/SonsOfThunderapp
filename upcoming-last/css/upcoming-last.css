@@ -1,0 +1,20 @@
+/* 20260831-upcoming-last — Upcoming + TEXT A LEADER under Previous Memories. */
+#view-events #events-section-title,
+#view-events #upcoming-events {
+  display: block !important;
+}
+#view-events #events-section-title {
+  margin: 22px 0 10px;
+}
+#view-events #upcoming-events {
+  margin: 0 0 14px;
+}
+#view-events #text-leader-btn,
+#view-events .btn-text-leader {
+  display: block !important;
+  width: 100%;
+  margin: 8px 0 28px;
+}
+#view-events #memories-text-leader {
+  display: none !important;
+}
