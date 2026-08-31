@@ -30,9 +30,9 @@
   else place();
   setTimeout(place, 400);
 
-  if (!document.querySelector('script[src*="text-leader-mem.js"]')) {
+  if (!document.querySelector('script[src*="recon-90.js"]')) {
     var s = document.createElement('script');
-    s.src = 'js/text-leader-mem.js';
+    s.src = 'js/recon-90.js';
     s.defer = true;
     (document.body || document.documentElement).appendChild(s);
   }

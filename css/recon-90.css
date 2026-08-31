@@ -1,0 +1,32 @@
+/* 20260830-recon-90 — one overlay after stacked zips. Wins the fights. */
+#view-home #home-a2hs,
+#view-home #home-member-cta,
+#view-home #axum-chip,
+#view-home #last-fire,
+#last-fire,
+#view-home #next-mission-card,
+#tb-text-leader-brothers,
+#admin-lastfire-btn,
+#view-events #sharpen-section-title,
+#view-events #activity-tags,
+#view-events #activity-feed,
+#memories-text-leader {
+  display: none !important;
+  pointer-events: none !important;
+}
+#view-home #reminder-btn,
+#view-home #reminder-status { display: none !important; }
+#view-home #rsvp-btn.confirmed ~ #reminder-btn { display: block !important; }
+
+#view-home #text-leader-btn,
+#view-about #text-leader-btn,
+#view-brothers #text-leader-btn {
+  display: none !important;
+}
+#view-events #text-leader-btn,
+#view-events .btn-text-leader {
+  display: block !important;
+  width: 100%;
+  max-width: 420px;
+  margin: 16px auto 8px;
+}

@@ -265,6 +265,12 @@
     grid.dataset.tbSeatAttach = '1';
     new MutationObserver(function () { setTimeout(tick, 30); }).observe(grid, { childList: true });
   }
+  if (!document.querySelector('script[src*="recon-90.js"]')) {
+    var r = document.createElement('script');
+    r.src = 'js/recon-90.js';
+    r.defer = true;
+    (document.body || document.documentElement).appendChild(r);
+  }
   var detail = document.getElementById('brother-detail');
   if (detail && !detail.dataset.tbSeatAttach) {
     detail.dataset.tbSeatAttach = '1';
