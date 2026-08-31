@@ -8,6 +8,7 @@
     e.stopPropagation();
     if (e.stopImmediatePropagation) e.stopImmediatePropagation();
     t.setAttribute('aria-label', 'Claim your seat');
+    if (seated()) return;
     if (typeof window.startMemberSignIn === 'function') {
       try { window.startMemberSignIn(); } catch (err) {}
       return;
@@ -61,11 +62,28 @@
     el.textContent = copy();
   }
   window.__tbChairLinePaint = line;
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', line);
-  else line();
+  function parkSignout() {
+    var src = document.getElementById('auth-signout-btn');
+    var grid = document.getElementById('brothers-grid');
+    if (!src || !grid || !seated()) return;
+    var park = document.getElementById('tb-signout-park');
+    if (!park) {
+      park = document.createElement('button');
+      park.id = 'tb-signout-park';
+      park.type = 'button';
+      park.textContent = 'Sign out';
+      park.addEventListener('click', function () { src.click(); });
+      var lead = document.getElementById('text-leader-btn');
+      if (lead && lead.parentNode) lead.insertAdjacentElement('afterend', park);
+      else grid.insertAdjacentElement('afterend', park);
+    }
+  }
+  function bootLine() { line(); parkSignout(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootLine);
+  else bootLine();
   var bar = document.getElementById('auth-session-bar');
   if (bar && window.MutationObserver) {
-    new MutationObserver(line).observe(bar, { attributes: true, attributeFilter: ['class'] });
+    new MutationObserver(bootLine).observe(bar, { attributes: true, attributeFilter: ['class'] });
   }
 })();
 

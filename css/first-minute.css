@@ -1,0 +1,16 @@
+/* 20260830-first-minute-2 — Home first paint = gathering + I'm In. */
+#view-home #home-a2hs,
+#view-home #home-member-cta {
+  display: none !important;
+}
+#view-home #reminder-btn,
+#view-home #reminder-status {
+  display: none !important;
+}
+#view-home #rsvp-btn.confirmed ~ #reminder-btn {
+  display: block !important;
+}
+#view-home #axum-chip,
+#view-home #last-fire {
+  display: none !important;
+}

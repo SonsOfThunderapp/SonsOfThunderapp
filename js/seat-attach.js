@@ -1,3 +1,4 @@
+/* 20260829-seat-press — TAKE YOUR SEAT only from a good press on the empty chair. */
 (function () {
   if (window.__tbSeatAttach) return;
   window.__tbSeatAttach = true;
@@ -245,7 +246,15 @@
     policeModal();
   }
 
-  window.stashSeatFromGate = function () { tick(); };
+  window.stashSeatFromGate = function () {
+    try { document.body.classList.add('tb-seated'); } catch (eS) {}
+    try { localStorage.setItem('tb_seat_locked', '1'); } catch (eL) {}
+    tick();
+    var nav = document.querySelector('.nav-item[data-view="brothers"]');
+    if (nav) {
+      try { nav.click(); } catch (eN) {}
+    }
+  };
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', tick);
   else tick();

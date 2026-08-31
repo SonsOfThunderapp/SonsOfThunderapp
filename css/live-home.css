@@ -20,8 +20,8 @@
 /* 20260830-first-minute
    Guest Home = gathering + I'm In. Other Home jobs wait.
    Seated brothers keep announcements / member chrome. */
-body:not(.tb-seated) #view-home #home-a2hs,
-body:not(.tb-seated) #view-home #home-member-cta,
+#view-home #home-a2hs,
+#view-home #home-member-cta,
 body:not(.tb-seated) #view-home #announcements-title,
 body:not(.tb-seated) #view-home #announcements,
 body:not(.tb-seated) #view-home #axum-chip,
