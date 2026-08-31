@@ -1,0 +1,9 @@
+/* Dock dots off until they mean a real unseen brother or proof. */
+.bottom-nav .nav-new-dot,
+.nav-item .nav-new-dot {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  opacity: 0 !important;
+  box-shadow: none !important;
+}

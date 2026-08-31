@@ -1,0 +1,197 @@
+/* 20260831-breaker-pass
+   One chrome sheet for the seven-space pour.
+   Does not restyle The Code, dock icons, or More structure. */
+
+/* 1 Core UX — first minute. Home = gathering + I'm In. */
+#view-home #home-a2hs,
+#view-home #home-member-cta,
+#view-home #axum-chip,
+#view-home #last-fire,
+#view-home #reminder-btn,
+#view-home #reminder-status,
+body:not(.tb-seated) #view-home #announcements-title,
+body:not(.tb-seated) #view-home #announcements {
+  display: none !important;
+}
+#view-home #rsvp-btn.confirmed ~ #reminder-btn,
+#view-home #rsvp-btn.confirmed ~ #reminder-status {
+  display: block !important;
+}
+
+/* 1 + 6 — film tile looks like film, not a cropped bolt. */
+#tb-month-film,
+#tb-home-film-tile,
+#home-film {
+  position: relative !important;
+  width: min(58vw, 220px) !important;
+  max-height: 34vh !important;
+  margin: 10px auto 4px !important;
+  aspect-ratio: 9 / 16 !important;
+  border-radius: 14px !important;
+  overflow: hidden !important;
+  cursor: pointer;
+}
+#tb-month-film .tb-month-film-pic,
+#tb-home-film-tile img,
+#home-film img,
+#home-film .tb-month-film-pic {
+  background-size: cover !important;
+  background-position: center 28% !important;
+  object-fit: cover !important;
+  object-position: center 28% !important;
+}
+#tb-film-cue {
+  display: block;
+  margin: 0 auto 14px;
+  text-align: center;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #8a8a8a;
+}
+#tb-month-film .tb-film-play,
+#tb-home-film-tile .tb-film-play,
+#home-film .tb-film-play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  box-shadow: 0 0 0 1px rgba(254, 241, 5, 0.45);
+  pointer-events: none;
+}
+#tb-month-film .tb-film-play::after,
+#tb-home-film-tile .tb-film-play::after,
+#home-film .tb-film-play::after {
+  content: "";
+  position: absolute;
+  left: 18px;
+  top: 14px;
+  border-style: solid;
+  border-width: 8px 0 8px 12px;
+  border-color: transparent transparent transparent #FEF105;
+}
+
+/* 1 — lying dock dots off until they mean something real. */
+.bottom-nav .nav-new-dot,
+.nav-item .nav-new-dot {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  opacity: 0 !important;
+  box-shadow: none !important;
+}
+
+/* 2 + 4 — write-fail note. Sits above the dock. */
+#tb-breaker-note {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  z-index: 9000;
+  padding: 12px 14px;
+  background: #0a0a0a;
+  border: 1px solid rgba(254, 241, 5, 0.35);
+  color: #f3f3f3;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.35;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+#tb-breaker-note.hidden { display: none !important; }
+#tb-breaker-note strong {
+  color: #FEF105;
+  font-weight: 600;
+}
+
+/* 1 return — GET THE PING under LOCKED IN. */
+#view-home #tb-home-ping {
+  display: block;
+  width: 100%;
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(254, 241, 5, 0.35);
+  background: #111;
+  color: #FEF105;
+  font-family: "Bebas Neue", Impact, "Arial Narrow", sans-serif;
+  font-size: 15px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+#view-home #tb-home-ping.hidden { display: none !important; }
+#view-home #tb-home-ping.is-on {
+  border-color: #2a2a2a;
+  color: #8a8a8a;
+}
+
+/* 1 — TEXT A LEADER lives on Memories. Not Home. Not a float. */
+#view-events #text-leader-btn,
+#view-events .btn-text-leader {
+  display: block !important;
+  width: 100%;
+  max-width: 420px;
+  margin: 16px auto 8px;
+}
+#view-home #text-leader-btn,
+#view-about #text-leader-btn,
+#view-brothers #text-leader-btn,
+#memories-text-leader,
+#tb-text-leader-brothers {
+  display: none !important;
+}
+
+/* 2 museum park — named ghosts only. */
+#view-home #last-fire,
+#last-fire.last-fire,
+#view-home #next-mission-card,
+#admin-lastfire-btn,
+#view-events #sharpen-section-title,
+#view-events #activity-tags,
+#view-events #activity-feed,
+#view-home #tb-week-home,
+#tb-week-home {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+/* 3 Mobile/PWA — Safari PTR must not reload the room. */
+html, body, #app, #views, .view,
+#view-home.active,
+#view-brothers.active,
+#view-events.active,
+#view-about.active {
+  overscroll-behavior-y: none;
+}
+
+/* 3 — nothing in the Dynamic Island. */
+:root {
+  --tb-island-top: max(72px, calc(env(safe-area-inset-top, 0px) + 54px));
+}
+#auth-gate:not(.hidden),
+#profile-modal:not(.hidden),
+#brother-detail:not(.hidden),
+#info-detail:not(.hidden),
+#thunder-modal:not(.hidden),
+#install-modal:not(.hidden),
+#memory-viewer:not(.hidden),
+#ios-install-overlay:not(.hidden),
+#inapp-install-overlay:not(.hidden) {
+  padding-top: var(--tb-island-top) !important;
+  box-sizing: border-box !important;
+}
+#view-brothers.active.view,
+#view-events.active.view,
+#view-about.active.view {
+  padding-top: var(--tb-island-top) !important;
+  box-sizing: border-box !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #tb-month-film .tb-month-film-ring { animation: none !important; }
+}

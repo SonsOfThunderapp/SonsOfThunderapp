@@ -1,0 +1,31 @@
+20260831-breaker-pass — space map
+
+1 CORE UX          breaker-pass.js firstMinute + paintFilm + chairLine
+                   + placeLeader + dressRsvp
+                   breaker-pass.css first-minute + film + dock + TEXT A LEADER
+
+2 RELIABILITY      js/attendance.js + sql/gathering-attendance.sql
+                   js/members-one.js + sql/app-members-one.sql
+                   js/founder-ping.js + netlify/functions/founder-ping.js
+                   js/tb-sb-one.js
+
+3 MOBILE / PWA     breaker-pass.css overscroll + --tb-island-top
+                   _headers + _redirects (plate never SPA HTML)
+
+4 ERROR / EDGE     window.tbBreakerNote
+                   guest vs seated copy
+                   attendance inflight + 900ms lock
+                   empty Memories locked sentence
+                   Claim your spot (not Bring a brother)
+
+5 PERFORMANCE      no boot video
+                   one entry JS + four siblings
+                   film tap-only
+
+6 VISUAL POLISH    current.jpg cover tile + play cue + TAP TO WATCH
+                   dock dots off
+                   ghost park (Last Fire / Sharpen / Axum / Home mission)
+
+7 EVERYTHING ELSE  README STOP + PARKED
+                   Innovation freeze through September 14
+                   own-edit, Who's In, charms, header-slim stay out
