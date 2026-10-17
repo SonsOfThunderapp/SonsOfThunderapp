@@ -1,4 +1,4 @@
-/* Type first on Ask Thunder. Voice is secondary. FAB size unchanged. */
+/* 20261017-thunder-voice — voice is the door. Listening state glows. */
 #thunder-modal .thunder-content {
   display: flex;
   flex-direction: column;
@@ -32,7 +32,33 @@
 }
 #thunder-modal .thunder-voice-bar {
   order: 6;
-  opacity: 0.55;
+  opacity: 1;
+}
+#thunder-modal #thunder-voice-btn {
+  background: #E30600;
+  border: none;
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  min-height: 44px;
+  width: 100%;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+#thunder-modal #thunder-voice-btn:active {
+  background: #b00500;
+}
+#thunder-modal #thunder-voice-btn.is-listening {
+  background: #FEF105;
+  color: #000;
+  box-shadow: 0 0 18px rgba(254, 241, 5, 0.55);
+  animation: tb-voice-pulse 1.4s ease-in-out infinite;
+}
+@keyframes tb-voice-pulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(254, 241, 5, 0.35); }
+  50% { box-shadow: 0 0 26px rgba(254, 241, 5, 0.85); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #thunder-modal #thunder-voice-btn.is-listening { animation: none; }
 }
 #thunder-modal .thunder-messages { order: 3; }
 #thunder-modal .thunder-ask-hero { order: 2; }
